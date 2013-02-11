@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.araqne</groupId>
+		<artifactId>araqne-webfx-pom</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	<artifactId>araqne-dom</artifactId>
+	<version>2.13.0</version>
+	<packaging>bundle</packaging>
+	<name>Araqne DOM</name>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>org.araqne.dom</Bundle-SymbolicName>
+						<Export-Package>
+							org.araqne.dom.api;version=${project.version},
+							org.araqne.dom.model;version=${project.version},
+							org.araqne.dom.model.windows;version=${project.version}
+						</Export-Package>
+						<Private-Package>
+							org.araqne.dom.api.impl,
+							org.araqne.dom.script,
+							org.araqne.dom.msgbus
+						</Private-Package>
+						<Import-Package>
+							org.araqne.msgbus;version="1.5.2",
+							org.araqne.confdb;version="0.10.0",
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-ipojo-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>ipojo-bundle</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.felix</groupId>
+			<artifactId>org.apache.felix.ipojo.annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.araqne</groupId>
+			<artifactId>araqne-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.araqne</groupId>
+			<artifactId>araqne-confdb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.araqne</groupId>
+			<artifactId>araqne-msgbus</artifactId>
+		</dependency>
+	</dependencies>
+</project>
