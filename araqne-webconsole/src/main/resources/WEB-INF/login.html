@@ -3,16 +3,71 @@
 <head>
 	<meta charset="utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
-	<title>Login</title>
+	<title>로그인</title>
+	<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 	<script type="text/javascript" data-main="/script/login" src="/require.js"></script>
+	<style>
+	* {
+		font-family: 'Lucida Grande', 'Apple SD 산돌 Neo', 'AppleSDGothicNeo', 'Segoe UI';
+		line-height: 1.4em;
+	}
+
+	.bg {
+		background: url('/images/background_logs.jpg') no-repeat;
+		background-size: 100%;
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+	}
+
+	.blurry {
+		-webkit-filter: blur(2px);
+		-ms-filter: blur(2px);
+		filter: blur(2px);
+	}
+
+	.container {
+		position: absolute;
+		top: 50%;
+		left: 53%;
+		margin-top: -25%;
+		margin-left: -25%;
+		width: 550px;
+
+		background: -webkit-linear-gradient(top, rgba(255,255,255,.85), rgba(255,255,255,1)); 
+		/* background: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#ddd)); */
+		padding: 25px;
+		border-radius: 10px;
+		border: 1px solid #fff;
+		border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	}
+	</style>
 </head>
 <body>
-	<form>
-		<label>ID</label>
-		<input id="txtId" type="text" />
-		<label>Password</label>
-		<input id="txtPassword" type="password" />
-		<button id="btnLogin" type="submit" class="btn">Login</button>
-	</form>
+	<div class="bg blurry"></div>
+	<div class="container">
+		<form class="form-horizontal">
+			<legend style="letter-spacing: 2px; font-family: 'Gill Sans'; font-weight: lighter">WELCOME TO<span style="letter-spacing: 2px; font-family: 'Gill Sans'; font-weight: normal"> LOGPRESSO</span></legend>
+			<div class="control-group">
+				<label class="control-label">ID</label>
+				<div class="controls">
+					<input type="text" id="txtId">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label">암호</label>
+				<div class="controls">
+					<input id="txtPassword" type="password" />
+				</div>
+			</div>
+			<div class="control-group">
+				<div class="controls">
+					<button id="btnLogin" type="submit" class="btn btn-primary">로그인</button>
+				</div>
+			</div>
+		</form>
+	</div>
 </body>
 </html>
