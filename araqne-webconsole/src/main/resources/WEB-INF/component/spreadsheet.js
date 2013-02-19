@@ -217,7 +217,7 @@ function Spret(el, data, options) {
 				$colheader.find("th").css("padding-bottom", "").css("border-bottom", "");
 				for(var i = xidxfrom; i <= xidxto; i++) {
 					var $header = $($colheader.find("th")[i + ((options.showIndex) ? 1 : 0)]);
-					$header.css("padding-bottom", "0").css("border-bottom", "4px solid #fc0")
+					$header.css("padding-bottom", "0").css("border-bottom", "4px solid #666")
 				}
 			}
 		},
