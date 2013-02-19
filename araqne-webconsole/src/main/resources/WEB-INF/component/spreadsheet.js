@@ -1,4 +1,4 @@
-define(["/lib/jquery.js", "/lib/knockout-2.1.0.debug.js", "/component/dd.js"], function(_$, ko, DD) {
+define(["/lib/jquery.js", "/lib/knockout-2.1.0.debug.js", "/component/dd.js", "/lib/jquery.ba-resize.js"], function(_$, ko, DD, jResize) {
 
 var MyGrid;
 
@@ -168,7 +168,7 @@ function Spret(el, data, options) {
 			this.$selection = $('<div class="spret-selection" style="position: absolute; border: 1px solid rgba(82,168,236,0.8); background-color: #E1E6F6">').prependTo($viewport);
 			this.set(this.current);
 
-			$(window).on("resize", this.onResize);
+			$container.on("resize", this.onResize);
 		},
 		set: function(range) {
 			this.current = range;
@@ -330,7 +330,7 @@ function Spret(el, data, options) {
 			this.$cursor = $('<div class="spret-cursor" style="position: absolute; border: 1px solid transparent; background-color: #fff">').prependTo($viewport);
 			this.set(this.current);
 
-			$(window).on("resize", this.onResize);
+			$container.on("resize", this.onResize);
 		},
 		set: function(position) {
 			var currIndex = getCurrentIndex();
@@ -1012,7 +1012,7 @@ function Spret(el, data, options) {
 		$defbody.remove();
 	}
 
-	$(window).on("resize", onResize)
+	$container.on("resize", onResize)
 
 	if(options.debug) { console.log("rowHeight:", rowHeight, "\tpageSize:", pageSize); }
 

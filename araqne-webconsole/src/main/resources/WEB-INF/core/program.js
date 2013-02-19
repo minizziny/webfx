@@ -1,4 +1,5 @@
-define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/list.js", "/lib/knockout-2.1.0.debug.js"], function(_$, Locale, socket, List, ko) {
+define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/list.js", "/lib/knockout-2.1.0.debug.js"
+	,"/script/sampleprogram.js"], function(_$, Locale, socket, List, ko, _program) {
 	var programManager = (function() {
 
 		var programs;
@@ -8,21 +9,22 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 			if(!programs || !packs) {
 				socket.send("org.araqne.dom.msgbus.ProgramPlugin.getAvailablePrograms", {}, function(m) {
 					programs = m.body.programs;
-					packs = m.body.packs;
+					//packs = m.body.packs;
+					packs = _program;
 
 					var starter = {
 						created: "2013-01-02 17:31:03+0900",
 						description: null,
-						name: "Starter",
-						pack: "System",
+						name: "홈",
+						pack: "시스템",
 						path: "starter",
 						seq: 4,
 						updated: "2013-01-02 17:31:03+0900",
 						visible: true
 					};
 
-					packs[0].programs.push(starter);
-					programs.push(starter);
+					packs[0].programs.splice(0, 0, starter);
+					programs.splice(0, 0, starter);
 
 					$.each(packs, function(i, pack) {
 						$.each(pack.programs, function(j, program) {
@@ -68,7 +70,7 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 				this.launch(program);
 			}
 
-			$("title").text("^_^ " + program.name);
+			$("title").text("Logpresso | " + program.name);
 		}
 
 		function findPackDllbyName(name) {
@@ -108,11 +110,12 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 				},
 				complete: function() {
 					var loadingdiv = $("<div>").css("position", "absolute")
-							.css("background", "url('../images/random_grey_variations.png')")
+							.css("background-color", "#eee")
 							.css("top", "0px")
 							.css("left", "0px")
 							.addClass("v-stretch")
 							.addClass("h-stretch")
+							.append("<img src='/images/ajax-loader.gif' class='ajax-loader'>")
 							.appendTo(".mainframe")
 
 					$(iframe.get(0).contentDocument).ready(function($) {

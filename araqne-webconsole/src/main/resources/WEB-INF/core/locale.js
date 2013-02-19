@@ -2,7 +2,7 @@ define([], function() {
 
 	var Locale = {
 		getCurrentLocale: function() {
-			return "en";
+			return "ko";
 		}
 	};
 
