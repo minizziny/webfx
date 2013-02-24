@@ -1,4 +1,4 @@
-define(["/lib/jquery.js", "/lib/knockout-2.1.0.debug.js", "/component/kuro.js", "/component/data.js"], function(_$, ko, $K, Data) {
+define(["/lib/jquery.js", "/lib/knockout.js", "/component/kuro.js", "/component/data.js"], function(_$, ko, $K, Data) {
 	var className = "Kuro.Tree";
 	var Tree = $K.namespace("Tree");
 

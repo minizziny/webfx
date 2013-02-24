@@ -1,4 +1,4 @@
-require(["/lib/jquery.js", "/lib/knockout-2.1.0.debug.js", "/lib/d3.v3.js"], 
+require(["/lib/jquery.js", "/lib/knockout.js", "/lib/d3.v3.js"], 
 	function(_$, ko, d3) {
 
 function makeChart(el) {

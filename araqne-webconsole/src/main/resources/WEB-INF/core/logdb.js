@@ -1,4 +1,4 @@
-define(["/core/Connection.js", "/component/util.js", "/lib/knockout-2.1.0.debug.js", "/core/logdb.viewmodel.js", "/component/list.js"], function(socket, Util, ko, ViewModel, List) {
+define(["/core/Connection.js", "/component/util.js", "/lib/knockout.js", "/core/logdb.viewmodel.js", "/component/list.js"], function(socket, Util, ko, ViewModel, List) {
 
 // class
 var Query = function(jobj) {
@@ -268,6 +268,10 @@ var Query = function(jobj) {
 			console.log("error")
 			console.log(resp);
 			return;
+		}
+
+		if(!!m.body.count) {
+			that.totalCount(m.body.count);
 		}
 
 		if(!!m.body.span_amount && !!m.body.span_field) {

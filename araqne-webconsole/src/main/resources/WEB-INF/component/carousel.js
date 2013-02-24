@@ -1,4 +1,4 @@
-define(["/lib/knockout-2.1.0.debug.js", "/lib/jquery.js", "/component/data.js", "/lib/iscroll-amd.js"], function(ko, _$, Data, iScroll) {
+define(["/lib/knockout.js", "/lib/jquery.js", "/component/data.js", "/lib/iscroll-amd.js"], function(ko, _$, Data, iScroll) {
 	var className = "Kuro.Carousel";
 	
 	var iScrollInst;

@@ -1,4 +1,4 @@
-define(["/lib/knockout-2.1.0.debug.js", "/core/logdb.js", "/component/window.js"], function(ko, logdbManager, Win) {
+define(["/lib/knockout.js", "/core/logdb.js", "/component/window.js"], function(ko, logdbManager, Win) {
 	var className = "Kuro.Logdb.Querybar";
 
 	ko.bindingHandlers[className] = {

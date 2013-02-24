@@ -1,5 +1,5 @@
 require(["/lib/jquery.js",
-	"/lib/knockout-2.1.0.debug.js",
+	"/lib/knockout.js",
 	"/lib/knockout.mapping-latest.debug.js",
 	"/core/connection.js",
 	"/component/form.js", 

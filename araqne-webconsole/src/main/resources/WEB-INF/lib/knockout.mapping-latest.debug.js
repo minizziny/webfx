@@ -9,7 +9,7 @@
 		factory(require("knockout"), exports);
 	} else if (typeof define === "function" && define["amd"]) {
 		// AMD anonymous module with hard-coded dependency on "knockout"
-		define(["../lib/knockout-2.1.0.debug.js", "exports"], factory);
+		define(["../lib/knockout.js", "exports"], factory);
 	} else {
 		// <script> tag: use the global `ko` object, attaching a `mapping` property
 		factory(ko, ko.mapping = {});

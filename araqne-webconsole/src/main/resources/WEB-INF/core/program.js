@@ -1,4 +1,4 @@
-define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/list.js", "/lib/knockout-2.1.0.debug.js"
+define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/list.js", "/lib/knockout.js"
 	,"/script/sampleprogram.js"], function(_$, Locale, socket, List, ko, _program) {
 	var programManager = (function() {
 

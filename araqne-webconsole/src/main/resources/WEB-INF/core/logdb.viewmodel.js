@@ -1,4 +1,4 @@
-define(["/lib/knockout-2.1.0.debug.js", "/core/logdb.js"], function(ko, LogDB) {
+define(["/lib/knockout.js", "/core/logdb.js"], function(ko, LogDB) {
 
 var ViewModel = function() {
 	var self = this;

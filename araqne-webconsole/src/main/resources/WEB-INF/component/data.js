@@ -1,4 +1,4 @@
-define(["/lib/knockout-2.1.0.debug.js", '/component/kuro.js'], function(ko, $K) {
+define(["/lib/knockout.js", '/component/kuro.js'], function(ko, $K) {
 
 var Data = $K.namespace("Data");
 

@@ -1,4 +1,4 @@
-require(["/lib/knockout-2.1.0.debug.js", "/component/data.js"], function(ko, Data) {
+require(["/lib/knockout.js", "/component/data.js"], function(ko, Data) {
 
 module("kuro.data");
 

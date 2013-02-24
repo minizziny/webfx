@@ -1,4 +1,4 @@
-define(["/lib/jquery.js", "/lib/knockout-2.1.0.debug.js", "/component/dd.js", "/lib/jquery.ba-resize.js"], function(_$, ko, DD, jResize) {
+define(["/lib/jquery.js", "/lib/knockout.js", "/component/dd.js", "/lib/jquery.ba-resize.js"], function(_$, ko, DD, jResize) {
 
 var MyGrid;
 

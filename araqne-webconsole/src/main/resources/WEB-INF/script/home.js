@@ -1,6 +1,6 @@
 require([
 	"/lib/jquery.js",
-	"/lib/knockout-2.1.0.debug.js",
+	"/lib/knockout.js",
 	"/core/connection.js",
 	"/core/program.js",
 	"/core/locale.js",

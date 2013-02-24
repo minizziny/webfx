@@ -1,4 +1,4 @@
-define(["/lib/jquery.js", "/lib/knockout-2.1.0.debug.js", "/lib/d3.v2.amd.js", "/component/kuro.js", "/component/data.js"], function(_$, ko, d3, $K, Data) {
+define(["/lib/jquery.js", "/lib/knockout.js", "/lib/d3.v2.amd.js", "/component/kuro.js", "/component/data.js"], function(_$, ko, d3, $K, Data) {
 	var componentName = "Kuro.Chart.Bar";
 	var Bar = $K.namespace("Chart.Bar");
 

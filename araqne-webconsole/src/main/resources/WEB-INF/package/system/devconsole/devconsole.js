@@ -1,4 +1,4 @@
-require(["/lib/jquery.js", "/lib/knockout-2.1.0.debug.js", "/core/connection.js"], 
+require(["/lib/jquery.js", "/lib/knockout.js", "/core/connection.js"], 
 	function(_$, ko, socket) {
 
 	console.log("---developer console---");
