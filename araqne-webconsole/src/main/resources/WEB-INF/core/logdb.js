@@ -1,4 +1,4 @@
-define(["/core/Connection.js", "/component/util.js", "/lib/knockout.js", "/core/logdb.viewmodel.js", "/component/list.js"], function(socket, Util, ko, ViewModel, List) {
+define(["/core/connection.js", "/component/util.js", "/lib/knockout.js", "/core/logdb.viewmodel.js", "/component/list.js"], function(socket, Util, ko, ViewModel, List) {
 
 // class
 var Query = function(jobj) {

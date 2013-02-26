@@ -32,7 +32,10 @@ var vmTasks;
 
 		vmTasks.onAfterRemove = function(program) {
 			Core.Program.exit(program);
-			vmTasks.selectAt(vmTasks.length() - 1);
+			setTimeout(function() {
+				vmTasks.selectAt(vmTasks.length() - 1);
+			}, 5);
+			
 		}
 
 		ko.applyBindings(vmTasks, container.get(0));
