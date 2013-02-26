@@ -35,11 +35,9 @@ function makeChart(el) {
 	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 	d3.csv("/package/system/starter/data.csv", function(error, data) {
-		console.log(data)
 	  data.forEach(function(d) {
 	    d.date = parseDate(d.date);
 	    d.close = +d.close;
-	    console.log(d)
 	  });
 
 	  var ydom = d3.extent(data, function(d) { return d.close; });

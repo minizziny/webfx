@@ -1,7 +1,5 @@
 define([], function() {
 
-
-
 function msgobj(single) {
 	//console.log(single);
 	var response = { 
@@ -27,7 +25,7 @@ function send(method, options, callback, request_option) {
 		{
 			"guid": guidGenerator(),
 			"type": "Request",
-			"source": (request_option) ? request_option.source : "",
+			"source": (request_option) ? request_option.source : window.__pid,
 			"target": "",
 			"method": method
 		}, options

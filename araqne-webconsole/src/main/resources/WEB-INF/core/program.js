@@ -1,5 +1,20 @@
 define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/list.js", "/lib/knockout.js"
 	,"/script/sampleprogram.js"], function(_$, Locale, socket, List, ko, _program) {
+
+	var pids = [];
+
+	function getPid() {
+		var pid = Math.round(Math.random() * 1000);
+
+		if(pids.indexOf(pid) === -1) {
+			pids.push(pid);
+			return pid.toString();
+		}
+		else {
+			return getPid();
+		}
+	}
+
 	var programManager = (function() {
 
 		var programs;
@@ -123,6 +138,8 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 							loadingdiv.fadeOut(function() {
 								$(this).remove();
 							});
+
+							iframe.get(0).contentWindow.__pid = getPid();
 						}, 300)
 					});
 				}

@@ -23,7 +23,7 @@ var Query = function(jobj) {
 
 	this.activeQuery = ko.observable(query_string);
 	this.activeId = ko.observable(id || -1);
-	this.isEnd = ko.observable(is_end || false);
+	this.isEnd = ko.observable(is_end || true);
 	this.totalCount = ko.observable(total_count || 0);
 	this.lastStarted = last_started;
 
@@ -108,6 +108,13 @@ var Query = function(jobj) {
 			if(isDebug) {
 				console.groupEnd();
 			}
+		},
+		onError: function(error) {
+			if(!!eventObj.onError) {
+				$.each(eventObj.onError, function(i, fn) { 
+					fn.call(that, error);
+				});
+			}
 		}
 	}
 
@@ -115,7 +122,10 @@ var Query = function(jobj) {
 		socket.send("org.araqne.logdb.msgbus.LogQueryPlugin.createQuery", { "query": querystr }, function(m) {
 
 			if(m.isError) {
-				console.log("cannot create query")
+				callback.onError({
+					code: 123,
+					msg: "cannot create query"
+				});
 				clearQuery();
 				return;
 			}
@@ -166,8 +176,12 @@ var Query = function(jobj) {
 			},
 			function(m) {
 				if(m.isError) {
-					console.log("cannot start query " + that.activeQuery());
+					
 					clearQuery();
+					callback.onError({
+						code: 255,
+						msg: "cannot start query"
+					});
 					return;
 				}
 
