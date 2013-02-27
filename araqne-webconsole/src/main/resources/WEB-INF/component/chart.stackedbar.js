@@ -44,14 +44,14 @@ define(["/lib/jquery.js", "/lib/d3.v2.amd.js", "/component/kuro.js"], function (
 			if(!this.isMouseOver) return;
 			
 			var coord = d3.svg.mouse(this);
-			tooltip.css("left", "70px").css("top", coord[1] + "px");
+			tooltip.css("right", "65px").css("top", coord[1] + "px");
 		}
 
 		function onMouseOut(i, e) {
 			if(!this.isMouseOver) return;
 			
 			var coord = d3.svg.mouse(this);
-			tooltip.css("left", "70px").css("top", coord[1] + "px");
+			tooltip.css("right", "65px").css("top", coord[1] + "px");
 			
 			d3.select(this).transition()
 				.attr("x", 0)
@@ -107,7 +107,7 @@ define(["/lib/jquery.js", "/lib/d3.v2.amd.js", "/component/kuro.js"], function (
 				})
 				.enter().append("g")
 					.attr("class", "legend")
-					.attr("transform", function (d) { return "translate(-50," + y(d.y0) + ")"; });
+					.attr("transform", function (d) { return "translate(-60," + y(d.y0) + ")"; });
 
 			legend.append("line")
 				.attr("x2", 10);
@@ -135,7 +135,7 @@ define(["/lib/jquery.js", "/lib/d3.v2.amd.js", "/component/kuro.js"], function (
 
 			var legend = svg.select(".state:last-child").selectAll(".legend")
 			  .data(function (d) { return d.ages; })
-			  .attr("transform", function (d) { return "translate(-50," + y(d.y0) + ")"; })
+			  .attr("transform", function (d) { return "translate(-60," + y(d.y0) + ")"; })
 		}
 
 
@@ -189,7 +189,7 @@ define(["/lib/jquery.js", "/lib/d3.v2.amd.js", "/component/kuro.js"], function (
 			var legend = svg.select(".state:last-child").selectAll(".legend")
 			  .data(function (d) { return d.ages; })
 			  .transition()
-			  	.attr("transform", function (d) { return "translate(-50," + y(d.y0) + ")"; })
+			  	.attr("transform", function (d) { return "translate(-60," + y(d.y0) + ")"; })
 
 			var text = svg.select(".state:last-child").selectAll("text")
 				.data(function (d) { return d.ages; })

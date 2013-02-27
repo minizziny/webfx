@@ -220,7 +220,7 @@ table, tr, td, tbody {
 				<a data-bind="attr: { href: 'home.html?program=' + path }, click: $parent.select.callFn($parent, $data)">
 					<span data-bind="text: name"></span>
 					<span>
-						<i class="icon-remove" data-bind="click: $parent.remove.callFn($parent, $data)"></i>
+						<i class="icon-remove" data-bind="click: $parent.remove.callFn($parent, $data), clickBubble: false"></i>
 					</span>
 				</a>
 			</li>
