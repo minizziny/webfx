@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+	<title>대시보드</title>
+	<script type="text/javascript" data-main="dashboard.mock" src="/require.js"></script>
+	<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+	
+	<link href="kradar.ui.layout.dock.css" rel="stylesheet"/>
+	<link href="kradar.ui.layout.dock.edge.css" rel="stylesheet"/>
+
+	<link href="/css/common.css" rel="stylesheet"/>
+
+	<style>
+.box7, .box8 { 
+	text-align: center;
+	margin-top: 5px;
+
+}
+
+
+
+	.container {
+		width: 100%;
+	}
+	
+	table.st td, table.st th {
+		font-size: 7pt;
+	}
+
+	table.st th {
+		background: -webkit-linear-gradient(top, #fff, #eee);
+		text-align: center;
+
+	}
+
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+
+
+
+.k-d-col {
+	background: transparent;
+}
+
+.mybox {
+	background-color: #fff;
+	border: 1px solid #ccc;
+	/*
+	border-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.25);
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05); 
+	*/
+
+	top: 5px;
+	left: 5px;
+	right: 10px;
+	bottom: 10px;
+	position: absolute;
+	border-radius: 5px;
+
+	padding: 0px;
+}
+
+.mybox .handler {
+	background-image: -webkit-linear-gradient(top,white,#E6E6E6);
+	border-radius: 6px 6px 0px 0px;
+	
+	font-weight: bold;
+	color: gray;
+	font-size: 14px;
+	
+	padding: 5px
+}
+
+.drop-compass {
+	border: 1px outset #0099ff;
+	background-color: white;
+	width: 32px;
+	height: 32px;
+	position: absolute;
+	/* z-index: 9999; */
+}
+
+
+.dock-preview {
+	position: absolute;
+	border: 1px solid rgba(0, 127, 255, .4);
+	background-color: rgba(0, 127, 255, .1);
+	z-index: 9997;
+}
+
+.dock-preview.left {
+	width: 50%;
+	height: 100%;
+}
+
+.dock-preview.right {
+	right: 0;
+	width: 50%;
+	height: 100%;
+}
+
+.dock-preview.top {
+	top: 0;
+	width: 100%;
+	height: 50%;
+}
+
+.dock-preview.bottom {
+	bottom: 0;
+	width: 100%;
+	height: 50%;
+}
+
+.over1 {
+	background-color: #ffcc00;
+}
+
+.drp-t {
+	top: 0;
+	left: 50%;
+	margin-left: -16px;
+}
+
+.drp-t.single {
+	top: 50%;
+	margin-top: -47px;
+}
+
+.drp-t:after {
+	/*content: 't';*/
+}
+
+.drp-b {
+	bottom: 0;
+	left: 50%;
+	margin-left: -16px;
+}
+
+.drp-b.single {
+	bottom: 50%;
+	margin-bottom: -47px;
+}
+
+.drp-b:after {
+	/*content: 'b';*/
+}
+
+.drp-l {
+	left: 0;
+	top: 50%;
+	margin-top: -16px;
+}
+
+.drp-l.single {
+	left: 50%;
+	margin-left: -47px;
+}
+
+.drp-l:after {
+	/*content: 'l';*/
+}
+
+.drp-r {
+	right: 0;
+	top: 50%;
+	margin-top: -16px;
+}
+
+.drp-r.single {
+	right: 50%;
+	margin-right: -47px;
+}
+
+.drp-r:after {
+	/*content: 'r';*/
+}
+
+.btn-mini {
+	float: right;
+}
+
+.modalasize {
+	width: 720px;
+	margin: -250px 0 0 -370px;
+}
+
+.modalasize .control-label {
+	width: 70px;
+}
+
+.modalasize .controls {
+	margin-left: 90px;
+}
+
+
+.navbar .brand {
+padding: 7px 20px 5px;
+}
+
+	</style>
+
+</head>
+<body>
+
+
+<aside id="modalSaveQuery" class="modal hidden modalasize">
+	<form class="form-horizontal">
+		<legend>차트</legend>
+		<div style="margin-bottom: 10px">
+			쿼리를 차트로 표현합니다.
+		</div>
+
+		<div class="control-group">
+			<label class="control-label">차트 종</label>
+			<div class="controls">				
+				<select class="span2">
+					<option>스플라인</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label class="control-label">X</label>
+			<div class="controls">
+				<select class="span2">
+					<option>_time</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<label class="control-label">Y</label>
+			<div class="controls">				
+				<select class="span2" style="margin-bottom:4px">
+					<option>avg</option>
+				</select>
+				<br/>
+				<select class="span2" style="margin-bottom:4px">
+					<option>max</option>
+				</select>
+				<br/>
+				<select class="span2" style="margin-bottom:4px">
+					<option>min</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="control-group">
+			<div class="form-actions" style="padding: 10px 20px; margin: 5px 0px">
+				<button class="btn modal-close">이전</button>
+				<button class="btn btn-primary pull-right" id="btnSaveQuery">다음</button>
+				
+			</div>
+		</div>
+	</form>
+</aside>
+
+<aside id="modalSaveQuery22" class="modal hidden">
+	<form class="form-horizontal">
+		<legend>쿼리</legend>
+		<div style="margin-bottom: 10px">
+			그래프로 표현할 쿼리를 입력하고, 그 결과를 확인합니다.
+		</div>
+		<form class="form-search" data-bind="submit: search">
+			<div class="control-group">
+				<div class="input-append">
+					<input type="search" class="search-query" style="width: 400px; border-radius: 15px 0 0 15px;" value="table limit=20 iis" placeholder="" />
+					<button type="submit" class="btn btn-primary" style=" border-radius: 0 15px 15px 0;"><i class="icon-search icon-white"></i> 검색</button>
+				</div>
+			</div>
+		</form>
+		<div class="control-group" style="padding: 10px 20px; height: 300px;">
+			
+		</div>
+		<div class="control-group">
+			<div class="form-actions" style="padding: 10px 20px; margin: 5px 0px">
+				<button class="btn modal-close">이전</button>
+				<button class="btn btn-primary pull-right" id="btnSaveQuery">다음</button>
+				
+			</div>
+		</div>
+	</form>
+</aside>
+
+<aside id="modalSaveQuery1" class="modal hidden">
+	<form class="form-horizontal">
+		<legend>위젯 추가</legend>
+		<div style="margin-bottom: 10px">
+			새로운 종류의 위젯을 대시보드에 추가합니다. 
+		</div>
+		<div class="control-group" style="padding: 10px 20px">
+			<label class="radio">
+			<input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked>
+				그래프
+			</label>
+			<label class="radio">
+			<input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+				그리드
+			</label>
+			<label class="radio">
+			<input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+				실시간 이벤트
+			</label>
+		</div>
+		<div class="control-group">
+			<div class="form-actions" style="padding: 10px 20px; margin: 5px 0px">
+				<button class="btn modal-close">취소</button>
+				<button class="btn btn-primary pull-right" id="btnSaveQuery">다음</button>
+				
+			</div>
+		</div>
+	</form>
+</aside>
+
+
+<div class="navbar navbar-fixed-top">
+	<div class="navbar-inner">
+		<a class="brand" href="#" style="margin-left: -10px">Dashboard</a>
+		<button id="btnAddTab" class="btn btn-primary pull-right" style="margin-right: 10px;">
+			<i class="icon-plus icon-white"></i>
+		</button>
+	</div>
+</div>
+
+<div id="flip" class="container" style="margin-top: 45px">
+	<div class="f-page" style="height: 90%">
+		
+	</div>
+
+</div>
+
+</body>
+</html>
