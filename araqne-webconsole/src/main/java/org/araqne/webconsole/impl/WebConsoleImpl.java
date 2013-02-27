@@ -24,6 +24,7 @@ import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
+import org.araqne.httpd.BundleResourceServlet;
 import org.araqne.httpd.HttpContext;
 import org.araqne.httpd.HttpContextRegistry;
 import org.araqne.httpd.HttpService;
@@ -37,6 +38,7 @@ import org.araqne.msgbus.handler.CallbackType;
 import org.araqne.msgbus.handler.MsgbusMethod;
 import org.araqne.msgbus.handler.MsgbusPlugin;
 import org.araqne.webconsole.WebConsole;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +48,8 @@ import org.slf4j.LoggerFactory;
 public class WebConsoleImpl implements WebConsole, WebSocketListener {
 	private final Logger logger = LoggerFactory.getLogger(WebConsoleImpl.class.getName());
 
+	private BundleContext bc;
+
 	@Requires
 	private HttpService httpd;
 
@@ -54,11 +58,16 @@ public class WebConsoleImpl implements WebConsole, WebSocketListener {
 
 	private ConcurrentMap<InetSocketAddress, WebSocketSession> sessions;
 
+	public WebConsoleImpl(BundleContext bc) {
+		this.bc = bc;
+	}
+
 	@Validate
 	public void start() {
 		sessions = new ConcurrentHashMap<InetSocketAddress, WebSocketSession>();
 		HttpContextRegistry contextRegistry = httpd.getContextRegistry();
 		HttpContext ctx = contextRegistry.ensureContext("webconsole");
+		ctx.addServlet("webconsole", new BundleResourceServlet(bc.getBundle(), "/WEB-INF"), "/*");
 		ctx.getWebSocketManager().addListener(this);
 	}
 
@@ -67,6 +76,7 @@ public class WebConsoleImpl implements WebConsole, WebSocketListener {
 		if (httpd != null) {
 			HttpContextRegistry contextRegistry = httpd.getContextRegistry();
 			HttpContext ctx = contextRegistry.ensureContext("webconsole");
+			ctx.removeServlet("webconsole");
 			ctx.getWebSocketManager().removeListener(this);
 		}
 	}
