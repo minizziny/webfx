@@ -73,6 +73,19 @@ th {
 }
 
 	</style>
+
+	<script type="text/html" id="tmplPartition">
+	<!-- ko foreach: usages -->
+		<tr>
+			<td>/dev/hda1</td>
+			<td>100MB/1GB</td>
+			<td>
+				<span class="pull-left chart-usage use" style="width: 20px"></span>
+				<span class="pull-left chart-usage" style="width: 180px"></span>
+			</td>
+		</tr>
+	<!-- /ko -->
+	</script>
 </head>
 <body>
 
@@ -113,26 +126,19 @@ th {
 					<button class="pull-right btn">로그 소스 관리</button>
 				</legend>
 				<table class="table table-bordered table-condensed">
+					<tbody></tbody>
 					<tr>
 						<th>로거</th>
 						<th>마지막 로그</th>
 						<th>일일 건 (수집량)</th>
 					</tr>
-					<tr>
-						<td>jobs-ssl</td>
-						<td>12-10-22 13:59:10</td>
-						<td>302,928건 (20MB)</td>
-					</tr>
-					<tr>
-						<td>jobs-ssl</td>
-						<td>12-10-22 13:59:10</td>
-						<td>302,928건 (20MB)</td>
-					</tr>
-					<tr>
-						<td>jobs-ssl</td>
-						<td>12-10-22 13:59:10</td>
-						<td>302,928건 (20MB)</td>
-					</tr>
+					<tbody id="tbArchiveStatus" data-bind="foreach: status">
+						<tr>
+							<td data-bind="text: table"></td>
+							<td data-bind="text: last"></td>
+							<td><span data-bind="text:count"></span>건 (<span data-bind="text:volume"></span>B)</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 		</div>
@@ -146,18 +152,26 @@ th {
 					<button class="pull-right btn">파티션 설정</button>
 				</legend>
 				<table class="table table-bordered table-condensed">
-					<tr>
-						<th>파티션</th>
-						<th colspan="2">사용량/전체</th>
-					</tr>
-					<tr>
-						<td>/dev/hda1</td>
-						<td>100MB/1GB</td>
-						<td>
-							<span class="pull-left chart-usage use" style="width: 20px"></span>
-							<span class="pull-left chart-usage" style="width: 180px"></span>
-						</td>
-					</tr>
+					<thead>
+						<tr>
+							<th>파티션</th>
+							<th colspan="2">사용량/전체</th>
+						</tr>
+					</thead>
+					<tbody id="tbPartition" data-bind="foreach: usages">
+						<tr>
+							<td data-bind="text: name"></td>
+							<td>
+								<span>100MB</span>
+								/
+								<span>1GB</span>
+							</td>
+							<td>
+								<span class="pull-left chart-usage use" style="width: 20px"></span>
+								<span class="pull-left chart-usage" style="width: 80px"></span>
+							</td>
+						</tr>
+					</tbody>
 				</table>
 			</div>
 
