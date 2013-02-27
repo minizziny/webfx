@@ -17,12 +17,12 @@
 (function (factory) {
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['jquery'], factory);
+    define(['/lib/jquery.js'], factory);
   } else {
     // Browser globals
     factory(jQuery);
   }
-}(function ($) {
+}(function (_$) {
   $.timeago = function(timestamp) {
     if (timestamp instanceof Date) {
       return inWords(timestamp);

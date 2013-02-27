@@ -100,15 +100,19 @@ th {
 			<div class="area">
 				<legend>
 					로그 발생 추이
+					<small id="ltLogTrend" class="timeago"></small>
 					<span class="badge">?</span>
+					<button id="rfLogTrend" class="pull-right btn"><i class="icon-refresh"></i></button>
 				</legend>
 				<div class="chart1"></div>
 			</div>
 			<div class="area">
 				<legend>
 					경보 발생 추이
+					<small id="ltAlertTrend" class="timeago"></small>
 					<span class="badge">?</span>
 					<button class="pull-right btn">로그 분석 설정 시작</button>
+					<button id="rfAlertTrend" class="pull-right btn"><i class="icon-refresh"></i></button>
 				</legend>
 				<div class="chart2"></div>
 			</div>
@@ -121,9 +125,10 @@ th {
 			<div class="area">
 				<legend>
 					로그 수집 현황
-					<small>3분전에 갱신</small>
+					<small id="ltStatus" class="timeago"></small>
 					<span class="badge">?</span>
 					<button class="pull-right btn">로그 소스 관리</button>
+					<button id="rfStatus" class="pull-right btn"><i class="icon-refresh"></i></button>
 				</legend>
 				<table class="table table-bordered table-condensed">
 					<tbody></tbody>

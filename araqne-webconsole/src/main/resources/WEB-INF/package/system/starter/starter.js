@@ -1,8 +1,28 @@
-require(["/lib/jquery.js", "/lib/knockout.js", "/lib/d3.v3.js", "/core/connection.js"], 
-	function(_$, ko, d3, Socket) {
+require(["/lib/jquery.js", "/lib/knockout.js", "/lib/d3.v3.js", "/core/connection.js", "/lib/jquery.timeago.js"], 
+	function(_$, ko, d3, Socket, timeago) {
 
 
-function makeChart(el, query) {
+jQuery.timeago.settings.strings = {
+	suffixAgo: "전",
+	suffixFromNow: "후",
+	seconds: "1분 이내",
+	minute: "1분",
+	minutes: "%d분",
+	hour: "1시간",
+	hours: "%d시간",
+	day: "하루",
+	days: "%d일",
+	month: "한 달",
+	months: "%d달",
+	year: "1년",
+	years: "%d년",
+	wordSeparator: " "
+};
+
+var iso8610 = d3.time.format.iso;
+
+
+function makeChart(el, query, elupdate) {
 	var margin = {top: 10, right: 20, bottom: 30, left: 80},
 	    width = 820 - margin.left - margin.right,
 	    height = 120 - margin.top - margin.bottom;
@@ -62,6 +82,11 @@ function makeChart(el, query) {
 	      .datum(data)
 	      .attr("class", "line")
 	      .attr("d", line);
+
+
+
+	   $(elupdate).attr("title", iso8610( new Date() )).timeago();
+	   $(elupdate).data("timeago", { datetime: new Date() });
 	})
 
 /*
@@ -94,8 +119,8 @@ function makeChart(el, query) {
 */
 }
 
-makeChart("div.chart1", "org.logpresso.core.msgbus.LauncherPlugin.getLogTrendGraph");
-makeChart("div.chart2", "org.logpresso.core.msgbus.LauncherPlugin.getAlertTrendGraph");
+makeChart("div.chart1", "org.logpresso.core.msgbus.LauncherPlugin.getLogTrendGraph", "#ltLogTrend");
+makeChart("div.chart2", "org.logpresso.core.msgbus.LauncherPlugin.getAlertTrendGraph", "#ltAlertTrend");
 
 Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getDiskUsages', {}, function(m) {
 	$.each(m.body.usages, function(i, obj) {
@@ -109,9 +134,35 @@ Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getDiskUsages', {}, functi
 	ko.applyBindings(m.body, document.getElementById("tbPartition"));
 });
 
-Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getArchiveStatus', {}, function(m) {
-	ko.applyBindings(m.body, document.getElementById("tbArchiveStatus"))
-})
+function getArchiveStatus() {
+	Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getArchiveStatus', {}, function(m) {
+		console.log(m);
+		ko.applyBindings(m.body, document.getElementById("tbArchiveStatus"))
+	});
+	
+	$("#ltStatus").attr("title", iso8610( new Date() )).timeago();
+	$("#ltStatus").data("timeago", { datetime: new Date() });
 
+}
+
+getArchiveStatus();
+
+$("#rfStatus").on("click", function() {
+	console.log("refresh Status");
+	getArchiveStatus();
+
+});
+
+$("#rfAlertTrend").on("click", function() {
+	console.log("refresh Alert Trend");
+	$("div.chart2").empty();
+	makeChart("div.chart2", "org.logpresso.core.msgbus.LauncherPlugin.getAlertTrendGraph", "#ltAlertTrend");
+});
+
+$("#rfLogTrend").on("click", function() {
+	console.log("refresh Log Trend");
+	$("div.chart1").empty();
+	makeChart("div.chart1", "org.logpresso.core.msgbus.LauncherPlugin.getLogTrendGraph",  "#ltLogTrend");
+});
 
 });
