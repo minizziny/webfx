@@ -5,11 +5,12 @@ require([
 	"/core/program.js",
 	"/core/locale.js",
 	"/core/page.js",
+	"/core/logdb.js",
 	"/component/list.js",
 	"/component/util.js"
 ], 
 
-function(_$, ko, socket, programManager, Locale, pageManager, List, Util) {
+function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List, Util) {
 
 var vmTasks;
 
