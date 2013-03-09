@@ -41,6 +41,7 @@ public class CometSession implements Session {
 	private CometSessionStore comet;
 	private String sessionKey;
 	private Channel channel;
+	private Date createdTime = new Date();
 	private Date lastAccessTime;
 
 	public CometSession(CometSessionStore comet, String sessionKey, Channel channel) {
@@ -142,12 +143,17 @@ public class CometSession implements Session {
 	}
 
 	@Override
+	public Date getCreatedTime() {
+		return createdTime;
+	}
+
+	@Override
 	public Date getLastAccessTime() {
 		return lastAccessTime;
 	}
 
 	@Override
 	public void setLastAccessTime() {
-		this.lastAccessTime = new Date();			
+		this.lastAccessTime = new Date();
 	}
 }
