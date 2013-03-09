@@ -20,9 +20,8 @@ require(["/lib/jquery.js", "/core/connection.js", "/core/login.js"],
 				return;
 			}
 
-			if(m.body.result === "success") {
-				location.href = "home.html";
-			}
+			location.href = "home.html";
+
 		});
 	});
 

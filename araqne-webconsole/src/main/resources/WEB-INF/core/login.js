@@ -13,12 +13,59 @@ function doLogin(login_name, password, loginCallback) {
 			"nick": login_name,
 			"hash": hash,
 			"force": false
-		}, loginCallback);
+		}, function(m, raw) {
+
+			console.log(raw)
+			
+			if(m.isError) {
+				alert(raw[0].errorMessage);
+				return;
+			}
+
+
+			if(m.body.result === "success") {
+
+				socket.send("org.araqne.logdb.msgbus.ManagementPlugin.login", {
+					"login_name": "araqne",
+					"password": ""
+				}, loginCallback);
+
+			}
+
+
+		});
 	});
 }
 
+function doLogout() {
+	var logout1 = "org.araqne.logdb.msgbus.ManagementPlugin.logout";
+	var logout2 = "org.araqne.dom.msgbus.LoginPlugin.logout";
+	socket.send(logout1, {}, function(m, raw) {
+		console.log(raw);
+
+		if(m.isError) {
+			alert(raw[0].errorMessage);
+			return;
+		}
+
+		console.log("logdb session closed")
+
+		socket.send(logout2, {}, function(m2, raw2) {
+
+			if(m.isError) {
+				alert(raw[0].errorMessage);
+				return;
+			}
+
+			location.href = "index.html";
+
+		});
+	})
+}
+
 return {
-	"doLogin": doLogin
+	"doLogin": doLogin,
+	"doLogout": doLogout
 }
 
 });

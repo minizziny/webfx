@@ -210,6 +210,39 @@ table, tr, td, tbody {
 }
 
 
+
+
+i.icon-settings {
+	background-size: 32px 32px;
+	background-position: 16px 0;
+	background-image: url("/images/settings.png");
+	width: 64px;
+	height: 32px;
+}
+
+i.icon-logout {
+	background-size: 32px 32px;
+	background-position: 5px 2px;
+	background-image: url("/images/logout.png");
+	width: 32px;
+	height: 40px;
+	margin-right: 5px;
+
+	vertical-align: -18px;
+}
+
+#logout {
+	height: 40px;
+	padding-right: 10px;
+	text-decoration: none;
+	color: white;
+}
+
+#logout:hover {
+	background-color: #333;
+}
+
+
 	</style>
 
 	<script type="text/javascript" data-main="/script/home" src="/require.js"></script>
@@ -261,7 +294,11 @@ table, tr, td, tbody {
 	<div class="navbar-inner">
 		<!-- <button id="start" class="btn btn-inverse pull-left active" href="#" style="margin-left: 30px">Start</button> -->
 		<a id="start" class="brand"><span>Logpresso</span></a>
-		<div class="container" data-bind="Kuro.List: self, tmpl: tasks"></div>
+		<div class="container pull-left" data-bind="Kuro.List: self, tmpl: tasks"></div>
+
+		<a id="logout" href="#" class="pull-right" title="로그아웃">
+			<i class="icon-logout"></i> 로그아웃
+		</a>
 	</div>
 </div>
 </body>

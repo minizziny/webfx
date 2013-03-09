@@ -7,10 +7,11 @@ require([
 	"/core/page.js",
 	"/core/logdb.js",
 	"/component/list.js",
-	"/component/util.js"
+	"/component/util.js",
+	"/core/login.js"
 ], 
 
-function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List, Util) {
+function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List, Util, loginManager) {
 
 var vmTasks;
 
@@ -123,4 +124,8 @@ var vmTasks;
 		$("#div-launcher").hide();
 		$("#start").removeClass("active");
 	}
+
+	$("#logout").on('click', function() {
+		loginManager.doLogout();
+	});
 });
