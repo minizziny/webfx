@@ -74,6 +74,14 @@ Array.prototype.removeAll = function() {
 	this.length = 0;
 }
 
+Array.prototype.last = function() {
+    return this[this.length-1];
+};
+
+String.prototype.trim = function() { 
+    return this.replace(/^\s+|\s+$/g, '');  
+};
+
 var Kuro = (function() {
 	function namespace(string) {
 		var object = this;
