@@ -22,6 +22,7 @@ import org.apache.felix.ipojo.annotations.Requires;
 import org.araqne.dom.api.AdminApi;
 import org.araqne.dom.api.GlobalConfigApi;
 import org.araqne.dom.model.Admin;
+import org.araqne.msgbus.MessageBus;
 import org.araqne.msgbus.Request;
 import org.araqne.msgbus.Response;
 import org.araqne.msgbus.Session;
@@ -42,6 +43,9 @@ public class LoginPlugin {
 
 	@Requires
 	private AdminApi adminApi;
+
+	@Requires
+	private MessageBus msgbus;
 
 	@AllowGuestAccess
 	@MsgbusMethod
@@ -81,10 +85,33 @@ public class LoginPlugin {
 		session.unsetProperty("nonce");
 		session.setProperty("admin_login_name", admin.getUser().getLoginName());
 		session.setProperty("locale", admin.getLang());
+		session.setProperty("auth", "dom");
+	}
+
+	@MsgbusMethod
+	public void logout(Request req, Response resp) {
+		Session session = req.getSession();
+
+		String auth = session.getString("auth");
+		if (auth != null && auth.equals("dom")) {
+			handleLogout(session);
+		}
 	}
 
 	@MsgbusMethod(type = CallbackType.SessionClosed)
-	public void logout(Session session) {
+	public void onLogout(Session session) {
+		String auth = session.getString("auth");
+		String loginName = session.getString("admin_login_name");
+
+		if (loginName != null && auth != null && auth.equals("dom"))
+			handleLogout(session);
+	}
+
+	private void handleLogout(Session session) {
 		adminApi.logout(session);
+		msgbus.closeSession(session);
+		session.unsetProperty("org_domain");
+		session.unsetProperty("admin_login_name");
+		session.unsetProperty("auth");
 	}
 }
