@@ -1,9 +1,6 @@
 require(["/lib/jquery.js", "/core/connection.js", "/core/login.js"], 
 	function(_$, socket, loginManager) {
 
-	$("#txtId").val("root");
-	$("#txtPassword").val("araqne");
-
 	$("#btnLogin").on("click", function(e) {
 		e.preventDefault();
 		e.stopPropagation();

@@ -16,7 +16,7 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 var vmTasks;
 
 	(function() {
-		var container = $(".navbar-fixed-bottom .container");
+		var container = $(".navbar-fixed-bottom #task");
 		vmTasks = new List.ViewModel([]);
 
 		vmTasks.onSelect = function(program) {
