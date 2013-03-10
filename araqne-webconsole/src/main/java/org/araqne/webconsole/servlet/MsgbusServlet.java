@@ -317,8 +317,8 @@ public class MsgbusServlet extends HttpServlet implements Runnable {
 		@Override
 		public String toString() {
 			SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			return "msgbus session=" + sessionId + ", remote=" + getRemoteAddress() + ", created="
-					+ f.format(getCreatedTime() + ", last access=" + f.format(getLastAccessTime()));
+			return "msgbus session=" + sessionId + ", admin=" + getAdminLoginName() + ", remote=" + getRemoteAddress()
+					+ ", created=" + f.format(getCreatedTime()) + ", last access=" + f.format(getLastAccessTime());
 		}
 	}
 
