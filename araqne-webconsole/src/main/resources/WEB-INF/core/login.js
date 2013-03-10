@@ -52,6 +52,8 @@ function doLogout() {
 
 		socket.send(logout2, {}, function(m2, raw2) {
 
+			console.log(raw2);
+
 			if(m.isError) {
 				alert(raw[0].errorMessage);
 				return;

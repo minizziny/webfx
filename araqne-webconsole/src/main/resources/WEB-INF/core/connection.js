@@ -31,6 +31,8 @@ function send(method, options, callback, request_option) {
 		}, options
 	];
 
+	//console.log(request[0].source)
+
 	$.post("/msgbus/request", JSON.stringify(request), function(raw, status, jqxhr) {
 		var full;
 		if($.browser.mozilla) {
@@ -41,6 +43,22 @@ function send(method, options, callback, request_option) {
 		}
 		
 		var response = msgobj(full);
+
+		if(response.isError) {
+			if(full[0].errorCode === "security" && full[0].errorMessage === "Security Violation") {
+				send("org.araqne.dom.msgbus.LoginPlugin.getPrincipal", {}, function(resp, raw1) {
+
+					if(resp.body.admin_login_name == null && resp.body.org_domain == null) {
+						alert("로그인이 필요합니다.")
+						parent.location.href = "/index.html";
+					}
+					else {
+						callback(response, full);
+					}
+				})
+				return;
+			}
+		}
 
 		callback(response, full);
 	});
