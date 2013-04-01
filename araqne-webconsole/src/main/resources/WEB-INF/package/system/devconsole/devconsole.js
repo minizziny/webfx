@@ -13,11 +13,18 @@ require(["/lib/jquery.js", "/lib/knockout.js", "/core/connection.js"],
 	areaResult = $("#areaResult");
 	areaRaw = $("#areaRaw");
 
-
 	btnRun.on("click", function() {
+		var jsonopt;
+		try {
+			jsonopt = JSON.parse(txtOpts.val());	
+		}
+		catch(e) {
+			jsonopt = {};
+		}
+		
 		areaResult.show().text("waiting for response...");
 
-		socket.send(txtMsg.val(), {}, function(m, raw) {
+		socket.send(txtMsg.val(), jsonopt, function(m, raw) {
 			areaResult.text("").hide();
 			
 			console.log(m);
