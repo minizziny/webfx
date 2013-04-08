@@ -74,18 +74,6 @@ th {
 
 	</style>
 
-	<script type="text/html" id="tmplPartition">
-	<!-- ko foreach: usages -->
-		<tr>
-			<td>/dev/hda1</td>
-			<td>100MB/1GB</td>
-			<td>
-				<span class="pull-left chart-usage use" style="width: 20px"></span>
-				<span class="pull-left chart-usage" style="width: 180px"></span>
-			</td>
-		</tr>
-	<!-- /ko -->
-	</script>
 </head>
 <body>
 
@@ -95,13 +83,14 @@ th {
 			<div class="muted" style="text-align: right">version: 0.0.9</div>
 			<div class="clearfix" style="margin-bottom: 10px">
 				<p class="pull-left">로그 수집 설정을 추가하여 로그 수집을 시작하세요.</p>
-				<button class="pull-right btn btn-primary">로그 수집 설정 시작</button>
+				<!--<button class="pull-right btn btn-primary">로그 수집 설정 시작</button>-->
 			</div>
 			<div class="area">
 				<legend>
 					로그 발생 추이
 					<small id="ltLogTrend" class="timeago"></small>
 					<span class="badge">?</span>
+					<button class="pull-right btn">로그 수집 설정 관리</button>
 					<button id="rfLogTrend" class="pull-right btn"><i class="icon-refresh"></i></button>
 				</legend>
 				<div class="chart1"></div>
@@ -116,39 +105,6 @@ th {
 				</legend>
 				<div class="chart2"></div>
 			</div>
-		</div>
-	</div>
-
-	<div class="row-fluid">
-
-		<div class="span6">
-			<div class="area">
-				<legend>
-					로그 수집 현황
-					<small id="ltStatus" class="timeago"></small>
-					<span class="badge">?</span>
-					<button class="pull-right btn">로그 소스 관리</button>
-					<button id="rfStatus" class="pull-right btn"><i class="icon-refresh"></i></button>
-				</legend>
-				<table class="table table-bordered table-condensed">
-					<tbody></tbody>
-					<tr>
-						<th>로거</th>
-						<th>마지막 로그</th>
-						<th>일일 건 (수집량)</th>
-					</tr>
-					<tbody id="tbArchiveStatus" data-bind="foreach: status">
-						<tr>
-							<td data-bind="text: table"></td>
-							<td data-bind="text: last"></td>
-							<td><span data-bind="text:count"></span>건 (<span data-bind="text:volume"></span>B)</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-		</div>
-
-		<div class="span6">
 			<div class="area">
 				<legend>
 					로그 파티션
@@ -156,24 +112,24 @@ th {
 					<span class="badge">?</span>
 					<button class="pull-right btn">파티션 설정</button>
 				</legend>
-				<table class="table table-bordered table-condensed">
+				<table id="tbPartition" class="table table-bordered table-condensed">
 					<thead>
 						<tr>
 							<th>파티션</th>
 							<th colspan="2">사용량/전체</th>
 						</tr>
 					</thead>
-					<tbody id="tbPartition" data-bind="foreach: usages">
+					<tbody data-bind="foreach: usages">
 						<tr>
 							<td data-bind="text: name"></td>
 							<td>
-								<span>100MB</span>
+								<span data-bind="text: usedSi"></span>
 								/
-								<span>1GB</span>
+								<span data-bind="text: totalSi"></span>
 							</td>
-							<td>
-								<span class="pull-left chart-usage use" style="width: 20px"></span>
-								<span class="pull-left chart-usage" style="width: 80px"></span>
+							<td width="40%">
+								<span class="pull-left chart-usage use" data-bind="style: {width: usedPercent}"></span>
+								<span class="pull-left chart-usage" data-bind="style: {width: freePercent}"></span>
 							</td>
 						</tr>
 					</tbody>

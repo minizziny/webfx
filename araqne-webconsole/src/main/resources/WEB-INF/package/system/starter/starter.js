@@ -21,7 +21,6 @@ jQuery.timeago.settings.strings = {
 
 var iso8610 = d3.time.format.iso;
 
-
 function makeChart(el, query, elupdate) {
 	var margin = {top: 10, right: 20, bottom: 30, left: 80},
 	    width = 820 - margin.left - margin.right,
@@ -122,18 +121,26 @@ function makeChart(el, query, elupdate) {
 makeChart("div.chart1", "org.logpresso.core.msgbus.LauncherPlugin.getLogTrendGraph", "#ltLogTrend");
 makeChart("div.chart2", "org.logpresso.core.msgbus.LauncherPlugin.getAlertTrendGraph", "#ltAlertTrend");
 
+function diskSize(val) {
+	var prefix = d3.formatPrefix(val);
+	return prefix.scale(val).toFixed(2) + prefix.symbol;		
+}
+
 Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getDiskUsages', {}, function(m) {
+	//console.log(m.body)
+
 	$.each(m.body.usages, function(i, obj) {
-		/*
-		obj.total_c = 
-		obj.used_c = 
-		obj.total_w = 
-		obj.used_w = 
-		*/
+		obj.totalSi = diskSize(obj.total);
+		obj.usedSi = diskSize(obj.used);
+		var widthPercent = 100;
+		var used = (obj.used / obj.total * widthPercent).toFixed(2);
+		obj.usedPercent = used + "%";
+		obj.freePercent = (widthPercent - used) + "%";
+		
 	});
 	ko.applyBindings(m.body, document.getElementById("tbPartition"));
 });
-
+/*
 function getArchiveStatus() {
 	Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getArchiveStatus', {}, function(m) {
 		console.log(m);
@@ -146,7 +153,7 @@ function getArchiveStatus() {
 }
 
 getArchiveStatus();
-
+*/
 $("#rfStatus").on("click", function() {
 	console.log("refresh Status");
 	getArchiveStatus();
