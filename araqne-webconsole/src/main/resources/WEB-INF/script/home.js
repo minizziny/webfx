@@ -51,6 +51,7 @@ var vmTasks;
 
 
 				var vmPrograms = new List.ViewModel(pack.programs);
+				window.vmPrograms = vmPrograms;
 
 				vmPrograms.pack = pack.name;
 				vmPrograms.run = function(program) {

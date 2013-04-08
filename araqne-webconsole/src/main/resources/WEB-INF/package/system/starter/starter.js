@@ -1,5 +1,5 @@
-require(["/lib/jquery.js", "/lib/knockout.js", "/lib/d3.v3.js", "/core/connection.js", "/lib/jquery.timeago.js"], 
-	function(_$, ko, d3, Socket, timeago) {
+require(["/lib/jquery.js", "/lib/knockout.js", "/lib/d3.v3.js", "/core/connection.js", "/lib/jquery.timeago.js", "/core/program.js"], 
+	function(_$, ko, d3, Socket, timeago, programManager) {
 
 
 jQuery.timeago.settings.strings = {
@@ -171,5 +171,20 @@ $("#rfLogTrend").on("click", function() {
 	$("div.chart1").empty();
 	makeChart("div.chart1", "org.logpresso.core.msgbus.LauncherPlugin.getLogTrendGraph",  "#ltLogTrend");
 });
+
+
+$("#btnManageLogSource").on("click", function() {
+	var programLogSource = {
+		"visible": true,
+		"created": "2013-02-12 15:18:03+0900",
+		"updated": "2013-02-12 15:18:03+0900",
+		"description": null,
+		"name": "로그 수집 설정",
+		"path": "logsource",
+		"seq": 2,
+		"pack": "Logpresso"
+	};
+	parent.vmPrograms.run(programLogSource);
+})
 
 });
