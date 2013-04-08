@@ -16,21 +16,25 @@
 package org.araqne.httpd;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.security.MessageDigest;
+import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.websocket.WebSocketFrameEncoder;
+
 import org.araqne.httpd.impl.WebSocketChannel;
-import org.araqne.httpd.impl.WebSocketFrameDecoderWithHost;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
+import org.jboss.netty.handler.codec.http.HttpHeaders.Names;
+import org.jboss.netty.handler.codec.http.HttpMethod;
+import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
+import org.jboss.netty.handler.codec.http.websocketx.WebSocketVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,56 +56,28 @@ public class WebSocketServlet extends HttpServlet {
 			return;
 
 		try {
-			// create websocket handshake response
-			resp.setStatus(HttpServletResponse.SC_SWITCHING_PROTOCOLS);
-			resp.addHeader(HttpHeaders.Names.UPGRADE, HttpHeaders.Values.WEBSOCKET);
-			resp.addHeader(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.UPGRADE);
+			WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory(getWebSocketLocation(req), null,
+					false, MAX_WEBSOCKET_FRAME_SIZE);
 
-			// fill in the headers and contents depending on handshake method
-			String key1 = req.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY1);
-			String key2 = req.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_KEY2);
-			if (key1 != null && key2 != null) {
-				// New handshake method with a challenge
-				resp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_ORIGIN, req.getHeader(HttpHeaders.Names.ORIGIN));
-				resp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_LOCATION, getWebSocketLocation(req));
-				String protocol = req.getHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL);
-				if (protocol != null) {
-					resp.addHeader(HttpHeaders.Names.SEC_WEBSOCKET_PROTOCOL, protocol);
-				}
-
-				// calculate the answer of the challenge
-				int a = (int) (Long.parseLong(key1.replaceAll("[^0-9]", "")) / key1.replaceAll("[^ ]", "").length());
-				int b = (int) (Long.parseLong(key2.replaceAll("[^0-9]", "")) / key2.replaceAll("[^ ]", "").length());
-				byte[] l = new byte[8];
-				req.getInputStream().read(l);
-				ByteBuffer bb = ByteBuffer.wrap(l);
-				long c = bb.getLong();
-				ChannelBuffer input = ChannelBuffers.buffer(16);
-				input.writeInt(a);
-				input.writeInt(b);
-				input.writeLong(c);
-				byte[] output = MessageDigest.getInstance("MD5").digest(input.array());
-				resp.getOutputStream().write(output);
-			} else {
-				// Old handshake method with no challenge
-				resp.addHeader(HttpHeaders.Names.WEBSOCKET_ORIGIN, req.getHeader(HttpHeaders.Names.ORIGIN));
-				resp.addHeader(HttpHeaders.Names.WEBSOCKET_LOCATION, getWebSocketLocation(req));
-				String protocol = req.getHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL);
-				if (protocol != null) {
-					resp.addHeader(HttpHeaders.Names.WEBSOCKET_PROTOCOL, protocol);
-				}
+			HttpMethod method = HttpMethod.valueOf(req.getMethod());
+			HttpRequest nettyReq = new DefaultHttpRequest(HttpVersion.HTTP_1_1, method, req.getRequestURI());
+			Enumeration<String> it = req.getHeaderNames();
+			while (it.hasMoreElements()) {
+				String header = it.nextElement();
+				nettyReq.addHeader(header, req.getHeader(header));
 			}
 
-			// upgrade the connection and send the handshake response
+			WebSocketServerHandshaker handshaker = wsFactory.newHandshaker(nettyReq);
+			if (handshaker == null) {
+				resp.setStatus(HttpResponseStatus.UPGRADE_REQUIRED.getCode());
+				resp.setHeader(Names.SEC_WEBSOCKET_VERSION, WebSocketVersion.V13.toHttpHeaderValue());
+				return;
+			}
+
 			String host = req.getHeader(HttpHeaders.Names.HOST);
 			Channel channel = (Channel) req.getAttribute("netty.channel");
-			ChannelPipeline p = channel.getPipeline();
-			p.remove("aggregator");
-			p.replace("decoder", "wsdecoder", new WebSocketFrameDecoderWithHost(host, MAX_WEBSOCKET_FRAME_SIZE));
-
-			resp.getOutputStream().close();
-
-			p.replace("encoder", "wsencoder", new WebSocketFrameEncoder());
+			channel.setAttachment(host);
+			handshaker.handshake(channel, nettyReq).addListener(WebSocketServerHandshaker.HANDSHAKE_LISTENER);
 
 			// open session
 			WebSocket socket = new WebSocketChannel(channel);

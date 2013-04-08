@@ -17,9 +17,9 @@ package org.araqne.httpd.impl;
 
 import java.net.InetSocketAddress;
 
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.handler.codec.http.websocket.DefaultWebSocketFrame;
 import org.araqne.httpd.WebSocket;
+import org.jboss.netty.channel.Channel;
+import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 public class WebSocketChannel implements WebSocket {
 
@@ -42,7 +42,7 @@ public class WebSocketChannel implements WebSocket {
 	@Override
 	public void send(String text) {
 		if (channel != null)
-			channel.write(new DefaultWebSocketFrame(text));
+			channel.write(new TextWebSocketFrame(text));
 	}
 
 	@Override

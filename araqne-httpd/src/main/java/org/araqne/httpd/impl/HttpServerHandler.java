@@ -29,6 +29,7 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.jboss.netty.handler.timeout.IdleState;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
@@ -61,8 +62,8 @@ public class HttpServerHandler extends IdleStateAwareChannelHandler {
 			Channel channel = ctx.getChannel();
 			if (logger.isDebugEnabled()) {
 				long idle = new Date().getTime() - event.getLastActivityTimeMillis();
-				logger.debug("araqne httpd: closing idle connection [local={}, remote={}, idle={}, state={}]",
-						new Object[] { channel.getLocalAddress(), channel.getRemoteAddress(), idle, event.getState() });
+				logger.debug("araqne httpd: closing idle connection [local={}, remote={}, idle={}, state={}]", new Object[] {
+						channel.getLocalAddress(), channel.getRemoteAddress(), idle, event.getState() });
 			}
 
 			channel.close();
@@ -90,11 +91,18 @@ public class HttpServerHandler extends IdleStateAwareChannelHandler {
 			request.setResponse(response);
 
 			httpContext.handle(request, response);
-		} else if (msg instanceof WebSocketFrame) {
+		} else if (msg instanceof TextWebSocketFrame) {
+			TextWebSocketFrame frame = (TextWebSocketFrame) msg;
+			String host = (String) ctx.getChannel().getAttachment();
+			HttpContext httpContext = findHttpContext(host);
 
-			WebSocketFrame frame = (WebSocketFrame) msg;
-			HttpContext httpContext = findHttpContext(frame.getHost());
-			httpContext.getWebSocketManager().dispatch(frame);
+			WebSocketFrame f = new WebSocketFrame();
+			f.setHost(host);
+			f.setRemote((InetSocketAddress) ctx.getChannel().getRemoteAddress());
+			f.setType(0);
+			f.setText(frame.getText());
+
+			httpContext.getWebSocketManager().dispatch(f);
 		}
 	}
 

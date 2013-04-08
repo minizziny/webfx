@@ -64,10 +64,11 @@ public class HttpContext {
 		String uri = request.getRequestURI();
 		logger.trace("araqne httpd: request [{} {}]", request.getMethod(), uri);
 
+		boolean isWebSocket = webSocketManager.getPath().equals(uri);
 		try {
 			String servletPath = null;
 			ServletMatchResult r = servletContext.matches(uri);
-			if (webSocketManager.getPath().equals(uri)) {
+			if (isWebSocket) {
 				servlet = webSocketManager.getServlet();
 				servletPath = webSocketManager.getPath();
 				pathInfo = uri.substring(uri.indexOf(servletPath) + servletPath.length());
@@ -98,7 +99,7 @@ public class HttpContext {
 			logger.error("araqne httpd: servlet error", t);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
-			if (response != null && !request.isAsyncStarted())
+			if (response != null && !request.isAsyncStarted() && !isWebSocket)
 				response.close();
 		}
 	}

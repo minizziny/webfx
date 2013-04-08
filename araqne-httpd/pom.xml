@@ -9,7 +9,7 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>araqne-httpd</artifactId>
-	<version>1.0.14</version>
+	<version>1.1.0</version>
 	<packaging>bundle</packaging>
 	<name>Araqne HTTP Daemon</name>
 	<build>
@@ -22,7 +22,10 @@
 					<instructions>
 						<Bundle-SymbolicName>org.araqne.httpd</Bundle-SymbolicName>
 						<Export-Package>org.araqne.httpd;version=${project.version}</Export-Package>
-						<Import-Package>!org.junit,*</Import-Package>
+						<Import-Package>
+							!org.junit,
+							*
+						</Import-Package>
 					</instructions>
 				</configuration>
 			</plugin>
@@ -62,9 +65,9 @@
 			<version>1.4.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.netty</groupId>
+			<groupId>io.netty</groupId>
 			<artifactId>netty</artifactId>
-			<version>3.2.2.Final</version>
+			<version>3.6.4.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.araqne</groupId>
