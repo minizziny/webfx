@@ -72,6 +72,10 @@ th {
 	background-color: rgba(232, 241, 247, 1);
 }
 
+.icon-refresh {
+	margin-top: 7px;
+}
+
 	</style>
 
 </head>
@@ -89,9 +93,8 @@ th {
 				<legend>
 					로그 발생 추이
 					<small id="ltLogTrend" class="timeago"></small>
-					<span class="badge">?</span>
-					<button class="pull-right btn" id="btnManageLogSource">로그 수집 설정 관리</button>
-					<button id="rfLogTrend" class="pull-right btn"><i class="icon-refresh"></i></button>
+					<i id="rfLogTrend" class="icon-refresh pull-right"></i>
+					<button class="pull-right btn" style="margin-right: 10px" id="btnManageLogSource">로그 수집 설정 관리</button>
 				</legend>
 				<div class="chart1"></div>
 			</div>
@@ -99,18 +102,15 @@ th {
 				<legend>
 					경보 발생 추이
 					<small id="ltAlertTrend" class="timeago"></small>
-					<span class="badge">?</span>
-					<button class="pull-right btn">로그 분석 설정 시작</button>
-					<button id="rfAlertTrend" class="pull-right btn"><i class="icon-refresh"></i></button>
+					<i id="rfAlertTrend" class="icon-refresh pull-right"></i>
 				</legend>
 				<div class="chart2"></div>
 			</div>
 			<div class="area">
 				<legend>
-					로그 파티션
-					<small>3분전에 갱신</small>
-					<span class="badge">?</span>
-					<button class="pull-right btn">파티션 설정</button>
+					디스크 파티션
+					<small id="ltPartition" class="timeago"></small>
+					<i id="rfPartition" class="icon-refresh pull-right"></i>
 				</legend>
 				<table id="tbPartition" class="table table-bordered table-condensed">
 					<thead>

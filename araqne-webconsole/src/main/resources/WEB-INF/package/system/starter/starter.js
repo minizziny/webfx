@@ -126,20 +126,28 @@ function diskSize(val) {
 	return prefix.scale(val).toFixed(2) + prefix.symbol;		
 }
 
-Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getDiskUsages', {}, function(m) {
-	//console.log(m.body)
+function getDiskUsages() {
+	Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getDiskUsages', {}, function(m) {
+		//console.log(m.body)
 
-	$.each(m.body.usages, function(i, obj) {
-		obj.totalSi = diskSize(obj.total);
-		obj.usedSi = diskSize(obj.used);
-		var widthPercent = 100;
-		var used = (obj.used / obj.total * widthPercent).toFixed(2);
-		obj.usedPercent = used + "%";
-		obj.freePercent = (widthPercent - used) + "%";
-		
+		$.each(m.body.usages, function(i, obj) {
+			obj.totalSi = diskSize(obj.total);
+			obj.usedSi = diskSize(obj.used);
+			var widthPercent = 100;
+			var used = (obj.used / obj.total * widthPercent).toFixed(2);
+			obj.usedPercent = used + "%";
+			obj.freePercent = (widthPercent - used) + "%";
+			
+		});
+		ko.applyBindings(m.body, document.getElementById("tbPartition"));
+
+		$("#ltPartition").attr("title", iso8610( new Date() )).timeago();
+		$("#ltPartition").data("timeago", { datetime: new Date() });
 	});
-	ko.applyBindings(m.body, document.getElementById("tbPartition"));
-});
+}
+
+getDiskUsages();
+
 /*
 function getArchiveStatus() {
 	Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getArchiveStatus', {}, function(m) {
@@ -171,6 +179,8 @@ $("#rfLogTrend").on("click", function() {
 	$("div.chart1").empty();
 	makeChart("div.chart1", "org.logpresso.core.msgbus.LauncherPlugin.getLogTrendGraph",  "#ltLogTrend");
 });
+
+$("#rfPartition").on("click", getDiskUsages);
 
 
 $("#btnManageLogSource").on("click", function() {
