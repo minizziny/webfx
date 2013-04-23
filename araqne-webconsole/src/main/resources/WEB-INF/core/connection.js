@@ -21,11 +21,17 @@ function send(method, options, callback, request_option) {
 	var defaultoptions = {};
 	options = $.extend(defaultoptions, options);
 
+	function getSource() {
+		var sid = (request_option) ? request_option.source : window.__pid;
+		if(sid == undefined) return "0";
+		else return sid.toString();
+	}
+
 	var request = [
 		{
 			"guid": guidGenerator(),
 			"type": "Request",
-			"source": (request_option) ? request_option.source : window.__pid,
+			"source": getSource(),
 			"target": "",
 			"method": method
 		}, options
@@ -155,6 +161,7 @@ function Trap() {
 		send("org.araqne.msgbus.PushPlugin.unsubscribe", {
 			callback: name
 		}, function(resp) {
+			console.log('unregistered');
 			if(callback != null) {
 				callback(resp);
 			}

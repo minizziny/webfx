@@ -331,11 +331,23 @@ var Query = function(jobj) {
 	}
 
 	function removeQuery(item, callback) {
-		socket.send("org.araqne.logdb.msgbus.LogQueryPlugin.removeQuery", { "id": item.activeId() }, function(m) {
+		var id = item.activeId();
+		if(id == -1) {
 			if(!!callback) {
 				callback();
 			}
-		});
+		}
+		else {
+			socket.send("org.araqne.logdb.msgbus.LogQueryPlugin.removeQuery", { "id": id }, function(m) {
+				if(!!callback) {
+					callback();
+				}
+				socket.unregisterTrap("logstorage-query-" + id);
+				setTimeout(function() {
+					socket.unregisterTrap("logstorage-query-timeline-" + id);
+				}, 5000);
+			});
+		}
 	}
 
 
