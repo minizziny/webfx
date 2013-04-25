@@ -1,25 +1,70 @@
-require(["/lib/jquery.js", "/lib/knockout.js", "/lib/d3.v3.js", "/core/connection.js", "/lib/jquery.timeago.js", "/core/program.js"], 
-	function(_$, ko, d3, Socket, timeago, programManager) {
-
-
-jQuery.timeago.settings.strings = {
-	suffixAgo: "전",
-	suffixFromNow: "후",
-	seconds: "1분 이내",
-	minute: "1분",
-	minutes: "%d분",
-	hour: "1시간",
-	hours: "%d시간",
-	day: "하루",
-	days: "%d일",
-	month: "한 달",
-	months: "%d달",
-	year: "1년",
-	years: "%d년",
-	wordSeparator: " "
-};
+require(["/lib/jquery.js", "/lib/knockout.js", "/lib/d3.v3.js", "/core/connection.js", "/core/program.js", "moment"], 
+	function(_$, ko, d3, Socket, programManager, moment) {
 
 var iso8610 = d3.time.format.iso;
+
+moment.lang('ko', {
+    months : "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
+    monthsShort : "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
+    weekdays : "일요일_월요일_화요일_수요일_목요일_금요일_토요일".split("_"),
+    weekdaysShort : "일_월_화_수_목_금_토".split("_"),
+    weekdaysMin : "일_월_화_수_목_금_토".split("_"),
+    longDateFormat : {
+        LT : "A h시 mm분",
+        L : "YYYY.MM.DD",
+        LL : "YYYY년 MMMM D일",
+        LLL : "YYYY년 MMMM D일 LT",
+        LLLL : "YYYY년 MMMM D일 dddd LT"
+    },
+    meridiem : function (hour, minute, isUpper) {
+        return hour < 12 ? '오전' : '오후';
+    },
+    calendar : {
+        sameDay : '오늘 LT',
+        nextDay : '내일 LT',
+        nextWeek : 'dddd LT',
+        lastDay : '어제 LT',
+        lastWeek : '지난주 dddd LT',
+        sameElse : 'L'
+    },
+    relativeTime : {
+        future : "%s 후",
+        past : "%s 전",
+        s : "몇초",
+        ss : "%d초",
+        m : "일분",
+        mm : "%d분",
+        h : "한시간",
+        hh : "%d시간",
+        d : "하루",
+        dd : "%d일",
+        M : "한달",
+        MM : "%d달",
+        y : "일년",
+        yy : "%d년"
+    },
+    ordinal : '%d일'
+});
+
+var timer = {};
+
+function updateTimer(el) {
+	var mm = moment();
+	var from = mm.fromNow();
+	$(el).text(from);
+
+	console.log(el, 'changed');
+	clearInterval(timer[el])
+	timer[el] = null;
+
+	timer[el] = setInterval(function() {
+		if(from != mm.fromNow()) {
+			console.log(el, 'changed');
+			from = mm.fromNow();
+			$(el).text(from);
+		}
+	}, 60000);
+}
 
 function makeChart(el, query, elupdate) {
 	var margin = {top: 10, right: 20, bottom: 30, left: 80},
@@ -82,48 +127,34 @@ function makeChart(el, query, elupdate) {
 	      .attr("class", "line")
 	      .attr("d", line);
 
-
-
-	   $(elupdate).attr("title", iso8610( new Date() )).timeago();
-	   $(elupdate).data("timeago", { datetime: new Date() });
+		updateTimer(elupdate);
 	})
 
-/*
-	d3.csv("/package/system/starter/data.csv", function(error, data) {
-	  data.forEach(function(d) {
-	    d.date = parseDate(d.date);
-	    d.close = +d.close;
-	  });
-
-	  var ydom = d3.extent(data, function(d) { return d.close; });
-	  ydom[0] = 0;
-
-	  x.domain(d3.extent(data, function(d) { return d.date; }));
-	  y.domain(ydom);
-
-	  svg.append("g")
-	      .attr("class", "x axis")
-	      .attr("transform", "translate(0," + height + ")")
-	      .call(xAxis);
-
-	  svg.append("g")
-	      .attr("class", "y axis")
-	      .call(yAxis)
-
-	  svg.append("path")
-	      .datum(data)
-	      .attr("class", "line")
-	      .attr("d", line);
-	});
-*/
 }
 
 makeChart("div.chart1", "org.logpresso.core.msgbus.LauncherPlugin.getLogTrendGraph", "#ltLogTrend");
 makeChart("div.chart2", "org.logpresso.core.msgbus.LauncherPlugin.getAlertTrendGraph", "#ltAlertTrend");
 
+
+function computerFormatPrefix(val) {
+	var computerFormatPrefixes = [ "", "K", "M", "G", "T", "P", "E", "Z", "Y" ];
+	function log1024(val) { return Math.log(val) / Math.log(1024); }
+
+	var pow = Math.floor( log1024(val) );
+	if(pow == -Infinity) {
+		return { symbol: '', value: 0 };
+	}
+	else {
+		return {
+			symbol: computerFormatPrefixes[pow],
+			value: val/Math.pow(1024, pow)
+		};
+	}
+}
+
 function diskSize(val) {
-	var prefix = d3.formatPrefix(val);
-	return prefix.scale(val).toFixed(2) + prefix.symbol;		
+	var pfx = computerFormatPrefix(val);
+	return  pfx.value.toFixed(2) + pfx.symbol + "B";
 }
 
 function getDiskUsages() {
@@ -141,27 +172,12 @@ function getDiskUsages() {
 		});
 		ko.applyBindings(m.body, document.getElementById("tbPartition"));
 
-		$("#ltPartition").attr("title", iso8610( new Date() )).timeago();
-		$("#ltPartition").data("timeago", { datetime: new Date() });
+		updateTimer("#ltPartition");
 	});
 }
 
 getDiskUsages();
 
-/*
-function getArchiveStatus() {
-	Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getArchiveStatus', {}, function(m) {
-		console.log(m);
-		ko.applyBindings(m.body, document.getElementById("tbArchiveStatus"))
-	});
-	
-	$("#ltStatus").attr("title", iso8610( new Date() )).timeago();
-	$("#ltStatus").data("timeago", { datetime: new Date() });
-
-}
-
-getArchiveStatus();
-*/
 $("#rfStatus").on("click", function() {
 	console.log("refresh Status");
 	getArchiveStatus();
