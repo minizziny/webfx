@@ -82,6 +82,16 @@ return [
                 "path": "logsource",
                 "seq": 2,
                 "pack": "Logpresso"
+            },
+            {
+                "visible": true,
+                "created": "2013-02-12 15:18:03+0900",
+                "updated": "2013-02-12 15:18:03+0900",
+                "description": null,
+                "name": "테이블 설정",
+                "path": "table",
+                "seq": 3,
+                "pack": "Logpresso"
             }
         ],
         "starter": "starter",
