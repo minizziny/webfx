@@ -128,9 +128,18 @@ public class MsgbusServlet extends HttpServlet implements Runnable {
 				logger.trace("araqne webconsole: flush queued traps [session={}]", session.getGuid());
 				flushTraps(q, resp.getOutputStream());
 			} else {
-				logger.trace("araqne webconsole: waiting msgbus response/trap [session={}]", session.getGuid());
+				if (contexts.containsKey(session.getGuid())) {
+					logger.trace("araqne webconsole: other trap is waiting. ignore this request.");
+					return;
+				}
+
+				logger.trace("araqne webconsole: waiting msgbus trap [session={}]", session.getGuid());
 				AsyncContext aCtx = req.startAsync();
-				contexts.put(session.getGuid(), aCtx);
+				AsyncContext old = contexts.putIfAbsent(session.getGuid(), aCtx);
+				if (old != null) {
+					aCtx.complete();
+					logger.trace("araqne webconsole: other trap is waiting. ignore this request.");
+				}
 			}
 		}
 	}
@@ -222,6 +231,7 @@ public class MsgbusServlet extends HttpServlet implements Runnable {
 		} catch (IOException e) {
 			logger.error("araqne webconsole: cannot send pending msg", e);
 		} finally {
+			logger.debug("araqne webconsole: waiting complete session={}", sessionId);
 			ctx.complete();
 			contexts.remove(sessionId);
 		}
