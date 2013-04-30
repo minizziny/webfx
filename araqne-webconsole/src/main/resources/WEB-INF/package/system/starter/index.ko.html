@@ -119,8 +119,8 @@ th {
 							<th colspan="2">사용량/전체</th>
 						</tr>
 					</thead>
-					<tbody>
-						<tr data-bind="foreach: usages">
+					<tbody data-bind="foreach: usages">
+						<tr>
 							<td data-bind="text: name"></td>
 							<td>
 								<span data-bind="text: usedSi"></span>

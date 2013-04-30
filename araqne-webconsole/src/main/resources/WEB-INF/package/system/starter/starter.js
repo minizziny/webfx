@@ -159,18 +159,21 @@ function diskSize(val) {
 
 function getDiskUsages() {
 	Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getDiskUsages', {}, function(m) {
-		//console.log(m.body)
+		var body = { usages: [] };
 
 		$.each(m.body.usages, function(i, obj) {
+
 			obj.totalSi = diskSize(obj.total);
 			obj.usedSi = diskSize(obj.used);
 			var widthPercent = 100;
 			var used = (obj.used / obj.total * widthPercent).toFixed(2);
 			obj.usedPercent = used + "%";
 			obj.freePercent = (widthPercent - used) + "%";
-			
+
+			body.usages.push(obj);
 		});
-		ko.applyBindings(m.body, document.getElementById("tbPartition"));
+
+		ko.applyBindings(body, document.getElementById("tbPartition"));
 
 		updateTimer("#ltPartition");
 	});
