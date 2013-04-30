@@ -158,8 +158,8 @@ function diskSize(val) {
 }
 
 function getDiskUsages() {
+	tbbody.usages.removeAll();
 	Socket.send('org.logpresso.core.msgbus.LauncherPlugin.getDiskUsages', {}, function(m) {
-		var body = { usages: [] };
 
 		$.each(m.body.usages, function(i, obj) {
 
@@ -170,15 +170,16 @@ function getDiskUsages() {
 			obj.usedPercent = used + "%";
 			obj.freePercent = (widthPercent - used) + "%";
 
-			body.usages.push(obj);
+			tbbody.usages.push(obj);
 		});
-
-		ko.applyBindings(body, document.getElementById("tbPartition"));
 
 		updateTimer("#ltPartition");
 	});
+
 }
 
+var tbbody = { usages: ko.observableArray() };
+ko.applyBindings(tbbody, document.getElementById("tbPartition"));
 getDiskUsages();
 
 $("#rfStatus").on("click", function() {
