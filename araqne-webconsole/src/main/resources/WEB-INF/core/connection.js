@@ -5,7 +5,6 @@ function ConnectionManager() {
 	var self = this;
 	var connWs;
 	var msgmap = {};
-	var nowPolling = false;
 
 	function msgobj(single) {
 		var response = { 
@@ -126,7 +125,6 @@ function ConnectionManager() {
 
 	var doPoll = function() {
 		console.log('doPoll')
-		nowPolling = true;
 
 		$.ajax({
 			url: "/msgbus/trap",
@@ -160,7 +158,7 @@ function ConnectionManager() {
 		}, function(m) {
 			msgmap[name] = ontrap;
 
-			if(!nowPolling) {
+			if(connWs == undefined && !window.WebSocket) {
 				doPoll();
 			}
 
@@ -206,6 +204,9 @@ function ConnectionManager() {
 		connWs.onmessage = function(e) {
 			//console.log(e)
 			onMessageReceived(e.data);
+		}
+		connWs.onerror = function(e) {
+			console.log(e);
 		}
 	}
 
