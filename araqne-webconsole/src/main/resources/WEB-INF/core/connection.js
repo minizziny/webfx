@@ -132,7 +132,7 @@ function ConnectionManager() {
 				var full;
 				try { full = JSON.parse(resp); }
 				catch(e) {
-					console.log("received message is not JSON", raw);
+					console.log("received message is not JSON", resp);
 				}
 				
 				if(full == undefined) return;
