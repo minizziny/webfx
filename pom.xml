@@ -186,5 +186,6 @@
 		<module>araqne-httpd</module>
 		<module>araqne-servlet-api</module>
 		<module>araqne-webconsole</module>
+		<module>araqne-websocket</module>
 	</modules>
 </project>
