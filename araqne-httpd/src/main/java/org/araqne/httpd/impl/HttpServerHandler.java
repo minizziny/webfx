@@ -126,7 +126,7 @@ public class HttpServerHandler extends IdleStateAwareChannelHandler {
 		for (String name : contextRegistry.getContextNames()) {
 			HttpContext context = contextRegistry.findContext(name);
 			InetSocketAddress remote = (InetSocketAddress) ctx.getChannel().getRemoteAddress();
-			context.getWebSocketManager().unregister(remote);
+			context.onConnectionClosed(remote);
 		}
 	}
 

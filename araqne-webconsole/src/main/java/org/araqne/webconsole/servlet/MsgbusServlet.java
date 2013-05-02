@@ -24,11 +24,14 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +40,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Invalidate;
+import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.araqne.httpd.HttpContext;
@@ -46,13 +50,15 @@ import org.araqne.msgbus.Message;
 import org.araqne.msgbus.Message.Type;
 import org.araqne.msgbus.MessageBus;
 import org.araqne.msgbus.Session;
+import org.araqne.webconsole.CometMonitor;
 import org.araqne.webconsole.impl.AraqneMessageDecoder;
 import org.araqne.webconsole.impl.AraqneMessageEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Component(name = "webconsole-msgbus-servlet")
-public class MsgbusServlet extends HttpServlet implements Runnable {
+@Provides(specifications = { CometMonitor.class })
+public class MsgbusServlet extends HttpServlet implements Runnable, CometMonitor {
 	private static final long serialVersionUID = 1L;
 	private final Logger logger = LoggerFactory.getLogger(MsgbusServlet.class);
 
@@ -139,6 +145,8 @@ public class MsgbusServlet extends HttpServlet implements Runnable {
 				if (old != null) {
 					aCtx.complete();
 					logger.trace("araqne webconsole: other trap is waiting. ignore this request.");
+				} else {
+					aCtx.addListener(new AsyncFinalizer(session.getGuid()));
 				}
 			}
 		}
@@ -345,8 +353,47 @@ public class MsgbusServlet extends HttpServlet implements Runnable {
 	}
 
 	@Override
+	public Set<String> getSessionKeys() {
+		return contexts.keySet();
+	}
+
+	@Override
+	public AsyncContext getAsyncContext(String sessionKey) {
+		return contexts.get(sessionKey);
+	}
+
+	@Override
 	public String toString() {
 		return "async contexts=" + contexts;
 	}
 
+	private class AsyncFinalizer implements AsyncListener {
+		private String sessionKey;
+
+		public AsyncFinalizer(String sessionKey) {
+			this.sessionKey = sessionKey;
+		}
+
+		@Override
+		public void onStartAsync(AsyncEvent event) throws IOException {
+		}
+
+		@Override
+		public void onComplete(AsyncEvent event) throws IOException {
+			logger.debug("araqne webconsole: removed async session [{}] on complete", sessionKey);
+			contexts.remove(sessionKey);
+		}
+
+		@Override
+		public void onTimeout(AsyncEvent event) throws IOException {
+			logger.debug("araqne webconsole: removed async session [{}] on timeout", sessionKey);
+			contexts.remove(sessionKey);
+		}
+
+		@Override
+		public void onError(AsyncEvent event) throws IOException {
+			logger.debug("araqne webconsole: removed async session [{}] on error", sessionKey);
+			contexts.remove(sessionKey);
+		}
+	}
 }

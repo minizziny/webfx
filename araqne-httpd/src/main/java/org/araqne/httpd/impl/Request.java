@@ -66,6 +66,7 @@ public class Request implements HttpServletRequest {
 	private ChannelHandlerContext ctx;
 	private boolean secure;
 	private boolean asyncStarted;
+	private AsyncContext asyncContext;
 
 	/**
 	 * can be null if not found
@@ -641,14 +642,16 @@ public class Request implements HttpServletRequest {
 
 	@Override
 	public AsyncContext getAsyncContext() {
-		// TODO Auto-generated method stub
-		return null;
+		if (!asyncStarted)
+			throw new IllegalStateException("not in async mode");
+		return asyncContext;
 	}
 
 	@Override
 	public AsyncContext startAsync() throws IllegalStateException {
 		asyncStarted = true;
-		return new AsyncContextImpl(this, resp);
+		asyncContext = new AsyncContextImpl(this, resp);
+		return asyncContext;
 	}
 
 	@Override

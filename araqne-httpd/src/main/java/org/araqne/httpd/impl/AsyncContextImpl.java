@@ -16,8 +16,12 @@
 package org.araqne.httpd.impl;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -26,14 +30,21 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class AsyncContextImpl implements AsyncContext {
+	private final Logger logger = LoggerFactory.getLogger(AsyncContextImpl.class);
 	private HttpServletRequest req;
 	private HttpServletResponse resp;
 	private long timeout;
+	private Date created = new Date();
+	private CopyOnWriteArraySet<AsyncListener> listeners;
 
 	public AsyncContextImpl(HttpServletRequest req, HttpServletResponse resp) {
 		this.req = req;
 		this.resp = resp;
+		this.listeners = new CopyOnWriteArraySet<AsyncListener>();
 	}
 
 	@Override
@@ -75,6 +86,14 @@ public class AsyncContextImpl implements AsyncContext {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		for (AsyncListener listener : listeners) {
+			try {
+				listener.onComplete(new AsyncEvent(this));
+			} catch (Throwable t) {
+				logger.error("araqne httpd: async oncomplete callback failed", t);
+			}
+		}
 	}
 
 	@Override
@@ -103,14 +122,17 @@ public class AsyncContextImpl implements AsyncContext {
 
 	@Override
 	public void addListener(AsyncListener listener) {
-		// TODO Auto-generated method stub
-
+		listeners.add(listener);
 	}
 
 	@Override
 	public void addListener(AsyncListener listener, ServletRequest servletRequest, ServletResponse servletResponse) {
-		// TODO Auto-generated method stub
-
+		listeners.add(listener);
 	}
 
+	@Override
+	public String toString() {
+		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		return df.format(created);
+	}
 }

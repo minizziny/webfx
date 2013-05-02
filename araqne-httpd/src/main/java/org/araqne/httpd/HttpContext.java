@@ -17,12 +17,17 @@ package org.araqne.httpd;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -42,11 +47,15 @@ public class HttpContext {
 	private WebSocketManager webSocketManager;
 	private ConcurrentMap<String, HttpSession> httpSessions;
 
+	// remote addr:port to async contexts
+	private ConcurrentMap<String, AsyncContext> asyncContexts;
+
 	public HttpContext(String name) {
 		this.name = name;
 		this.servletContext = new ServletContextImpl(name, "/", "");
 		this.webSocketManager = new WebSocketManager();
 		this.httpSessions = new ConcurrentHashMap<String, HttpSession>();
+		this.asyncContexts = new ConcurrentHashMap<String, AsyncContext>();
 	}
 
 	public HttpContext(String name, String contextPath) {
@@ -54,6 +63,7 @@ public class HttpContext {
 		this.servletContext = new ServletContextImpl(name, contextPath, "");
 		this.webSocketManager = new WebSocketManager();
 		this.httpSessions = new ConcurrentHashMap<String, HttpSession>();
+		this.asyncContexts = new ConcurrentHashMap<String, AsyncContext>();
 	}
 
 	public void handle(Request request, Response response) throws IOException {
@@ -99,6 +109,16 @@ public class HttpContext {
 			logger.error("araqne httpd: servlet error", t);
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		} finally {
+			if (request.isAsyncStarted()) {
+				AsyncContext aCtx = request.getAsyncContext();
+				aCtx.addListener(new AsyncContextCloser());
+				String remote = getRemoteAddress(request);
+				asyncContexts.put(remote, aCtx);
+
+				if (logger.isDebugEnabled())
+					logger.debug("araqne httpd: put http context's async context, remote addr={}", remote);
+			}
+
 			if (response != null && !request.isAsyncStarted() && !isWebSocket)
 				response.close();
 		}
@@ -130,8 +150,47 @@ public class HttpContext {
 		return servletContext.removeServlet(name);
 	}
 
+	public void onConnectionClosed(InetSocketAddress remote) {
+		logger.trace("araqne httpd: client connection closed, remote addr={}", remote);
+		String remoteAddr = remote.getAddress().getHostAddress() + ":" + remote.getPort();
+		AsyncContext ctx = asyncContexts.remove(remoteAddr);
+		if (ctx != null)
+			ctx.complete();
+
+		webSocketManager.unregister(remote);
+	}
+
 	@Override
 	public String toString() {
 		return "HTTP Context [" + name + ", sessions=" + httpSessions.size() + "]\n>>\n" + servletContext + webSocketManager;
+	}
+
+	private String getRemoteAddress(ServletRequest req) {
+		return req.getRemoteAddr() + ":" + req.getRemotePort();
+
+	}
+
+	private class AsyncContextCloser implements AsyncListener {
+		@Override
+		public void onComplete(AsyncEvent event) throws IOException {
+			if (logger.isDebugEnabled()) {
+				ServletRequest req = event.getAsyncContext().getRequest();
+				logger.debug("araqne httpd: remove http context's async context, remote addr={}", getRemoteAddress(req));
+			}
+
+			asyncContexts.remove(event.getAsyncContext());
+		}
+
+		@Override
+		public void onTimeout(AsyncEvent event) throws IOException {
+		}
+
+		@Override
+		public void onError(AsyncEvent event) throws IOException {
+		}
+
+		@Override
+		public void onStartAsync(AsyncEvent event) throws IOException {
+		}
 	}
 }

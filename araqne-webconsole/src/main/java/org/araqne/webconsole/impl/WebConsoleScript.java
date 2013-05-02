@@ -17,15 +17,18 @@ package org.araqne.webconsole.impl;
 
 import org.araqne.api.Script;
 import org.araqne.api.ScriptContext;
+import org.araqne.webconsole.CometMonitor;
 import org.araqne.webconsole.Program;
 import org.araqne.webconsole.ProgramApi;
 
 public class WebConsoleScript implements Script {
 	private ScriptContext context;
 	private ProgramApi programApi;
+	private CometMonitor cometMonitor;
 
-	public WebConsoleScript(ProgramApi programApi) {
+	public WebConsoleScript(ProgramApi programApi, CometMonitor cometMonitor) {
 		this.programApi = programApi;
+		this.cometMonitor = cometMonitor;
 	}
 
 	@Override
@@ -36,6 +39,17 @@ public class WebConsoleScript implements Script {
 	public void programs(String[] args) {
 		for (Program p : programApi.getPrograms()) {
 			context.println(p.toString());
+		}
+	}
+
+	/**
+	 * @since 2.7.2
+	 */
+	public void cometSessions(String[] args) {
+		context.println("Long polling sessions");
+		context.println("-----------------------");
+		for (String sessionKey : cometMonitor.getSessionKeys()) {
+			context.println(sessionKey + ": " + cometMonitor.getAsyncContext(sessionKey));
 		}
 	}
 }
