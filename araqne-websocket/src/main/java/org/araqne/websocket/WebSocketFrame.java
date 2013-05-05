@@ -18,7 +18,6 @@ package org.araqne.websocket;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -123,10 +122,8 @@ public class WebSocketFrame {
 			bos.write(len);
 		} else {
 			bos.write(maskBit(127));
-			bos.write(len >> 24);
-			bos.write(len >> 16);
-			bos.write(len >> 8);
-			bos.write(len);
+			for (int i = 7; i >= 0; i--)
+				bos.write(len >> (i * 8));
 		}
 
 		try {
@@ -134,7 +131,7 @@ public class WebSocketFrame {
 				bos.write(maskingKey);
 
 				// encode payload
-				byte[] masked = Arrays.copyOf(payload, payload.length);
+				byte[] masked = new byte[payload.length];
 				for (int i = 0; i < payload.length; i++) {
 					masked[i] = (byte) (payload[i] ^ maskingKey[i % 4]);
 				}
