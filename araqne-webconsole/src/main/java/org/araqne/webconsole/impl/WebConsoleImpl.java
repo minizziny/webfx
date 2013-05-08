@@ -25,6 +25,8 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.araqne.httpd.BundleResourceServlet;
+import org.araqne.httpd.FileDownloadService;
+import org.araqne.httpd.FileDownloadServlet;
 import org.araqne.httpd.HttpContext;
 import org.araqne.httpd.HttpContextRegistry;
 import org.araqne.httpd.HttpService;
@@ -56,6 +58,9 @@ public class WebConsoleImpl implements WebConsole, WebSocketListener {
 	@Requires
 	private MessageBus msgbus;
 
+	@Requires
+	private FileDownloadService downloadService;
+
 	private ConcurrentMap<InetSocketAddress, WebSocketSession> sessions;
 
 	public WebConsoleImpl(BundleContext bc) {
@@ -68,6 +73,7 @@ public class WebConsoleImpl implements WebConsole, WebSocketListener {
 		HttpContextRegistry contextRegistry = httpd.getContextRegistry();
 		HttpContext ctx = contextRegistry.ensureContext("webconsole");
 		ctx.addServlet("webconsole", new BundleResourceServlet(bc.getBundle(), "/WEB-INF"), "/*");
+		ctx.addServlet("downloader", new FileDownloadServlet(downloadService), "/downloader");
 		ctx.getWebSocketManager().addListener(this);
 	}
 
@@ -77,6 +83,7 @@ public class WebConsoleImpl implements WebConsole, WebSocketListener {
 			HttpContextRegistry contextRegistry = httpd.getContextRegistry();
 			HttpContext ctx = contextRegistry.ensureContext("webconsole");
 			ctx.removeServlet("webconsole");
+			ctx.removeServlet("downloader");
 			ctx.getWebSocketManager().removeListener(this);
 		}
 	}

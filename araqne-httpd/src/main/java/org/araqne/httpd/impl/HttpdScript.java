@@ -29,6 +29,8 @@ import org.araqne.api.Script;
 import org.araqne.api.ScriptArgument;
 import org.araqne.api.ScriptContext;
 import org.araqne.api.ScriptUsage;
+import org.araqne.httpd.FileDownloadHandler;
+import org.araqne.httpd.FileDownloadService;
 import org.araqne.httpd.FileResourceServlet;
 import org.araqne.httpd.HttpConfiguration;
 import org.araqne.httpd.HttpContext;
@@ -43,9 +45,11 @@ public class HttpdScript implements Script {
 	private final Logger logger = LoggerFactory.getLogger(HttpdScript.class.getName());
 	private ScriptContext context;
 	private HttpService httpd;
+	private FileDownloadService downloadService;
 
-	public HttpdScript(HttpService httpd) {
+	public HttpdScript(HttpService httpd, FileDownloadService downloadService) {
 		this.httpd = httpd;
+		this.downloadService = downloadService;
 	}
 
 	@Override
@@ -295,5 +299,25 @@ public class HttpdScript implements Script {
 			context.println("invalid listen ip format");
 			logger.error("araqne httpd: invalid listen ip format", e);
 		}
+	}
+
+	public void downloads(String[] args) {
+		context.println("File Download Handlers");
+		context.println("------------------------");
+		for (FileDownloadHandler handler : downloadService.getHandlers()) {
+			context.println(handler);
+		}
+	}
+
+	@ScriptUsage(description = "cancel download", arguments = { @ScriptArgument(name = "token", type = "string", description = "download token") })
+	public void cancelDownload(String[] args) {
+		FileDownloadHandler handler = downloadService.findHandler(args[0]);
+		if (handler == null) {
+			context.println("download handler not found");
+			return;
+		}
+
+		downloadService.removeHandler(handler);
+		context.println("removed");
 	}
 }

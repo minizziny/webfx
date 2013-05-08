@@ -4,4 +4,5 @@
 	<instance component="http-service" />
 	<instance component="httpd-script-factory" />
 	<instance component="httpd-session-checker" />
+	<instance component="httpd-file-downloader" />
 </ipojo>

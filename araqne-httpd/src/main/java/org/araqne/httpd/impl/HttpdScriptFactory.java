@@ -21,6 +21,7 @@ import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.ServiceProperty;
 import org.araqne.api.Script;
 import org.araqne.api.ScriptFactory;
+import org.araqne.httpd.FileDownloadService;
 import org.araqne.httpd.HttpService;
 
 @Component(name = "httpd-script-factory")
@@ -32,10 +33,13 @@ public class HttpdScriptFactory implements ScriptFactory {
 
 	@Requires
 	private HttpService httpd;
+	
+	@Requires
+	private FileDownloadService downloadService;
 
 	@Override
 	public Script createScript() {
-		return new HttpdScript(httpd);
+		return new HttpdScript(httpd, downloadService);
 	}
 
 }
