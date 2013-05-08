@@ -19,7 +19,7 @@
 	}
 
 	.board {
-		margin-top: 42px;
+		/* margin-top: 42px; */
 	}
 
 	.brandpreset {
@@ -131,19 +131,9 @@
 </head>
 <body ng-controller="Controller">
 	<topbar>
-		<a href="#">Logpresso</a>
-		<ul ng-controller="ProgramController">
-			<li></li>
-		</ul>
-		<ul ng-controller="TaskController">
-			<li ng-repeat="task in tasks">
-				{{task}}
-			</li>
-		</ul>
-		<a href="#" ng-click="logout()">Logout</a>
 	</topbar>
 
-	<div ng-controller="PresetController" class="toolbar navbar navbar-fixed-top">
+	<div ng-controller="PresetController" class="toolbar navbar navbar-top" style="margin-bottom: 10px">
 		<div class="navbar-inner" style="text-align: center">
 			<select style="float: left; margin-top: 5px; margin-bottom: 0; margin-left: 5px" ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
 			<span class="brandpreset">{{selectedPreset.name}}</span>
@@ -238,7 +228,7 @@
 						<div class="control-group">
 							<label class="control-label" for="widgetInterval">실행 주기</label>
 							<div class="controls">
-								<input id="widgetInterval" type="number" ng-model="ctxWidget.interval"/>
+								<input id="widgetInterval" type="number" ng-model="ctxWidget.interval" min="5"/> 초
 							</div>
 						</div>
 					</div>

@@ -76,6 +76,7 @@ angular.module('logdb', [])
 				registerTrap();
 			})
 			.failed(function(m, raw) {
+				asyncQuery.done('failed', m);
 				console.log(raw, 'cannot create query');
 			})
 
@@ -118,6 +119,9 @@ angular.module('logdb', [])
 			.success(function(m) {
 				
 			})
+			.failed(function(m) {
+				asyncQuery.done('failed', m);
+			});
 		}
 
 		function getResult(id, offset, limit, trigger) {

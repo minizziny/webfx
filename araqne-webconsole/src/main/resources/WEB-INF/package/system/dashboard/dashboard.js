@@ -84,6 +84,11 @@ app.directive('queryInput', function($compile, serviceLogdb) {
 				})
 				.loaded(function(m) {
 					//console.log(z.id(), 'loaded', m)
+
+					z.dispose();
+				})
+				.failed(function(m) {
+					alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.')
 				})
 			}
 
@@ -103,11 +108,14 @@ app.directive('queryResult', function($compile) {
 
 			scope.$watch(attrs.ngModel, function() {
 				var raw = scope[attrs.ngModel];
-				if(!angular.isArray(raw)) return;
 
 				scope.qrDataColumns.splice(0, scope.qrDataColumns.length);
 				scope.qrDataColumnsOrder.splice(0, scope.qrDataColumnsOrder.length);
 				scope.qrData.splice(0, scope.qrData.length);
+
+				if(!angular.isArray(raw)) {
+					return;
+				}
 
 				for (var i = 0; i < raw.length; i++) {
 					for (var col in raw[i]) {
@@ -151,7 +159,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 			if(attrs.type == 'grid') {
 				var template = angular.element('<div class="widget"><h5 style="float:left">' + attrs.name + '</h5>' +
 					'<button style="margin-left: 10px" class="close">&times;</button>' +
-					'<span style="float:right"><input type="number" style="width:80px" ng-model="' + attrs.guid + '.interval" /></span>' + 
+					'<span style="float:right"><input type="number" min="5" style="width:80px" ng-model="' + attrs.guid + '.interval" /></span>' + 
 					'<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
 					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table></div>');
 				$compile(template)(scope);
@@ -168,10 +176,12 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 						scope[attrs.guid].data = m.body.result;
 						scope.$apply();
 
-						timer = setTimeout(query, Math.max(10000, scope[attrs.guid].interval * 1000) );
+						clearTimeout(timer);
+						timer = null;
+						timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
 					})
 					.loaded(function(m) {
-						//console.log(z.id(), 'loaded', m)
+						z.dispose();
 					});
 				}
 
@@ -394,13 +404,13 @@ function WizardController($scope, eventSender) {
 	
 	function getDefaultContext() {
 		return {
-			'name': 'aa',
+			'name': '',
 			'guid': guidGenerator(),
 			'interval': 15,
 			'type': 'grid',
 			'data': {
 				'order': undefined,
-				'query': 'table limit=7 memlogs | fields _id, msg'
+				'query': ''
 			}
 		}
 	}
@@ -417,6 +427,7 @@ function WizardController($scope, eventSender) {
 			.show();
 		$scope.go(0);
 		$scope.ctxWidget = getDefaultContext();
+		$scope.qresult = null;
 	}
 
 	$scope.qresult;
