@@ -189,8 +189,15 @@ angular.module('logdb', [])
 		return instance;
 	}
 
+	function remove(instance) {
+		instance.dispose();
+		var idx = logdb.queries.indexOf(instance);
+		logdb.queries.splice(idx, 1);
+	}
+
 	return {
-		create: create
+		create: create,
+		remove: remove
 	}
 });
 

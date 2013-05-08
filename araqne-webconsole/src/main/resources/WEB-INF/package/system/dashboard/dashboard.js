@@ -61,7 +61,6 @@ app.directive('queryInput', function($compile, serviceLogdb) {
 			$compile(textarea)(scope);
 
 			var pid = proc.pid;
-			var z = serviceLogdb.create(pid);
 			
 			textarea.on('keydown', function(e) {
 				if (e.type === 'keydown' && e.keyCode === 13) {
@@ -73,19 +72,17 @@ app.directive('queryInput', function($compile, serviceLogdb) {
 			element.find('.search').on('click', search);
 
 			function search() {
+				var z = serviceLogdb.create(pid);
 				
 				var queryValue = textarea.data('$ngModelController').$modelValue;
 
 				z.query(queryValue)
 				.pageLoaded(function(m) {
-					//console.log(z.id(), 'pageLoaded', m)
 					scope[attrs.ngModel] = m.body.result;
 					scope.$apply();
 				})
 				.loaded(function(m) {
-					//console.log(z.id(), 'loaded', m)
-
-					z.dispose();
+					serviceLogdb.remove(z);
 				})
 				.failed(function(m) {
 					alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.')
@@ -160,43 +157,41 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 				var template = angular.element('<div class="widget"><h5>' + attrs.name + '</h5>' +
 					'<button style="margin-left: 10px" class="close widget-close">&times;</button>' +
 					'<button class="close widget-refresh"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
-					'<span style="float:right"><input type="number" min="5" ng-model="' + attrs.guid + '.interval" /></span>' + 
+					'<span style="float:right"><input type="number" min="5" ng-model="' + attrs.guid + '.interval" /><small style="vertical-align:2px"> 초</small></span>' + 
 					'<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
 					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table></div>');
 				$compile(template)(scope);
 				element.append(template);
 				
-				var z = serviceLogdb.create(proc.pid);
 				var timer;
 
 				function query() {
 					console.log('--------------------')
+					var z = serviceLogdb.create(proc.pid);
 					z.query(attrs.query)
 					.pageLoaded(function(m) {
 						//console.log(z.id(), 'pageloaded', m)
 						scope[attrs.guid].data = m.body.result;
 						scope.$apply();
 
-						refresh();
+						clearTimeout(timer);
+						timer = null;
+						timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
 					})
 					.loaded(function(m) {
-						z.dispose();
+						serviceLogdb.remove(z);
 					})
 					.failed(function(m) {
-						refresh();
+						clearTimeout(timer);
+						timer = null;
+						query();
 					});
-				}
-
-				function refresh() {
-					clearTimeout(timer);
-					timer = null;
-					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
 				}
 
 				query();
 
 				function dispose() {
-					z.dispose();
+					//z.dispose();
 					clearTimeout(timer);
 					timer = null;
 					element.remove();
@@ -207,7 +202,11 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 					dispose();
 				});
 
-				template.find('button.widget-refresh').on('click', refresh);
+				template.find('button.widget-refresh').on('click', function() {
+					clearTimeout(timer);
+					timer = null;
+					query();
+				});
 
 				element[0].$dispose = dispose; 
 				
