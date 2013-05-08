@@ -148,10 +148,10 @@ function ConnectionManager() {
 		});
 	}
 
-	this.register = function(name, ontrap, callback) {
+	this.register = function(name, ontrap, callback, source) {
 		if(name == null) return;
 
-		console.log("register " + name);
+		//console.log("register " + name);
 
 		self.send("org.araqne.msgbus.PushPlugin.subscribe", {
 			callback: name
@@ -167,14 +167,14 @@ function ConnectionManager() {
 			}
 
 		}, {
-			source: "0"
+			source: (source === undefined) ? "0" : source
 		})
 	};
 
-	this.unregister = function(name, ontrap, callback) {
+	this.unregister = function(name, ontrap, callback, source) {
 		if(name == null) return;
 
-		console.log("unregister " + name);
+		//console.log("unregister " + name);
 
 		msgmap[name] = null;
 		delete msgmap[name];
@@ -182,7 +182,6 @@ function ConnectionManager() {
 		self.send("org.araqne.msgbus.PushPlugin.unsubscribe", {
 			callback: name
 		}, function(resp) {
-			console.log('unregistered');
 			if(callback != null) {
 				callback(resp);
 			}

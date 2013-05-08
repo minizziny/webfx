@@ -1,47 +1,241 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html ng-app="dashboard">
 <head>
 	<meta charset="utf-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
-	<title>로그인</title>
-	<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
-	<script type="text/javascript" data-main="/script/login" src="/require.js"></script>
+	<script src="../../logpresso/logsource/lib/sha1.js"></script>
+
+	<script src="../../logpresso/logsource/lib/jquery-1.9.1.js"></script>
+	<script src="../../logpresso/logsource/lib/angular.js"></script>
+	<script src="../../logpresso/logsource/lib/d3.v3.js"></script>
+	<script src="../../logpresso/logsource/myApp.js"></script>
+	<script src="module.logdb.js"></script>
+
+	<link rel="stylesheet" href="../../logpresso/logsource/lib/bootstrap/css/bootstrap.css" />
+	<link rel="stylesheet" href="../../logpresso/logsource/logsource.css" />
 	<style>
-	* {
-		font-family: 'Lucida Grande', 'Apple SD 산돌 Neo', 'AppleSDGothicNeo', 'Segoe UI';
-		line-height: 1.4em;
+
+	body {
+		background-color: #eee;
 	}
 
-	html, body {
-		height: 100%;
+	.wizard {
+		float: left;
+		width: 98%;
+		margin-left: 10px;
+		padding-left: 0px;
+		border-left: 0px;
 	}
 
-	.container {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		margin-top: -13%;
-		margin-left: -25%;
-		width: 550px;
-
-		background: -webkit-linear-gradient(top, rgba(255,255,255,.85), rgba(255,255,255,1)); 
-		/* background: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#ddd)); */
-		padding: 25px;
-		border-radius: 10px;
-		border: 1px solid #fff;
-		border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+	.newWidget {
+		-webkit-transition: .1s ease-in;
+		overflow: hidden;
 	}
+
+	.newWidget.step0 {
+		width: 700px;
+		margin-left: -350px;
+	}
+
+	.newWidget.step1 {
+		/*
+		width: 800px;
+		margin-left: -400px;
+		*/
+	}
+
+	.newWidget.step2 {
+		width: 1000px;
+		margin-left: -500px;
+		/* height: 500px; */
+	}
+
+	.newWidget.step3 {
+		width: 540px;
+		margin-left: -270px;
+	}
+
+	query-input textarea {
+		width: calc(100% - 100px);
+	}
+
+	query-input .btn {
+		float: right;
+		width: 80px;
+	}
+
+	.qr-container {
+		overflow-x: scroll;
+		border: 1px solid #ddd;
+		margin-bottom: 10px;
+	}
+
+	.qr1 > .cmpqr {
+		width: 100%;
+		max-width: 880px;
+	}
+
+	.qr2 > .cmpqr {
+		width: 100%;
+		max-width: 780px;
+	}
+
+	.listArrangeCols {
+		border: 1px solid #ccc;
+		float: right;
+		width: 17%;
+		margin-bottom: 20px;
+	}
+
+	.listArrangeCols > li {
+		margin: 5px 12px;
+		list-style-type: none;
+	}
+
+	widget {
+		float: left;
+	}
+
+	widget > .widget {
+		padding: 10px;
+		margin: 10px;
+		border-bottom: 1px solid #ccc;
+		background-color: white;
+	}
+
+	ul.radio {
+		list-style: none;
+	}
+
+	label.radio {
+		display: inline;
+		margin-left: 3px;
+		padding-left: 0;
+		line-height: 2;
+	}
+
 	</style>
 </head>
-<body>
-	<div class="bg blurry"></div>
-	<div class="container">
-		<form class="form-horizontal">
-			<legend style="letter-spacing: 2px; font-family: 'Gill Sans', 'Lucida Sans Unicode'; font-weight: lighter">UNDER<span style="letter-spacing: 2px; font-family: 'Gill Sans', 'Lucida Sans Unicode'; font-weight: normal"> DEVELOPMENT</span></legend>
-			<div class="control-group">
-				개발중인 페이지 입니다.
-			</div>
-		</form>
+<body ng-controller="Controller">
+	<topbar>
+		<a href="#">Logpresso</a>
+		<ul ng-controller="ProgramController">
+			<li></li>
+		</ul>
+		<ul ng-controller="TaskController">
+			<li ng-repeat="task in tasks">
+				{{task}}
+			</li>
+		</ul>
+		<a href="#" ng-click="logout()">Logout</a>
+	</topbar>
+
+	<div ng-controller="PresetController" class="toolbar">
+		<select ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
+		<span>{{selectedPreset.name}}</span>
+		<button class="btn btn-primary pull-right" ng-click="openNewWidget()">새 위젯 추가</button>
 	</div>
+
+	<div ng-controller="WallController" class="board">
+		<!-- <widget guid="my_array" name="my" type="grid" query="table limit=5 memlogs" fields="['_id', 'msg']" interval="15"></widget> -->
+	</div>
+
+	<br class="clearboth" />
+
+	<div class="modal errorWin" modal>
+		<a href="#" class="modal-close close" ng-click="clearError()">&times;</a>
+		<div class="raw"></div>
+	</div>
+
+	<div class="modal newWidget step0" modal ng-controller="WizardController">
+		<a href="#" class="modal-close close">&times;</a>
+		<ol class="wizard">
+			<li class="wiz-step active">
+				<legend>위젯 종류 선택</legend>
+				<fieldset>
+					<div class="fieldset-description">추가할 위젯의 종류를 선택하십시오.</div>
+					<ul class="radio">
+						<li>
+							<input type="radio" ng-model="widgetType" value="table" id="radioTable">
+							<label class="radio" for="radioTable">테이블</label>
+						</li>
+						<li>
+							<input type="radio" ng-model="widgetType" value="graph" id="radioGraph" disabled>
+							<label class="radio" for="radioGraph">그래프</label>
+						</li>
+					</ul>
+					<div style="margin-bottom: 20px" ng-bind="selectedParserFactory.description"></div>
+					<div class="control-group submit-group">
+						<button class="wiz-next btn" ng-click="go(1)">다음</button>
+					</div>
+				</fieldset>
+			</li>
+			<li class="wiz-step">
+				<legend>데이터 쿼리</legend>
+				<fieldset>
+					<div class="fieldset-description">쿼리한 데이터를 바탕으로 위젯을 생성합니다. 원하는 데이터를 쿼리하십시오.</div>
+					<div>
+						<query-input ng-model="qresult" query-model="ctxWidget.data.query"></query-input>
+						<div class="qr-container" style="width: 100%">
+							<query-result ng-model="qresult" class="qr1"></query-result>
+						</div>
+					</div>
+					<div class="control-group submit-group">
+						<button class="wiz-prev btn" ng-click="go(0)">이전</button>
+						<button class="wiz-next btn" ng-click="go(2)">다음</button>
+					</div>
+				</fieldset>
+			</li>
+			<li class="wiz-step">
+				<legend>컬럼 선택 및 배치</legend>
+				<fieldset>
+					<div class="fieldset-description">위젯에 표시할 필드를 선택하고, 드래그해서 컬럼 순서를 조절하십시오.</div>
+					<div>
+						<div class="qr-container" style="width: 80%; float: left">
+							<query-result ng-model="qresult" class="qr2"></query-result>
+						</div>
+						<ul class="listArrangeCols">
+							<li ng-repeat="(i, col) in qrDataColumnsOrder" ng-hide="col.name=='$$hashKey'">
+								<input type="checkbox" ng-model="col.is_visible">
+								<span>{{col.name}}</span>
+								<button style="float:right" ng-click="shift(i, col)">v</button>
+								<button style="float:right" ng-click="unshift(i, col)">^</button>
+							</li>
+						</ul>
+					</div>
+					<div class="control-group submit-group clearboth">
+						<button class="wiz-prev btn" ng-click="go(1)">이전</button>
+						<button class="wiz-next btn" ng-click="go(3)">다음</button>
+					</div>
+				</fieldset>
+			</li>
+			<li class="wiz-step">
+				<legend>위젯 공통 설정</legend>
+				<fieldset>
+					<div class="fieldset-description">위젯의 이름과 실행 주기를 입력하십시오.</div>
+					<div class="form-horizontal">
+						<div class="control-group">
+							<label class="control-label" for="widgetName">위젯 이름</label>
+							<div class="controls">
+								<input id="widgetName" type="text" ng-model="ctxWidget.name"/>
+							</div>
+						</div>
+						<div class="control-group">
+							<label class="control-label" for="widgetInterval">실행 주기</label>
+							<div class="controls">
+								<input id="widgetInterval" type="number" ng-model="ctxWidget.interval"/>
+							</div>
+						</div>
+					</div>
+					<div class="control-group submit-group clearboth">
+						<button class="wiz-prev btn" ng-click="go(2)">이전</button>
+						<button class="wiz-next btn" ng-click="submit()">완료</button>
+					</div>
+				</fieldset>
+			</li>
+		</ol>
+	</div>
+
+	<script src="dashboard.js"></script>
+
 </body>
 </html>
