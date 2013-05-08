@@ -157,9 +157,10 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 			};
 
 			if(attrs.type == 'grid') {
-				var template = angular.element('<div class="widget"><h5 style="float:left">' + attrs.name + '</h5>' +
-					'<button style="margin-left: 10px" class="close">&times;</button>' +
-					'<span style="float:right"><input type="number" min="5" style="width:80px" ng-model="' + attrs.guid + '.interval" /></span>' + 
+				var template = angular.element('<div class="widget"><h5>' + attrs.name + '</h5>' +
+					'<button style="margin-left: 10px" class="close widget-close">&times;</button>' +
+					'<button class="close widget-refresh"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
+					'<span style="float:right"><input type="number" min="5" ng-model="' + attrs.guid + '.interval" /></span>' + 
 					'<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
 					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table></div>');
 				$compile(template)(scope);
@@ -176,13 +177,20 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 						scope[attrs.guid].data = m.body.result;
 						scope.$apply();
 
-						clearTimeout(timer);
-						timer = null;
-						timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
+						refresh();
 					})
 					.loaded(function(m) {
 						z.dispose();
+					})
+					.failed(function(m) {
+						refresh();
 					});
+				}
+
+				function refresh() {
+					clearTimeout(timer);
+					timer = null;
+					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
 				}
 
 				query();
@@ -194,10 +202,13 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 					element.remove();
 				}
 
-				template.find('button.close').on('click', function() {
+				template.find('button.widget-close').on('click', function() {
 					eventSender.onRemoveSingleWidget(attrs.guid);
 					dispose();
 				});
+
+				template.find('button.widget-refresh').on('click', refresh);
+
 				element[0].$dispose = dispose; 
 				
 			}
