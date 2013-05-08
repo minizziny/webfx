@@ -18,7 +18,7 @@ function doLogin(login_name, password, loginCallback) {
 			console.log(raw)
 			
 			if(m.isError) {
-				alert(raw[0].errorMessage);
+				alert('로그인에 실패했습니다.');
 				return;
 			}
 
