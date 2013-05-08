@@ -18,6 +18,19 @@
 		background-color: #eee;
 	}
 
+	.board {
+		margin-top: 42px;
+	}
+
+	.brandpreset {
+		line-height: 39px;
+		font-size: 20px;
+		font-weight: 200;
+		color: #777777;
+		text-shadow: 0 1px 0 #ffffff;
+		margin-left: -65px;
+	}
+
 	.wizard {
 		float: left;
 		width: 98%;
@@ -89,6 +102,7 @@
 	.listArrangeCols > li {
 		margin: 5px 12px;
 		list-style-type: none;
+		clear: both;
 	}
 
 	widget {
@@ -129,10 +143,12 @@
 		<a href="#" ng-click="logout()">Logout</a>
 	</topbar>
 
-	<div ng-controller="PresetController" class="toolbar">
-		<select ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
-		<span>{{selectedPreset.name}}</span>
-		<button class="btn btn-primary pull-right" ng-click="openNewWidget()">새 위젯 추가</button>
+	<div ng-controller="PresetController" class="toolbar navbar navbar-fixed-top">
+		<div class="navbar-inner" style="text-align: center">
+			<select style="float: left; margin-top: 5px; margin-bottom: 0; margin-left: 5px" ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
+			<span class="brandpreset">{{selectedPreset.name}}</span>
+			<button class="btn btn-primary pull-right" style="margin-right: 5px" ng-click="openNewWidget()">새 위젯 추가</button>
+		</div>
 	</div>
 
 	<div ng-controller="WallController" class="board">
@@ -188,7 +204,7 @@
 			<li class="wiz-step">
 				<legend>컬럼 선택 및 배치</legend>
 				<fieldset>
-					<div class="fieldset-description">위젯에 표시할 필드를 선택하고, 드래그해서 컬럼 순서를 조절하십시오.</div>
+					<div class="fieldset-description">위젯에 표시할 필드를 선택하고, 컬럼 순서를 조절하십시오.</div>
 					<div>
 						<div class="qr-container" style="width: 80%; float: left">
 							<query-result ng-model="qresult" class="qr2"></query-result>

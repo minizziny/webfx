@@ -139,7 +139,7 @@ app.directive('queryResult', function($compile) {
 	}
 });
 
-app.directive('widget', function($compile, serviceLogdb) {
+app.directive('widget', function($compile, serviceLogdb, eventSender) {
 	return {
 		restrict: 'E',
 		link: function(scope, element, attrs) {
@@ -149,7 +149,9 @@ app.directive('widget', function($compile, serviceLogdb) {
 			};
 
 			if(attrs.type == 'grid') {
-				var template = angular.element('<div class="widget"><h5 style="float:left">' + attrs.name + '</h5><span style="float:right"><input type="number" ng-model="' + attrs.guid + '.interval" /></span>' + 
+				var template = angular.element('<div class="widget"><h5 style="float:left">' + attrs.name + '</h5>' +
+					'<button style="margin-left: 10px" class="close">&times;</button>' +
+					'<span style="float:right"><input type="number" style="width:80px" ng-model="' + attrs.guid + '.interval" /></span>' + 
 					'<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
 					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table></div>');
 				$compile(template)(scope);
@@ -175,12 +177,18 @@ app.directive('widget', function($compile, serviceLogdb) {
 
 				query();
 
-				element[0].$dispose = function() {
+				function dispose() {
 					z.dispose();
 					clearTimeout(timer);
 					timer = null;
 					element.remove();
 				}
+
+				template.find('button.close').on('click', function() {
+					eventSender.onRemoveSingleWidget(attrs.guid);
+					dispose();
+				});
+				element[0].$dispose = dispose; 
 				
 			}
 
@@ -196,7 +204,9 @@ app.factory('eventSender', function() {
 	var e = {
 		onCreateNewWidget: null,
 		onCreateNewWidgetAndSavePreset: null,
-		onOpenNewWidget: null
+		onOpenNewWidget: null,
+		onCurrentPresetChanged: null,
+		onRemoveSingleWidget: null
 	}
 	return e;
 });
@@ -221,19 +231,37 @@ function WallController($scope) {
 }
 
 function PresetController($scope, $compile, socket, eventSender) {
+	eventSender.onCurrentPresetChanged = function() {
+		console.log('currentPreset changed')
+
+		console.log($scope.currentPreset);
+		return SavePreset($scope.selectedPreset.guid, $scope.selectedPreset.name, $scope.currentPreset.state);
+	}
+
+	eventSender.onRemoveSingleWidget = function(guid) {
+		console.log('onRemoveSingleWidget', guid);
+
+		var widgets = $scope.currentPreset.state.widgets;
+		for (var i = widgets.length - 1; i >= 0; i--) {
+			if(widgets[i].name == guid) {
+				widgets.splice(i, 1);
+				break;
+			}
+		};
+
+		eventSender.onCurrentPresetChanged(); // save state
+	}
 
 	eventSender.onCreateNewWidgetAndSavePreset = function(ctx) {
+		// no exist widgets array
 		if(!$scope.currentPreset.state.widgets) {
 			$scope.currentPreset.state["widgets"] = [];
 		}
 
 		$scope.currentPreset.state.widgets.push(ctx);
-
-		console.log($scope.currentPreset);
-
 		eventSender.onCreateNewWidget(ctx);
 
-		return SavePreset($scope.selectedPreset.guid, $scope.selectedPreset.name, $scope.currentPreset.state);
+		eventSender.onCurrentPresetChanged(); // save state
 	}
 
 	eventSender.onCreateNewWidget = function(ctx) {
@@ -308,7 +336,7 @@ function PresetController($scope, $compile, socket, eventSender) {
 			var widgets = m.body.preset.state.widgets;
 			for (var i = 0; i < widgets.length; i++) {
 				
-				eventSender.onCreateNewWidget(widgets[0]);
+				eventSender.onCreateNewWidget(widgets[i]);
 
 			};
 
