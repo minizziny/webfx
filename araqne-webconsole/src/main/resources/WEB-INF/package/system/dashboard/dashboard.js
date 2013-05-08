@@ -243,7 +243,7 @@ function PresetController($scope, $compile, socket, eventSender) {
 
 		var widgets = $scope.currentPreset.state.widgets;
 		for (var i = widgets.length - 1; i >= 0; i--) {
-			if(widgets[i].name == guid) {
+			if(widgets[i].guid == guid) {
 				widgets.splice(i, 1);
 				break;
 			}
@@ -267,7 +267,7 @@ function PresetController($scope, $compile, socket, eventSender) {
 	eventSender.onCreateNewWidget = function(ctx) {
 		var orderstr = "['" + ctx.data.order.join("','") + "']";
 		var query = ctx.data.query;
-		var widget = angular.element('<widget guid="' + ctx.name + '" name="' + ctx.name + '" type="' + ctx.type + '" interval="' + ctx.interval + '" query="' + query + '" fields="' + orderstr + '" >');
+		var widget = angular.element('<widget guid="' + ctx.guid + '" name="' + ctx.name + '" type="' + ctx.type + '" interval="' + ctx.interval + '" query="' + query + '" fields="' + orderstr + '" >');
 		$compile(widget)($scope);
 		$('.board').append(widget)
 	}
@@ -384,10 +384,18 @@ function PresetController($scope, $compile, socket, eventSender) {
 }
 
 function WizardController($scope, eventSender) {
+
+	function guidGenerator() {
+		var s4 = function() {
+			return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+		};
+		return ('w'+s4()+s4()+s4()+s4());
+	}
 	
 	function getDefaultContext() {
 		return {
 			'name': 'aa',
+			'guid': guidGenerator(),
 			'interval': 15,
 			'type': 'grid',
 			'data': {
