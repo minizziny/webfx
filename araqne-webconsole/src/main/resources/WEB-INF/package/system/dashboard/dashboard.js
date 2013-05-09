@@ -157,10 +157,18 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 				var template = angular.element('<div class="widget"><h5>' + attrs.name + '</h5>' +
 					'<button style="margin-left: 10px" class="close widget-close">&times;</button>' +
 					'<button class="close widget-refresh"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
-					'<span style="float:right"><input type="number" min="5" ng-model="' + attrs.guid + '.interval" /><small style="vertical-align:2px"> 초</small></span>' + 
-					'<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
-					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table></div>');
-				$compile(template)(scope);
+					'<span class="ninput" style="float:right"></span>' + 
+					'</div>');
+
+				var table = angular.element('<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
+					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table>');
+				var ninput = angular.element('<input type="number" min="5" ng-model="' + attrs.guid + '.interval" />');
+				$compile(table)(scope);
+				$compile(ninput)(scope);
+
+				template.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
+				template.append(table);
+
 				element.append(template);
 				
 				var timer;
@@ -168,7 +176,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 				function query() {
 					console.log('--------------------')
 					var z = serviceLogdb.create(proc.pid);
-					z.query(attrs.query)
+					z.query(decodeURIComponent(attrs.query))
 					.pageLoaded(function(m) {
 						//console.log(z.id(), 'pageloaded', m)
 						scope[attrs.guid].data = m.body.result;
@@ -184,7 +192,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 					.failed(function(m) {
 						clearTimeout(timer);
 						timer = null;
-						query();
+						timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
 					});
 				}
 
@@ -286,7 +294,7 @@ function PresetController($scope, $compile, socket, eventSender) {
 
 	eventSender.onCreateNewWidget = function(ctx) {
 		var orderstr = "['" + ctx.data.order.join("','") + "']";
-		var query = ctx.data.query;
+		var query = encodeURIComponent(ctx.data.query);
 		var widget = angular.element('<widget guid="' + ctx.guid + '" name="' + ctx.name + '" type="' + ctx.type + '" interval="' + ctx.interval + '" query="' + query + '" fields="' + orderstr + '" >');
 		$compile(widget)($scope);
 		$('.board').append(widget)
