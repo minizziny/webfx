@@ -1,6 +1,118 @@
 var app = angular.module('dashboard', ['myApp', 'logdb']);
 var proc;
 
+parent.d3 = d3;
+
+var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
+function checkDate(member, i) {
+	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19)))
+}
+
+app.factory('serviceChart', function(serviceGuid) {
+	function multiBarHorizontalChart(selector, data) {
+		nv.addGraph(function() {
+			var chart = nv.models.multiBarHorizontalChart()
+			.x(function(d) { return { 'obj': d, 'label': d.label, 'toString': function() {return d.guid;} } }) // xlabel이 동일할 경우에 대책
+			.y(function(d) { return d.value })
+			//.margin({top: 40, right: 40, bottom: 40, left: 170})
+			.margin({top: 0, right: 20, bottom: 20, left: 120})
+			.showValues(true)
+			.tooltips(false)
+			.showControls(false);
+
+			chart.xAxis.tickFormat(function(d) {
+				if(checkDate(d.label)) {
+					return d.label.substring(0, 19);
+				}
+				else {
+					return d.label;
+				}
+			});
+			chart.yAxis.tickFormat(d3.format('d'));
+
+			d3.select(selector)
+			.datum(data)
+			.transition().duration(500)
+			.call(chart);
+
+			nv.utils.windowResize(chart.update);
+
+			return chart;
+		});	
+	}
+
+	function buildJSONStructure(dataSeries, dataResult, dataLabel) {
+
+		var st = [];
+
+		for (var i = 0; i < dataSeries.length; i++) {
+			var s = dataSeries[i];
+			var series = {
+				'key': s.name,
+				'color': s.color,
+				'values': undefined
+			};
+
+			series.values = dataResult.map(function(obj) {
+				return {
+					'value': obj[s.value.name],
+					'label': obj[dataLabel.name]
+				}
+			});
+			st.push(series);
+		};
+
+		// assign guid
+		if(dataResult != undefined) {
+			for (var i = dataResult.length - 1; i >= 0; i--) {
+				var guid = serviceGuid.generateType3();
+				for (var j = st.length - 1; j >= 0; j--) {
+					st[j].values[i].guid = guid;
+				};
+			};	
+		}
+
+		return st;
+	}
+
+	function getDataSeries(metadata) {
+		var metadataSeries = JSON.parse(decodeURIComponent(metadata));
+
+		var dataSeries = metadataSeries.map(function(obj) {
+			var value = { name: obj.key }
+			delete obj.key;
+			obj.value = value;
+			return obj
+		});
+
+		return dataSeries;
+	}
+
+	return {
+		multiBarHorizontalChart: multiBarHorizontalChart,
+		buildJSONStructure: buildJSONStructure,
+		getDataSeries: getDataSeries
+	}
+})
+
+app.factory('serviceGuid', function() {
+	var s4 = function() {
+		return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+	};
+
+	return {
+		generateType1: function() {
+			return (s4()+s4()+"-"+s4()+"-"+s4()+"-"+s4()+"-"+s4()+s4()+s4());
+		},
+		generateType2: function() {
+			return ('w'+s4()+s4()+s4()+s4());
+		},
+		generateType3: function() {
+			return ('w'+s4());
+		}
+	}
+});
+
 app.directive('autosize', function() {
 	return {
 		restrict: 'A',
@@ -93,17 +205,36 @@ app.directive('queryInput', function($compile, serviceLogdb) {
 	}
 });
 
+app.directive('afterIterate', function() {
+	return {
+		link: function(scope, element, attrs) {
+			if(scope.$last) {
+				var fn = scope.$parent[attrs.afterIterate];
+				if(!!fn) {
+					fn.call(scope, scope);
+				}
+			}
+		}
+	}
+})
+
 app.directive('queryResult', function($compile) {
 	return {
 		restrict: 'E',
-		template: '<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-hide="col.name==\'$$hashKey\' || !col.is_visible" ng-repeat="col in qrDataColumnsOrder">{{col.name}}</th></tr></thead>' + 
+		template: '<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-hide="col.name==\'$$hashKey\' || !col.is_visible" ng-repeat="col in qrDataColumnsOrder" after-iterate="columnChanged">{{col.name}}</th></tr></thead>' + 
 			'<tbody><tr ng-repeat="d in qrData"><td ng-hide="col.name==\'$$hashKey\' || !col.is_visible" ng-repeat="col in qrDataColumnsOrder">{{d[col.name]}}</td></tr></tbody></table>',
 		link: function(scope, element, attrs) {
 			scope.qrDataColumns = [];
 			scope.qrDataColumnsOrder = [];
+			scope.qrDataColumnsOrder.exceptedHashKey = function() {
+				return this.filter(function(el) {
+					return (el.name != '$$hashKey');
+				});
+			}
 			scope.qrData = [];
 
 			scope.$watch(attrs.ngModel, function() {
+				//console.log('model updated')
 				var raw = scope[attrs.ngModel];
 
 				scope.qrDataColumns.splice(0, scope.qrDataColumns.length);
@@ -136,7 +267,8 @@ app.directive('queryResult', function($compile) {
 				for (var i = 0; i < scope.qrDataColumns.length; i++) {
 					scope.qrDataColumnsOrder.push({
 						'name': scope.qrDataColumns[i],
-						'is_visible': true
+						'is_visible': true,
+						'is_checked': undefined
 					});
 				}
 			});
@@ -144,7 +276,82 @@ app.directive('queryResult', function($compile) {
 	}
 });
 
-app.directive('widget', function($compile, serviceLogdb, eventSender) {
+app.directive('qrSelectable', function($compile, serviceGuid, eventSender) {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attrs) {
+
+			element.parent().css('position', 'relative').css('overflow-y', 'hidden');
+			var container = angular.element('<div style="min-width:100%; height:100%; top:0; background-color: transparent; opacity: .5; position: absolute"></div>');
+
+			eventSender.onLabelLayoutUpdate = function() {
+				setTimeout(function() {
+					var ths = element.find('th:visible');
+					var labels = container.find('label');
+					for (var i = labels.length - 1; i >= 0; i--) {
+						$(labels[i]).width($(ths[i]).width());
+					};
+
+					var total_col_len = 0;
+					for (var i = ths.length - 1; i >= 0; i--) {
+						total_col_len = total_col_len + $(ths[i]).width() + 16;
+					};
+					container.width(total_col_len);
+					
+				}, 200)
+				
+			}
+
+			scope.columnChanged = function() {
+				//console.log('columnChanged')
+				container.empty().remove();	
+				element.after(container);
+
+				var ths = element.find('th');
+				var qrOrder = scope.qrDataColumnsOrder;
+				for (var i = 0; i < qrOrder.length; i++) {
+					//if(qrOrder[i].is_checked == undefined) { qrOrder[i].is_checked = (i % 2) ? true: false; }
+
+					if(qrOrder[i].name == "$$hashKey") continue;
+
+					$(ths[i]).find('input[type=checkbox]').remove();
+
+					var guid = serviceGuid.generateType2();
+					var check = angular.element('<input type="checkbox" id="' + guid + '" ng-model="qrDataColumnsOrder[' + i + '].is_checked">');
+					var label = angular.element('<label class="qr-sel-label" ng-class="{ selected: qrDataColumnsOrder[' + i + '].is_checked, unselected: !qrDataColumnsOrder[' + i + '].is_checked }" for="' + guid + '" style="float: left; padding: 7px; height: 220px">');
+					angular.element(ths[i]).prepend(check);
+					container.append(label);
+
+					$compile(check)(scope);
+					$compile(label)(scope);
+				};
+
+				scope.checkAtLeast2cols = function() {
+					var tmp = [];
+					for (var i = qrOrder.length - 1; i >= 0; i--) {
+						if(qrOrder[i].is_checked) tmp.push(true);
+					};
+					return (tmp.length >= 2) ? false: true;
+				}
+
+			}
+
+			eventSender.updateVisible = function(targetScope) {
+				var qrOrder = scope.qrDataColumnsOrder.exceptedHashKey();
+				var qrOrderTarget = targetScope.qrDataColumnsOrder;
+
+				//console.log(qrOrder, qrOrderTarget)
+
+				for (var i = 0; i < qrOrder.length; i++) {
+					qrOrderTarget[i].is_visible = qrOrder[i].is_checked;
+				}
+			}
+			
+		}
+	}
+});
+
+app.directive('widget', function($compile, serviceLogdb, eventSender, serviceChart) {
 	return {
 		restrict: 'E',
 		link: function(scope, element, attrs) {
@@ -153,57 +360,58 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 				interval: parseInt(attrs.interval)
 			};
 
-			if(attrs.type == 'grid') {
-				var template = angular.element('<div class="widget"><h5>' + attrs.name + '</h5>' +
-					'<button style="margin-left: 10px" class="close widget-close">&times;</button>' +
-					'<button class="close widget-refresh"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
-					'<span class="ninput" style="float:right"></span>' + 
-					'</div>');
+			var timer, pageLoaded;
 
+			function query() {
+				console.log('--------------------')
+				var z = serviceLogdb.create(proc.pid);
+				var q = z.query(decodeURIComponent(attrs.query));
+				q.pageLoaded(pageLoaded)
+				.loaded(function(m) {
+					serviceLogdb.remove(z);
+				})
+				.failed(function(m) {
+					clearTimeout(timer);
+					timer = null;
+					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
+				});
+
+				return q;
+			}
+
+			function dispose() {
+				clearTimeout(timer);
+				timer = null;
+				element.remove();
+			}
+
+			var template = angular.element('<div class="widget"><h5>' + attrs.name + '</h5>' +
+				'<button style="margin-left: 10px" class="close widget-close">&times;</button>' +
+				'<button class="close widget-refresh"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
+				'<span class="ninput" style="float:right"></span>' + 
+				'</div>');
+			var ninput = angular.element('<input type="number" min="5" ng-model="' + attrs.guid + '.interval" />');
+
+			if(attrs.type == 'grid') {
 				var table = angular.element('<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
 					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table>');
-				var ninput = angular.element('<input type="number" min="5" ng-model="' + attrs.guid + '.interval" />');
 				$compile(table)(scope);
 				$compile(ninput)(scope);
-
 				template.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
 				template.append(table);
 
 				element.append(template);
 				
-				var timer;
+				pageLoaded = function(m) {
+					scope[attrs.guid].data = m.body.result;
+					scope.$apply();
 
-				function query() {
-					console.log('--------------------')
-					var z = serviceLogdb.create(proc.pid);
-					z.query(decodeURIComponent(attrs.query))
-					.pageLoaded(function(m) {
-						//console.log(z.id(), 'pageloaded', m)
-						scope[attrs.guid].data = m.body.result;
-						scope.$apply();
-
-						clearTimeout(timer);
-						timer = null;
-						timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
-					})
-					.loaded(function(m) {
-						serviceLogdb.remove(z);
-					})
-					.failed(function(m) {
-						clearTimeout(timer);
-						timer = null;
-						timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
-					});
-				}
-
-				query();
-
-				function dispose() {
-					//z.dispose();
 					clearTimeout(timer);
 					timer = null;
-					element.remove();
-				}
+					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
+				};
+
+				query().pageLoaded(pageLoaded);
 
 				template.find('button.widget-close').on('click', function() {
 					eventSender.onRemoveSingleWidget(attrs.guid);
@@ -218,6 +426,42 @@ app.directive('widget', function($compile, serviceLogdb, eventSender) {
 
 				element[0].$dispose = dispose; 
 				
+			}
+			else if(attrs.type == 'chart.bar') {
+				element.append(template);
+				var svg = angular.element('<svg class="widget">');
+				$compile(ninput)(scope);
+				template.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
+				template.append(svg);
+
+				pageLoaded = function(m) {
+					var dataResult = m.body.result;
+					var dataSeries = serviceChart.getDataSeries(attrs.series);
+					var dataLabel = {name: attrs.label};
+
+					var json = serviceChart.buildJSONStructure(dataSeries, dataResult, dataLabel);
+					serviceChart.multiBarHorizontalChart(svg[0], json);
+
+					clearTimeout(timer);
+					timer = null;
+					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
+				}
+
+				query().pageLoaded(pageLoaded);
+
+				template.find('button.widget-close').on('click', function() {
+					eventSender.onRemoveSingleWidget(attrs.guid);
+					dispose();
+				});
+
+				template.find('button.widget-refresh').on('click', function() {
+					clearTimeout(timer);
+					timer = null;
+					query();
+				});
+
+				element[0].$dispose = dispose;
+
 			}
 
 			scope.$watch(attrs.guid + '.interval', function() {
@@ -234,7 +478,11 @@ app.factory('eventSender', function() {
 		onCreateNewWidgetAndSavePreset: null,
 		onOpenNewWidget: null,
 		onCurrentPresetChanged: null,
-		onRemoveSingleWidget: null
+		onRemoveSingleWidget: null,
+		onLabelLayoutUpdate: null,
+		updateVisible: null,
+		onUpdateVisible: null,
+		onSendChartDataWizard: null
 	}
 	return e;
 });
@@ -289,15 +537,27 @@ function PresetController($scope, $compile, socket, eventSender) {
 		$scope.currentPreset.state.widgets.push(ctx);
 		eventSender.onCreateNewWidget(ctx);
 
-		eventSender.onCurrentPresetChanged(); // save state
+		eventSender.onCurrentPresetChanged(); // save state   <-------- 주석 풀어
 	}
 
 	eventSender.onCreateNewWidget = function(ctx) {
-		var orderstr = "['" + ctx.data.order.join("','") + "']";
-		var query = encodeURIComponent(ctx.data.query);
-		var widget = angular.element('<widget guid="' + ctx.guid + '" name="' + ctx.name + '" type="' + ctx.type + '" interval="' + ctx.interval + '" query="' + query + '" fields="' + orderstr + '" >');
-		$compile(widget)($scope);
-		$('.board').append(widget)
+		if(ctx.type == 'grid') {
+			var orderstr = "['" + ctx.data.order.join("','") + "']";
+			var query = encodeURIComponent(ctx.data.query);
+			var widget = angular.element('<widget guid="' + ctx.guid + '" name="' + ctx.name + '" type="' + ctx.type + '" interval="' + ctx.interval + '" query="' + query + '" fields="' + orderstr + '" >');
+			$compile(widget)($scope);
+			$('.board').append(widget);
+		}
+		else if(ctx.type == 'chart') {
+			if(ctx.data.type == 'bar') {
+				var query = encodeURIComponent(ctx.data.query);
+				var series = encodeURIComponent(JSON.stringify(ctx.data.series));
+				var widget = angular.element('<widget guid="' + ctx.guid + '" name="' + ctx.name + '" type="' + ctx.type + '.' + ctx.data.type + '" interval="' + ctx.interval + '" query="' + query + '" series="' + series + '" label="' + ctx.data.label + '">');
+				$compile(widget)($scope);
+				$('.board').append(widget);
+			}
+		}
+
 	}
 
 	$scope.dataPresetList = [];
@@ -411,24 +671,168 @@ function PresetController($scope, $compile, socket, eventSender) {
 	//RemovePresets('autosave')
 }
 
-function WizardController($scope, eventSender) {
+function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) {
+	var color_map = ["#AFD8F8","#F6BD0F","#8BBA00","#FF8E46","#008E8E","#D64646","#8E468E","#588526","#B3AA00","#008ED6","#9D080D","#A186BE","#CC6600","#FDC689","#ABA000","#F26D7D","#FFF200","#0054A6","#F7941C","#CC3300","#006600","#663300","#6DCFF6"];
+	var number_of_index = 0;
 
-	function guidGenerator() {
-		var s4 = function() {
-			return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-		};
-		return ('w'+s4()+s4()+s4()+s4());
-	}
-	
-	function getDefaultContext() {
+	function getDefaultSeries() {
+		number_of_index++;
 		return {
-			'name': '',
-			'guid': guidGenerator(),
-			'interval': 15,
-			'type': 'grid',
-			'data': {
-				'order': undefined,
-				'query': ''
+			'name': '시리즈' + number_of_index,
+			'guid': serviceGuid.generateType2(),
+			'value': undefined,
+			'color': color_map[number_of_index-1]
+		}
+	}
+
+	$scope.dataSeries = [];
+	$scope.dataLabel;
+	$scope.selectedSeriesIdx = 0;
+
+	$scope.$watch('dataLabel', function() {
+		console.log('dataLabel changed');
+		var st = serviceChart.buildJSONStructure($scope.dataSeries, $scope.qresult, $scope.dataLabel);
+		render(st);
+	});
+
+	$scope.$watch('dataSeries', function() {
+		console.log('dataSeries changed');
+		var st = serviceChart.buildJSONStructure($scope.dataSeries, $scope.qresult, $scope.dataLabel);
+		render(st);
+	}, true);
+
+	function render(st) {
+		$('.charthere svg').empty();
+
+		serviceChart.multiBarHorizontalChart('.charthere svg', st);
+	}
+
+	eventSender.onUpdateVisible = function() {
+		eventSender.updateVisible($scope);
+		init();
+	}
+
+	function init() {
+		//console.log($scope.ctypes, $scope.chartType)
+
+		// 초기화
+		$scope.dataSeries.splice(0, $scope.dataSeries.length);
+		$scope.dataLabel = undefined;
+		$scope.selectedSeriesIdx = 0;	
+		number_of_index = 0;	
+
+		// 선택한 컬럼만 뽑아냄
+		var selectedCols = $scope.qrDataColumnsOrder.filter(function(obj) {
+			if(obj.is_visible) return obj;
+		});
+
+		var types = [];
+		for (var i = 0; i < selectedCols.length; i++) {
+
+			var map = $scope.qresult.map(function(obj, j) {
+				return obj[selectedCols[i].name];
+			});
+			var type = checkArrayMemberType(map);
+			types.push(type);
+
+			// [ name ] selectedCols 의 number type 컬럼 수대로 series 추가
+			if(type == "number") {
+				var series = $scope.addSeries();
+				series.name = selectedCols[i].name;
+				series.value = selectedCols[i];
+			}
+		};
+
+		var idxDatetime = types.indexOf('datetime');
+		var idxString = types.indexOf('string');
+		var idxNumber = types.indexOf('number');
+
+		// [ datetime ] 첫번째 datetime type 컬럼을 dataLabel로 지정
+		if(idxDatetime != -1) {
+			$scope.dataLabel = selectedCols[idxDatetime];
+		}
+		
+		// [ string ] dataLabel 미지정시 첫번째 string type 컬럼을 dataLabel로 지정
+		if(idxString != -1 && $scope.dataLabel == undefined) {
+			$scope.dataLabel = selectedCols[idxString];
+		}
+
+		// 다 돌아봤는데 Label로 쓸만한게 없으면...
+		if($scope.dataLabel == undefined) {
+			$scope.dataLabel = selectedCols[idxNumber];
+		}
+	}
+
+	$scope.addSeries = function() {
+		var series = getDefaultSeries('grid')
+		$scope.dataSeries.push(series);
+		return series;
+	}
+
+	$scope.selectSeries = function(i) {
+		$scope.selectedSeriesIdx = i;
+	}
+
+	$scope.removeSeries = function(i) {
+		if($scope.dataSeries.length == 1) return;
+
+		$scope.dataSeries.splice(i, 1);
+		if(i - 1 < 0) {
+			$scope.selectedSeriesIdx = i + 1;
+		}
+		else {
+			$scope.selectedSeriesIdx = i - 1;
+		}
+		
+	}
+
+	function checkArrayMemberType(array) {
+		var types = ['number', 'datetime', 'string'];
+		if(array.every(myApp.isNumber)) return types[0];
+		if(array.every(checkDate)) return types[1];
+
+		return types[2];
+	}
+
+	eventSender.onSendChartDataWizard = function() {
+		console.log('onSendChartDataWizard');
+
+		return {
+			'series': $scope.dataSeries,
+			'label': $scope.dataLabel,
+			'type': 'bar'
+		}
+	}
+
+}
+
+function WizardController($scope, eventSender, serviceGuid) {
+	var dataChart;
+	
+	function getDefaultContext(type) {
+		if(type == "grid") {
+			return {
+				'name': '',
+				'guid': serviceGuid.generateType2(),
+				'interval': 15,
+				'type': 'grid',
+				'data': {
+					'order': undefined,
+					'query': ''
+				}
+			}
+		}
+		else if(type == "chart") {
+			return {
+				'name': '',
+				'guid': serviceGuid.generateType2(),
+				'interval': 15,
+				'type': 'chart',
+				'data': {
+					'label': undefined,
+					'series': undefined,
+					'query': ''
+				}
 			}
 		}
 	}
@@ -444,14 +848,52 @@ function WizardController($scope, eventSender) {
 			.removeClass(makeRemoveClassHandler(/^step/))
 			.show();
 		$scope.go(0);
-		$scope.ctxWidget = getDefaultContext();
+		//$scope.ctxWidget = getDefaultContext('grid');
 		$scope.qresult = null;
 	}
 
 	$scope.qresult;
-	$scope.widgetType = 'table';
 
-	$scope.ctxWidget = getDefaultContext();
+	var wtypes = [
+		{
+			'name': 'table',
+			's0next': 1,
+			's0nextCallback': function() {
+				$scope.ctxWidget = getDefaultContext('grid');
+				return;
+			},
+			's1next': 2,
+			's3prev': 2
+		},
+		{
+			'name': 'graph',
+			's0next': 1,
+			's0nextCallback': function() {
+				$scope.ctxWidget = getDefaultContext('chart');
+				return;
+			},
+			's1next': 4,
+			's1nextCallback': function() {
+				return eventSender.onLabelLayoutUpdate;
+			},
+			's4nextCallback': function() {
+				return eventSender.onUpdateVisible;
+			},
+			's5nextCallback': function() {
+				dataChart = eventSender.onSendChartDataWizard();
+				return;
+			},
+			's3prev': 5
+		}
+	];
+	$scope.widgetType = wtypes[1];
+	$scope.widgetTypeName = "graph";
+	
+	$scope.selectType = function(i) {
+		$scope.widgetType = wtypes[i];
+	}
+
+	$scope.ctxWidget;
 
 	$scope.shift = function(i, item) {
 		$scope.qrDataColumnsOrder.splice(i, 1);
@@ -463,15 +905,31 @@ function WizardController($scope, eventSender) {
 		$scope.qrDataColumnsOrder.splice(i - 1, 0, item);
 	}
 
-	$scope.go = function(page) {
+	$scope.go = function(page, callback) {
+		//console.log('go' + page);
 		var el = $('.wizard li.wiz-step').removeClass('active')[page];
 		$(el).addClass('active');
 		$('.newWidget')
 			.removeClass(makeRemoveClassHandler(/^step/))
 			.addClass('step' + page);
+
+		if(!!callback) {
+			callback($scope);
+		}
 	}
 
 	$scope.submit = function() {
+
+		if($scope.widgetType.name == 'table') {
+			submitTable();
+		}
+		else if ($scope.widgetType.name == 'graph') {
+			submitGraph();
+		}
+
+	}
+
+	function submitTable() {
 		var order = $scope.qrDataColumnsOrder.filter(function(obj) {
 			if(obj.name == '$$hashKey') return false;
 			if(obj.is_visible) return true;
@@ -485,6 +943,71 @@ function WizardController($scope, eventSender) {
 
 		eventSender.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
 		$('.newWidget').hide();	
+	}
+
+	// chart options
+	$scope.ctypes = [
+		{
+			'name': 'bar'
+		},
+		{
+			'name': 'line'
+		},
+		{
+			'name': 'pie'
+		}
+	];
+	$scope.chartType = $scope.ctypes[0];
+	$scope.selectChartType = function(idx) {
+		$scope.chartType = $scope.ctypes[idx];
+	}
+
+	$scope.moreCol = false;
+	$scope.showMoreColOption = function($event) {
+		$event.preventDefault();
+		$scope.moreCol = true;
+	}
+
+	$scope.dataCustomColumn;
+	$scope.addCustomColumn = function() {
+		console.log($scope.qrData, $scope.qresult);
 		
+		var obj = {};
+		obj[$scope.dataCustomColumn] = 123;
+
+		$scope.qrDataColumnsOrder.push({
+			'name': $scope.dataCustomColumn,
+			'is_visible': true,
+			'is_checked': true
+		});
+		
+		for (var i = $scope.qresult.length - 1; i >= 0; i--) {
+			$scope.qresult[i][$scope.dataCustomColumn] = '';
+		};
+
+		var tmp = $scope.qresult;
+		$scope.qresult = null;
+		//$scope.$apply();
+		$scope.qresult = tmp;
+		
+
+		$scope.dataCustomColumn = '';
+		eventSender.onLabelLayoutUpdate();
+	}	
+
+	function submitGraph() {
+
+		$scope.ctxWidget.data.label = dataChart.label.name;
+		$scope.ctxWidget.data.series = dataChart.series.map(function(obj) {
+			return {
+				'color': obj.color,
+				'name': obj.name,
+				'key': obj.value.name
+			}
+		});
+
+		$scope.ctxWidget.data.type = dataChart.type;
+		eventSender.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
+		$('.newWidget').hide();
 	}
 }

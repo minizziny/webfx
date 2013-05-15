@@ -5,13 +5,16 @@
 	<script src="../../logpresso/logsource/lib/sha1.js"></script>
 
 	<script src="../../logpresso/logsource/lib/jquery-1.9.1.js"></script>
+	<script src="../../logpresso/logsource/lib/bootstrap/js/bootstrap.js"></script>
 	<script src="../../logpresso/logsource/lib/angular.js"></script>
-	<script src="../../logpresso/logsource/lib/d3.v3.js"></script>
+	<script src="../../../lib/d3.v2.js"></script>
+	<script src="nv.d3.custom.js"></script>
 	<script src="../../logpresso/logsource/myApp.js"></script>
 	<script src="module.logdb.js"></script>
 
 	<link rel="stylesheet" href="../../logpresso/logsource/lib/bootstrap/css/bootstrap.css" />
 	<link rel="stylesheet" href="../../logpresso/logsource/logsource.css" />
+	<link rel="stylesheet" href="nv.d3.css" />
 	<style>
 
 	body {
@@ -67,6 +70,18 @@
 		margin-left: -270px;
 	}
 
+	.newWidget.step4 {
+		width: 1000px;
+		margin-left: -500px;
+	}
+
+	.newWidget.step5 {
+		width: 96.5%;
+		margin-left: -49%;
+		min-height: 90%;
+		top: 10px;
+	}
+
 	query-input textarea {
 		width: calc(100% - 100px);
 	}
@@ -92,14 +107,25 @@
 		max-width: 780px;
 	}
 
-	.listArrangeCols {
+	.qr2 > .cmpqr {
+		/* table-layout: fixed; */
+	}
+
+	.cmpqr td, .cmpqr th {
+		word-wrap: break-word;
+	}
+
+	.listbox {
 		border: 1px solid #ccc;
-		float: right;
-		width: 17%;
 		margin-bottom: 20px;
 	}
 
-	.listArrangeCols > li {
+	.arrangeCols {
+		float: right;
+		width: 17%;
+	}
+
+	.listbox > li {
 		margin: 5px 12px;
 		list-style-type: none;
 		clear: both;
@@ -139,6 +165,70 @@
 		line-height: 2;
 	}
 
+	label.qr-sel-label.selected {
+		border: 1px solid #09f;
+		background: rgba(0, 153, 255, .4);
+		-webkit-animation: fade-in .2s 1;
+	}
+
+	label.qr-sel-label.unselected {
+		border: 1px solid transparent;
+		-webkit-animation: fade-out .2s 1;
+	}
+
+	.charthere {
+		/* -webkit-transition: .1s ease-in; */
+		position: absolute;
+		border: 1px solid #ccc;
+		top: 71px;
+		right: 27px;
+		bottom: 56px;
+		width: 37.5%;
+	}
+
+	.charthere:hover {
+		/* -webkit-transform: scale(1.25) translateX(-25px) translateY(15px); */
+	}
+
+	.clearfix:before,
+	.clearfix:after {
+		content:"";
+		display:table;
+	}
+
+	.clearfix:after {
+		clear:both;
+	}
+
+	@-webkit-keyframes fade-out {
+		0% { opacity: 1; }
+		100% { opacity: 0; }
+	}
+
+	@-webkit-keyframes fade-in {
+		0% { opacity: 0; }
+		100% { opacity: 1; }
+	}
+
+	.moreCol {
+		-webkit-animation: fade-in .5s 1;
+	}
+
+	.moreCol label, .moreCol button {
+		display: inline;
+		vertical-align: text-bottom;
+		margin: 0 5px 0 20px;
+	}
+
+	.charthere svg {
+		width: 100%;
+	}
+
+	svg.widget {
+		width: 400px;
+		clear: both;
+		height: 300px;
+	}
 	</style>
 </head>
 <body ng-controller="Controller">
@@ -154,10 +244,11 @@
 	</div>
 
 	<div ng-controller="WallController" class="board">
-		<!-- <widget guid="my_array" name="my" type="grid" query="table limit=5 memlogs" fields="['_id', 'msg']" interval="15"></widget> -->
+		<!--
+		<widget guid="testtest" name="멤" type="grid" interval="15" query="table%20limit%3D10%20memlogs" fields="['_id','pfree']"></widget>
+		<widget guid="testchart" name="멤차트" type="chart.bar" interval="15" query="table%20limit%3D10%20memlogs" series="%5B%7B%22color%22%3A%22%23AFD8F8%22%2C%22name%22%3A%22%ED%9B%84%EB%A6%AC%22%2C%22key%22%3A%22pfree%22%7D%5D" label="_time"></widget>
+		-->
 	</div>
-
-	<br class="clearboth" />
 
 	<div class="modal errorWin" modal>
 		<a href="#" class="modal-close close" ng-click="clearError()">&times;</a>
@@ -167,26 +258,28 @@
 	<div class="modal newWidget step0" modal ng-controller="WizardController">
 		<a href="#" class="modal-close close">&times;</a>
 		<ol class="wizard">
+			<!-- 0 -->
 			<li class="wiz-step active">
 				<legend>위젯 종류 선택</legend>
 				<fieldset>
 					<div class="fieldset-description">추가할 위젯의 종류를 선택하십시오.</div>
 					<ul class="radio">
 						<li>
-							<input type="radio" ng-model="widgetType" value="table" id="radioTable">
+							<input type="radio" ng-model="widgetTypeName" value="table" ng-change="selectType(0)" id="radioTable">
 							<label class="radio" for="radioTable">테이블</label>
 						</li>
 						<li>
-							<input type="radio" ng-model="widgetType" value="graph" id="radioGraph" disabled>
+							<input type="radio" ng-model="widgetTypeName" value="graph" ng-change="selectType(1)" id="radioGraph">
 							<label class="radio" for="radioGraph">그래프</label>
 						</li>
 					</ul>
 					<div style="margin-bottom: 20px" ng-bind="selectedParserFactory.description"></div>
 					<div class="control-group submit-group">
-						<button class="wiz-next btn" ng-click="go(1)">다음</button>
+						<button class="wiz-next btn" ng-click="go(1, widgetType.s0nextCallback())">다음</button>
 					</div>
 				</fieldset>
 			</li>
+			<!-- 1 -->
 			<li class="wiz-step">
 				<legend>데이터 쿼리</legend>
 				<fieldset>
@@ -199,10 +292,11 @@
 					</div>
 					<div class="control-group submit-group">
 						<button class="wiz-prev btn" ng-click="go(0)">이전</button>
-						<button class="wiz-next btn" ng-click="go(2)">다음</button>
+						<button class="wiz-next btn" ng-click="go(widgetType.s1next, widgetType.s1nextCallback())">다음</button>
 					</div>
 				</fieldset>
 			</li>
+			<!-- 2 -->
 			<li class="wiz-step">
 				<legend>컬럼 선택 및 배치</legend>
 				<fieldset>
@@ -211,7 +305,7 @@
 						<div class="qr-container" style="width: 80%; float: left">
 							<query-result ng-model="qresult" class="qr2"></query-result>
 						</div>
-						<ul class="listArrangeCols">
+						<ul class="listbox arrangeCols">
 							<li ng-repeat="(i, col) in qrDataColumnsOrder" ng-hide="col.name=='$$hashKey'">
 								<input type="checkbox" ng-model="col.is_visible">
 								<span>{{col.name}}</span>
@@ -226,6 +320,7 @@
 					</div>
 				</fieldset>
 			</li>
+			<!-- 3 -->
 			<li class="wiz-step">
 				<legend>위젯 공통 설정</legend>
 				<fieldset>
@@ -245,14 +340,106 @@
 						</div>
 					</div>
 					<div class="control-group submit-group clearboth">
-						<button class="wiz-prev btn" ng-click="go(2)">이전</button>
+						<button class="wiz-prev btn" ng-click="go(widgetType.s3prev)">이전</button>
 						<button class="wiz-next btn" ng-click="submit()">완료</button>
+					</div>
+				</fieldset>
+			</li>
+
+			<!-- 4 -->
+			<li class="wiz-step">
+				<legend>차트 설정 및 데이터 선택</legend>
+				<fieldset>
+					<div class="well clearfix">
+						<span class="pull-left" style="margin-top: 12px;margin-right: 10px">차트 종류를 선택하십시오.</span>
+						<div class="btn-group pull-left" data-toggle="buttons-radio">
+							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(0)">바</button>
+							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(1)">라인</button>
+							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(2)">파이</button>
+						</div>
+					</div>
+					<div class="clearfix" style="margin-top: 20px">
+						<div class="fieldset-description">
+							<span style="margin-left: 10px">컬럼을 선택하십시오.</span>
+							<a href="#" ng-click="showMoreColOption($event)" ng-hide="moreCol">차트에 표시하려는 컬럼이 없습니까?</a>
+							<div class="well" style="margin-top: 5px" ng-show="moreCol" ng-class="{ moreCol: moreCol }">
+								<div style="margin-bottom: 5px;line-height: 2;">컬럼을 직접 입력하여 선택할 수 있습니다.</div>
+								<label>컬럼 이름</label> <input type="text" ng-model="dataCustomColumn">
+								<label>컬럼 타입</label>
+								<select>
+									<option>숫자</option>
+									<option>날짜</option>
+									<option>문자열</option>
+								</select>
+								<button class="btn" style="margin-bottom:-2px" ng-click="addCustomColumn()">컬럼 추가 및 선택</button>
+							</div>
+						</div>
+						<div class="qr-container" style="width: 100%; height: 240px; overflow: scroll; margin-top: 5px">
+							<query-result qr-selectable ng-model="qresult" class="qr2"></query-result>
+						</div>
+					</div>
+					<div class="control-group submit-group">
+						<button class="wiz-prev btn" ng-click="go(1)">이전</button>
+						<button class="wiz-next btn" ng-click="go(5, widgetType.s4nextCallback())">다음</button>
+					</div>
+				</fieldset>
+			</li>
+			<!-- 5 -->
+			<li class="wiz-step" ng-controller="ChartBindingController">
+				<legend>차트 설정 및 데이터 선택</legend>
+				<fieldset>
+					<div class="fieldset-description"></div>
+					<div style="width: 60%; float: left">
+						<div class="qr-container" style="width: 100%; height: 240px; overflow: scroll">
+							<query-result ng-model="qresult" class="qr2 qr-selected"></query-result>
+						</div>
+						<div style="width: 22%; float: left">
+							<ul class="nav nav-pills nav-stacked" style="max-height: 100px; overflow: auto; margin-left: 0; padding: 5px; border: 1px solid #ccc">
+								<li ng-repeat="(i, s) in dataSeries" class="clearboth" ng-class="{active: selectedSeriesIdx == i}">
+									<a ng-click="selectSeries(i)">
+										<span>{{s.name}}</span>
+										<button class="close widget-refresh pull-right" ng-click="removeSeries(i)">
+											<i class="icon-minus pull-right" ng-style="{backgroundColor: s.color}"></i>
+										</button>
+									</a>
+								</li>
+							</ul>
+							<button class="btn" ng-click="addSeries()"><i class="icon-plus"></i>시리즈 추가</button>
+						</div>
+						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; background-color: #f0f0f0">
+							<div class="control-group">
+								<label class="control-label" for="widgetName">이름</label>
+								<div class="controls">
+									<input id="widgetName" type="text" ng-model="dataSeries[selectedSeriesIdx].name"/>
+								</div>
+							</div>
+							<div class="control-group">
+								<label class="control-label" for="widgetInterval">값</label>
+								<div class="controls">
+									<select ng-model="dataSeries[selectedSeriesIdx].value" ng-options="col.name for col in qrDataColumnsOrder"></select>
+								</div>
+							</div>
+						</div>
+						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; margin-bottom: 36px; background-color: #f0f0f0">
+							<div class="control-group">
+								<label class="control-label" for="widgetInterval">라벨</label>
+								<div class="controls">
+									<select ng-model="dataLabel" ng-options="col.name for col in qrDataColumnsOrder"></select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="charthere">
+						<svg></svg>
+					</div>
+					<div class="control-group submit-group clearboth" style="bottom: 15px; left: 20px; right: 27px; position: absolute">
+						<button class="wiz-prev btn" ng-click="go(4)">이전</button>
+						<button class="wiz-next btn" ng-click="go(3, widgetType.s5nextCallback())">다음</button>
 					</div>
 				</fieldset>
 			</li>
 		</ol>
 	</div>
-
 	<script src="dashboard.js"></script>
 
 </body>
