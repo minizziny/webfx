@@ -22,21 +22,24 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 public class WebSocketChannel implements WebSocket {
-
+	private InetSocketAddress localAddr;
+	private InetSocketAddress remoteAddr;
 	private Channel channel;
 
 	public WebSocketChannel(Channel channel) {
 		this.channel = channel;
+		this.localAddr = (InetSocketAddress) channel.getLocalAddress();
+		this.remoteAddr = (InetSocketAddress) channel.getRemoteAddress();
 	}
 
 	@Override
 	public InetSocketAddress getLocalAddress() {
-		return (InetSocketAddress) channel.getLocalAddress();
+		return localAddr;
 	}
 
 	@Override
 	public InetSocketAddress getRemoteAddress() {
-		return (InetSocketAddress) channel.getRemoteAddress();
+		return remoteAddr;
 	}
 
 	@Override

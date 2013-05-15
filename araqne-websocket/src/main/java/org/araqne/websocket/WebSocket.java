@@ -170,8 +170,18 @@ public class WebSocket {
 			return;
 
 		if (socket != null) {
-			ensureClose(socket.getOutputStream());
-			ensureClose(socket.getInputStream());
+			try {
+				// getOutputStream can raise exception
+				ensureClose(socket.getOutputStream());
+			} catch (Throwable t) {
+			}
+
+			try {
+				// getInputStream can raise exception
+				ensureClose(socket.getInputStream());
+			} catch (Throwable t) {
+			}
+
 			socket.close();
 		}
 
@@ -263,6 +273,7 @@ public class WebSocket {
 
 			boolean fin = (sb[0] & 0x80) == 0x80;
 			int opcode = (sb[0]) & 0xf;
+			@SuppressWarnings("unused")
 			boolean mask = (sb[1] & 0x80) == 0x80;
 
 			long payloadLen = 0;
