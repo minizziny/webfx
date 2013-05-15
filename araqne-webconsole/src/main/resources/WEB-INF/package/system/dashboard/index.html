@@ -222,6 +222,7 @@
 
 	.charthere svg {
 		width: 100%;
+		margin: 0 10px;
 	}
 
 	svg.widget {
@@ -353,9 +354,10 @@
 					<div class="well clearfix">
 						<span class="pull-left" style="margin-top: 12px;margin-right: 10px">차트 종류를 선택하십시오.</span>
 						<div class="btn-group pull-left" data-toggle="buttons-radio">
-							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(0)">바</button>
-							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(1)">라인</button>
+							<button class="btn btn-large active" data-toggle="button" ng-click="selectChartType(0)">바</button>
+							<!-- <button class="btn btn-large" data-toggle="button" ng-click="selectChartType(1)">라인</button>
 							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(2)">파이</button>
+						-->
 						</div>
 					</div>
 					<div class="clearfix" style="margin-top: 20px">
@@ -366,11 +368,7 @@
 								<div style="margin-bottom: 5px;line-height: 2;">컬럼을 직접 입력하여 선택할 수 있습니다.</div>
 								<label>컬럼 이름</label> <input type="text" ng-model="dataCustomColumn">
 								<label>컬럼 타입</label>
-								<select>
-									<option>숫자</option>
-									<option>날짜</option>
-									<option>문자열</option>
-								</select>
+								<select ng-model="selectedCustomColumnType" ng-options="ct.displayName for ct in dataCustomColumnTypes"></select>
 								<button class="btn" style="margin-bottom:-2px" ng-click="addCustomColumn()">컬럼 추가 및 선택</button>
 							</div>
 						</div>
@@ -416,7 +414,7 @@
 							<div class="control-group">
 								<label class="control-label" for="widgetInterval">값</label>
 								<div class="controls">
-									<select ng-model="dataSeries[selectedSeriesIdx].value" ng-options="col.name for col in qrDataColumnsOrder"></select>
+									<select ng-model="dataSeries[selectedSeriesIdx].value" ng-options="col.name for col in dataNumberTypeCols"></select>
 								</div>
 							</div>
 						</div>

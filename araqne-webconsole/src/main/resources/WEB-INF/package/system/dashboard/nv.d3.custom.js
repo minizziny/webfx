@@ -7185,7 +7185,7 @@ nv.models.multiBarHorizontal = function() {
             .attr('text-anchor', function(d,i) { return getY(d,i) < 0 ? 'end' : 'start' })
             .attr('y', x.rangeBand() / (data.length * 2))
             .attr('dy', '.32em')
-            .text(function(d,i) { return getY(d,i).toFixed() })// valueFormat(getY(d,i)) })
+            .text(function(d,i) { return parseInt(getY(d,i)).toFixed() })// valueFormat(getY(d,i)) })
         d3.transition(bars)
             //.delay(function(d,i) { return i * delay / data[0].values.length })
           .select('text')

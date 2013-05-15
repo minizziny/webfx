@@ -5,6 +5,7 @@ parent.d3 = d3;
 
 var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
 function checkDate(member, i) {
+	if(member == undefined) return false;
 	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19)))
 }
 
@@ -340,7 +341,18 @@ app.directive('qrSelectable', function($compile, serviceGuid, eventSender) {
 				var qrOrder = scope.qrDataColumnsOrder.exceptedHashKey();
 				var qrOrderTarget = targetScope.qrDataColumnsOrder;
 
-				//console.log(qrOrder, qrOrderTarget)
+				// qrOrder가 더 많을 경우 qrOrderTarget 에 추가한다 (사용자 정의 컬럼)
+				if(qrOrder.length > qrOrderTarget.length) {
+					var qrOrderTargetName = qrOrderTarget.map(function(o) { return o.name; });
+
+					var newOrders = qrOrder.filter(function(o) {
+						return !(qrOrderTargetName.indexOf(o.name) > -1);
+					});
+
+					for (var i = 0; i < newOrders.length; i++) {
+						qrOrderTarget.push(newOrders[i]);
+					};
+				}
 
 				for (var i = 0; i < qrOrder.length; i++) {
 					qrOrderTarget[i].is_visible = qrOrder[i].is_checked;
@@ -435,6 +447,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				template.append(svg);
 
 				pageLoaded = function(m) {
+					console.log('chart.bar reloaded')
 					var dataResult = m.body.result;
 					var dataSeries = serviceChart.getDataSeries(attrs.series);
 					var dataLabel = {name: attrs.label};
@@ -688,6 +701,7 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 	$scope.dataSeries = [];
 	$scope.dataLabel;
 	$scope.selectedSeriesIdx = 0;
+	$scope.dataNumberTypeCols = [];
 
 	$scope.$watch('dataLabel', function() {
 		console.log('dataLabel changed');
@@ -717,22 +731,38 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 
 		// 초기화
 		$scope.dataSeries.splice(0, $scope.dataSeries.length);
+		$scope.dataNumberTypeCols.splice(0, $scope.dataNumberTypeCols.length);
 		$scope.dataLabel = undefined;
 		$scope.selectedSeriesIdx = 0;	
-		number_of_index = 0;	
+		number_of_index = 0;
+
+		// 모든 컬럼의 타입 체크
+		var cols = $scope.qrDataColumnsOrder;
+		for (var i = 0; i < cols.length; i++) {
+			if(cols[i].type == undefined) {
+				var mapAll = $scope.qresult.map(function(obj, j) {
+					return obj[cols[i].name];
+				});
+				var type = checkArrayMemberType(mapAll);
+				cols[i]['type'] = type;
+			}
+
+			// number type 만 따로 뽑아냄
+			if(cols[i]['type'] == "number") {
+				$scope.dataNumberTypeCols.push(cols[i]);
+			}
+		}
 
 		// 선택한 컬럼만 뽑아냄
-		var selectedCols = $scope.qrDataColumnsOrder.filter(function(obj) {
+		var selectedCols = cols.filter(function(obj) {
 			if(obj.is_visible) return obj;
 		});
 
 		var types = [];
 		for (var i = 0; i < selectedCols.length; i++) {
 
-			var map = $scope.qresult.map(function(obj, j) {
-				return obj[selectedCols[i].name];
-			});
-			var type = checkArrayMemberType(map);
+			// 선택한 컬럼의 타입 추가
+			var type = selectedCols[i].type;
 			types.push(type);
 
 			// [ name ] selectedCols 의 number type 컬럼 수대로 series 추가
@@ -969,8 +999,22 @@ function WizardController($scope, eventSender, serviceGuid) {
 	}
 
 	$scope.dataCustomColumn;
+	$scope.dataCustomColumnTypes = [
+		{
+			name: 'number',
+			displayName: '숫자'
+		},
+		{
+			name: 'datetime',
+			displayName: '날짜'
+		},
+		{
+			name: 'string',
+			displayName: '문자열'
+		}
+	];
+	$scope.selectedCustomColumnType = $scope.dataCustomColumnTypes[0];
 	$scope.addCustomColumn = function() {
-		console.log($scope.qrData, $scope.qresult);
 		
 		var obj = {};
 		obj[$scope.dataCustomColumn] = 123;
@@ -978,7 +1022,8 @@ function WizardController($scope, eventSender, serviceGuid) {
 		$scope.qrDataColumnsOrder.push({
 			'name': $scope.dataCustomColumn,
 			'is_visible': true,
-			'is_checked': true
+			'is_checked': true,
+			'type': $scope.selectedCustomColumnType.name
 		});
 		
 		for (var i = $scope.qresult.length - 1; i >= 0; i--) {
