@@ -16,11 +16,17 @@ var form = $K.namespace("Form");
 		if(!isForm(el, arguments.callee.name)) return;
 
 		var ret = {};
-		$(el[0]).find("*[data-form]").each(function(i, obj) {
+		$(el[0]).find("*(:not(:radio)[data-form]").each(function(i, obj) {
 			if(!!obj.dataset.form) {
 				ret[obj.dataset.form] = $(obj).val();
 			}
 		});
+
+		$(el[0]).find(":radio[data-form]:checked").each(function(i, obj) {
+			if(!!obj.dataset.form) {
+				ret[obj.dataset.form] = $(obj).val();
+			}
+		})
 
 		console.log("serialize:", ret)
 
