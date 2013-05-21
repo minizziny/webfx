@@ -23,7 +23,8 @@ app.factory('serviceChart', function(serviceGuid) {
 
 			chart.xAxis.tickFormat(function(d) {
 				if(checkDate(d.label)) {
-					return d.label.substring(0, 19);
+					//return d.label.substring(0, 19);
+					return d3.time.format('%x %X')(new Date(d.label));
 				}
 				else {
 					return d.label;
@@ -40,6 +41,40 @@ app.factory('serviceChart', function(serviceGuid) {
 
 			return chart;
 		});	
+	}
+
+	function lineChart(selector, data, xtype) {
+		nv.addGraph(function() {
+			var isXtype = (xtype == 'datetime');
+			var chart = nv.models.lineChart()
+			.x(function(d) {
+				if(isXtype) {
+					return new Date(d.label)
+				}
+				else {
+					return d.label;
+				}
+			})
+			.y(function(d) { return d.value })
+			.margin({right: 30})
+			.color(d3.scale.category10().range());
+
+			if(isXtype) {
+				chart.xAxis.tickFormat(function(d) {
+					return d3.time.format('%x %X')(new Date(d));
+				});
+			}
+			chart.yAxis.tickFormat(d3.format('d'));
+
+			d3.select(selector)
+			.datum(data)
+			.transition().duration(500)
+			.call(chart);
+
+			nv.utils.windowResize(chart.update);
+
+			return chart;
+		});
 	}
 
 	function buildJSONStructure(dataSeries, dataResult, dataLabel) {
@@ -91,6 +126,7 @@ app.factory('serviceChart', function(serviceGuid) {
 
 	return {
 		multiBarHorizontalChart: multiBarHorizontalChart,
+		lineChart: lineChart,
 		buildJSONStructure: buildJSONStructure,
 		getDataSeries: getDataSeries
 	}
@@ -439,7 +475,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				element[0].$dispose = dispose; 
 				
 			}
-			else if(attrs.type == 'chart.bar') {
+			else if(attrs.type == 'chart.bar' || attrs.type == 'chart.line') {
 				element.append(template);
 				var svg = angular.element('<svg class="widget">');
 				$compile(ninput)(scope);
@@ -447,13 +483,18 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				template.append(svg);
 
 				pageLoaded = function(m) {
-					console.log('chart.bar reloaded')
+					console.log(attrs.type + ' reloaded');
 					var dataResult = m.body.result;
 					var dataSeries = serviceChart.getDataSeries(attrs.series);
-					var dataLabel = {name: attrs.label};
+					var dataLabel = {name: attrs.label, type: attrs.labeltype};
 
 					var json = serviceChart.buildJSONStructure(dataSeries, dataResult, dataLabel);
-					serviceChart.multiBarHorizontalChart(svg[0], json);
+					if(attrs.type == 'chart.line') {
+						serviceChart.lineChart(svg[0], json, dataLabel.type);
+					}
+					else if(attrs.type == 'chart.bar') {
+						serviceChart.multiBarHorizontalChart(svg[0], json);
+					}
 
 					clearTimeout(timer);
 					timer = null;
@@ -519,12 +560,12 @@ function WallController($scope) {
 
 }
 
-function PresetController($scope, $compile, socket, eventSender) {
+function PresetController($scope, $compile, socket, eventSender, serviceGuid) {
 	eventSender.onCurrentPresetChanged = function() {
 		console.log('currentPreset changed')
 
 		console.log($scope.currentPreset);
-		return SavePreset($scope.selectedPreset.guid, $scope.selectedPreset.name, $scope.currentPreset.state);
+		return SavePreset($scope.currentPreset.guid, $scope.currentPreset.name, $scope.currentPreset.state);
 	}
 
 	eventSender.onRemoveSingleWidget = function(guid) {
@@ -550,7 +591,7 @@ function PresetController($scope, $compile, socket, eventSender) {
 		$scope.currentPreset.state.widgets.push(ctx);
 		eventSender.onCreateNewWidget(ctx);
 
-		eventSender.onCurrentPresetChanged(); // save state   <-------- 주석 풀어
+		eventSender.onCurrentPresetChanged(); // save state
 	}
 
 	eventSender.onCreateNewWidget = function(ctx) {
@@ -562,10 +603,10 @@ function PresetController($scope, $compile, socket, eventSender) {
 			$('.board').append(widget);
 		}
 		else if(ctx.type == 'chart') {
-			if(ctx.data.type == 'bar') {
+			if(ctx.data.type == 'bar' || ctx.data.type == 'line') {
 				var query = encodeURIComponent(ctx.data.query);
 				var series = encodeURIComponent(JSON.stringify(ctx.data.series));
-				var widget = angular.element('<widget guid="' + ctx.guid + '" name="' + ctx.name + '" type="' + ctx.type + '.' + ctx.data.type + '" interval="' + ctx.interval + '" query="' + query + '" series="' + series + '" label="' + ctx.data.label + '">');
+				var widget = angular.element('<widget guid="' + ctx.guid + '" name="' + ctx.name + '" type="' + ctx.type + '.' + ctx.data.type + '" interval="' + ctx.interval + '" query="' + query + '" series="' + series + '" label="' + ctx.data.label + '" labeltype="' + ctx.data.labelType + '">');
 				$compile(widget)($scope);
 				$('.board').append(widget);
 			}
@@ -574,14 +615,7 @@ function PresetController($scope, $compile, socket, eventSender) {
 	}
 
 	$scope.dataPresetList = [];
-	$scope.selectedPreset;
 	$scope.currentPreset;
-
-	$scope.$watch('selectedPreset', function(preset) {
-		if(preset == undefined) return;
-		LoadPreset(preset.guid);
-	});
-
 
 	function GetPresetList(callback) {
 		socket.send('org.logpresso.core.msgbus.WallPlugin.getPresetNames', {}, proc.pid)
@@ -603,8 +637,23 @@ function PresetController($scope, $compile, socket, eventSender) {
 	}
 
 	function SavePreset(guid, name, state) {
+		var isExist = false;
+		for (var i = $scope.dataPresetList.length - 1; i >= 0; i--) {
+			if($scope.dataPresetList[i].guid == guid) {
+				isExist = true;
+				break;
+			}
+		};
+
+		if(!isExist) {
+			$scope.dataPresetList.push({
+				'guid': guid,
+				'name': name
+			});
+		}
+
 		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
-			{ "guid": guid, "name": name, "state": state }
+			{ 'guid': guid, 'name': name, 'state': state }
 		, proc.pid);
 	}
 
@@ -647,17 +696,56 @@ function PresetController($scope, $compile, socket, eventSender) {
 		.failed(msgbusFailed);
 	}
 
-	function NewPreset(name) {
-		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
-			{ "guid": name, "name": name, "state": { "widgets": [] } }
-		, proc.pid);
-	}
-
 	function RemovePresets() {
 		var args = Array.prototype.slice.call(arguments, 0);
+
+		for (var i = $scope.dataPresetList.length - 1; i >= 0; i--) {
+			for (var j = args.length - 1; j >= 0; j--) {
+				if($scope.dataPresetList[i].guid == args[j]) {
+					$scope.dataPresetList.splice(i, 1);
+				}
+			};
+		};
+
 		return socket.send("org.logpresso.core.msgbus.WallPlugin.removePresets", 
 			{ "guids": args }
 		, proc.pid);
+	}
+
+	$scope.SaveAs = function() {
+		var newname = prompt('저장할 새 프리셋 이름을 입력하세요');
+		if(newname == undefined) return;
+
+		var newguid = serviceGuid.generateType2();
+		SavePreset(newguid, newname, $scope.currentPreset.state).success(function() {
+			LoadPreset(newguid);
+		})
+	}
+
+	$scope.New = function() {
+		var newname = prompt('새 프리셋 이름을 입력하세요');
+		if(newname == undefined) return;
+
+		var newguid = serviceGuid.generateType2();
+		SavePreset(newguid, newname, { "widgets": [] }).success(function() {
+			LoadPreset(newguid);
+		})
+	}
+
+	$scope.Remove = function() {
+		RemovePresets($scope.currentPreset.guid).success(function() {
+			LoadPreset('autosave');
+		});
+	}
+
+	$scope.Clear = function() {
+		ClearPreset();
+		SavePreset($scope.currentPreset.guid, $scope.currentPreset.name, { "widgets": [] });
+	}
+
+	$scope.Load = function(preset) {
+		console.log(preset)
+		LoadPreset(preset.guid);
 	}
 
 	function Init() {
@@ -665,12 +753,13 @@ function PresetController($scope, $compile, socket, eventSender) {
 		GetPresetList(function() {
 			for (var i = $scope.dataPresetList.length - 1; i >= 0; i--) {
 				if($scope.dataPresetList[i].guid == "autosave") {
-					$scope.selectedPreset = $scope.dataPresetList[i];
+					$scope.currentPreset = $scope.dataPresetList[i];
+					LoadPreset($scope.dataPresetList[i].guid);
 					break;
 				}
 			};
 
-			if($scope.selectedPreset == undefined) {
+			if($scope.currentPreset == undefined) {
 				console.log("InitAutosave");
 				InitAutosave().success(Init);
 			}
@@ -702,23 +791,35 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 	$scope.dataLabel;
 	$scope.selectedSeriesIdx = 0;
 	$scope.dataNumberTypeCols = [];
+	$scope.dataNumberDatetimeTypeCols = [];
 
 	$scope.$watch('dataLabel', function() {
 		console.log('dataLabel changed');
 		var st = serviceChart.buildJSONStructure($scope.dataSeries, $scope.qresult, $scope.dataLabel);
-		render(st);
+		render(st, $scope.dataLabel);
 	});
 
 	$scope.$watch('dataSeries', function() {
 		console.log('dataSeries changed');
 		var st = serviceChart.buildJSONStructure($scope.dataSeries, $scope.qresult, $scope.dataLabel);
-		render(st);
+		render(st, $scope.dataLabel);
 	}, true);
 
-	function render(st) {
-		$('.charthere svg').empty();
+	$scope.$watch('chartType', function() {
 
-		serviceChart.multiBarHorizontalChart('.charthere svg', st);
+	});
+
+	function render(st, dataLabel) {
+		$('.charthere svg').empty();
+		console.log($scope.chartType)
+
+		if($scope.chartType.name == 'bar') {
+			serviceChart.multiBarHorizontalChart('.charthere svg', st);	
+		}
+		else if($scope.chartType.name == 'line') {
+			serviceChart.lineChart('.charthere svg', st, dataLabel.type);
+		}
+		
 	}
 
 	eventSender.onUpdateVisible = function() {
@@ -727,11 +828,12 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 	}
 
 	function init() {
-		//console.log($scope.ctypes, $scope.chartType)
+		//console.log($scope.chartType)
 
 		// 초기화
 		$scope.dataSeries.splice(0, $scope.dataSeries.length);
 		$scope.dataNumberTypeCols.splice(0, $scope.dataNumberTypeCols.length);
+		$scope.dataNumberDatetimeTypeCols.splice(0, $scope.dataNumberDatetimeTypeCols.length);
 		$scope.dataLabel = undefined;
 		$scope.selectedSeriesIdx = 0;	
 		number_of_index = 0;
@@ -750,6 +852,11 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 			// number type 만 따로 뽑아냄
 			if(cols[i]['type'] == "number") {
 				$scope.dataNumberTypeCols.push(cols[i]);
+				$scope.dataNumberDatetimeTypeCols.push(cols[i]);
+			}
+
+			if(cols[i]['type'] == "datetime") {
+				$scope.dataNumberDatetimeTypeCols.push(cols[i]);
 			}
 		}
 
@@ -777,20 +884,35 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 		var idxString = types.indexOf('string');
 		var idxNumber = types.indexOf('number');
 
-		// [ datetime ] 첫번째 datetime type 컬럼을 dataLabel로 지정
-		if(idxDatetime != -1) {
-			$scope.dataLabel = selectedCols[idxDatetime];
+
+		if($scope.chartType.name == "bar") {
+			// [ datetime ] 첫번째 datetime type 컬럼을 dataLabel로 지정
+			if(idxDatetime != -1) {
+				$scope.dataLabel = selectedCols[idxDatetime];
+			}
+			
+			// [ string ] dataLabel 미지정시 첫번째 string type 컬럼을 dataLabel로 지정
+			if(idxString != -1 && $scope.dataLabel == undefined) {
+				$scope.dataLabel = selectedCols[idxString];
+			}
+
+			// 다 돌아봤는데 Label로 쓸만한게 없으면...
+			if($scope.dataLabel == undefined) {
+				$scope.dataLabel = selectedCols[idxNumber];
+			}
 		}
-		
-		// [ string ] dataLabel 미지정시 첫번째 string type 컬럼을 dataLabel로 지정
-		if(idxString != -1 && $scope.dataLabel == undefined) {
-			$scope.dataLabel = selectedCols[idxString];
+		else if($scope.chartType.name == "line") {
+			// [ datetime ] 첫번째 datetime type 컬럼을 dataLabel로 지정
+			if(idxDatetime != -1) {
+				$scope.dataLabel = selectedCols[idxDatetime];
+			}
+
+			if($scope.dataLabel == undefined) {
+				$scope.dataLabel = selectedCols[idxNumber];
+			}
 		}
 
-		// 다 돌아봤는데 Label로 쓸만한게 없으면...
-		if($scope.dataLabel == undefined) {
-			$scope.dataLabel = selectedCols[idxNumber];
-		}
+
 	}
 
 	$scope.addSeries = function() {
@@ -830,7 +952,7 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 		return {
 			'series': $scope.dataSeries,
 			'label': $scope.dataLabel,
-			'type': 'bar'
+			'type': $scope.chartType.name
 		}
 	}
 
@@ -1043,6 +1165,7 @@ function WizardController($scope, eventSender, serviceGuid) {
 	function submitGraph() {
 
 		$scope.ctxWidget.data.label = dataChart.label.name;
+		$scope.ctxWidget.data.labelType = dataChart.label.type;
 		$scope.ctxWidget.data.series = dataChart.series.map(function(obj) {
 			return {
 				'color': obj.color,
@@ -1052,6 +1175,7 @@ function WizardController($scope, eventSender, serviceGuid) {
 		});
 
 		$scope.ctxWidget.data.type = dataChart.type;
+		console.log($scope.ctxWidget)
 		eventSender.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
 		$('.newWidget').hide();
 	}

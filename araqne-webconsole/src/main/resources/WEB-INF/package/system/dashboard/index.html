@@ -31,7 +31,10 @@
 		font-weight: 200;
 		color: #777777;
 		text-shadow: 0 1px 0 #ffffff;
-		margin-left: -65px;
+		margin: auto;
+		width: 400px;
+		text-align: center;
+		margin-top: -35px;
 	}
 
 	.wizard {
@@ -230,6 +233,10 @@
 		clear: both;
 		height: 300px;
 	}
+
+	i.icon-noncheck {
+		background-position: 9999px 9999px;
+	}
 	</style>
 </head>
 <body ng-controller="Controller">
@@ -237,10 +244,46 @@
 	</topbar>
 
 	<div ng-controller="PresetController" class="toolbar navbar navbar-top" style="margin-bottom: 10px">
-		<div class="navbar-inner" style="text-align: center">
-			<select style="float: left; margin-top: 5px; margin-bottom: 0; margin-left: 5px" ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
-			<span class="brandpreset">{{selectedPreset.name}}</span>
+		<div class="navbar-inner">
+			<!--<select style="float: left; margin-top: 5px; margin-bottom: 0; margin-left: 5px" ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
+			-->
+			<div class="btn-group">
+				<button class="btn dropdown-toggle" data-toggle="dropdown">
+					새 프리셋
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li><a tabindex="-1" href="#" ng-click="New()">빈 프리셋</a></li>
+					<li><a tabindex="-1" href="#" ng-click="SaveAs()">현재 프리셋을 다른 이름으로 저장</a></li>
+				</ul>
+			</div>
+			<div class="btn-group">
+				<button class="btn dropdown-toggle" data-toggle="dropdown">
+					불러오기
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li ng-repeat="preset in dataPresetList">
+						<a tabindex="-1" href="#" ng-click="Load(preset)" style="padding-left:10px">
+							<i ng-class="{ 'icon-ok': preset.guid == currentPreset.guid, 'icon-noncheck': preset.guid != currentPreset.guid }"></i>
+							{{preset.name}}
+						</a>
+					</li>
+				</ul>
+			</div>
+			<div class="btn-group">
+				<button class="btn dropdown-toggle" data-toggle="dropdown">
+					<i class="icon-wrench"></i>
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li><a tabindex="-1" href="#" ng-click="Remove()">이 프리셋 삭제</a></li>
+					<li class="divider"></li>
+					<li><a tabindex="-1" href="#" ng-click="Clear()">모든 위젯 지우기</a></li>
+				</ul>
+			</div>
 			<button class="btn btn-primary pull-right" style="margin-right: 5px" ng-click="openNewWidget()">새 위젯 추가</button>
+			<div class="brandpreset">{{currentPreset.name}}</div>
 		</div>
 	</div>
 
@@ -355,7 +398,7 @@
 						<span class="pull-left" style="margin-top: 12px;margin-right: 10px">차트 종류를 선택하십시오.</span>
 						<div class="btn-group pull-left" data-toggle="buttons-radio">
 							<button class="btn btn-large active" data-toggle="button" ng-click="selectChartType(0)">바</button>
-							<!-- <button class="btn btn-large" data-toggle="button" ng-click="selectChartType(1)">라인</button>
+							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(1)">라인</button><!--
 							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(2)">파이</button>
 						-->
 						</div>
@@ -418,11 +461,19 @@
 								</div>
 							</div>
 						</div>
-						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; margin-bottom: 36px; background-color: #f0f0f0">
+						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; margin-bottom: 36px; background-color: #f0f0f0" ng-show="chartType.name == 'bar'">
 							<div class="control-group">
 								<label class="control-label" for="widgetInterval">라벨</label>
 								<div class="controls">
 									<select ng-model="dataLabel" ng-options="col.name for col in qrDataColumnsOrder"></select>
+								</div>
+							</div>
+						</div>
+						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; margin-bottom: 36px; background-color: #f0f0f0" ng-show="chartType.name == 'line'">
+							<div class="control-group">
+								<label class="control-label">X축</label>
+								<div class="controls">
+									<select ng-model="dataLabel" ng-options="col.name for col in dataNumberDatetimeTypeCols"></select>
 								</div>
 							</div>
 						</div>
