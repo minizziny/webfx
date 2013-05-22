@@ -996,9 +996,9 @@ function WizardController($scope, eventSender, serviceGuid) {
 	}
 
 	eventSender.onOpenNewWidget = function() {
-		$('.newWidget')
-			.removeClass(makeRemoveClassHandler(/^step/))
-			.show();
+		var newWidgetWin = $('.newWidget').removeClass(makeRemoveClassHandler(/^step/));
+		newWidgetWin[0].showDialog();
+			
 		$scope.go(0);
 		//$scope.ctxWidget = getDefaultContext('grid');
 		$scope.qresult = null;
@@ -1058,6 +1058,8 @@ function WizardController($scope, eventSender, serviceGuid) {
 	}
 
 	$scope.go = function(page, callback) {
+		window.scrollTo(0, 0);
+
 		//console.log('go' + page);
 		var el = $('.wizard li.wiz-step').removeClass('active')[page];
 		$(el).addClass('active');
@@ -1094,7 +1096,7 @@ function WizardController($scope, eventSender, serviceGuid) {
 		console.log($scope.ctxWidget);
 
 		eventSender.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
-		$('.newWidget').hide();	
+		$('.newWidget')[0].hideDialog();	
 	}
 
 	// chart options
@@ -1177,6 +1179,6 @@ function WizardController($scope, eventSender, serviceGuid) {
 		$scope.ctxWidget.data.type = dataChart.type;
 		console.log($scope.ctxWidget)
 		eventSender.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
-		$('.newWidget').hide();
+		$('.newWidget')[0].hideDialog();
 	}
 }
