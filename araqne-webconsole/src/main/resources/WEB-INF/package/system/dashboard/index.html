@@ -68,7 +68,7 @@
 		/* height: 500px; */
 	}
 
-	.newWidget.step3 {
+	.newWidget.step3, .removePreset, .clearWidgets {
 		width: 540px;
 		margin-left: -270px;
 	}
@@ -277,13 +277,37 @@
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
-					<li><a tabindex="-1" href="#" ng-click="Remove()">이 프리셋 삭제</a></li>
+					<li><a tabindex="-1" href="#" ng-click="AlertRemove()">이 프리셋 삭제</a></li>
 					<li class="divider"></li>
-					<li><a tabindex="-1" href="#" ng-click="Clear()">모든 위젯 지우기</a></li>
+					<li><a tabindex="-1" href="#" ng-click="AlertClear()">모든 위젯 지우기</a></li>
 				</ul>
 			</div>
 			<button class="btn btn-primary pull-right" style="margin-right: 5px" ng-click="openNewWidget()">새 위젯 추가</button>
 			<div class="brandpreset">{{currentPreset.name}}</div>
+		</div>
+
+		<div class="modal clearWidgets" modal>
+			<a href="#" class="modal-close close" style="margin-bottom: -30px">&times;</a>
+			<legend>모든 위젯 지우기</legend>
+			<div style="margin-bottom: 20px">
+				이 프리셋의 모든 위젯이 지워집니다. 계속하시겠습니까?
+			</div>
+			<div class="control-group submit-group">
+				<button class="btn btn-danger" ng-click="Clear()">삭제</button>
+				<button class="btn" ng-click="CancelClear()">취소</button>
+			</div>
+		</div>
+
+		<div class="modal removePreset" modal>
+			<a href="#" class="modal-close close" style="margin-bottom: -30px">&times;</a>
+			<legend>프리셋 삭제</legend>
+			<div style="margin-bottom: 20px">
+				프리셋 <code>{{currentPreset.name}}</code>을 삭제합니다. 계속하시겠습니까?
+			</div>
+			<div class="control-group submit-group">
+				<button class="btn btn-danger" ng-click="Remove()">삭제</button>
+				<button class="btn" ng-click="CancelRemove()">취소</button>
+			</div>
 		</div>
 	</div>
 

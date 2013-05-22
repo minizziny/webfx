@@ -732,15 +732,34 @@ function PresetController($scope, $compile, socket, eventSender, serviceGuid) {
 		})
 	}
 
+	$scope.AlertRemove = function() {
+		$('.removePreset')[0].showDialog();
+	}
+
+	$scope.CancelRemove = function() {
+		$('.removePreset')[0].hideDialog();
+	}
+
 	$scope.Remove = function() {
 		RemovePresets($scope.currentPreset.guid).success(function() {
 			LoadPreset('autosave');
+			$('.removePreset')[0].hideDialog();
 		});
+	}
+
+	$scope.AlertClear = function() {
+		$('.clearWidgets')[0].showDialog();
+	}
+
+	$scope.CancelClear = function() {
+		$('.clearWidgets')[0].hideDialog();
 	}
 
 	$scope.Clear = function() {
 		ClearPreset();
-		SavePreset($scope.currentPreset.guid, $scope.currentPreset.name, { "widgets": [] });
+		SavePreset($scope.currentPreset.guid, $scope.currentPreset.name, { "widgets": [] }).success(function() {
+			$('.clearWidgets')[0].hideDialog();
+		})
 	}
 
 	$scope.Load = function(preset) {
