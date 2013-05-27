@@ -408,16 +408,15 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				interval: parseInt(attrs.interval)
 			};
 
-			var timer, pageLoaded;
+			var timer, created, pageLoaded, loaded, z;
 
 			function query() {
 				console.log('--------------------')
-				var z = serviceLogdb.create(proc.pid);
+				z = serviceLogdb.create(proc.pid);
 				var q = z.query(decodeURIComponent(attrs.query));
-				q.pageLoaded(pageLoaded)
-				.loaded(function(m) {
-					serviceLogdb.remove(z);
-				})
+				q.created(created)
+				.pageLoaded(pageLoaded)
+				.loaded(loaded)
 				.failed(function(m) {
 					clearTimeout(timer);
 					timer = null;
@@ -449,17 +448,51 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				template.append(table);
 
 				element.append(template);
+
+				var q;
+
+				created = function(m) {
+					console.log('grid reloaded');
+					scope[attrs.guid].data = [];
+				}
+
+				loaded = function(m) {
+					var first_load_length = scope[attrs.guid].data.length;
+					
+					var amount = Math.max(m.body.total_count, first_load_length);
+					if(amount > 15) {
+						var total_count = Math.min(m.body.total_count, 1000);
+
+						// load more
+						z.getResult(first_load_length, total_count - first_load_length, function() {
+							scope.$apply();
+
+							serviceLogdb.remove(z);	
+							clearTimeout(timer);
+							timer = null;
+							timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
+						});
+					}
+					else {
+						scope.$apply();
+
+						serviceLogdb.remove(z);	
+						clearTimeout(timer);
+						timer = null;
+						timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
+					}
+
+				}
 				
 				pageLoaded = function(m) {
-					scope[attrs.guid].data = m.body.result;
-					scope.$apply();
+					for (var i = 0; i < m.body.result.length; i++) {
+						scope[attrs.guid].data.push(m.body.result[i]);
+					};
 
-					clearTimeout(timer);
-					timer = null;
-					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
+					scope.$apply();
 				};
 
-				query().pageLoaded(pageLoaded);
+				q = query().pageLoaded(pageLoaded).loaded(loaded).created(created);
 
 				template.find('button.widget-close').on('click', function() {
 					eventSender.onRemoveSingleWidget(attrs.guid);
@@ -482,8 +515,15 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				template.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
 				template.append(svg);
 
-				pageLoaded = function(m) {
+				created = function(m) {
 					console.log(attrs.type + ' reloaded');
+				}
+
+				loaded = function(m) {
+					serviceLogdb.remove(z);
+				}
+
+				pageLoaded = function(m) {
 					var dataResult = m.body.result;
 					var dataSeries = serviceChart.getDataSeries(attrs.series);
 					var dataLabel = {name: attrs.label, type: attrs.labeltype};
@@ -501,7 +541,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
 				}
 
-				query().pageLoaded(pageLoaded);
+				query().pageLoaded(pageLoaded).loaded(loaded).created(created);
 
 				template.find('button.widget-close').on('click', function() {
 					eventSender.onRemoveSingleWidget(attrs.guid);
@@ -830,7 +870,7 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 
 	function render(st, dataLabel) {
 		$('.charthere svg').empty();
-		console.log($scope.chartType)
+		//console.log($scope.chartType)
 
 		if($scope.chartType.name == 'bar') {
 			serviceChart.multiBarHorizontalChart('.charthere svg', st);	

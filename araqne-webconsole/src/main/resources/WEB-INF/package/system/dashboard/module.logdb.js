@@ -73,7 +73,7 @@ angular.module('logdb', [])
 			.success(function(m) {
 				
 				clazz.id = m.body.id;
-				registerTrap();
+				registerTrap(m);
 			})
 			.failed(function(m, raw) {
 				asyncQuery.done('failed', m);
@@ -82,13 +82,14 @@ angular.module('logdb', [])
 
 		}
 
-		function registerTrap() {
+		function registerTrap(m) {
 			var name = 'logstorage-query-' + clazz.id;
 			var tname = 'logstorage-query-timeline-' + clazz.id;
 
 			servicePush.register(name, pid, onTrap, function(resp) {
 
 				servicePush.register(tname, pid, onTimeline, function(resp) {
+					asyncQuery.done('created', m);
 					startQuery();
 				});
 				
@@ -124,7 +125,7 @@ angular.module('logdb', [])
 			});
 		}
 
-		function getResult(id, offset, limit, trigger) {
+		function getResult(id, offset, limit, callback) {
 			socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.getResult',
 			{
 				id: id,
@@ -133,9 +134,13 @@ angular.module('logdb', [])
 			}, pid)
 			.success(function(m) {
 				asyncQuery.done('pageLoaded', m);
-			})
-			.failed(function(m) {
 
+				if(!!callback) {
+					callback();
+				}
+			})
+			.failed(function(m, resp) {
+				console.log('getResult failed', resp)
 			});
 		}
 
@@ -173,6 +178,11 @@ angular.module('logdb', [])
 			},
 			dispose: function() {
 				return new Async(dispose);
+			},
+			getResult: function() {
+				var args = Array.prototype.slice.call(arguments);
+				args.splice(0, 0, clazz.id);
+				getResult.apply(this, args);
 			},
 			id: function() {
 				return clazz.id;
