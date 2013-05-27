@@ -25,8 +25,8 @@ app.factory('serviceChart', function(serviceGuid) {
 
 			chart.xAxis.tickFormat(function(d) {
 				if(checkDate(d.label)) {
-					//return d.label.substring(0, 19);
-					return d3.time.format('%x %X')(new Date(d.label));
+					return d.label.substring(0, 19);
+					//return d3.time.format('%x %X')(new Date(d.label));
 				}
 				else {
 					return d.label;
@@ -47,7 +47,7 @@ app.factory('serviceChart', function(serviceGuid) {
 
 	function lineChart(selector, data, xtype) {
 		$(selector).empty();
-		
+
 		nv.addGraph(function() {
 			var isXtype = (xtype == 'datetime');
 			var chart = nv.models.lineChart()
@@ -60,12 +60,12 @@ app.factory('serviceChart', function(serviceGuid) {
 				}
 			})
 			.y(function(d) { return d.value })
-			.margin({right: 30})
+			.margin({right: 60})
 			.color(d3.scale.category10().range());
 
 			if(isXtype) {
 				chart.xAxis.tickFormat(function(d) {
-					return d3.time.format('%x %X')(new Date(d));
+					return d3.time.format('%Y-%m-%d %H:%M:%S')(new Date(d));
 				});
 			}
 			chart.yAxis.tickFormat(d3.format('d'));
