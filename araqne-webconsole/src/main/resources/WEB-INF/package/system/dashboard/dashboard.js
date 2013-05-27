@@ -475,22 +475,32 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				element.remove();
 			}
 
-			var template = angular.element('<div class="widget"><h5>' + attrs.name + '</h5>' +
+			var elWidget = angular.element('<div class="widget"></div>');
+			var elCard = angular.element('<div class="card"></div>');
+			var elFront = angular.element('<figure class="front"></figure>');
+			var elBack = angular.element('<figure class="back"><button class="close">back</button></figure>');
+			var titlebar = angular.element('<h5>' + attrs.name + '</h5>' +
 				'<button style="margin-left: 10px" class="close widget-close">&times;</button>' +
 				'<button class="close widget-refresh"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
-				'<span class="ninput" style="float:right"></span>' + 
-				'</div>');
+				'<button class="close widget-property"><i style="margin-top: 6px; margin-left:10px;" class="icon-info-sign pull-right"></i></button>');
+
+			var info = angular.element('<span class="ninput" style="float:left"></span>');
+
+			elFront.append(titlebar);
+			elBack.append(info);
+
 			var ninput = angular.element('<input type="number" min="5" ng-model="' + attrs.guid + '.interval" />');
+
+			elBack.append(angular.element('<div class="clearboth">' + decodeURIComponent(attrs.query) + '</div>'));
 
 			if(attrs.type == 'grid') {
 				var table = angular.element('<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
 					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table>');
 				$compile(table)(scope);
 				$compile(ninput)(scope);
-				template.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
-				template.append(table);
-
-				element.append(template);
+				elBack.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
+				elFront.append(table);
+				elCard.append(elFront);
 
 				query().pageLoaded(pageLoaded).loaded(loaded).created(created);
 
@@ -504,11 +514,11 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				}				
 			}
 			else if(attrs.type == 'chart.bar' || attrs.type == 'chart.line') {
-				element.append(template);
 				var svg = angular.element('<svg class="widget">');
 				$compile(ninput)(scope);
-				template.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
-				template.append(svg);
+				elBack.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
+				elFront.append(svg);
+				elCard.append(elFront);
 				
 				query().pageLoaded(pageLoaded).loaded(loaded).created(created);
 
@@ -531,16 +541,28 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
 				}
 			}
+			elCard.append(elBack);
 
-			template.find('button.widget-close').on('click', function() {
+			elWidget.append(elCard);
+			element.append(elWidget);
+
+			elFront.find('button.widget-close').on('click', function() {
 				eventSender.onRemoveSingleWidget(attrs.guid);
 				dispose();
 			});
 
-			template.find('button.widget-refresh').on('click', function() {
+			elFront.find('button.widget-refresh').on('click', function() {
 				clearTimeout(timer);
 				timer = null;
 				query();
+			});
+
+			elFront.find('button.widget-property').on('click', function() {
+				elCard.addClass('flipped');
+			});
+
+			elBack.find('button.close').on('click', function() {
+				elCard.removeClass('flipped');
 			});
 
 			element[0].$dispose = dispose; 

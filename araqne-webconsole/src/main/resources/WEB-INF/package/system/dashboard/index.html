@@ -139,10 +139,56 @@
 	}
 
 	widget > .widget {
+		position: relative;
+		-webkit-perspective: 800px;
+	}
+
+	.widget .card {
+		-webkit-transform-style: preserve-3d;
+		-webkit-transition: -webkit-transform 1s;
+	}
+
+	.card.flipped {
+		-webkit-transform: rotateY(180deg);
+	}
+
+	.card figure {
+		-webkit-margin-before: 0;
+		-webkit-margin-after: 0;
+		-webkit-margin-start: 0;
+		-webkit-margin-end: 0;
+
+		display: block;
+		position: relative;
+		-webkit-backface-visibility: hidden;
+	}
+
+	figure.front {
 		padding: 10px;
 		margin: 10px;
 		border-bottom: 1px solid #ccc;
 		background-color: white;
+	}
+
+	.card input, .card button {
+		-webkit-transition: -webkit-transform 1s;
+	}
+
+	.card.flipped .front input, .card.flipped .front button {
+		opacity: 0;
+	}
+
+	figure.back {
+		-webkit-transform: rotateY(180deg);
+		background: white;
+		position: absolute;
+		padding: 10px;
+		top: 0;
+		left: 10px;
+		right: 10px;
+		bottom: 0;
+		border-bottom: 1px solid #ccc;
+		box-shadow: 0 0 10px #ccc;
 	}
 
 	.widget h5 {
