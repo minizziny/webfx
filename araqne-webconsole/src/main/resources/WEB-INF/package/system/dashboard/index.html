@@ -7,14 +7,12 @@
 	<script src="../../logpresso/logsource/lib/jquery-1.9.1.js"></script>
 	<script src="../../logpresso/logsource/lib/bootstrap/js/bootstrap.js"></script>
 	<script src="../../logpresso/logsource/lib/angular.js"></script>
-	<script src="../../../lib/d3.v2.js"></script>
-	<script src="nv.d3.custom.js"></script>
+	<script src="../../logpresso/logsource//lib/d3.v3.js"></script>
 	<script src="../../logpresso/logsource/myApp.js"></script>
 	<script src="module.logdb.js"></script>
 
 	<link rel="stylesheet" href="../../logpresso/logsource/lib/bootstrap/css/bootstrap.css" />
 	<link rel="stylesheet" href="../../logpresso/logsource/logsource.css" />
-	<link rel="stylesheet" href="nv.d3.css" />
 	<style>
 
 	body {
@@ -274,14 +272,40 @@
 		margin: 0 10px;
 	}
 
+	i.icon-noncheck {
+		background-position: 9999px 9999px;
+	}
+
+	/* widget */
 	svg.widget {
 		width: 400px;
 		clear: both;
 		height: 300px;
+		display: block;
 	}
 
-	i.icon-noncheck {
-		background-position: 9999px 9999px;
+	figure .axis path, figure .axis line {
+		fill: none;
+		stroke: #000;
+		shape-rendering: crispEdges;
+	}
+
+	/*
+	figure .axis.x text {
+		-webkit-transform: rotate(315deg) translate(-55px, 0px)
+	}
+	*/
+
+	figure .line {
+		fill: none;
+		stroke: steelblue;
+		stroke-width: 1.5px;
+	}
+
+	figure text {
+		font-size: 11px;
+		letter-spacing: -0.5px;
+		/*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; */
 	}
 	</style>
 </head>
@@ -361,7 +385,7 @@
 		<!--
 		<widget guid="testtest" name="멤" type="grid" interval="15" query="table%20limit%3D10%20memlogs" fields="['_id','pfree']"></widget>
 		<widget guid="testchart" name="멤차트" type="chart.bar" interval="15" query="table%20limit%3D10%20memlogs" series="%5B%7B%22color%22%3A%22%23AFD8F8%22%2C%22name%22%3A%22%ED%9B%84%EB%A6%AC%22%2C%22key%22%3A%22pfree%22%7D%5D" label="_time"></widget>
-		-->
+	-->
 	</div>
 
 	<div class="modal errorWin" modal>

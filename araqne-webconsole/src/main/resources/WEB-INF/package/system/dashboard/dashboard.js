@@ -12,73 +12,288 @@ function checkDate(member, i) {
 app.factory('serviceChart', function(serviceGuid) {
 	function multiBarHorizontalChart(selector, data) {
 		$(selector).empty();
+		if(data.length == 0) return;
 
-		nv.addGraph(function() {
-			var chart = nv.models.multiBarHorizontalChart()
-			.x(function(d) { return { 'obj': d, 'label': d.label, 'toString': function() {return d.guid;} } }) // xlabel이 동일할 경우에 대책
-			.y(function(d) { return d.value })
-			//.margin({top: 40, right: 40, bottom: 40, left: 170})
-			.margin({top: 0, right: 20, bottom: 20, left: 120})
-			.showValues(true)
-			.tooltips(false)
-			.showControls(false);
 
-			chart.xAxis.tickFormat(function(d) {
-				if(checkDate(d.label)) {
-					return d.label.substring(0, 19);
-					//return d3.time.format('%x %X')(new Date(d.label));
-				}
-				else {
-					return d.label;
-				}
+		var margin = {top: 20, right: 20, bottom: 90, left: 40},
+		width = 400 - margin.left - margin.right,
+		height = 300 - margin.top - margin.bottom;
+
+		if(true) { //xtype == 'datetime') {
+			var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+
+			data.forEach(function(d) {
+				d.values.forEach(function(v) {
+					v.label = v.label.substring(0, 19);
+				});
 			});
-			chart.yAxis.tickFormat(d3.format('d'));
+		}
 
-			d3.select(selector)
-			.datum(data)
-			.transition().duration(500)
-			.call(chart);
+		var x0 = d3.scale.ordinal()
+		.rangeRoundBands([0, width], .1);
 
-			nv.utils.windowResize(chart.update);
+		var x1 = d3.scale.ordinal();
 
-			return chart;
-		});	
+		var y = d3.scale.linear()
+		.range([height, 0]);
+
+		var color = d3.scale.ordinal()
+		.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+		var xAxis = d3.svg.axis()
+		.scale(x0)
+		.orient("bottom");
+
+		var yAxis = d3.svg.axis()
+		.scale(y)
+		.orient("left")
+		.tickFormat(d3.format(".2s"));
+
+		var svg = d3.select(selector).append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		console.log(data)
+		var xDom0 = data[0].values.map(function(d) { return d.label; });
+		var xDom1 = data.map(function(d) { return d.key; });
+		x0.domain(xDom0);
+		x1.domain(xDom1).rangeRoundBands([0, x0.rangeBand()]);
+		y.domain([0, d3.max(data, function(d) { return d3.max(d.values, function(d) { return d.value; }); })]);
+
+		//console.log(xDom1, xDom2);
+
+		var xGroup = svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis);
+
+		if(true) {// xtype == 'datetime') {
+			xGroup.selectAll('text')
+				.attr('transform', "rotate(-45) translate(-55 0)")
+		}
+
+		svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis)
+		/*
+		.append("text")
+		.attr("transform", "rotate(-90)")
+		.attr("y", 6)
+		.attr("dy", ".71em")
+		.style("text-anchor", "end")
+		.text("Population");
+		*/
+
+		console.log(data)
+
+		var state = svg.selectAll(".state")
+		.data(data)
+		.enter().append("g")
+		.attr("class", "g");
+
+		state.selectAll("rect")
+		.data(function(d) {
+			return d.values;
+		})
+		.enter().append("rect")
+			.attr("width", x1.rangeBand())
+			.attr("x", function(d, i1, i0) { return x0(d.label) + x1.rangeBand() * i0; })
+			.attr("y", function(d) { return y(d.value); })
+			.attr("height", function(d) { return height - y(d.value); })
+			.style("fill", function(d, i1, i0) { return data[i0].color; });
+
+		return;
+		var legend = svg.selectAll(".legend")
+		.data(ageNames.slice().reverse())
+		.enter().append("g")
+		.attr("class", "legend")
+		.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+		legend.append("rect")
+		.attr("x", width - 18)
+		.attr("width", 18)
+		.attr("height", 18)
+		.style("fill", color);
+
+		legend.append("text")
+		.attr("x", width - 24)
+		.attr("y", 9)
+		.attr("dy", ".35em")
+		.style("text-anchor", "end")
+		.text(function(d) { return d; });
 	}
 
 	function lineChart(selector, data, xtype) {
 		$(selector).empty();
+		if(data[0].values.length == 0) return;
 
-		nv.addGraph(function() {
-			var isXtype = (xtype == 'datetime');
-			var chart = nv.models.lineChart()
-			.x(function(d) {
-				if(isXtype) {
-					return new Date(d.label)
-				}
-				else {
-					return d.label;
-				}
-			})
-			.y(function(d) { return d.value })
-			.margin({right: 60})
-			.color(d3.scale.category10().range());
+		var margin;
+		if(xtype == 'number') {
+			margin = {top: 10, right: 20, bottom: 40, left: 80};
+		}
+		else if(xtype == 'datetime') {
+			margin = {top: 10, right: 20, bottom: 90, left: 80};
+		}
+		width = 400 - margin.left - margin.right,
+		height = 300 - margin.top - margin.bottom;
 
-			if(isXtype) {
-				chart.xAxis.tickFormat(function(d) {
-					return d3.time.format('%Y-%m-%d %H:%M:%S')(new Date(d));
+		if(xtype == 'datetime') {
+			var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+
+			data.forEach(function(d) {
+				d.values.forEach(function(v) {
+					v.label = parseDate(v.label.substring(0, 19));
 				});
-			}
-			chart.yAxis.tickFormat(d3.format('d'));
+			});
+		}
 
-			d3.select(selector)
-			.datum(data)
-			.transition().duration(500)
-			.call(chart);
+		var x = d3.time.scale()
+		.range([0, width]);
 
-			nv.utils.windowResize(chart.update);
+		var y = d3.scale.linear()
+		.range([height, 0]);
 
-			return chart;
+		var xAxis = d3.svg.axis()
+		.scale(x)
+		.orient("bottom")
+
+		var yAxis = d3.svg.axis()
+		.scale(y)
+		.orient("left");
+
+		var line = d3.svg.line()
+		.x(function(d) { return x(d.label); })
+		.y(function(d) { return y(d.value); });
+
+		var svg = d3.select(selector).append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		// data depends
+		var xDom = d3.extent(data[0].values, function(d) { return d.label; })
+		x.domain(xDom);
+
+
+		if(xtype == 'datetime') {
+			xAxis.tickFormat(d3.time.format("%Y-%m-%d %H:%M:%S"));
+		}
+		else if(xtype == 'number') {
+			xAxis.tickFormat(d3.format('d'))
+			.tickValues(d3.range(xDom[0], xDom[1], data[0].values.length / 5));
+		}
+		
+		y.domain([
+			d3.min(data, function(c) { return d3.min(c.values, function(v) { return v.value; }); }),
+			d3.max(data, function(c) { return d3.max(c.values, function(v) { return v.value; }); })
+			]);
+
+		var xGroup = svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis)
+
+		if(xtype == 'datetime') {
+			xGroup.selectAll('text')
+				.attr('transform', "rotate(-45) translate(-55 0)")
+		}
+
+		svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis)
+		
+		var city = svg.selectAll(".city")
+		.data(data)
+		.enter().append("g")
+		.attr("class", "city");
+
+		city.append("path")
+		.attr("class", "line")
+		.attr("d", function(d) { return line(d.values); })
+		.style("stroke", function(d) { return d.color; });
+
+		city.append("text")
+		.datum(function(d) { return {name: d.key, value: d.values[d.values.length - 1]}; })
+		.attr("transform", function(d) { return "translate(" + x(d.value.label) + "," + y(d.value.value) + ")"; })
+		.attr("x", 3)
+		.attr("dy", ".35em")
+		.text(function(d) { return d.key; });
+
+
+		/*
+
+		console.log(data);
+
+		if(data.length > 0) {
+			console.log(data[0].values.length)
+			data = data[0].values;
+		}
+		else {
+			return;
+		}
+
+		var margin = {top: 10, right: 20, bottom: 90, left: 80},
+		width = 400 - margin.left - margin.right,
+		height = 300 - margin.top - margin.bottom;
+
+		var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+
+		data.forEach(function(d) {
+			d.label = parseDate(d.label.substring(0, 19));
 		});
+
+		var x = d3.time.scale()
+		.range([0, width]);
+
+		var y = d3.scale.linear()
+		.range([height, 0]);
+
+		var xAxis = d3.svg.axis()
+		.scale(x)
+		.orient("bottom")
+		.tickFormat(d3.time.format("%Y-%m-%d %H:%M:%S"));
+
+		var yAxis = d3.svg.axis()
+		.scale(y)
+		.orient("left")
+		.ticks(5);
+
+
+		var line = d3.svg.line()
+		.x(function(d) { return x(d.label); })
+		.y(function(d) { return y(d.value); });
+
+		var svg = d3.select(selector).append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		x.domain(d3.extent(data, function(d) { return d.label; }));
+		y.domain(d3.extent(data, function(d) { return d.value; }));
+
+		svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis)
+		.selectAll('text')
+			.attr('transform', "rotate(-45) translate(-55 0)");
+
+		svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis)
+
+		svg.append("path")
+		.datum(data)
+		.attr("class", "line")
+		.attr("d", line);
+
+		return svg;
+
+		*/
 	}
 
 	function buildJSONStructure(dataSeries, dataResult, dataLabel) {
@@ -593,11 +808,7 @@ app.factory('eventSender', function() {
 function Controller($scope, serviceSession, serviceTask, eventSender) {
 
 	$scope.logout = serviceSession.logout;
-
-	serviceTask.init();
 	proc = serviceTask.newProcess('dashboard');
-
-	//serviceSession.login("root", "araqne", proc.pid);
 
 	$scope.openNewWidget = function() {
 		eventSender.onOpenNewWidget();
