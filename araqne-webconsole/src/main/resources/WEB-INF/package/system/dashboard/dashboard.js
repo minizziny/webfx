@@ -4,6 +4,8 @@ var proc;
 parent.d3 = d3;
 
 var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
+var tooltip = $('<div class="tooltip fade top"><div class="tooltip-arrow"></div><div class="tooltip-inner">...</div></div>').appendTo($('body'));
+
 function checkDate(member, i) {
 	if(member == undefined) return false;
 	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19)))
@@ -15,7 +17,7 @@ app.factory('serviceChart', function(serviceGuid) {
 		if(data.length == 0) return;
 
 
-		var margin = {top: 20, right: 20, bottom: 90, left: 40},
+		var margin = {top: 30, right: 20, bottom: 90, left: 40},
 		width = 400 - margin.left - margin.right,
 		height = 300 - margin.top - margin.bottom;
 
@@ -102,27 +104,44 @@ app.factory('serviceChart', function(serviceGuid) {
 			.attr("x", function(d, i1, i0) { return x0(d.label) + x1.rangeBand() * i0; })
 			.attr("y", function(d) { return y(d.value); })
 			.attr("height", function(d) { return height - y(d.value); })
-			.style("fill", function(d, i1, i0) { return data[i0].color; });
+			.style("fill", function(d, i1, i0) { return data[i0].color; })
+			.on('mouseenter', function(d, i, j) {
+				this.isEnter = true;
+				
+				d3.select(this).style('fill', d3.rgb(data[j].color).darker(1));
+				tooltip.find('.tooltip-inner').html(d.value + '/' + d.label);
+				var mpos = d3.mouse($('body')[0]);
+				tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in');
+			})
+			.on('mousemove', function(d, i, j) {
+				var mpos = d3.mouse($('body')[0]);
+				tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in');
+			})
+			.on('mouseout', function(d, i, j) {
+				d3.select(this).style('fill', data[j].color);
+				tooltip.removeClass('in');
 
-		return;
-		var legend = svg.selectAll(".legend")
-		.data(ageNames.slice().reverse())
+				this.isEnter = false;
+			});
+
+		var legend = d3.select(selector).select('svg').selectAll(".legend")
+		.data(data.slice().reverse())
 		.enter().append("g")
 		.attr("class", "legend")
-		.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+		.attr("transform", function(d, i) { return "translate(" + (width - i * 60 - margin.right) + ", 0)"; });
 
 		legend.append("rect")
-		.attr("x", width - 18)
+		.attr("x", 30)
 		.attr("width", 18)
 		.attr("height", 18)
-		.style("fill", color);
+		.style("fill", function(d) { return d.color; });
 
 		legend.append("text")
-		.attr("x", width - 24)
+		.attr("x", 24)
 		.attr("y", 9)
 		.attr("dy", ".35em")
 		.style("text-anchor", "end")
-		.text(function(d) { return d; });
+		.text(function(d) { return d.key; });
 	}
 
 	function lineChart(selector, data, xtype) {
@@ -177,7 +196,6 @@ app.factory('serviceChart', function(serviceGuid) {
 		var xDom = d3.extent(data[0].values, function(d) { return d.label; })
 		x.domain(xDom);
 
-
 		if(xtype == 'datetime') {
 			xAxis.tickFormat(d3.time.format("%Y-%m-%d %H:%M:%S"));
 		}
@@ -210,6 +228,33 @@ app.factory('serviceChart', function(serviceGuid) {
 		.enter().append("g")
 		.attr("class", "city");
 
+		var dots = svg.selectAll('.dots')
+		.data(data)
+		.enter().append('g')
+		.attr('class', 'dots');
+
+		var dot = dots.selectAll('.dot')
+		.data(function(d) { return d.values; })
+		.enter().append('circle')
+		.attr('class', 'dot')
+		.attr("r", 3)
+		.attr("cx", function(d) { return x(d.label); })
+		.attr("cy", function(d) { return y(d.value); })
+		.style("stroke", function(d, i, j) { return data[j].color; })
+		.style('stroke-width', 2)
+		.style("fill", function(d, i, j) { return '#fff'; })
+		.on('mouseover', function(d, i) {
+			var mpos = d3.mouse($('body')[0]);
+			d3.select(this).attr('r', 5);
+
+			tooltip.find('.tooltip-inner').html(d.value + '/' + d.label);
+			tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in');
+		})
+		.on('mouseout', function() {
+			d3.select(this).attr('r', 3);
+			tooltip.removeClass('in');
+		});
+
 		city.append("path")
 		.attr("class", "line")
 		.attr("d", function(d) { return line(d.values); })
@@ -222,78 +267,6 @@ app.factory('serviceChart', function(serviceGuid) {
 		.attr("dy", ".35em")
 		.text(function(d) { return d.key; });
 
-
-		/*
-
-		console.log(data);
-
-		if(data.length > 0) {
-			console.log(data[0].values.length)
-			data = data[0].values;
-		}
-		else {
-			return;
-		}
-
-		var margin = {top: 10, right: 20, bottom: 90, left: 80},
-		width = 400 - margin.left - margin.right,
-		height = 300 - margin.top - margin.bottom;
-
-		var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
-
-		data.forEach(function(d) {
-			d.label = parseDate(d.label.substring(0, 19));
-		});
-
-		var x = d3.time.scale()
-		.range([0, width]);
-
-		var y = d3.scale.linear()
-		.range([height, 0]);
-
-		var xAxis = d3.svg.axis()
-		.scale(x)
-		.orient("bottom")
-		.tickFormat(d3.time.format("%Y-%m-%d %H:%M:%S"));
-
-		var yAxis = d3.svg.axis()
-		.scale(y)
-		.orient("left")
-		.ticks(5);
-
-
-		var line = d3.svg.line()
-		.x(function(d) { return x(d.label); })
-		.y(function(d) { return y(d.value); });
-
-		var svg = d3.select(selector).append("svg")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
-		.append("g")
-		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-		x.domain(d3.extent(data, function(d) { return d.label; }));
-		y.domain(d3.extent(data, function(d) { return d.value; }));
-
-		svg.append("g")
-		.attr("class", "x axis")
-		.attr("transform", "translate(0," + height + ")")
-		.call(xAxis)
-		.selectAll('text')
-			.attr('transform', "rotate(-45) translate(-55 0)");
-
-		svg.append("g")
-		.attr("class", "y axis")
-		.call(yAxis)
-
-		svg.append("path")
-		.datum(data)
-		.attr("class", "line")
-		.attr("d", line);
-
-		return svg;
-
-		*/
 	}
 
 	function buildJSONStructure(dataSeries, dataResult, dataLabel) {
