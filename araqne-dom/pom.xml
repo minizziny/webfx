@@ -60,14 +60,17 @@
 		<dependency>
 			<groupId>org.araqne</groupId>
 			<artifactId>araqne-api</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.araqne</groupId>
 			<artifactId>araqne-confdb</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.araqne</groupId>
 			<artifactId>araqne-msgbus</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 	</dependencies>
 </project>
