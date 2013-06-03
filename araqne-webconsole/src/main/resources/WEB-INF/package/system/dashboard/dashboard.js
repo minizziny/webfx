@@ -89,6 +89,17 @@ app.factory('serviceChart', function(serviceGuid) {
 		.text("Population");
 		*/
 
+		/* rules */
+		svg.append('g')
+		.selectAll("line.rule.y")
+		.data(y.ticks(yAxis.ticks()[0]))
+		.enter().append('line')
+		.attr('class', 'rule y')
+		.attr('x2', width)
+		.attr("transform", function(d) { return "translate(0," + y(d) + ")"; })
+		.style('stroke', '#ccc')
+		.style('stroke-width', '0.5');
+
 		var state = svg.selectAll(".state")
 		.data(data)
 		.enter().append("g")
@@ -100,14 +111,28 @@ app.factory('serviceChart', function(serviceGuid) {
 		})
 		.enter().append("rect")
 			.attr("width", x1.rangeBand())
-			.attr("x", function(d, i1, i0) { return x0(d.label) + x1.rangeBand() * i0; })
+			.attr("x", function(d, i, j) { return x0(d.label) + x1.rangeBand() * j; })
 			.attr("y", function(d) { return y(d.value); })
 			.attr("height", function(d) { return height - y(d.value); })
-			.style("fill", function(d, i1, i0) { return data[i0].color; })
+			.style("fill", function(d, i, j) {
+				if(data.length == 1) {
+					return color_map[i];
+				}
+				else {
+					return data[j].color;
+				}
+			})
 			.on('mouseenter', function(d, i, j) {
 				this.isEnter = true;
 				
-				d3.select(this).style('fill', d3.rgb(data[j].color).darker(1));
+				d3.select(this).style('fill', function() {
+					if(data.length == 1) {
+						return d3.rgb(color_map[i]).darker(1);
+					}
+					else {
+						return d3.rgb(data[j].color).darker(1);
+					}
+				});
 				tooltip.find('.tooltip-inner').html(d.value + '/' + d.label);
 				var mpos = d3.mouse($('body')[0]);
 				tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in').show();
@@ -117,7 +142,14 @@ app.factory('serviceChart', function(serviceGuid) {
 				tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in');
 			})
 			.on('mouseout', function(d, i, j) {
-				d3.select(this).style('fill', data[j].color);
+				d3.select(this).style('fill', function() {
+					if(data.length == 1) {
+						return color_map[i];
+					}
+					else {
+						return data[j].color;
+					}
+				});
 				tooltip.removeClass('in').hide();
 
 				this.isEnter = false;
@@ -133,10 +165,22 @@ app.factory('serviceChart', function(serviceGuid) {
 		.attr("x", 30)
 		.attr("width", 18)
 		.attr("height", 18)
-		.style("fill", function(d) { return d.color; });
+		.style("fill", function(d, i) { 
+			if(data.length == 1) {
+				return 'transparent';
+			}
+			else {
+				return d.color;
+			}
+		});
 
 		legend.append("text")
-		.attr("x", 24)
+		.attr("x", function() {
+			if(data.length == 1) {
+				return 48;
+			}
+			else { return 24; }
+		})
 		.attr("y", 9)
 		.attr("dy", ".35em")
 		.style("text-anchor", "end")
@@ -218,10 +262,40 @@ app.factory('serviceChart', function(serviceGuid) {
 				.attr('transform', "rotate(-45) translate(-55 0)")
 		}
 
+		/* rules */
+		svg.append('g')
+		.selectAll("line.rule.y")
+		.data(y.ticks(yAxis.ticks()[0]))
+		.enter().append('line')
+		.attr('class', 'rule y')
+		.attr('x2', width)
+		.attr("transform", function(d) { return "translate(0," + y(d) + ")"; })
+		.style('stroke', '#ccc')
+		.style('stroke-width', '0.5');
+
+		var xRuleData;
+		if(xAxis.tickValues() != null) {
+			xRuleData = xAxis.tickValues();
+		}
+		else {
+			xRuleData = x.ticks(xAxis.ticks()[0]);
+		}
+
+		svg.append('g')
+		.selectAll("line.rule.x")
+		.data(xRuleData)
+		.enter().append('line')
+		.attr('class', 'rule x')
+		.attr('y2', height)
+		.attr("transform", function(d) { return "translate(" + x(d) + ",0)"; })
+		.style('stroke', '#ccc')
+		.style('stroke-width', '0.5');
+
+
 		svg.append("g")
 		.attr("class", "y axis")
-		.call(yAxis)
-		
+		.call(yAxis);
+
 		var city = svg.selectAll(".city")
 		.data(data)
 		.enter().append("g")
@@ -239,18 +313,24 @@ app.factory('serviceChart', function(serviceGuid) {
 		.attr("r", 3)
 		.attr("cx", function(d) { return x(d.label); })
 		.attr("cy", function(d) { return y(d.value); })
-		.style("stroke", function(d, i, j) { return data[j].color; })
+		.style("stroke", function(d, i, j) { return 'transparent' })// return data[j].color; })
 		.style('stroke-width', 2)
-		.style("fill", function(d, i, j) { return '#fff'; })
-		.on('mouseover', function(d, i) {
+		.style("fill", function(d, i, j) { return 'transparent'; })
+		.on('mouseover', function(d, i, j) {
 			var mpos = d3.mouse($('body')[0]);
-			d3.select(this).attr('r', 5);
+			d3.select(this)
+			.attr('r', 5)
+			.style("stroke", function() { return data[j].color; })
+			.style("fill", function() { return '#fff'; });
 
 			tooltip.find('.tooltip-inner').html(d.value + '/' + d.label);
 			tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in').show();
 		})
 		.on('mouseout', function() {
-			d3.select(this).attr('r', 3);
+			d3.select(this).attr('r', 3)
+			.style("stroke", function() { return 'transparent'; })
+			.style("fill", function() { return 'transparent'; });
+
 			tooltip.removeClass('in').hide();;
 		});
 
