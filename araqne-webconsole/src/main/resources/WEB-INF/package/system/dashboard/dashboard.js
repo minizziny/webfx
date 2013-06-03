@@ -1,10 +1,12 @@
 var app = angular.module('dashboard', ['myApp', 'logdb']);
 var proc;
+console.log('dashboard init');
 
 parent.d3 = d3;
 
 var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
 var tooltip = $('<div class="tooltip fade top"><div class="tooltip-arrow"></div><div class="tooltip-inner">...</div></div>').appendTo($('body'));
+var color_map = ["#AFD8F8","#F6BD0F","#8BBA00","#FF8E46","#008E8E","#D64646","#8E468E","#588526","#B3AA00","#008ED6","#9D080D","#A186BE","#CC6600","#FDC689","#ABA000","#F26D7D","#FFF200","#0054A6","#F7941C","#CC3300","#006600","#663300","#6DCFF6"];
 
 function checkDate(member, i) {
 	if(member == undefined) return false;
@@ -57,7 +59,6 @@ app.factory('serviceChart', function(serviceGuid) {
 		.append("g")
 		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-		console.log(data)
 		var xDom0 = data[0].values.map(function(d) { return d.label; });
 		var xDom1 = data.map(function(d) { return d.key; });
 		x0.domain(xDom0);
@@ -88,8 +89,6 @@ app.factory('serviceChart', function(serviceGuid) {
 		.text("Population");
 		*/
 
-		console.log(data)
-
 		var state = svg.selectAll(".state")
 		.data(data)
 		.enter().append("g")
@@ -111,7 +110,7 @@ app.factory('serviceChart', function(serviceGuid) {
 				d3.select(this).style('fill', d3.rgb(data[j].color).darker(1));
 				tooltip.find('.tooltip-inner').html(d.value + '/' + d.label);
 				var mpos = d3.mouse($('body')[0]);
-				tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in');
+				tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in').show();
 			})
 			.on('mousemove', function(d, i, j) {
 				var mpos = d3.mouse($('body')[0]);
@@ -119,7 +118,7 @@ app.factory('serviceChart', function(serviceGuid) {
 			})
 			.on('mouseout', function(d, i, j) {
 				d3.select(this).style('fill', data[j].color);
-				tooltip.removeClass('in');
+				tooltip.removeClass('in').hide();
 
 				this.isEnter = false;
 			});
@@ -248,11 +247,11 @@ app.factory('serviceChart', function(serviceGuid) {
 			d3.select(this).attr('r', 5);
 
 			tooltip.find('.tooltip-inner').html(d.value + '/' + d.label);
-			tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in');
+			tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in').show();
 		})
 		.on('mouseout', function() {
 			d3.select(this).attr('r', 3);
-			tooltip.removeClass('in');
+			tooltip.removeClass('in').hide();;
 		});
 
 		city.append("path")
@@ -267,6 +266,77 @@ app.factory('serviceChart', function(serviceGuid) {
 		.attr("dy", ".35em")
 		.text(function(d) { return d.key; });
 
+	}
+
+	function pie(selector, data) {
+		$(selector).empty();
+		if(data.length == 0) return;
+		data = data[0];
+		
+		var width = 400,
+		height = 300,
+		radius = Math.min(width, height) / 3;
+
+		//var color = d3.scale.ordinal().range(color_map);
+
+		var arc = d3.svg.arc()
+		.outerRadius(radius - 10)
+		.innerRadius(0);
+
+		var arcl = d3.svg.arc()
+		.outerRadius(radius - 10)
+		.innerRadius(radius - 60);
+
+		var pie = d3.layout.pie()
+		.sort(null)
+		.value(function(d) { return d.value; });
+
+		var svg = d3.select(selector).append("svg")
+		.attr("width", width)
+		.attr("height", height)
+		.append("g")
+		.attr("transform", "translate(" + (width / 2 - 80) + "," + height / 2 + ")");
+
+		var g = svg.selectAll(".arc")
+		.data(pie(data.values))
+		.enter().append("g")
+		.attr("class", "arc");
+
+		g.append("path")
+		.attr("d", arc)
+		.style("fill", function(d, i) { return color_map[i]; }); //color(d.data.value); });
+
+		var g2 = svg.selectAll(".arcl")
+		.data(pie(data.values))
+		.enter().append("g")
+		.attr("class", "arcl");
+
+		g2.append("text")
+		.attr("transform", function(d) { return "translate(" + arcl.centroid(d) + ")"; })
+		.attr("dy", ".35em")
+		.style("text-anchor", "middle")
+		.text(function(d) { return d.data.value; });
+
+		var legend = svg.append('g')
+		.attr('transform', 'translate(-130, ' + -radius + ')')
+		.selectAll(".legend")
+		.data(data.values)
+		.enter().append("g")
+		.attr("class", "legend")
+		.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+		legend.append("rect")
+		.attr("x", width - 18)
+		.attr("width", 18)
+		.attr("height", 18)
+		.style("fill", function(d, i) { return color_map[i]; });
+
+		legend.append("text")
+		.attr("x", width - 24)
+		.attr("y", 9)
+		.attr("dy", ".35em")
+		.style("text-anchor", "end")
+		.text(function(d) { return d.label; });
 	}
 
 	function buildJSONStructure(dataSeries, dataResult, dataLabel) {
@@ -319,6 +389,7 @@ app.factory('serviceChart', function(serviceGuid) {
 	return {
 		multiBarHorizontalChart: multiBarHorizontalChart,
 		lineChart: lineChart,
+		pie: pie,
 		buildJSONStructure: buildJSONStructure,
 		getDataSeries: getDataSeries
 	}
@@ -701,7 +772,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
 				}				
 			}
-			else if(attrs.type == 'chart.bar' || attrs.type == 'chart.line') {
+			else if(attrs.type == 'chart.bar' || attrs.type == 'chart.line' || attrs.type == 'chart.pie') {
 				var svg = angular.element('<svg class="widget">');
 				$compile(ninput)(scope);
 				elBack.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
@@ -721,6 +792,9 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 					}
 					else if(attrs.type == 'chart.bar') {
 						serviceChart.multiBarHorizontalChart(svg[0], json);
+					}
+					else if(attrs.type == 'chart.pie') {
+						serviceChart.pie(svg[0], json);
 					}
 
 					serviceLogdb.remove(z);	
@@ -836,7 +910,7 @@ function PresetController($scope, $compile, socket, eventSender, serviceGuid) {
 			$('.board').append(widget);
 		}
 		else if(ctx.type == 'chart') {
-			if(ctx.data.type == 'bar' || ctx.data.type == 'line') {
+			if(ctx.data.type == 'bar' || ctx.data.type == 'line' || ctx.data.type == 'pie') {
 				var query = encodeURIComponent(ctx.data.query);
 				var series = encodeURIComponent(JSON.stringify(ctx.data.series));
 				var widget = angular.element('<widget guid="' + ctx.guid + '" name="' + ctx.name + '" type="' + ctx.type + '.' + ctx.data.type + '" interval="' + ctx.interval + '" query="' + query + '" series="' + series + '" label="' + ctx.data.label + '" labeltype="' + ctx.data.labelType + '">');
@@ -1026,7 +1100,6 @@ function PresetController($scope, $compile, socket, eventSender, serviceGuid) {
 }
 
 function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) {
-	var color_map = ["#AFD8F8","#F6BD0F","#8BBA00","#FF8E46","#008E8E","#D64646","#8E468E","#588526","#B3AA00","#008ED6","#9D080D","#A186BE","#CC6600","#FDC689","#ABA000","#F26D7D","#FFF200","#0054A6","#F7941C","#CC3300","#006600","#663300","#6DCFF6"];
 	var number_of_index = 0;
 
 	function getDefaultSeries() {
@@ -1069,6 +1142,9 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 		}
 		else if($scope.chartType.name == 'line') {
 			serviceChart.lineChart('.charthere svg', st, dataLabel.type);
+		}
+		else if($scope.chartType.name == 'pie') {
+			serviceChart.pie('.charthere svg', st);
 		}
 		
 	}
@@ -1136,7 +1212,7 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 		var idxNumber = types.indexOf('number');
 
 
-		if($scope.chartType.name == "bar") {
+		if($scope.chartType.name == "bar" || $scope.chartType.name == "pie") {
 			// [ datetime ] 첫번째 datetime type 컬럼을 dataLabel로 지정
 			if(idxDatetime != -1) {
 				$scope.dataLabel = selectedCols[idxDatetime];
@@ -1162,7 +1238,6 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 				$scope.dataLabel = selectedCols[idxNumber];
 			}
 		}
-
 
 	}
 
