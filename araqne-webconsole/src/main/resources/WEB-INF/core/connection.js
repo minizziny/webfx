@@ -214,6 +214,10 @@ function ConnectionManager() {
 		connWs.onerror = function(e) {
 			console.log(e);
 		}
+		connWs.onclose = function(e) {
+			alert("세션이 종료되었습니다. 다시 로그인하십시오.");
+			parent.location.href = "/";
+		}
 	}
 
 
