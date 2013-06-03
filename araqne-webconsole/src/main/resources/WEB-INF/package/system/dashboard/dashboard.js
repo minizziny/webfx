@@ -751,67 +751,90 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				interval: parseInt(attrs.interval)
 			};
 
-			var timer, created, pageLoaded, loaded, z, manuplulate;
-			var isLoaded = false;
+			function getData(qString, onDataLoaded, elRefresh) {
+				var timer, qInst, isLoaded = false;
 
-			created = function(m) {
-				isLoaded = false;
-				console.log(attrs.type + ' reloaded');
-				scope[attrs.guid].data = [];
-			}
+				function created(m) {
+					isLoaded = false;
+					console.log(attrs.type + ' ------------- ', qInst.id());
+					scope[attrs.guid].data = [];
+				}
 
-			loaded = function(m) {
-				console.log(attrs.type + ' loaded');
-				var first_load_length = scope[attrs.guid].data.length;
-				
-				var amount = Math.max(m.body.total_count, first_load_length);
-				if(amount > 15) {
-					var total_count = Math.min(m.body.total_count, 1000);
+				function pageLoaded(m) {
+					console.log(attrs.type + ' pageloaded', qInst.id());
+					for (var i = 0; i < m.body.result.length; i++) {
+						scope[attrs.guid].data.push(m.body.result[i]);
+					};
 
-					// load more
-					z.getResult(first_load_length, total_count - first_load_length, function() {
-						manuplulate();
+					if(isLoaded) {
+						dataLoaded(false);
+					}
+				}
+
+				function loaded(m) {
+					console.log(attrs.type + ' loaded', qInst.id());
+					var first_load_length = scope[attrs.guid].data.length;
+					
+					var amount = Math.max(m.body.total_count, first_load_length);
+					if(amount > 15) {
+						var total_count = Math.min(m.body.total_count, 1000);
+
+						// load more
+						qInst.getResult(first_load_length, total_count - first_load_length, function() {
+							dataLoaded(true);
+							isLoaded = true;
+						});
+					}
+					else {
+						dataLoaded(true);
 						isLoaded = true;
+					}
+				}
+
+				function dataLoaded(removeQuery) {
+					if(removeQuery == true) {
+						console.log(attrs.type + ' onDataLoaded', qInst.id(), Date.now())	
+					}
+					else {
+						console.warn(attrs.type + ' onDataLoaded', qInst.id(), Date.now());
+					}
+					
+					onDataLoaded({
+						dispose: function() {
+							clearTimeout(timer);
+							timer = null;
+							element.remove();
+						}
+					});
+
+					if(removeQuery) {
+						serviceLogdb.remove(qInst);	
+						clearTimeout(timer);
+						timer = null;
+						timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
+					}
+				}
+
+				function query() {
+					qInst = serviceLogdb.create(proc.pid);
+					qInst.query(qString)
+					.created(created)
+					.pageLoaded(pageLoaded)
+					.loaded(loaded)
+					.failed(function(m) {
+						clearTimeout(timer);
+						timer = null;
+						timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
 					});
 				}
-				else {
-					manuplulate();
-					isLoaded = true;
-				}
 
-			}
-			
-			pageLoaded = function(m) {
-				console.log(attrs.type + ' pageloaded');
-				for (var i = 0; i < m.body.result.length; i++) {
-					scope[attrs.guid].data.push(m.body.result[i]);
-				};
+				query();
 
-				if(isLoaded) {
-					manuplulate();
-				}
-			};
-
-			function query() {
-				console.log('--------------------')
-				z = serviceLogdb.create(proc.pid);
-				var q = z.query(decodeURIComponent(attrs.query));
-				q.created(created)
-				.pageLoaded(pageLoaded)
-				.loaded(loaded)
-				.failed(function(m) {
+				elRefresh.on('click', function() {
 					clearTimeout(timer);
 					timer = null;
-					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
+					query();
 				});
-
-				return q;
-			}
-
-			function dispose() {
-				clearTimeout(timer);
-				timer = null;
-				element.remove();
 			}
 
 			var elWidget = angular.element('<div class="widget"></div>');
@@ -829,10 +852,10 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 			elBack.append(info);
 
 			var ninput = angular.element('<input type="number" min="5" ng-model="' + attrs.guid + '.interval" />');
-
 			elBack.append(angular.element('<div class="clearboth">' + decodeURIComponent(attrs.query) + '</div>'));
 
 			if(attrs.type == 'grid') {
+
 				var table = angular.element('<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
 					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table>');
 				$compile(table)(scope);
@@ -841,27 +864,33 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				elFront.append(table);
 				elCard.append(elFront);
 
-				query().pageLoaded(pageLoaded).loaded(loaded).created(created);
 
-				manuplulate = function() {
+				getData(decodeURIComponent(attrs.query), function(self) {
+
 					scope.$apply();
 
-					serviceLogdb.remove(z);	
-					clearTimeout(timer);
-					timer = null;
-					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
-				}				
+					elFront.find('button.widget-close').off('click').on('click', function() {
+						eventSender.onRemoveSingleWidget(attrs.guid);
+						self.dispose();
+					});
+
+					element[0].$dispose = function() {
+						self.dispose();
+					}; 
+
+				}, elFront.find('button.widget-refresh'));
 			}
-			else if(attrs.type == 'chart.bar' || attrs.type == 'chart.line' || attrs.type == 'chart.pie') {
+			else if (attrs.type == 'chart.bar' || attrs.type == 'chart.line' || attrs.type == 'chart.pie') { 
+
 				var svg = angular.element('<svg class="widget">');
 				$compile(ninput)(scope);
 				elBack.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
 				elFront.append(svg);
 				elCard.append(elFront);
-				
-				query().pageLoaded(pageLoaded).loaded(loaded).created(created);
 
-				manuplulate = function() {
+
+				getData(decodeURIComponent(attrs.query), function(self) {
+
 					var dataResult = scope[attrs.guid].data;
 					var dataSeries = serviceChart.getDataSeries(attrs.series);
 					var dataLabel = {name: attrs.label, type: attrs.labeltype};
@@ -877,27 +906,21 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 						serviceChart.pie(svg[0], json);
 					}
 
-					serviceLogdb.remove(z);	
-					clearTimeout(timer);
-					timer = null;
-					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
-				}
-			}
-			elCard.append(elBack);
+					elFront.find('button.widget-close').off('click').on('click', function() {
+						eventSender.onRemoveSingleWidget(attrs.guid);
+						self.dispose();
+					});
 
+					element[0].$dispose = function() {
+						self.dispose();
+					};
+
+				}, elFront.find('button.widget-refresh'));
+			}
+
+			elCard.append(elBack);
 			elWidget.append(elCard);
 			element.append(elWidget);
-
-			elFront.find('button.widget-close').on('click', function() {
-				eventSender.onRemoveSingleWidget(attrs.guid);
-				dispose();
-			});
-
-			elFront.find('button.widget-refresh').on('click', function() {
-				clearTimeout(timer);
-				timer = null;
-				query();
-			});
 
 			elFront.find('button.widget-property').on('click', function() {
 				elCard.addClass('flipped');
@@ -906,8 +929,6 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 			elBack.find('button.close').on('click', function() {
 				elCard.removeClass('flipped');
 			});
-
-			element[0].$dispose = dispose; 
 
 			scope.$watch(attrs.guid + '.interval', function() {
 				console.log('interval updated')
