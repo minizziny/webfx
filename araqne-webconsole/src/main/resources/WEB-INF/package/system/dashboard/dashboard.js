@@ -4,6 +4,8 @@ var proc;
 parent.d3 = d3;
 
 var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
+var tooltip = $('<div class="tooltip fade top"><div class="tooltip-arrow"></div><div class="tooltip-inner">...</div></div>').appendTo($('body'));
+
 function checkDate(member, i) {
 	if(member == undefined) return false;
 	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19)))
@@ -12,73 +14,259 @@ function checkDate(member, i) {
 app.factory('serviceChart', function(serviceGuid) {
 	function multiBarHorizontalChart(selector, data) {
 		$(selector).empty();
+		if(data.length == 0) return;
 
-		nv.addGraph(function() {
-			var chart = nv.models.multiBarHorizontalChart()
-			.x(function(d) { return { 'obj': d, 'label': d.label, 'toString': function() {return d.guid;} } }) // xlabel이 동일할 경우에 대책
-			.y(function(d) { return d.value })
-			//.margin({top: 40, right: 40, bottom: 40, left: 170})
-			.margin({top: 0, right: 20, bottom: 20, left: 120})
-			.showValues(true)
-			.tooltips(false)
-			.showControls(false);
 
-			chart.xAxis.tickFormat(function(d) {
-				if(checkDate(d.label)) {
-					return d.label.substring(0, 19);
-					//return d3.time.format('%x %X')(new Date(d.label));
-				}
-				else {
-					return d.label;
-				}
+		var margin = {top: 30, right: 20, bottom: 90, left: 40},
+		width = 400 - margin.left - margin.right,
+		height = 300 - margin.top - margin.bottom;
+
+		if(true) { //xtype == 'datetime') {
+			var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+
+			data.forEach(function(d) {
+				d.values.forEach(function(v) {
+					v.label = v.label.substring(0, 19);
+				});
 			});
-			chart.yAxis.tickFormat(d3.format('d'));
+		}
 
-			d3.select(selector)
-			.datum(data)
-			.transition().duration(500)
-			.call(chart);
+		var x0 = d3.scale.ordinal()
+		.rangeRoundBands([0, width], .1);
 
-			nv.utils.windowResize(chart.update);
+		var x1 = d3.scale.ordinal();
 
-			return chart;
-		});	
+		var y = d3.scale.linear()
+		.range([height, 0]);
+
+		var color = d3.scale.ordinal()
+		.range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+		var xAxis = d3.svg.axis()
+		.scale(x0)
+		.orient("bottom");
+
+		var yAxis = d3.svg.axis()
+		.scale(y)
+		.orient("left")
+		.tickFormat(d3.format(".2s"));
+
+		var svg = d3.select(selector).append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		console.log(data)
+		var xDom0 = data[0].values.map(function(d) { return d.label; });
+		var xDom1 = data.map(function(d) { return d.key; });
+		x0.domain(xDom0);
+		x1.domain(xDom1).rangeRoundBands([0, x0.rangeBand()]);
+		y.domain([0, d3.max(data, function(d) { return d3.max(d.values, function(d) { return d.value; }); })]);
+
+		//console.log(xDom1, xDom2);
+
+		var xGroup = svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis);
+
+		if(true) {// xtype == 'datetime') {
+			xGroup.selectAll('text')
+				.attr('transform', "rotate(-45) translate(-55 0)")
+		}
+
+		svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis)
+		/*
+		.append("text")
+		.attr("transform", "rotate(-90)")
+		.attr("y", 6)
+		.attr("dy", ".71em")
+		.style("text-anchor", "end")
+		.text("Population");
+		*/
+
+		console.log(data)
+
+		var state = svg.selectAll(".state")
+		.data(data)
+		.enter().append("g")
+		.attr("class", "g");
+
+		state.selectAll("rect")
+		.data(function(d) {
+			return d.values;
+		})
+		.enter().append("rect")
+			.attr("width", x1.rangeBand())
+			.attr("x", function(d, i1, i0) { return x0(d.label) + x1.rangeBand() * i0; })
+			.attr("y", function(d) { return y(d.value); })
+			.attr("height", function(d) { return height - y(d.value); })
+			.style("fill", function(d, i1, i0) { return data[i0].color; })
+			.on('mouseenter', function(d, i, j) {
+				this.isEnter = true;
+				
+				d3.select(this).style('fill', d3.rgb(data[j].color).darker(1));
+				tooltip.find('.tooltip-inner').html(d.value + '/' + d.label);
+				var mpos = d3.mouse($('body')[0]);
+				tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in');
+			})
+			.on('mousemove', function(d, i, j) {
+				var mpos = d3.mouse($('body')[0]);
+				tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in');
+			})
+			.on('mouseout', function(d, i, j) {
+				d3.select(this).style('fill', data[j].color);
+				tooltip.removeClass('in');
+
+				this.isEnter = false;
+			});
+
+		var legend = d3.select(selector).select('svg').selectAll(".legend")
+		.data(data.slice().reverse())
+		.enter().append("g")
+		.attr("class", "legend")
+		.attr("transform", function(d, i) { return "translate(" + (width - i * 60 - margin.right) + ", 0)"; });
+
+		legend.append("rect")
+		.attr("x", 30)
+		.attr("width", 18)
+		.attr("height", 18)
+		.style("fill", function(d) { return d.color; });
+
+		legend.append("text")
+		.attr("x", 24)
+		.attr("y", 9)
+		.attr("dy", ".35em")
+		.style("text-anchor", "end")
+		.text(function(d) { return d.key; });
 	}
 
 	function lineChart(selector, data, xtype) {
 		$(selector).empty();
+		if(data[0].values.length == 0) return;
 
-		nv.addGraph(function() {
-			var isXtype = (xtype == 'datetime');
-			var chart = nv.models.lineChart()
-			.x(function(d) {
-				if(isXtype) {
-					return new Date(d.label)
-				}
-				else {
-					return d.label;
-				}
-			})
-			.y(function(d) { return d.value })
-			.margin({right: 60})
-			.color(d3.scale.category10().range());
+		var margin;
+		if(xtype == 'number') {
+			margin = {top: 10, right: 20, bottom: 40, left: 80};
+		}
+		else if(xtype == 'datetime') {
+			margin = {top: 10, right: 20, bottom: 90, left: 80};
+		}
+		width = 400 - margin.left - margin.right,
+		height = 300 - margin.top - margin.bottom;
 
-			if(isXtype) {
-				chart.xAxis.tickFormat(function(d) {
-					return d3.time.format('%Y-%m-%d %H:%M:%S')(new Date(d));
+		if(xtype == 'datetime') {
+			var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
+
+			data.forEach(function(d) {
+				d.values.forEach(function(v) {
+					v.label = parseDate(v.label.substring(0, 19));
 				});
-			}
-			chart.yAxis.tickFormat(d3.format('d'));
+			});
+		}
 
-			d3.select(selector)
-			.datum(data)
-			.transition().duration(500)
-			.call(chart);
+		var x = d3.time.scale()
+		.range([0, width]);
 
-			nv.utils.windowResize(chart.update);
+		var y = d3.scale.linear()
+		.range([height, 0]);
 
-			return chart;
+		var xAxis = d3.svg.axis()
+		.scale(x)
+		.orient("bottom")
+
+		var yAxis = d3.svg.axis()
+		.scale(y)
+		.orient("left");
+
+		var line = d3.svg.line()
+		.x(function(d) { return x(d.label); })
+		.y(function(d) { return y(d.value); });
+
+		var svg = d3.select(selector).append("svg")
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		// data depends
+		var xDom = d3.extent(data[0].values, function(d) { return d.label; })
+		x.domain(xDom);
+
+		if(xtype == 'datetime') {
+			xAxis.tickFormat(d3.time.format("%Y-%m-%d %H:%M:%S"));
+		}
+		else if(xtype == 'number') {
+			xAxis.tickFormat(d3.format('d'))
+			.tickValues(d3.range(xDom[0], xDom[1], data[0].values.length / 5));
+		}
+		
+		y.domain([
+			d3.min(data, function(c) { return d3.min(c.values, function(v) { return v.value; }); }),
+			d3.max(data, function(c) { return d3.max(c.values, function(v) { return v.value; }); })
+			]);
+
+		var xGroup = svg.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + height + ")")
+		.call(xAxis)
+
+		if(xtype == 'datetime') {
+			xGroup.selectAll('text')
+				.attr('transform', "rotate(-45) translate(-55 0)")
+		}
+
+		svg.append("g")
+		.attr("class", "y axis")
+		.call(yAxis)
+		
+		var city = svg.selectAll(".city")
+		.data(data)
+		.enter().append("g")
+		.attr("class", "city");
+
+		var dots = svg.selectAll('.dots')
+		.data(data)
+		.enter().append('g')
+		.attr('class', 'dots');
+
+		var dot = dots.selectAll('.dot')
+		.data(function(d) { return d.values; })
+		.enter().append('circle')
+		.attr('class', 'dot')
+		.attr("r", 3)
+		.attr("cx", function(d) { return x(d.label); })
+		.attr("cy", function(d) { return y(d.value); })
+		.style("stroke", function(d, i, j) { return data[j].color; })
+		.style('stroke-width', 2)
+		.style("fill", function(d, i, j) { return '#fff'; })
+		.on('mouseover', function(d, i) {
+			var mpos = d3.mouse($('body')[0]);
+			d3.select(this).attr('r', 5);
+
+			tooltip.find('.tooltip-inner').html(d.value + '/' + d.label);
+			tooltip.css('top', mpos[1] - 60).css('left',mpos[0] - tooltip.width() / 2).addClass('in');
+		})
+		.on('mouseout', function() {
+			d3.select(this).attr('r', 3);
+			tooltip.removeClass('in');
 		});
+
+		city.append("path")
+		.attr("class", "line")
+		.attr("d", function(d) { return line(d.values); })
+		.style("stroke", function(d) { return d.color; });
+
+		city.append("text")
+		.datum(function(d) { return {name: d.key, value: d.values[d.values.length - 1]}; })
+		.attr("transform", function(d) { return "translate(" + x(d.value.label) + "," + y(d.value.value) + ")"; })
+		.attr("x", 3)
+		.attr("dy", ".35em")
+		.text(function(d) { return d.key; });
+
 	}
 
 	function buildJSONStructure(dataSeries, dataResult, dataLabel) {
@@ -475,22 +663,32 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				element.remove();
 			}
 
-			var template = angular.element('<div class="widget"><h5>' + attrs.name + '</h5>' +
+			var elWidget = angular.element('<div class="widget"></div>');
+			var elCard = angular.element('<div class="card"></div>');
+			var elFront = angular.element('<figure class="front"></figure>');
+			var elBack = angular.element('<figure class="back"><button class="close">back</button></figure>');
+			var titlebar = angular.element('<h5>' + attrs.name + '</h5>' +
 				'<button style="margin-left: 10px" class="close widget-close">&times;</button>' +
 				'<button class="close widget-refresh"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
-				'<span class="ninput" style="float:right"></span>' + 
-				'</div>');
+				'<button class="close widget-property"><i style="margin-top: 6px; margin-left:10px;" class="icon-info-sign pull-right"></i></button>');
+
+			var info = angular.element('<span class="ninput" style="float:left"></span>');
+
+			elFront.append(titlebar);
+			elBack.append(info);
+
 			var ninput = angular.element('<input type="number" min="5" ng-model="' + attrs.guid + '.interval" />');
+
+			elBack.append(angular.element('<div class="clearboth">' + decodeURIComponent(attrs.query) + '</div>'));
 
 			if(attrs.type == 'grid') {
 				var table = angular.element('<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
 					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table>');
 				$compile(table)(scope);
 				$compile(ninput)(scope);
-				template.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
-				template.append(table);
-
-				element.append(template);
+				elBack.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
+				elFront.append(table);
+				elCard.append(elFront);
 
 				query().pageLoaded(pageLoaded).loaded(loaded).created(created);
 
@@ -504,11 +702,11 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				}				
 			}
 			else if(attrs.type == 'chart.bar' || attrs.type == 'chart.line') {
-				element.append(template);
 				var svg = angular.element('<svg class="widget">');
 				$compile(ninput)(scope);
-				template.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
-				template.append(svg);
+				elBack.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
+				elFront.append(svg);
+				elCard.append(elFront);
 				
 				query().pageLoaded(pageLoaded).loaded(loaded).created(created);
 
@@ -531,16 +729,28 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
 				}
 			}
+			elCard.append(elBack);
 
-			template.find('button.widget-close').on('click', function() {
+			elWidget.append(elCard);
+			element.append(elWidget);
+
+			elFront.find('button.widget-close').on('click', function() {
 				eventSender.onRemoveSingleWidget(attrs.guid);
 				dispose();
 			});
 
-			template.find('button.widget-refresh').on('click', function() {
+			elFront.find('button.widget-refresh').on('click', function() {
 				clearTimeout(timer);
 				timer = null;
 				query();
+			});
+
+			elFront.find('button.widget-property').on('click', function() {
+				elCard.addClass('flipped');
+			});
+
+			elBack.find('button.close').on('click', function() {
+				elCard.removeClass('flipped');
 			});
 
 			element[0].$dispose = dispose; 
@@ -571,11 +781,7 @@ app.factory('eventSender', function() {
 function Controller($scope, serviceSession, serviceTask, eventSender) {
 
 	$scope.logout = serviceSession.logout;
-
-	serviceTask.init();
 	proc = serviceTask.newProcess('dashboard');
-
-	//serviceSession.login("root", "araqne", proc.pid);
 
 	$scope.openNewWidget = function() {
 		eventSender.onOpenNewWidget();

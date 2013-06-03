@@ -7,3 +7,4 @@ target
 *.csproj.user
 obj
 bin
+*.dep
