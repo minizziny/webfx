@@ -57,7 +57,11 @@ function ConnectionManager() {
 			if(connWs.readyState == 1) {
 				connWs.send(JSON.stringify(request));
 			}
-			else {
+			else if(connWs.readyState == 2 || connWs.readyState == 3) {
+				alert("세션이 종료되었습니다. 다시 로그인하십시오.");
+				parent.location.href = "/";
+			}
+			else if(connWs.readyState == 0) {
 				console.log('websocket connection delayed')
 				connWs.onopen = function() {
 					connWs.send(JSON.stringify(request));
@@ -65,6 +69,9 @@ function ConnectionManager() {
 						connWs.onopen = null;
 					}, 500);
 				}
+			}
+			else {
+				console.error('websocket error', connWs);
 			}
 		}
 
@@ -92,7 +99,7 @@ function ConnectionManager() {
 
 						if(resp.body.admin_login_name == null && resp.body.org_domain == null) {
 							alert("로그인이 필요합니다.")
-							parent.location.href = "/index.html";
+							parent.location.href = "/";
 							//$("#login").show();
 						}
 						else {

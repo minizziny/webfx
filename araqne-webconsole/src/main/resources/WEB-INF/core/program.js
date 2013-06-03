@@ -47,6 +47,7 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 							var appicon = "package/" + pack.dll + "/" + program.path + "/icon.png";
 							$.get(appicon, function() {
 								program.icon(appicon);
+								console.clear();
 							});
 						});
 					});
@@ -122,6 +123,7 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 				},
 				error: function() {
 					iframe.attr("src", defUrl);
+					console.clear();
 				},
 				complete: function() {
 					var loadingdiv = $("<div>").css("position", "absolute")
