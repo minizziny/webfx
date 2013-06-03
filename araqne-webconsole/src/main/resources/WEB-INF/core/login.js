@@ -18,7 +18,32 @@ function doLogin(login_name, password, loginCallback) {
 			console.log(raw)
 			
 			if(m.isError) {
-				alert('로그인에 실패했습니다.');
+				var ec = raw[0].errorCode;
+				if(ec == 'admin-not-found') {
+					alert('로그인에 실패했습니다. 사용자를 찾을 수 없습니다.');
+				}
+				else if(ec == 'invalid-password') {
+					alert('로그인에 실패했습니다. 암호가 틀립니다.');
+				}
+				else if(ec == 'invalid-otp-password'){
+					alert('로그인에 실패했습니다. OTP 암호가 틀립니다.');
+				}
+				else if(ec == 'expired-password') {
+					alert('로그인에 실패했습니다. 암호가 만료되었습니다.');
+				}
+				else if(ec == 'not-trust-host') {
+					alert('로그인에 실패했습니다. 신뢰할 수 없는 호스트입니다.');
+				}
+				else if(ec == 'locked-admin') {
+					alert('로그인에 실패했습니다. 사용자 계정이 잠겨있습니다.');
+				}
+				else if(ec == 'max_session') {
+					alert('허용된 세션을 초과했습니다.');
+				}
+				else {
+					alert('로그인에 실패했습니다.\n코드: ' + ec);	
+				}
+
 				return;
 			}
 
@@ -59,7 +84,7 @@ function doLogout() {
 				return;
 			}
 
-			location.href = "index.html";
+			location.href = "/";
 
 		});
 	})

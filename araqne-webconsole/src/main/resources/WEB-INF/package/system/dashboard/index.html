@@ -385,7 +385,8 @@
 		<!--
 		<widget guid="testtest" name="멤" type="grid" interval="15" query="table%20limit%3D10%20memlogs" fields="['_id','pfree']"></widget>
 		<widget guid="testchart" name="멤차트" type="chart.bar" interval="15" query="table%20limit%3D10%20memlogs" series="%5B%7B%22color%22%3A%22%23AFD8F8%22%2C%22name%22%3A%22%ED%9B%84%EB%A6%AC%22%2C%22key%22%3A%22pfree%22%7D%5D" label="_time"></widget>
-	-->
+		<widget guid="testchart" name="멤차트" type="chart.pie" interval="15" query="table%20limit%3D5000%20memlogs%20%7C%20timechart%20span%3D10m%20count" series="%5B%7B%22color%22%3A%22%23AFD8F8%22%2C%22name%22%3A%22%ED%9B%84%EB%A6%AC%22%2C%22key%22%3A%22count%22%7D%5D" label="_time"></widget>
+		-->
 	</div>
 
 	<div class="modal errorWin" modal>
@@ -492,9 +493,8 @@
 						<span class="pull-left" style="margin-top: 12px;margin-right: 10px">차트 종류를 선택하십시오.</span>
 						<div class="btn-group pull-left" data-toggle="buttons-radio">
 							<button class="btn btn-large active" data-toggle="button" ng-click="selectChartType(0)">바</button>
-							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(1)">라인</button><!--
+							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(1)">라인</button>
 							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(2)">파이</button>
-						-->
 						</div>
 					</div>
 					<div class="clearfix" style="margin-top: 20px">
@@ -555,7 +555,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; margin-bottom: 36px; background-color: #f0f0f0" ng-show="chartType.name == 'bar'">
+						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; margin-bottom: 36px; background-color: #f0f0f0" ng-show="chartType.name == 'bar' || chartType.name == 'pie'">
 							<div class="control-group">
 								<label class="control-label" for="widgetInterval">라벨</label>
 								<div class="controls">
@@ -573,7 +573,9 @@
 						</div>
 					</div>
 					<div class="charthere">
-						<svg></svg>
+						<figure>
+							<svg></svg>
+						</figure>
 					</div>
 					<div class="control-group submit-group clearboth" style="bottom: 15px; left: 20px; right: 27px; position: absolute">
 						<button class="wiz-prev btn" ng-click="go(4)">이전</button>
