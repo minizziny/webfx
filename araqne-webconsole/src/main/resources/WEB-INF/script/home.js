@@ -54,7 +54,7 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 				window.vmPrograms = vmPrograms;
 
 				vmPrograms.pack = pack.name;
-				vmPrograms.run = function(program) {
+				vmPrograms.run = function(program, args) {
 					$("#div-launcher").hide();
 					$("#start").removeClass("active");
 
@@ -63,7 +63,7 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 					var found = false;
 					var foundprogram;
 					$.each(vmTasks.items(), function(i, obj){
-						if(obj.path === program.path) {
+						if(obj.path === program.path && obj.pack === program.pack) {
 							found = true;
 							foundprogram = obj;
 							return false;
@@ -71,10 +71,12 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 					})
 					
 					if(!found) {
+						program.args = args;
 						vmTasks.add(program);
 						vmTasks.select(program);
 					}
 					else {
+						foundprogram.args = args;
 						vmTasks.select(foundprogram);
 					}
 				}
