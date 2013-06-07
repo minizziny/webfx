@@ -50,6 +50,7 @@ public class HttpServerImpl implements HttpServer, HttpConfigurationListener {
 	private KeyStoreManager keyStoreManager;
 	private Channel listener;
 	private ConfigService conf;
+	private NioServerSocketChannelFactory channelFactory;
 
 	public HttpServerImpl(BundleContext bc, HttpConfiguration config, HttpContextRegistry contextRegistry,
 			KeyStoreManager keyStoreManager, ConfigService conf) {
@@ -66,8 +67,8 @@ public class HttpServerImpl implements HttpServer, HttpConfigurationListener {
 	@Override
 	public void open() {
 		// Configure the server.
-		ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
-				Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
+		channelFactory = new NioServerSocketChannelFactory(Executors.newCachedThreadPool(), Executors.newCachedThreadPool());
+		ServerBootstrap bootstrap = new ServerBootstrap(channelFactory);
 
 		// Set up the event pipeline factory.
 		bootstrap.setPipelineFactory(new HttpPipelineFactory(bc, config, contextRegistry, keyStoreManager));
@@ -76,7 +77,7 @@ public class HttpServerImpl implements HttpServer, HttpConfigurationListener {
 		InetSocketAddress addr = config.getListenAddress();
 		listener = bootstrap.bind(addr);
 
-		logger.info("araqne httpd: {} ({}) opened", addr, config.isSsl() ? "https" : "http");
+		logger.info("araqne httpd: {} ({}) opened", listener.getLocalAddress(), config.isSsl() ? "https" : "http");
 	}
 
 	@Override
@@ -148,7 +149,10 @@ public class HttpServerImpl implements HttpServer, HttpConfigurationListener {
 		try {
 			if (listener != null) {
 				logger.info("araqne httpd: {} closed", listener.getLocalAddress());
-				listener.unbind();
+				listener.close().awaitUninterruptibly();
+				channelFactory.releaseExternalResources();
+				listener = null;
+				channelFactory = null;
 			}
 		} catch (Throwable t) {
 			logger.error("araqne httpd: cannot close " + listener.getLocalAddress(), t);
@@ -158,6 +162,6 @@ public class HttpServerImpl implements HttpServer, HttpConfigurationListener {
 	@Override
 	public boolean isOpened() {
 		// TODO Auto-generated method stub
-		return  listener == null ? false : listener.isOpen();
+		return listener == null ? false : listener.isOpen();
 	}
 }

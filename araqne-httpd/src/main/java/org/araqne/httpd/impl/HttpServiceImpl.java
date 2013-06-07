@@ -93,6 +93,8 @@ public class HttpServiceImpl implements HttpService {
 	public void stop() {
 		for (HttpServer server : listeners.values())
 			server.close();
+
+		listeners.clear();
 	}
 
 	@Override
@@ -134,6 +136,7 @@ public class HttpServiceImpl implements HttpService {
 		HttpServer old = listeners.putIfAbsent(config.getListenAddress(), server);
 		if (old != null)
 			throw new IllegalStateException("server already exists: " + config.getListenAddress());
+		server.open();
 		return server;
 	}
 

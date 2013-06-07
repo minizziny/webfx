@@ -112,8 +112,7 @@ public class HttpdScript implements Script {
 
 			HttpConfiguration config = new HttpConfiguration(new InetSocketAddress(port));
 			config.setDefaultHttpContext(defaultContext);
-			HttpServer server = httpd.createServer(config);
-			server.open();
+			httpd.createServer(config);
 			context.println("opened http server");
 		} catch (Exception e) {
 			context.println(e.getMessage());
@@ -135,8 +134,7 @@ public class HttpdScript implements Script {
 
 			InetSocketAddress listen = new InetSocketAddress(port);
 			HttpConfiguration config = new HttpConfiguration(listen, keyAlias, trustAlias);
-			HttpServer server = httpd.createServer(config);
-			server.open();
+			httpd.createServer(config);
 			context.println("opened https server");
 		} catch (Exception e) {
 			context.println(e.getMessage());
