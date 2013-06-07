@@ -1,4 +1,4 @@
-var app = angular.module('dashboard', ['myApp', 'logdb']);
+var app = angular.module('dashboard', ['myApp', 'logdb', 'ui.sortable']);
 var proc;
 console.log('dashboard init');
 
@@ -852,7 +852,8 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 			elBack.append(info);
 
 			var ninput = angular.element('<input type="number" min="5" ng-model="' + attrs.guid + '.interval" />');
-			elBack.append(angular.element('<div class="clearboth">' + decodeURIComponent(attrs.query) + '</div>'));
+			var elquerystr = $('<div class="clearboth">').append($('<pre>').text(decodeURIComponent(attrs.query)));
+			elBack.append(elquerystr);
 
 			if(attrs.type == 'grid') {
 

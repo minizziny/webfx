@@ -47,7 +47,7 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 							var appicon = "package/" + pack.dll + "/" + program.path + "/icon.png";
 							$.get(appicon, function() {
 								program.icon(appicon);
-								console.clear();
+								//console.clear();
 							});
 						});
 					});
@@ -81,6 +81,9 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 
 			if(current.length == 1) {
 				current.show();
+				if(current.get(0).contentWindow.onArgumentSent != undefined) {
+					current.get(0).contentWindow.onArgumentSent(program.args);
+				}
 			}
 			else if(current.length == 0) {
 				this.launch(program);
@@ -123,7 +126,7 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 				},
 				error: function() {
 					iframe.attr("src", defUrl);
-					console.clear();
+					//console.clear();
 				},
 				complete: function() {
 					var loadingdiv = $("<div>").css("position", "absolute")
@@ -139,6 +142,9 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 						setTimeout(function() {
 							loadingdiv.fadeOut(function() {
 								$(this).remove();
+								if(iframe.get(0).contentWindow.onArgumentSent != undefined) {
+									iframe.get(0).contentWindow.onArgumentSent(program.args);
+								}
 							});
 
 							iframe.get(0).contentWindow.__pid = getPid();
