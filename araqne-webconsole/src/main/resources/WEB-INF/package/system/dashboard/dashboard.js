@@ -1,4 +1,4 @@
-var app = angular.module('dashboard', ['myApp', 'logdb']);
+var app = angular.module('dashboard', ['myApp', 'logdb', 'ui.sortable']);
 var proc;
 console.log('dashboard init');
 

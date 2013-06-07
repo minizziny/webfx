@@ -5,11 +5,13 @@
 	<script src="../../logpresso/logsource/lib/sha1.js"></script>
 
 	<script src="../../logpresso/logsource/lib/jquery-1.9.1.js"></script>
+	<script src="jquery-ui-1.9.2.sortable.js"></script>
 	<script src="../../logpresso/logsource/lib/bootstrap/js/bootstrap.js"></script>
 	<script src="../../logpresso/logsource/lib/angular.js"></script>
 	<script src="../../logpresso/logsource/lib/d3.v3.js"></script>
 	<script src="../../logpresso/logsource/myApp.js"></script>
 	<script src="module.logdb.js"></script>
+	<script src="sortable.js"></script>
 
 	<link rel="stylesheet" href="../../logpresso/logsource/lib/bootstrap/css/bootstrap.css" />
 	<link rel="stylesheet" href="../../logpresso/logsource/logsource.css" />
@@ -116,6 +118,8 @@
 		word-wrap: break-word;
 	}
 
+	/* ListBox */
+
 	.listbox {
 		border: 1px solid #ccc;
 		margin-bottom: 20px;
@@ -127,10 +131,34 @@
 	}
 
 	.listbox > li {
-		margin: 5px 12px;
+		padding: 3px 11px;
+		margin: 1px;
 		list-style-type: none;
 		clear: both;
 	}
+
+	li > input[type=checkbox] {
+		vertical-align: top;
+	}
+
+	ul.ui-sortable > li {
+		border: 1px solid transparent;
+		background-color: transparent;
+		cursor: pointer;
+	}
+
+	ul.ui-sortable > li:hover {
+		border: 1px solid transparent;
+		background-color: #ebf2fc;
+	}
+
+	ul.ui-sortable > li.ui-sortable-helper, ul.ui-sortable > li.ui-sortable-helper:hover {
+		border: 1px solid rgba(82, 168, 236, 0.8);
+		background-color: #ebf2fc; /* #cceaff */
+		box-shadow: 1px 1px 10px #aaa;
+	}
+
+	/* Widget */
 
 	widget {
 		float: left;
@@ -307,6 +335,7 @@
 		letter-spacing: -0.5px;
 		/*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; */
 	}
+
 	</style>
 </head>
 <body ng-controller="Controller">
@@ -439,17 +468,19 @@
 			<li class="wiz-step">
 				<legend>컬럼 선택 및 배치</legend>
 				<fieldset>
-					<div class="fieldset-description">위젯에 표시할 필드를 선택하고, 컬럼 순서를 조절하십시오.</div>
+					<div class="fieldset-description">위젯에 표시할 필드를 선택하고, 드래그 &amp; 드롭하여 컬럼 순서를 조절하십시오.</div>
 					<div>
 						<div class="qr-container" style="width: 80%; float: left">
 							<query-result ng-model="qresult" class="qr2"></query-result>
 						</div>
-						<ul class="listbox arrangeCols">
+						<ul class="listbox arrangeCols" ui-sortable ng-model="qrDataColumnsOrder">
 							<li ng-repeat="(i, col) in qrDataColumnsOrder" ng-hide="col.name=='$$hashKey'">
 								<input type="checkbox" ng-model="col.is_visible">
 								<span>{{col.name}}</span>
+								<!--
 								<button style="float:right" ng-click="shift(i, col)">v</button>
 								<button style="float:right" ng-click="unshift(i, col)">^</button>
+								-->
 							</li>
 						</ul>
 					</div>
