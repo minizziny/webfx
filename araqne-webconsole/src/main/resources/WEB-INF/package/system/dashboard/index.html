@@ -85,13 +85,26 @@
 		top: 10px;
 	}
 
-	query-input textarea {
-		width: calc(100% - 100px);
+	query-input.loading textarea {
+		width: calc(100% - 190px);
+	}
+
+	query-input.loaded textarea {
+		width: calc(100% - 105px);
+	}
+
+	query-input.loading .stop {
+		display: block;
+	}
+
+	query-input.loaded .stop {
+		display: none;
 	}
 
 	query-input .btn {
 		float: right;
 		width: 80px;
+		margin-left: 5px;
 	}
 
 	.qr-container {
@@ -453,7 +466,7 @@
 				<fieldset>
 					<div class="fieldset-description">쿼리한 데이터를 바탕으로 위젯을 생성합니다. 원하는 데이터를 쿼리하십시오.</div>
 					<div>
-						<query-input ng-model="qresult" query-model="ctxWidget.data.query"></query-input>
+						<query-input ng-model="qresult" query-model="ctxWidget.data.query" query-onloading="inputOnloading" query-onloaded="inputOnloaded" query-onpageloaded="inputOnpageloaded"></query-input>
 						<div class="qr-container" style="width: 100%">
 							<query-result ng-model="qresult" class="qr1"></query-result>
 						</div>
@@ -468,7 +481,7 @@
 			<li class="wiz-step">
 				<legend>컬럼 선택 및 배치</legend>
 				<fieldset>
-					<div class="fieldset-description">위젯에 표시할 필드를 선택하고, 드래그 &amp; 드롭하여 컬럼 순서를 조절하십시오.</div>
+					<div class="fieldset-description">위젯에 표시할 필드를 선택하고, 오른쪽 목록에서 드래그 &amp; 드롭하여 컬럼 순서를 조절하십시오.</div>
 					<div>
 						<div class="qr-container" style="width: 80%; float: left">
 							<query-result ng-model="qresult" class="qr2"></query-result>

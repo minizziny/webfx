@@ -546,8 +546,9 @@ app.directive('autosize', function() {
 app.directive('queryInput', function($compile, serviceLogdb) {
 	return {
 		restrict: 'E',
-		template: '<textarea autosize></textarea> <button class="search btn btn-primary">검색</button>',
+		template: '<textarea autosize></textarea> <button class="search btn btn-primary">검색</button> <button class="stop btn btn-warning">중지</button>',
 		link: function(scope, element, attrs) {
+			element.addClass('loaded');
 			var textarea = element.find('textarea');
 			textarea.attr('ng-model', attrs.queryModel);
 			$compile(textarea)(scope);
@@ -563,22 +564,55 @@ app.directive('queryInput', function($compile, serviceLogdb) {
 			
 			element.find('.search').on('click', search);
 
+			element.find('.stop').on('click', stop);
+
+			var z;
 			function search() {
-				var z = serviceLogdb.create(pid);
+				textarea.blur();
+				if(z != undefined) {
+					serviceLogdb.remove(z);
+				}
+				z = serviceLogdb.create(pid);
 				
 				var queryValue = textarea.data('$ngModelController').$modelValue;
 
 				z.query(queryValue)
+				.created(function(m) {
+					element.removeClass('loaded').addClass('loading');
+
+					if(scope[attrs.queryOnloading] != undefined) {
+						scope[attrs.queryOnloading].call(this);
+					}
+				})
 				.pageLoaded(function(m) {
 					scope[attrs.ngModel] = m.body.result;
 					scope.$apply();
+
+					if(scope[attrs.queryOnpageloaded] != undefined) {
+						scope[attrs.queryOnpageloaded].call(this);	
+					}
 				})
 				.loaded(function(m) {
+					element.removeClass('loading').addClass('loaded');
 					serviceLogdb.remove(z);
+
+					if(scope[attrs.queryOnloaded] != undefined) {
+						scope[attrs.queryOnloaded].call(this);	
+					}
 				})
 				.failed(function(m) {
 					alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.')
 				})
+			}
+
+			function stop() {
+				alert('쿼리를 중지합니다.')
+				element.removeClass('loading').addClass('loaded');
+				serviceLogdb.remove(z);
+
+				if(scope[attrs.queryOnloaded] != undefined) {
+					scope[attrs.queryOnloaded].call(this);	
+				}
 			}
 
 		}
@@ -652,6 +686,26 @@ app.directive('queryResult', function($compile) {
 					});
 				}
 			});
+
+			var loadingInd = angular.element('<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>')
+			element.prepend(loadingInd.hide());
+
+			element[0].showLoadingIndicator = function() {
+				element.find('table').hide();
+				loadingInd.show();
+			}
+
+			element[0].showTable = function() {
+				element.find('table').show();
+			}
+
+			element[0].hideTable = function() {
+				element.find('table').hide();
+			}
+
+			element[0].hideLoadingIndicator = function() {
+				loadingInd.fadeOut();
+			}
 		}
 	}
 });
@@ -1434,12 +1488,25 @@ function WizardController($scope, eventSender, serviceGuid) {
 
 	$scope.qresult;
 
+	$scope.inputOnloading = function() {
+		$('.qr1')[0].showLoadingIndicator();
+	}
+
+	$scope.inputOnpageloaded = function() {
+		$('.qr1')[0].showTable();
+	}
+
+	$scope.inputOnloaded = function() {
+		$('.qr1')[0].hideLoadingIndicator();
+	}
+
 	var wtypes = [
 		{
 			'name': 'table',
 			's0next': 1,
 			's0nextCallback': function() {
 				$scope.ctxWidget = getDefaultContext('grid');
+				$('.qr1')[0].hideTable();
 				return;
 			},
 			's1next': 2,
@@ -1450,6 +1517,7 @@ function WizardController($scope, eventSender, serviceGuid) {
 			's0next': 1,
 			's0nextCallback': function() {
 				$scope.ctxWidget = getDefaultContext('chart');
+				$('.qr1')[0].hideTable();
 				return;
 			},
 			's1next': 4,
