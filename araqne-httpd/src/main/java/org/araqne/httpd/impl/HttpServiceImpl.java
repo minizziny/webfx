@@ -75,7 +75,6 @@ public class HttpServiceImpl implements HttpService {
 			try {
 				logger.info("araqne httpd: opening http server [{}]", PrimitiveConverter.serialize(c));
 				HttpServer server = loadServer(c);
-				server.open();
 
 				// build regex patterns
 				HttpConfiguration sc = server.getConfiguration();
