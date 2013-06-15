@@ -89,7 +89,7 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 				this.launch(program);
 			}
 
-			$("title").text("Logpresso | " + program.name);
+			$("title").text("Logsaver® | " + program.name);
 		}
 
 		function findPackDllbyName(name) {

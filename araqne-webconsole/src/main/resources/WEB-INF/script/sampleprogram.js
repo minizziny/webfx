@@ -71,7 +71,7 @@ return [
                 "name": "로그 쿼리",
                 "path": "logquery",
                 "seq": 1,
-                "pack": "Logpresso"
+                "pack": "Logsaver"
             },
             {
                 "visible": true,
@@ -81,7 +81,7 @@ return [
                 "name": "로그 수집 설정",
                 "path": "logsource",
                 "seq": 2,
-                "pack": "Logpresso"
+                "pack": "Logsaver"
             },
             {
                 "visible": true,
@@ -91,14 +91,14 @@ return [
                 "name": "테이블 설정",
                 "path": "table",
                 "seq": 3,
-                "pack": "Logpresso"
+                "pack": "Logsaver"
             }
         ],
         "starter": "starter",
         "created": "2013-02-12 15:18:03+0900",
         "updated": "2013-02-12 15:18:03+0900",
         "description": null,
-        "name": "Logpresso",
+        "name": "Logsaver",
         "seq": 1,
         "dll": "logpresso"
     }
