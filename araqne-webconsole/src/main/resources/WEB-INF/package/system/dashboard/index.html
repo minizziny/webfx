@@ -10,346 +10,14 @@
 	<script src="../../logpresso/logsource/lib/angular.js"></script>
 	<script src="../../logpresso/logsource/lib/d3.v3.js"></script>
 	<script src="../../logpresso/logsource/myApp.js"></script>
+	<script src="module.util.js"></script>
 	<script src="module.logdb.js"></script>
+	<script src="module.logdb.input.js"></script>
 	<script src="sortable.js"></script>
 
 	<link rel="stylesheet" href="../../logpresso/logsource/lib/bootstrap/css/bootstrap.css" />
 	<link rel="stylesheet" href="../../logpresso/logsource/logsource.css" />
-	<style>
-
-	body {
-		background-color: #eee;
-	}
-
-	.board {
-		/* margin-top: 42px; */
-	}
-
-	.brandpreset {
-		line-height: 39px;
-		font-size: 20px;
-		font-weight: 200;
-		color: #777777;
-		text-shadow: 0 1px 0 #ffffff;
-		margin: auto;
-		width: 400px;
-		text-align: center;
-		margin-top: -35px;
-	}
-
-	.wizard {
-		float: left;
-		width: 98%;
-		margin-left: 10px;
-		padding-left: 0px;
-		border-left: 0px;
-	}
-
-	.newWidget {
-		-webkit-transition: .1s ease-in;
-		overflow: hidden;
-	}
-
-	.newWidget.step0 {
-		width: 700px;
-		margin-left: -350px;
-	}
-
-	.newWidget.step1 {
-		/*
-		width: 800px;
-		margin-left: -400px;
-		*/
-	}
-
-	.newWidget.step2 {
-		width: 1000px;
-		margin-left: -500px;
-		/* height: 500px; */
-	}
-
-	.newWidget.step3, .removePreset, .clearWidgets {
-		width: 540px;
-		margin-left: -270px;
-	}
-
-	.newWidget.step4 {
-		width: 1000px;
-		margin-left: -500px;
-	}
-
-	.newWidget.step5 {
-		width: 96.5%;
-		margin-left: -49%;
-		min-height: 90%;
-		top: 10px;
-	}
-
-	query-input.loading textarea {
-		width: calc(100% - 190px);
-	}
-
-	query-input.loaded textarea {
-		width: calc(100% - 105px);
-	}
-
-	query-input.loading .stop {
-		display: block;
-	}
-
-	query-input.loaded .stop {
-		display: none;
-	}
-
-	query-input .btn {
-		float: right;
-		width: 80px;
-		margin-left: 5px;
-	}
-
-	.qr-container {
-		overflow-x: scroll;
-		border: 1px solid #ddd;
-		margin-bottom: 10px;
-	}
-
-	.qr1 > .cmpqr {
-		width: 100%;
-		max-width: 880px;
-	}
-
-	.qr2 > .cmpqr {
-		width: 100%;
-		max-width: 780px;
-	}
-
-	.qr2 > .cmpqr {
-		/* table-layout: fixed; */
-	}
-
-	.cmpqr td, .cmpqr th {
-		word-wrap: break-word;
-	}
-
-	/* ListBox */
-
-	.listbox {
-		border: 1px solid #ccc;
-		margin-bottom: 20px;
-	}
-
-	.arrangeCols {
-		float: right;
-		width: 17%;
-	}
-
-	.listbox > li {
-		padding: 3px 11px;
-		margin: 1px;
-		list-style-type: none;
-		clear: both;
-	}
-
-	li > input[type=checkbox] {
-		vertical-align: top;
-	}
-
-	ul.ui-sortable > li {
-		border: 1px solid transparent;
-		background-color: transparent;
-		cursor: pointer;
-	}
-
-	ul.ui-sortable > li:hover {
-		border: 1px solid transparent;
-		background-color: #ebf2fc;
-	}
-
-	ul.ui-sortable > li.ui-sortable-helper, ul.ui-sortable > li.ui-sortable-helper:hover {
-		border: 1px solid rgba(82, 168, 236, 0.8);
-		background-color: #ebf2fc; /* #cceaff */
-		box-shadow: 1px 1px 10px #aaa;
-	}
-
-	/* Widget */
-
-	widget {
-		float: left;
-	}
-
-	widget > .widget {
-		position: relative;
-		-webkit-perspective: 800px;
-	}
-
-	.widget .card {
-		-webkit-transform-style: preserve-3d;
-		-webkit-transition: -webkit-transform 1s;
-	}
-
-	.card.flipped {
-		-webkit-transform: rotateY(180deg);
-	}
-
-	.card figure {
-		-webkit-margin-before: 0;
-		-webkit-margin-after: 0;
-		-webkit-margin-start: 0;
-		-webkit-margin-end: 0;
-
-		display: block;
-		position: relative;
-		-webkit-backface-visibility: hidden;
-	}
-
-	figure.front {
-		padding: 10px;
-		margin: 10px;
-		border-bottom: 1px solid #ccc;
-		background-color: white;
-	}
-
-	.card input, .card button {
-		-webkit-transition: -webkit-transform 1s;
-	}
-
-	.card.flipped .front input, .card.flipped .front button {
-		display: none;
-	}
-
-	figure.back {
-		-webkit-transform: rotateY(180deg);
-		background: white;
-		position: absolute;
-		padding: 10px;
-		top: 0;
-		left: 10px;
-		right: 10px;
-		bottom: 0;
-		border-bottom: 1px solid #ccc;
-		box-shadow: 0 0 10px #ccc;
-	}
-
-	.widget h5 {
-		float: left;
-		margin-top: 2px;
-	}
-
-	widget input[type=number] {
-		width: 40px;
-		font-size: 12px;
-		height: 19px;
-		padding: 2px;
-	}
-
-	ul.radio {
-		list-style: none;
-	}
-
-	label.radio {
-		display: inline;
-		margin-left: 3px;
-		padding-left: 0;
-		line-height: 2;
-	}
-
-	label.qr-sel-label.selected {
-		border: 1px solid #09f;
-		background: rgba(0, 153, 255, .4);
-		-webkit-animation: fade-in .2s 1;
-	}
-
-	label.qr-sel-label.unselected {
-		border: 1px solid transparent;
-		-webkit-animation: fade-out .2s 1;
-	}
-
-	.charthere {
-		/* -webkit-transition: .1s ease-in; */
-		position: absolute;
-		border: 1px solid #ccc;
-		top: 71px;
-		right: 27px;
-		bottom: 56px;
-		width: 37.5%;
-	}
-
-	.charthere:hover {
-		/* -webkit-transform: scale(1.25) translateX(-25px) translateY(15px); */
-	}
-
-	.clearfix:before,
-	.clearfix:after {
-		content:"";
-		display:table;
-	}
-
-	.clearfix:after {
-		clear:both;
-	}
-
-	@-webkit-keyframes fade-out {
-		0% { opacity: 1; }
-		100% { opacity: 0; }
-	}
-
-	@-webkit-keyframes fade-in {
-		0% { opacity: 0; }
-		100% { opacity: 1; }
-	}
-
-	.moreCol {
-		-webkit-animation: fade-in .5s 1;
-	}
-
-	.moreCol label, .moreCol button {
-		display: inline;
-		vertical-align: text-bottom;
-		margin: 0 5px 0 20px;
-	}
-
-	.charthere svg {
-		width: 100%;
-		margin: 0 10px;
-	}
-
-	i.icon-noncheck {
-		background-position: 9999px 9999px;
-	}
-
-	/* widget */
-	svg.widget {
-		width: 400px;
-		clear: both;
-		height: 300px;
-		display: block;
-	}
-
-	figure .axis path, figure .axis line {
-		fill: none;
-		stroke: #000;
-		shape-rendering: crispEdges;
-	}
-
-	/*
-	figure .axis.x text {
-		-webkit-transform: rotate(315deg) translate(-55px, 0px)
-	}
-	*/
-
-	figure .line {
-		fill: none;
-		stroke: steelblue;
-		stroke-width: 1.5px;
-	}
-
-	figure text {
-		font-size: 11px;
-		letter-spacing: -0.5px;
-		/*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; */
-	}
-
-	</style>
+	<link rel="stylesheet" href="dashboard.css" />
 </head>
 <body ng-controller="Controller">
 	<topbar>
@@ -423,7 +91,7 @@
 		</div>
 	</div>
 
-	<div ng-controller="WallController" class="board">
+	<div class="board">
 		<!--
 		<widget guid="testtest" name="멤" type="grid" interval="15" query="table%20limit%3D10%20memlogs" fields="['_id','pfree']"></widget>
 		<widget guid="testchart" name="멤차트" type="chart.bar" interval="15" query="table%20limit%3D10%20memlogs" series="%5B%7B%22color%22%3A%22%23AFD8F8%22%2C%22name%22%3A%22%ED%9B%84%EB%A6%AC%22%2C%22key%22%3A%22pfree%22%7D%5D" label="_time"></widget>
@@ -473,7 +141,7 @@
 					</div>
 					<div class="control-group submit-group">
 						<button class="wiz-prev btn" ng-click="go(0)">이전</button>
-						<button class="wiz-next btn" ng-click="go(widgetType.s1next, widgetType.s1nextCallback())">다음</button>
+						<button class="wiz-next btn" ng-click="go(widgetType.s1next)">다음</button>
 					</div>
 				</fieldset>
 			</li>
@@ -486,14 +154,10 @@
 						<div class="qr-container" style="width: 80%; float: left">
 							<query-result ng-model="qresult" class="qr2"></query-result>
 						</div>
-						<ul class="listbox arrangeCols" ui-sortable ng-model="qrDataColumnsOrder">
-							<li ng-repeat="(i, col) in qrDataColumnsOrder" ng-hide="col.name=='$$hashKey'">
+						<ul class="listbox arrangeCols" ui-sortable ng-model="qrCols">
+							<li ng-repeat="(i, col) in qrCols">
 								<input type="checkbox" ng-model="col.is_visible">
 								<span>{{col.name}}</span>
-								<!--
-								<button style="float:right" ng-click="shift(i, col)">v</button>
-								<button style="float:right" ng-click="unshift(i, col)">^</button>
-								-->
 							</li>
 						</ul>
 					</div>
@@ -530,9 +194,13 @@
 			</li>
 
 			<!-- 4 -->
-			<li class="wiz-step">
+			<li class="wiz-step" ng-controller="SelectColumnController">
 				<legend>차트 설정 및 데이터 선택</legend>
 				<fieldset>
+					<div class="alert alert-error check-col-info" style="display:none">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						<span></span>
+					</div>
 					<div class="well clearfix">
 						<span class="pull-left" style="margin-top: 12px;margin-right: 10px">차트 종류를 선택하십시오.</span>
 						<div class="btn-group pull-left" data-toggle="buttons-radio">
@@ -554,12 +222,12 @@
 							</div>
 						</div>
 						<div class="qr-container" style="width: 100%; height: 240px; overflow: scroll; margin-top: 5px">
-							<query-result qr-selectable ng-model="qresult" class="qr2"></query-result>
+							<query-result qr-selectable="true" qr-check-type="true" ng-model="qresult" class="qr2"></query-result>
 						</div>
 					</div>
 					<div class="control-group submit-group">
 						<button class="wiz-prev btn" ng-click="go(1)">이전</button>
-						<button class="wiz-next btn" ng-click="go(5, widgetType.s4nextCallback())">다음</button>
+						<button class="wiz-next btn" ng-click="go(5, widgetType.s4nextCallback(), widgetType.s4nextEvent())">다음</button>
 					</div>
 				</fieldset>
 			</li>
@@ -570,7 +238,7 @@
 					<div class="fieldset-description"></div>
 					<div style="width: 60%; float: left">
 						<div class="qr-container" style="width: 100%; height: 240px; overflow: scroll">
-							<query-result ng-model="qresult" class="qr2 qr-selected"></query-result>
+							<query-result qr-custom-template="qrTmpl" qr-check-type="true" ng-model="qresult" class="qr2 qr-selected"></query-result>
 						</div>
 						<div style="width: 22%; float: left">
 							<ul class="nav nav-pills nav-stacked" style="max-height: 100px; overflow: auto; margin-left: 0; padding: 5px; border: 1px solid #ccc">
@@ -603,7 +271,7 @@
 							<div class="control-group">
 								<label class="control-label" for="widgetInterval">라벨</label>
 								<div class="controls">
-									<select ng-model="dataLabel" ng-options="col.name for col in qrDataColumnsOrder"></select>
+									<select ng-model="dataLabel" ng-options="col.name for col in qrCols"></select>
 								</div>
 							</div>
 						</div>

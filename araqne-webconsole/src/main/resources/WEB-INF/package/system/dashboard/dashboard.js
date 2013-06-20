@@ -1,4 +1,4 @@
-var app = angular.module('dashboard', ['myApp', 'logdb', 'ui.sortable']);
+var app = angular.module('dashboard', ['myApp', 'logdb', 'ui.sortable', 'logdb.input', 'util']);
 var proc;
 console.log('dashboard init');
 
@@ -17,13 +17,13 @@ app.factory('serviceChart', function(serviceGuid) {
 	function multiBarHorizontalChart(selector, data) {
 		$(selector).empty();
 		if(data.length == 0) return;
-
+		console.log(data)
 
 		var margin = {top: 30, right: 20, bottom: 90, left: 40},
 		width = 400 - margin.left - margin.right,
 		height = 300 - margin.top - margin.bottom;
 
-		if(true) { //xtype == 'datetime') {
+		if(data[0].labelType == 'datetime') {
 			var parseDate = d3.time.format("%Y-%m-%d %H:%M:%S").parse;
 
 			data.forEach(function(d) {
@@ -187,13 +187,14 @@ app.factory('serviceChart', function(serviceGuid) {
 		.text(function(d) { return d.key; });
 	}
 
-	function lineChart(selector, data, xtype) {
+	function lineChart(selector, data) {
 		$(selector).empty();
 		if(data[0].values.length == 0) return;
 
+		var xtype = data[0].labelType;
 		var margin;
 		if(xtype == 'number') {
-			margin = {top: 10, right: 20, bottom: 40, left: 80};
+			margin = {top: 10, right: 20, bottom: 90, left: 80};
 		}
 		else if(xtype == 'datetime') {
 			margin = {top: 10, right: 20, bottom: 90, left: 80};
@@ -243,8 +244,8 @@ app.factory('serviceChart', function(serviceGuid) {
 			xAxis.tickFormat(d3.time.format("%Y-%m-%d %H:%M:%S"));
 		}
 		else if(xtype == 'number') {
-			xAxis.tickFormat(d3.format('d'))
-			.tickValues(d3.range(xDom[0], xDom[1], data[0].values.length / 5));
+			xAxis.tickFormat(d3.format(',d'))
+			//.tickValues(d3.range(xDom[0], xDom[1], data[0].values.length / 5));
 		}
 		
 		y.domain([
@@ -257,7 +258,7 @@ app.factory('serviceChart', function(serviceGuid) {
 		.attr("transform", "translate(0," + height + ")")
 		.call(xAxis)
 
-		if(xtype == 'datetime') {
+		if(true) {
 			xGroup.selectAll('text')
 				.attr('transform', "rotate(-45) translate(-55 0)")
 		}
@@ -428,7 +429,8 @@ app.factory('serviceChart', function(serviceGuid) {
 			var series = {
 				'key': s.name,
 				'color': s.color,
-				'values': undefined
+				'values': undefined,
+				'labelType': dataLabel.type
 			};
 
 			series.values = dataResult.map(function(obj) {
@@ -474,327 +476,6 @@ app.factory('serviceChart', function(serviceGuid) {
 		getDataSeries: getDataSeries
 	}
 })
-
-app.factory('serviceGuid', function() {
-	var s4 = function() {
-		return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-	};
-
-	return {
-		generateType1: function() {
-			return (s4()+s4()+"-"+s4()+"-"+s4()+"-"+s4()+"-"+s4()+s4()+s4());
-		},
-		generateType2: function() {
-			return ('w'+s4()+s4()+s4()+s4());
-		},
-		generateType3: function() {
-			return ('w'+s4());
-		}
-	}
-});
-
-app.directive('autosize', function() {
-	return {
-		restrict: 'A',
-		link: function(scope, $self, attrs) {
-			var shadow, minHeight, noFlickerPad;
-			$self.on('keydown', update).on('keyup', update);
-
-			function update(e) {
-
-				if(shadow == undefined) {
-					minHeight    = $self.height();
-					noFlickerPad = $self.hasClass('autogrow-short') ? 0 : parseInt($self.css('lineHeight')) || 0;
-
-					shadow = $('<div></div>').css({
-						position:    'absolute',
-						top:         -10000,
-						left:        -10000,
-						width:       $self.width(),
-						fontSize:    $self.css('fontSize'),
-						fontFamily:  $self.css('fontFamily'),
-						fontWeight:  $self.css('fontWeight'),
-						lineHeight:  $self.css('lineHeight'),
-						resize:      'none',
-						'word-wrap': 'break-word'
-					}).appendTo(document.body);
-				}
-
-				var times = function(string, number)
-				{
-					for (var i=0, r=''; i<number; i++) r += string;
-						return r;
-				};
-
-				var val = $self[0].value.replace(/</g, '&lt;')
-					.replace(/>/g, '&gt;')
-					.replace(/&/g, '&amp;')
-					.replace(/\n$/, '<br/>&nbsp;')
-					.replace(/\n/g, '<br/>')
-					.replace(/ {2,}/g, function(space){ return times('&nbsp;', space.length - 1) + ' ' });
-
-				shadow.css('width', $self.width());
-				shadow.html(val + (noFlickerPad === 0 ? '...' : '')); // Append '...' to resize pre-emptively.
-				$self.height(Math.max(shadow.height() + noFlickerPad, minHeight));
-
-				return true;
-			}
-		}
-	}
-});
-
-app.directive('queryInput', function($compile, serviceLogdb) {
-	return {
-		restrict: 'E',
-		template: '<textarea autosize></textarea> <button class="search btn btn-primary">검색</button> <button class="stop btn btn-warning">중지</button>',
-		link: function(scope, element, attrs) {
-			element.addClass('loaded');
-			var textarea = element.find('textarea');
-			textarea.attr('ng-model', attrs.queryModel);
-			$compile(textarea)(scope);
-
-			var pid = proc.pid;
-			
-			textarea.on('keydown', function(e) {
-				if (e.type === 'keydown' && e.keyCode === 13) {
-					e.preventDefault();
-					search();
-				}
-			});
-			
-			element.find('.search').on('click', search);
-
-			element.find('.stop').on('click', stop);
-
-			var z;
-			function search() {
-				textarea.blur();
-				if(z != undefined) {
-					serviceLogdb.remove(z);
-				}
-				z = serviceLogdb.create(pid);
-				
-				var queryValue = textarea.data('$ngModelController').$modelValue;
-
-				z.query(queryValue)
-				.created(function(m) {
-					element.removeClass('loaded').addClass('loading');
-
-					if(scope[attrs.queryOnloading] != undefined) {
-						scope[attrs.queryOnloading].call(this);
-					}
-				})
-				.pageLoaded(function(m) {
-					scope[attrs.ngModel] = m.body.result;
-					scope.$apply();
-
-					if(scope[attrs.queryOnpageloaded] != undefined) {
-						scope[attrs.queryOnpageloaded].call(this);	
-					}
-				})
-				.loaded(function(m) {
-					element.removeClass('loading').addClass('loaded');
-					serviceLogdb.remove(z);
-
-					if(scope[attrs.queryOnloaded] != undefined) {
-						scope[attrs.queryOnloaded].call(this);	
-					}
-				})
-				.failed(function(m) {
-					alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.')
-				})
-			}
-
-			function stop() {
-				alert('쿼리를 중지합니다.')
-				element.removeClass('loading').addClass('loaded');
-				serviceLogdb.remove(z);
-
-				if(scope[attrs.queryOnloaded] != undefined) {
-					scope[attrs.queryOnloaded].call(this);	
-				}
-			}
-
-		}
-	}
-});
-
-app.directive('afterIterate', function() {
-	return {
-		link: function(scope, element, attrs) {
-			if(scope.$last) {
-				var fn = scope.$parent[attrs.afterIterate];
-				if(!!fn) {
-					fn.call(scope, scope);
-				}
-			}
-		}
-	}
-})
-
-app.directive('queryResult', function($compile) {
-	return {
-		restrict: 'E',
-		template: '<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-hide="col.name==\'$$hashKey\' || !col.is_visible" ng-repeat="col in qrDataColumnsOrder" after-iterate="columnChanged">{{col.name}}</th></tr></thead>' + 
-			'<tbody><tr ng-repeat="d in qrData"><td ng-hide="col.name==\'$$hashKey\' || !col.is_visible" ng-repeat="col in qrDataColumnsOrder">{{d[col.name]}}</td></tr></tbody></table>',
-		link: function(scope, element, attrs) {
-			scope.qrDataColumns = [];
-			scope.qrDataColumnsOrder = [];
-			scope.qrDataColumnsOrder.exceptedHashKey = function() {
-				return this.filter(function(el) {
-					return (el.name != '$$hashKey');
-				});
-			}
-			scope.qrData = [];
-
-			scope.$watch(attrs.ngModel, function() {
-				//console.log('model updated')
-				var raw = scope[attrs.ngModel];
-
-				scope.qrDataColumns.splice(0, scope.qrDataColumns.length);
-				scope.qrDataColumnsOrder.splice(0, scope.qrDataColumnsOrder.length);
-				scope.qrData.splice(0, scope.qrData.length);
-
-				if(!angular.isArray(raw)) {
-					return;
-				}
-
-				for (var i = 0; i < raw.length; i++) {
-					for (var col in raw[i]) {
-						if(scope.qrDataColumns.indexOf(col) == -1) {
-							scope.qrDataColumns.push(col);
-						}
-					}
-					scope.qrData.push(raw[i]);
-				};
-
-				scope.qrDataColumns.sort(function(a,b) {
-					if(a.indexOf('_') == 0) {
-						return -1;
-					}
-					else {
-						return 1;
-					}
-					return 0;
-				});
-
-				for (var i = 0; i < scope.qrDataColumns.length; i++) {
-					scope.qrDataColumnsOrder.push({
-						'name': scope.qrDataColumns[i],
-						'is_visible': true,
-						'is_checked': undefined
-					});
-				}
-			});
-
-			var loadingInd = angular.element('<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>')
-			element.prepend(loadingInd.hide());
-
-			element[0].showLoadingIndicator = function() {
-				element.find('table').hide();
-				loadingInd.show();
-			}
-
-			element[0].showTable = function() {
-				element.find('table').show();
-			}
-
-			element[0].hideTable = function() {
-				element.find('table').hide();
-			}
-
-			element[0].hideLoadingIndicator = function() {
-				loadingInd.fadeOut();
-			}
-		}
-	}
-});
-
-app.directive('qrSelectable', function($compile, serviceGuid, eventSender) {
-	return {
-		restrict: 'A',
-		link: function(scope, element, attrs) {
-
-			element.parent().css('position', 'relative').css('overflow-y', 'hidden');
-			var container = angular.element('<div style="min-width:100%; height:100%; top:0; background-color: transparent; opacity: .5; position: absolute"></div>');
-
-			eventSender.onLabelLayoutUpdate = function() {
-				setTimeout(function() {
-					var ths = element.find('th:visible');
-					var labels = container.find('label');
-					for (var i = labels.length - 1; i >= 0; i--) {
-						$(labels[i]).width($(ths[i]).width());
-					};
-
-					var total_col_len = 0;
-					for (var i = ths.length - 1; i >= 0; i--) {
-						total_col_len = total_col_len + $(ths[i]).width() + 16;
-					};
-					container.width(total_col_len);
-					
-				}, 200)
-				
-			}
-
-			scope.columnChanged = function() {
-				//console.log('columnChanged')
-				container.empty().remove();	
-				element.after(container);
-
-				var ths = element.find('th');
-				var qrOrder = scope.qrDataColumnsOrder;
-				for (var i = 0; i < qrOrder.length; i++) {
-					//if(qrOrder[i].is_checked == undefined) { qrOrder[i].is_checked = (i % 2) ? true: false; }
-
-					if(qrOrder[i].name == "$$hashKey") continue;
-
-					$(ths[i]).find('input[type=checkbox]').remove();
-
-					var guid = serviceGuid.generateType2();
-					var check = angular.element('<input type="checkbox" id="' + guid + '" ng-model="qrDataColumnsOrder[' + i + '].is_checked">');
-					var label = angular.element('<label class="qr-sel-label" ng-class="{ selected: qrDataColumnsOrder[' + i + '].is_checked, unselected: !qrDataColumnsOrder[' + i + '].is_checked }" for="' + guid + '" style="float: left; padding: 7px; height: 220px">');
-					angular.element(ths[i]).prepend(check);
-					container.append(label);
-
-					$compile(check)(scope);
-					$compile(label)(scope);
-				};
-
-				scope.checkAtLeast2cols = function() {
-					var tmp = [];
-					for (var i = qrOrder.length - 1; i >= 0; i--) {
-						if(qrOrder[i].is_checked) tmp.push(true);
-					};
-					return (tmp.length >= 2) ? false: true;
-				}
-
-			}
-
-			eventSender.updateVisible = function(targetScope) {
-				var qrOrder = scope.qrDataColumnsOrder.exceptedHashKey();
-				var qrOrderTarget = targetScope.qrDataColumnsOrder;
-
-				// qrOrder가 더 많을 경우 qrOrderTarget 에 추가한다 (사용자 정의 컬럼)
-				if(qrOrder.length > qrOrderTarget.length) {
-					var qrOrderTargetName = qrOrderTarget.map(function(o) { return o.name; });
-
-					var newOrders = qrOrder.filter(function(o) {
-						return !(qrOrderTargetName.indexOf(o.name) > -1);
-					});
-
-					for (var i = 0; i < newOrders.length; i++) {
-						qrOrderTarget.push(newOrders[i]);
-					};
-				}
-
-				for (var i = 0; i < qrOrder.length; i++) {
-					qrOrderTarget[i].is_visible = qrOrder[i].is_checked;
-				}
-			}
-			
-		}
-	}
-});
 
 app.directive('widget', function($compile, serviceLogdb, eventSender, serviceChart) {
 	return {
@@ -952,7 +633,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 
 					var json = serviceChart.buildJSONStructure(dataSeries, dataResult, dataLabel);
 					if(attrs.type == 'chart.line') {
-						serviceChart.lineChart(svg[0], json, dataLabel.type);
+						serviceChart.lineChart(svg[0], json);
 					}
 					else if(attrs.type == 'chart.bar') {
 						serviceChart.multiBarHorizontalChart(svg[0], json);
@@ -1001,9 +682,10 @@ app.factory('eventSender', function() {
 		onCurrentPresetChanged: null,
 		onRemoveSingleWidget: null,
 		onLabelLayoutUpdate: null,
-		updateVisible: null,
-		onUpdateVisible: null,
-		onSendChartDataWizard: null
+		onSendChartDataWizard: null,
+		onSelectColumnFinished: null,
+		onSelectColumnFinishing: null,
+		onChartBindingStarting: null
 	}
 	return e;
 });
@@ -1016,10 +698,6 @@ function Controller($scope, serviceSession, serviceTask, eventSender) {
 	$scope.openNewWidget = function() {
 		eventSender.onOpenNewWidget();
 	}
-
-}
-
-function WallController($scope) {
 
 }
 
@@ -1255,6 +933,91 @@ function PresetController($scope, $compile, socket, eventSender, serviceGuid) {
 	//RemovePresets('autosave')
 }
 
+function SelectColumnController($scope, eventSender) {
+	$scope.dataCustomColumn;
+	$scope.dataCustomColumnTypes = [
+		{
+			name: 'number',
+			displayName: '숫자'
+		},
+		{
+			name: 'datetime',
+			displayName: '날짜'
+		},
+		{
+			name: 'string',
+			displayName: '문자열'
+		}
+	];
+	$scope.selectedCustomColumnType = $scope.dataCustomColumnTypes[0];
+	$scope.addCustomColumn = function() {
+
+		$scope.qrCols.push({
+			'name': $scope.dataCustomColumn,
+			'is_visible': true,
+			'is_checked': true,
+			'type': $scope.selectedCustomColumnType.name
+		});
+		
+		for (var i = $scope.qresult.length - 1; i >= 0; i--) {
+			$scope.qresult[i][$scope.dataCustomColumn] = '';
+		};
+
+		var tmp = $scope.qresult;
+		$scope.qresult = null;
+		$scope.qresult = tmp;
+		
+		$scope.dataCustomColumn = '';
+	}
+
+	eventSender.onSelectColumnFinishing = function() {
+
+		// 바인딩하기 전, 선택한 컬럼이 차트 타입에 대하여 유효한지 검증합니다.
+
+		var required = $scope.chartType.required;
+		var one = $scope.chartType.one;
+		var selected = $scope.qrCols.getSelectedItems();
+
+		var satisfy_one = true, satisfy_requirement = true;
+
+		if(angular.isArray(required)) {
+			satisfy_requirement = required.every(function(cond) {
+				return selected.some(function(item) {
+					return item.type == cond;
+				})
+			});
+		}
+
+		if(angular.isArray(one)) {
+			satisfy_one = one.every(function(cond) {
+				return selected.filter(function(item) {
+					return item.type == cond;
+				}).length == 1;
+			});
+		}
+		
+		if(!(satisfy_requirement && satisfy_one)) {
+			$('.check-col-info').fadeIn();
+			$('.check-col-info span').text($scope.chartType.invalid_msg);
+		}
+		else {
+			$('.check-col-info').hide();
+		}
+
+		return satisfy_requirement && satisfy_one;
+	}
+
+	eventSender.onSelectColumnFinished = function() {
+		console.log($scope.qresult)
+		console.log($scope.qrCols)
+		// 바인딩 화면에 컬럼 정보를 넘겨줍니다.
+		return {
+			'cols': $scope.qrCols,
+			'result': $scope.qresult
+		}
+	}
+}
+
 function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) {
 	var number_of_index = 0;
 
@@ -1268,6 +1031,13 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 		}
 	}
 
+	$scope.qrTmpl = '<table ng-class="{ selectable: isSelectable }" class="cmpqr table table-striped table-condensed-custom">' +
+			'<thead><tr><th ng-class="{ selected: col.is_checked }" ng-style="{ backgroundColor: col.color }" ng-hide="!col.is_visible" ng-repeat="col in qrCols" after-iterate="columnChanged" ng-click="toggleCheck(col)">' +
+			'<input id="{{col.guid}}" ng-show="isSelectable" type="checkbox" ng-model="col.is_checked" style="margin-right: 5px">' +
+			'<span class="qr-th-type" ng-show="col.type == \'number\'">1</span><span class="qr-th-type" ng-show="col.type == \'string\'">A</span><span class="qr-th-type" ng-show="col.type == \'datetime\'"><i class="icon-white icon-time"></i></span>' + 
+			' {{col.name}} </th></tr></thead>' + 
+			'<tbody><tr ng-repeat="d in qrData"><td ng-class="{ selected: col.is_checked }" ng-style="{ backgroundColor: col.color }"" ng-hide="!col.is_visible" ng-repeat="col in qrCols" ng-click="toggleCheck(col)">{{d[col.name]}}</td></tr></tbody></table>',
+
 	$scope.dataSeries = [];
 	$scope.dataLabel;
 	$scope.selectedSeriesIdx = 0;
@@ -1277,27 +1047,47 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 	$scope.$watch('dataLabel', function() {
 		console.log('dataLabel changed');
 		var st = serviceChart.buildJSONStructure($scope.dataSeries, $scope.qresult, $scope.dataLabel);
-		render(st, $scope.dataLabel);
+		render(st);
 	});
 
 	$scope.$watch('dataSeries', function() {
-		console.log('dataSeries changed');
-		var st = serviceChart.buildJSONStructure($scope.dataSeries, $scope.qresult, $scope.dataLabel);
-		render(st, $scope.dataLabel);
+		var ignore_render = false;
+		for (var i = $scope.qrCols.length - 1; i >= 0; i--) {
+			$scope.qrCols[i].color = undefined;
+			$scope.qrCols[i].is_checked = false;
+		};
+		for (var i = $scope.dataSeries.length - 1; i >= 0; i--) {
+			var rgb = d3.rgb($scope.dataSeries[i].color);
+			if($scope.dataSeries[i].value == undefined) {
+				ignore_render = true;
+			}
+			else {
+				$scope.dataSeries[i].value.color = 'rgba(' + rgb.r + ',' + rgb.g + ',' + rgb.b + ',' + '.3)';	
+			}
+			
+		};
+
+		if(!ignore_render) {
+
+			console.log('dataSeries changed', $scope.dataSeries);
+			var st = serviceChart.buildJSONStructure($scope.dataSeries, $scope.qresult, $scope.dataLabel);
+			render(st);
+
+		}
 	}, true);
 
 	$scope.$watch('chartType', function() {
 
 	});
 
-	function render(st, dataLabel) {
+	function render(st) {
 		//console.log($scope.chartType)
 
 		if($scope.chartType.name == 'bar') {
 			serviceChart.multiBarHorizontalChart('.charthere svg', st);	
 		}
 		else if($scope.chartType.name == 'line') {
-			serviceChart.lineChart('.charthere svg', st, dataLabel.type);
+			serviceChart.lineChart('.charthere svg', st);
 		}
 		else if($scope.chartType.name == 'pie') {
 			serviceChart.pie('.charthere svg', st);
@@ -1305,14 +1095,39 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 		
 	}
 
-	eventSender.onUpdateVisible = function() {
-		eventSender.updateVisible($scope);
+	eventSender.onChartBindingStarting = function() {
+		// 이전 단계에서 선택된 항목의 정보를 전달해준다
+		var sender = eventSender.onSelectColumnFinished();
+
+		$scope.qresult = null;
+		$scope.qresult = sender.result;
+
+		var qrOrder = sender.cols;
+		var qrOrderTarget = $scope.qrCols;
+
+		// qrOrder가 더 많을 경우 qrOrderTarget 에 추가한다 (사용자 정의 컬럼)
+		if(qrOrder.length > qrOrderTarget.length) {
+			var qrOrderTargetName = qrOrderTarget.map(function(o) { return o.name; });
+
+			var newOrders = qrOrder.filter(function(o) {
+				return !(qrOrderTargetName.indexOf(o.name) > -1);
+			});
+
+			for (var i = 0; i < newOrders.length; i++) {
+				qrOrderTarget.push(newOrders[i]);
+			};
+		}
+
+		// qrOrderTarget에 똑같이 체크 표시
+		for (var i = qrOrder.length - 1; i >= 0; i--) {
+			if(qrOrder[i].is_checked) {
+				qrOrderTarget[i].is_checked = true;
+			}
+		};
 		init();
 	}
 
 	function init() {
-		//console.log($scope.chartType)
-
 		// 초기화
 		$scope.dataSeries.splice(0, $scope.dataSeries.length);
 		$scope.dataNumberTypeCols.splice(0, $scope.dataNumberTypeCols.length);
@@ -1321,17 +1136,8 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 		$scope.selectedSeriesIdx = 0;	
 		number_of_index = 0;
 
-		// 모든 컬럼의 타입 체크
-		var cols = $scope.qrDataColumnsOrder;
+		var cols = $scope.qrCols;
 		for (var i = 0; i < cols.length; i++) {
-			if(cols[i].type == undefined) {
-				var mapAll = $scope.qresult.map(function(obj, j) {
-					return obj[cols[i].name];
-				});
-				var type = checkArrayMemberType(mapAll);
-				cols[i]['type'] = type;
-			}
-
 			// number type 만 따로 뽑아냄
 			if(cols[i]['type'] == "number") {
 				$scope.dataNumberTypeCols.push(cols[i]);
@@ -1345,7 +1151,7 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 
 		// 선택한 컬럼만 뽑아냄
 		var selectedCols = cols.filter(function(obj) {
-			if(obj.is_visible) return obj;
+			if(obj.is_checked) return obj;
 		});
 
 		var types = [];
@@ -1360,6 +1166,10 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 				var series = $scope.addSeries();
 				series.name = selectedCols[i].name;
 				series.value = selectedCols[i];
+				/*
+				var color = d3.rgb(series.color);
+				selectedCols[i].color = 'rgba(' + color.r + ',' + color.g + ',' + color.b + ',.5)';
+				*/
 			}
 		};
 
@@ -1400,6 +1210,7 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 	$scope.addSeries = function() {
 		var series = getDefaultSeries('grid')
 		$scope.dataSeries.push(series);
+		$scope.selectSeries($scope.dataSeries.indexOf(series));
 		return series;
 	}
 
@@ -1482,6 +1293,7 @@ function WizardController($scope, eventSender, serviceGuid) {
 		newWidgetWin[0].showDialog();
 			
 		$scope.go(0);
+		$('.wiz-next.btn:first').focus();
 		//$scope.ctxWidget = getDefaultContext('grid');
 		$scope.qresult = null;
 	}
@@ -1498,6 +1310,7 @@ function WizardController($scope, eventSender, serviceGuid) {
 
 	$scope.inputOnloaded = function() {
 		$('.qr1')[0].hideLoadingIndicator();
+		$('.wiz-next.btn:eq(1)').focus();
 	}
 
 	var wtypes = [
@@ -1507,7 +1320,10 @@ function WizardController($scope, eventSender, serviceGuid) {
 			's0nextCallback': function() {
 				$scope.ctxWidget = getDefaultContext('grid');
 				$('.qr1')[0].hideTable();
-				return;
+				setTimeout(function() {
+					$('query-input textarea').focus();	
+				}, 250);
+				
 			},
 			's1next': 2,
 			's3prev': 2
@@ -1518,14 +1334,16 @@ function WizardController($scope, eventSender, serviceGuid) {
 			's0nextCallback': function() {
 				$scope.ctxWidget = getDefaultContext('chart');
 				$('.qr1')[0].hideTable();
-				return;
+				setTimeout(function() {
+					$('query-input textarea').focus();	
+				}, 250);
 			},
 			's1next': 4,
-			's1nextCallback': function() {
-				return eventSender.onLabelLayoutUpdate;
+			's4nextEvent': function() {
+				return eventSender.onSelectColumnFinishing;
 			},
 			's4nextCallback': function() {
-				return eventSender.onUpdateVisible;
+				return eventSender.onChartBindingStarting;
 			},
 			's5nextCallback': function() {
 				dataChart = eventSender.onSendChartDataWizard();
@@ -1543,18 +1361,14 @@ function WizardController($scope, eventSender, serviceGuid) {
 
 	$scope.ctxWidget;
 
-	$scope.shift = function(i, item) {
-		$scope.qrDataColumnsOrder.splice(i, 1);
-		$scope.qrDataColumnsOrder.splice(i + 1, 0, item);
-	}
-
-	$scope.unshift = function(i, item) {
-		$scope.qrDataColumnsOrder.splice(i, 1);
-		$scope.qrDataColumnsOrder.splice(i - 1, 0, item);
-	}
-
-	$scope.go = function(page, callback) {
+	$scope.go = function(page, callback, event) {
 		window.scrollTo(0, 0);
+
+		if(event !== undefined) {
+			if(!event()) {
+				return;
+			}
+		}
 
 		//console.log('go' + page);
 		var el = $('.wizard li.wiz-step').removeClass('active')[page];
@@ -1580,8 +1394,7 @@ function WizardController($scope, eventSender, serviceGuid) {
 	}
 
 	function submitTable() {
-		var order = $scope.qrDataColumnsOrder.filter(function(obj) {
-			if(obj.name == '$$hashKey') return false;
+		var order = $scope.qrCols.filter(function(obj) {
 			if(obj.is_visible) return true;
 		})
 		.map(function(obj) {
@@ -1598,13 +1411,19 @@ function WizardController($scope, eventSender, serviceGuid) {
 	// chart options
 	$scope.ctypes = [
 		{
-			'name': 'bar'
+			'name': 'bar',
+			'required': ['number'],
+			'invalid_msg': '하나 이상의 숫자 타입의 컬럼을 선택하십시오.'
 		},
 		{
-			'name': 'line'
+			'name': 'line',
+			'required': ['number'],
+			'invalid_msg': '하나 이상의 숫자 타입의 컬럼을 선택하십시오.'
 		},
 		{
-			'name': 'pie'
+			'name': 'pie',
+			'required': ['number'],
+			'invalid_msg': '하나 이상의 숫자 타입의 컬럼을 선택하십시오.'
 		}
 	];
 	$scope.chartType = $scope.ctypes[0];
@@ -1617,48 +1436,6 @@ function WizardController($scope, eventSender, serviceGuid) {
 		$event.preventDefault();
 		$scope.moreCol = true;
 	}
-
-	$scope.dataCustomColumn;
-	$scope.dataCustomColumnTypes = [
-		{
-			name: 'number',
-			displayName: '숫자'
-		},
-		{
-			name: 'datetime',
-			displayName: '날짜'
-		},
-		{
-			name: 'string',
-			displayName: '문자열'
-		}
-	];
-	$scope.selectedCustomColumnType = $scope.dataCustomColumnTypes[0];
-	$scope.addCustomColumn = function() {
-		
-		var obj = {};
-		obj[$scope.dataCustomColumn] = 123;
-
-		$scope.qrDataColumnsOrder.push({
-			'name': $scope.dataCustomColumn,
-			'is_visible': true,
-			'is_checked': true,
-			'type': $scope.selectedCustomColumnType.name
-		});
-		
-		for (var i = $scope.qresult.length - 1; i >= 0; i--) {
-			$scope.qresult[i][$scope.dataCustomColumn] = '';
-		};
-
-		var tmp = $scope.qresult;
-		$scope.qresult = null;
-		//$scope.$apply();
-		$scope.qresult = tmp;
-		
-
-		$scope.dataCustomColumn = '';
-		eventSender.onLabelLayoutUpdate();
-	}	
 
 	function submitGraph() {
 
