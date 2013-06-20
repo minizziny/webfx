@@ -115,6 +115,7 @@ public class WebConsoleImpl implements WebConsole, WebSocketListener {
 		}
 
 		logger.trace("araqne webconsole: websocket frame [{}]", frame);
+		session.setLastAccessTime();
 		Message msg = AraqneMessageDecoder.decode(session, frame.getTextData());
 		if (msg != null)
 			msgbus.dispatch(session, msg);
