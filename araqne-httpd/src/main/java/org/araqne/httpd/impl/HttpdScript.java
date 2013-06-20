@@ -103,14 +103,23 @@ public class HttpdScript implements Script {
 	}
 
 	@ScriptUsage(description = "open port", arguments = {
-			@ScriptArgument(name = "port", type = "int", description = "bind port"),
+			@ScriptArgument(name = "ip:port", type = "string", description = "port or ip:port"),
 			@ScriptArgument(name = "default context", type = "String", description = "default http context") })
 	public void open(String[] args) {
 		try {
-			int port = Integer.valueOf(args[0]);
+			String ip = "0.0.0.0";
+			int port = 80;
+			String s = args[0];
+			if (s.contains(":")) {
+				int p = s.lastIndexOf(':');
+				ip = s.substring(0, p);
+				port = Integer.valueOf(s.substring(p + 1));
+			} else {
+				port = Integer.valueOf(s);
+			}
 			String defaultContext = args[1];
 
-			HttpConfiguration config = new HttpConfiguration(new InetSocketAddress(port));
+			HttpConfiguration config = new HttpConfiguration(new InetSocketAddress(ip, port));
 			config.setDefaultHttpContext(defaultContext);
 			httpd.createServer(config);
 			context.println("opened http server");
