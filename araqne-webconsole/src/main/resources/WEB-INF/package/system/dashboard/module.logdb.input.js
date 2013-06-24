@@ -91,11 +91,15 @@ angular.module('logdb.input', ['logdb', 'util'])
 		restrict: 'E',
 		template: '<table ng-class="{ selectable: isSelectable }" class="cmpqr table table-striped table-condensed">' +
 			'<thead><tr><th ng-class="{ selected: col.is_checked }" ng-hide="!col.is_visible" ng-repeat="col in qrCols" after-iterate="columnChanged" ng-click="toggleCheck(col)">' +
-			'<input id="{{col.guid}}" ng-show="isSelectable" type="checkbox" ng-model="col.is_checked" style="margin-right: 5px">' +
+			'<input id="{{col.guid}}" ng-show="isSelectable" type="checkbox" ng-click="_stopPropation($event)" ng-model="col.is_checked" style="margin-right: 5px">' +
 			'<span class="qr-th-type" ng-show="col.type == \'number\'">1</span><span class="qr-th-type" ng-show="col.type == \'string\'">A</span><span class="qr-th-type" ng-show="col.type == \'datetime\'"><i class="icon-white icon-time"></i></span>' + 
 			' {{col.name}} </th></tr></thead>' + 
 			'<tbody><tr ng-repeat="d in qrData"><td ng-class="{ selected: col.is_checked }" ng-hide="!col.is_visible" ng-repeat="col in qrCols" ng-click="toggleCheck(col)">{{d[col.name]}}</td></tr></tbody></table>',
 		link: function(scope, element, attrs) {
+			scope._stopPropation = function(event) {
+				event.stopPropagation();
+			}
+
 			if(attrs.qrCustomTemplate != undefined) {
 				element.empty();
 				var customEl = angular.element(scope[attrs.qrCustomTemplate]);
