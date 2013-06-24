@@ -204,17 +204,7 @@ $("#rfPartition").on("click", getDiskUsages);
 
 
 $("#btnManageLogSource").on("click", function() {
-	var programLogSource = {
-		"visible": true,
-		"created": "2013-02-12 15:18:03+0900",
-		"updated": "2013-02-12 15:18:03+0900",
-		"description": null,
-		"name": "로그 수집 설정",
-		"path": "logsource",
-		"seq": 2,
-		"pack": "Logpresso"
-	};
-	parent.vmPrograms.run(programLogSource);
+	parent.Core.Program.run('logsource', 'Logpresso');
 })
 
 });

@@ -43,43 +43,41 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 		ko.applyBindings(vmTasks, container.get(0));
 	})();
 
+	function runProgram(program, args) {
+		$("#div-launcher").hide();
+		$("#start").removeClass("active");
+
+		$(".mainframe").removeClass("blurry");
+
+		var found = false;
+		var foundprogram;
+		$.each(vmTasks.items(), function(i, obj){
+			if(obj.path === program.path && obj.pack === program.pack) {
+				found = true;
+				foundprogram = obj;
+				return false;
+			}
+		})
+		
+		if(!found) {
+			program.args = args;
+			vmTasks.add(program);
+			vmTasks.select(program);
+		}
+		else {
+			foundprogram.args = args;
+			vmTasks.select(foundprogram);
+		}
+	}
 
 	var getPrograms = function() {
 		Core.Program.getPrograms(function(packs, programs) {
 			
 			$.each(packs, function(i, pack) {
 
-
 				var vmPrograms = new List.ViewModel(pack.programs);
-				window.vmPrograms = vmPrograms;
-
 				vmPrograms.pack = pack.name;
-				vmPrograms.run = function(program, args) {
-					$("#div-launcher").hide();
-					$("#start").removeClass("active");
-
-					$(".mainframe").removeClass("blurry");
-
-					var found = false;
-					var foundprogram;
-					$.each(vmTasks.items(), function(i, obj){
-						if(obj.path === program.path && obj.pack === program.pack) {
-							found = true;
-							foundprogram = obj;
-							return false;
-						}
-					})
-					
-					if(!found) {
-						program.args = args;
-						vmTasks.add(program);
-						vmTasks.select(program);
-					}
-					else {
-						foundprogram.args = args;
-						vmTasks.select(foundprogram);
-					}
-				}
+				vmPrograms.run = runProgram;
 
 				if(pack.name === "System") {
 					ko.applyBindings(vmPrograms, document.getElementById("pack-system"));
@@ -89,10 +87,8 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 					ko.applyBindings(vmPrograms, page.get(0));
 				}
 			});
-
 			afterworks();
 		});
-
 
 		$("#start").on("click", function() {
 			if($("#div-launcher").is(":hidden")) {
@@ -114,18 +110,23 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 
 	function afterworks() {
 		var entry = pageManager.urlParam("program");
+		var entrypack = pageManager.urlParam("pack");
 		if(entry == null) {
 			entry = "starter";
 		}
 
-		var program = Core.Program.getProgramById(entry);
-		if(!!program) {
-			vmTasks.add(program);
-			vmTasks.select(program);
+		if(entrypack == null) {
+			entrypack = 'System';
 		}
 
-		$("#div-launcher").hide();
-		$("#start").removeClass("active");
+		var program = Core.Program.findProgram(entry, entrypack);
+		runProgram(program);
+	}
+
+	window.Core.Program.run = function(programPath, packageName, args) {
+		var program = Core.Program.findProgram(programPath, packageName);
+		runProgram(program, args);
+
 	}
 
 	$("#logout").on('click', function() {
@@ -140,7 +141,6 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 		var pw = $("#txtPassword").val();
 
 		loginManager.doLogin(id, pw, function(m, raw) {
-			console.log(raw)
 			
 			if(m.isError) {
 				if(raw[0].errorCode === "already-logon"){

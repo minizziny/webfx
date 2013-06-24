@@ -1,5 +1,4 @@
-define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/list.js", "/lib/knockout.js"
-	,"/script/sampleprogram.js"], function(_$, Locale, socket, List, ko, _program) {
+define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/list.js", "/lib/knockout.js"], function(_$, Locale, socket, List, ko) {
 
 	var pids = [];
 
@@ -23,23 +22,43 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 		this.getPrograms = function(callback) {
 			if(!programs || !packs) {
 				socket.send("org.araqne.dom.msgbus.ProgramPlugin.getAvailablePrograms", {}, function(m) {
+					console.log(m)
 					programs = m.body.programs;
-					//packs = m.body.packs;
-					packs = _program;
+					packs = m.body.packs;
 
+					// dom.install 시 없는 프로그램 하드코딩
 					var starter = {
-						created: "2013-01-02 17:31:03+0900",
-						description: null,
 						name: "홈",
-						pack: "시스템",
+						pack: "System",
 						path: "starter",
-						seq: 4,
-						updated: "2013-01-02 17:31:03+0900",
 						visible: true
 					};
 
 					packs[0].programs.splice(0, 0, starter);
 					programs.splice(0, 0, starter);
+
+					var table = {
+						name: "테이블 관리",
+						pack: "Logpresso",
+						path: "table",
+						visible: true
+					};
+
+					packs[1].programs.push(table);
+					programs.push(table);
+					// 하드코딩 끝
+
+					function findProgramByPath(path) {
+						var found = this.programs.filter(function(obj) {
+							return obj.path == path;
+						});
+						if(found.length > 0) return found[0];
+						else {
+							var msg = 'Cannot find program.';
+							alert(msg);
+							throw new ReferenceError(msg);
+						}
+					}
 
 					$.each(packs, function(i, pack) {
 						$.each(pack.programs, function(j, program) {
@@ -50,6 +69,8 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 								//console.clear();
 							});
 						});
+
+						pack.findProgramByPath = findProgramByPath;
 					});
 
 					callback(packs, programs);
@@ -61,16 +82,13 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 			}
 		}
 
-		this.getProgramById = function(id) {
-			var program = null;
-			$.each(programs, function(i, obj) {
-				if(obj.path === id) {
-					program = obj;
-					return false;
-				}
-			});
-
-			return program;
+		this.findProgram = function(path, packName) {
+			var pack = findPackByName(packName);
+			if(!!pack) {
+				return pack.findProgramByPath(path);
+			}
+			
+			return;
 		}
 
 		this.go = function(program) {
@@ -92,20 +110,27 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 			$("title").text("Logsaver® | " + program.name);
 		}
 
-		function findPackDllbyName(name) {
-			var dll;
+		function findPackByName(name) {
+			var found;
 			$.each(packs, function(i, obj) {
 				if(obj.name === name) {
-					dll = obj.dll;
+					found = obj;
 					return false;
 				}
 			});
 
-			return dll;
+			if(!!found) {
+				return found;
+			}
+			else {
+				var msg = 'Cannot find program pack.';
+				alert(msg);
+				throw new ReferenceError(msg);
+			}
 		}
 
 		this.launch = function(program) {
-			var packdll = findPackDllbyName(program.pack);
+			var packdll = findPackByName(program.pack).dll;
 			var localedUrl = "package/" + packdll + "/" + program.path + "/index." + Locale.getCurrentLocale() + ".html";
 			var defUrl = "package/" + packdll + "/" + program.path + "/index.html";
 			if(Locale.getCurrentLocale() == "en") {
@@ -164,7 +189,7 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 			launch: launch,
 			exit: exit,
 			getPrograms: getPrograms,
-			getProgramById: getProgramById,
+			findProgram: findProgram
 		}
 	})();
 
