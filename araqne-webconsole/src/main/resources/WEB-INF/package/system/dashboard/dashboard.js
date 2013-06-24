@@ -46,6 +46,15 @@ moment.lang('ko', {
     ordinal : '%d일'
 });
 
+var reltimeTable = {};
+
+setInterval(function() {
+	for(var prop in reltimeTable) {
+		var obj = reltimeTable[prop];
+		obj.el.text(obj.lastUpdated.fromNow());
+	}
+}, 1000);
+
 parent.d3 = d3;
 
 var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
@@ -531,19 +540,15 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 			};
 
 			function updateTimer(guid, elTimeStamp) {
-				var mm = moment();
-				var from = mm.fromNow();
-				elTimeStamp.text(from);
+				console.log(reltimeTable);
+				reltimeTable[guid] = {
+					'el': elTimeStamp,
+					'lastUpdated': moment()
+				};
+			}
 
-				clearInterval(timer[guid])
-				timer[guid] = null;
-
-				timer[guid] = setInterval(function() {
-					if(from != mm.fromNow()) {
-						from = mm.fromNow();
-						elTimeStamp.text(from);
-					}
-				}, 1000);
+			function disposeTimer(guid) {
+				delete reltimeTable[guid];
 			}
 
 			function getData(qString, onDataLoaded, elRefresh, elPause, elResume) {
@@ -596,6 +601,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 					
 					onDataLoaded({
 						dispose: function() {
+							disposeTimer(attrs.guid);
 							clearTimeout(timer);
 							timer = null;
 							element.remove();
@@ -671,7 +677,6 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 			elBack.append(elQueryStr);
 
 			var elTimeStamp = titlebar.find('.timestamp');
-			console.log(elTimeStamp)
 
 			if(attrs.type == 'grid') {
 
@@ -688,7 +693,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 
 					scope.$apply();
 
-					//updateTimer(attrs.guid, elTimeStamp);
+					updateTimer(attrs.guid, elTimeStamp);
 					
 					elFront.find('button.widget-close').off('click').on('click', function() {
 						eventSender.onRemoveSingleWidget(attrs.guid);
@@ -730,7 +735,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 						serviceChart.pie(svg[0], json);
 					}
 
-					//updateTimer(attrs.guid, elTimeStamp);
+					updateTimer(attrs.guid, elTimeStamp);
 
 					elFront.find('button.widget-close').off('click').on('click', function() {
 						eventSender.onRemoveSingleWidget(attrs.guid);
