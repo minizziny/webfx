@@ -27,25 +27,32 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 					packs = m.body.packs;
 
 					// dom.install 시 없는 프로그램 하드코딩
-					var starter = {
-						name: "홈",
-						pack: "System",
-						path: "starter",
-						visible: true
-					};
+					if(programs.filter(function(obj) {
+						return obj.path == 'starter';
+					}).length == 0) {
+						var starter = {
+							name: "홈",
+							pack: "System",
+							path: "starter",
+							visible: true
+						};
+						packs[0].programs.splice(0, 0, starter);
+						programs.splice(0, 0, starter);
+					}
 
-					packs[0].programs.splice(0, 0, starter);
-					programs.splice(0, 0, starter);
+					if(programs.filter(function(obj) {
+						return obj.path == 'table';
+					}).length == 0) {
+						var table = {
+							name: "테이블 관리",
+							pack: "Logpresso",
+							path: "table",
+							visible: true
+						};
 
-					var table = {
-						name: "테이블 관리",
-						pack: "Logpresso",
-						path: "table",
-						visible: true
-					};
-
-					packs[1].programs.push(table);
-					programs.push(table);
+						packs[1].programs.push(table);
+						programs.push(table);
+					}
 					// 하드코딩 끝
 
 					function findProgramByPath(path) {
