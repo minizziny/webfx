@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
-	<title>Logsaver®</title>
+	<title>Logpresso</title>
 	<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
 	<style>
 
@@ -286,6 +286,7 @@ i.icon-logout {
 
 	</style>
 
+	<script type="text/javascript" src="global.config.js"></script>
 	<script type="text/javascript" data-main="/script/home" src="/require.js"></script>
 
 	<script type="text/html" id="tasks">
@@ -334,7 +335,7 @@ i.icon-logout {
 <div class="navbar navbar-inverse navbar-fixed-bottom tbar">
 	<div class="navbar-inner">
 		<!-- <button id="start" class="btn btn-inverse pull-left active" href="#" style="margin-left: 30px">Start</button> -->
-		<a id="start" class="brand"><span style="background-image:url(images/logsaver/Logsaver_logo.jpg);background-size:132px 40px; background-repeat:no-repeat;">&nbsp;</span></a>
+		<a id="start" class="brand"><span>Logpresso</span></a>
 		<div id="task" class="pull-left" data-bind="Kuro.List: self, tmpl: tasks"></div>
 
 		<a id="logout" href="#" class="pull-right" title="로그아웃">
@@ -343,7 +344,6 @@ i.icon-logout {
 	</div>
 </div>
 
-<!--
 <div id="login">
 	<div class="bg blurry"></div>
 	<div class="cnt">
@@ -364,81 +364,6 @@ i.icon-logout {
 			<div class="control-group">
 				<div class="controls">
 					<button id="btnLogin" type="submit" class="btn btn-primary">로그인</button>
-				</div>
-			</div>
-		</form>
-	</div>
-</div>
--->
-<style>
-.ls_centering {
-	background-image: url(images/logsaver/BackGround_Login.jpg);
-	height: 279px;
-	width: 524px;
-	margin: auto;
-	margin-left: -262px;
-	top: 50%;
-	position: absolute;
-	margin-top: -140px;
-	left: 50%;
-	border-bottom: 1px solid #ccc;
-	box-shadow: 0px 0px 15px #aaa;
-}
-
-.ls_form {
-	position: relative;
-	height: 100%;
-}
-
-.ls_form input {
-	border-radius: 0;
-	font-size: 9pt;
-	padding: 0 5px;
-	width: 120px;
-}
-
-#login {
-	background: -webkit-linear-gradient(top, #eeeeee 0%,#cccccc 100%); /* Chrome10+,Safari5.1+ */
-}
-
-#txtId {
-	position: absolute;
-	bottom: 35px;
-	right: 102px;
-}
-
-#txtPassword {
-	position: absolute;
-	bottom: 10px;
-	right: 102px;
-}
-
-#btnLogin {
-	position: absolute;
-	background-image: url(images/logsaver/Button_Login.gif);
-	width: 80px;
-	height: 40px;
-	border: 0px;
-	bottom: 15px;
-	right: 10px;
-}
-</style>
-<div id="login">
-	<div class="ls_centering">
-		<form class="form-horizontal ls_form">
-			<div class="control-group">
-				<div class="controls">
-					<input type="text" id="txtId">
-				</div>
-			</div>
-			<div class="control-group">
-				<div class="controls">
-					<input id="txtPassword" type="password" />
-				</div>
-			</div>
-			<div class="control-group">
-				<div class="controls">
-					<button id="btnLogin" type="submit"></button>
 				</div>
 			</div>
 		</form>

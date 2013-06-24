@@ -114,7 +114,7 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 				this.launch(program);
 			}
 
-			$("title").text("Logsaver® | " + program.name);
+			$("title").text(window.Global.Config.productName + " | " + program.name);
 		}
 
 		function findPackByName(name) {
