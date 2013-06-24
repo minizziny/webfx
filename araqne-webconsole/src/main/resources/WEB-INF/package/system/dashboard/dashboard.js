@@ -540,7 +540,6 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 			};
 
 			function updateTimer(guid, elTimeStamp) {
-				console.log(reltimeTable);
 				reltimeTable[guid] = {
 					'el': elTimeStamp,
 					'lastUpdated': moment()
@@ -604,7 +603,6 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 							disposeTimer(attrs.guid);
 							clearTimeout(timer);
 							timer = null;
-							element.remove();
 						}
 					});
 
@@ -616,17 +614,21 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 					}
 				}
 
+				function failed(m, raw) {
+					element.find('.alert-error').show();
+					element.find('.alert-error span').text(raw[0].errorCode);
+					clearTimeout(timer);
+					timer = null;
+					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
+				}
+
 				function query() {
 					qInst = serviceLogdb.create(proc.pid);
 					qInst.query(qString)
 					.created(created)
 					.pageLoaded(pageLoaded)
 					.loaded(loaded)
-					.failed(function(m) {
-						clearTimeout(timer);
-						timer = null;
-						timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
-					});
+					.failed(failed);
 				}
 
 				query();
@@ -665,7 +667,8 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				'<button class="close widget-refresh-pause"><i style="margin-top: 6px; margin-left:10px;" class="icon-pause pull-right"></i></button>' +
 				'<button class="close widget-refresh-resume" style="display:none"><i style="margin-top: 6px; margin-left:10px;" class="icon-play pull-right"></i></button>' +
 				'<button class="close widget-refresh"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
-				'<button class="close widget-property"><i style="margin-top: 6px; margin-left:10px;" class="icon-info-sign pull-right"></i></button></div>');
+				'<button class="close widget-property"><i style="margin-top: 6px; margin-left:10px;" class="icon-info-sign pull-right"></i></button></div>' +
+				'<div class="alert alert-error clearboth" style="display:none"><b>쿼리를 실행하는데 문제가 있습니다!</b><br><span></span></div>');
 
 			var info = angular.element('<span class="ninput" style="float:left"></span>');
 			var ninput = angular.element('<input type="number" min="5" ng-model="' + attrs.guid + '.interval" />');
@@ -698,10 +701,12 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 					elFront.find('button.widget-close').off('click').on('click', function() {
 						eventSender.onRemoveSingleWidget(attrs.guid);
 						self.dispose();
+						element.remove();
 					});
 
 					element[0].$dispose = function() {
 						self.dispose();
+						element.remove();
 					}; 
 
 				}, 
@@ -740,10 +745,12 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 					elFront.find('button.widget-close').off('click').on('click', function() {
 						eventSender.onRemoveSingleWidget(attrs.guid);
 						self.dispose();
+						element.remove();
 					});
 
 					element[0].$dispose = function() {
 						self.dispose();
+						element.remove();
 					};
 
 				},
@@ -755,6 +762,15 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 			elCard.append(elBack);
 			elWidget.append(elCard);
 			element.append(elWidget);
+
+			elFront.find('button.widget-close').off('click').on('click', function() {
+				eventSender.onRemoveSingleWidget(attrs.guid);
+				element.remove();
+			});
+
+			element[0].$dispose = function() {
+				element.remove();
+			};
 
 			elFront.find('button.widget-property').on('click', function() {
 				elCard.addClass('flipped');

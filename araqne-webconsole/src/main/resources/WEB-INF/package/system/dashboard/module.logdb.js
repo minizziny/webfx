@@ -76,7 +76,7 @@ angular.module('logdb', [])
 				registerTrap(m);
 			})
 			.failed(function(m, raw) {
-				asyncQuery.done('failed', m);
+				asyncQuery.done('failed', m, raw);
 				console.log(raw, 'cannot create query');
 			})
 

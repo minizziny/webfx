@@ -201,7 +201,7 @@
 
 	widget {
 		float: left;
-		min-height: 300px;
+		/* min-height: 300px; */
 		min-width: 400px;
 	}
 
