@@ -201,11 +201,19 @@
 
 	widget {
 		float: left;
+		min-height: 300px;
+		min-width: 400px;
 	}
 
 	widget > .widget {
 		position: relative;
 		-webkit-perspective: 800px;
+	}
+
+	.cmpqr-cont {
+		max-height: 500px;
+		overflow-y: auto;
+		clear: both;
 	}
 
 	.widget .card {
@@ -240,7 +248,7 @@
 	}
 
 	.card.flipped .front input, .card.flipped .front button {
-		display: none;
+		display: none !important;
 	}
 
 	figure.back {
@@ -259,6 +267,12 @@
 	.widget h5 {
 		float: left;
 		margin-top: 2px;
+	}
+
+	.widget h5.timestamp {
+		font-weight: normal;
+		margin-left: 10px;
+		color: #999;
 	}
 
 	widget input[type=number] {

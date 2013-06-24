@@ -2,6 +2,50 @@ var app = angular.module('dashboard', ['myApp', 'logdb', 'ui.sortable', 'logdb.i
 var proc;
 console.log('dashboard init');
 
+var timer = {};
+moment.lang('ko', {
+    months : "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
+    monthsShort : "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
+    weekdays : "일요일_월요일_화요일_수요일_목요일_금요일_토요일".split("_"),
+    weekdaysShort : "일_월_화_수_목_금_토".split("_"),
+    weekdaysMin : "일_월_화_수_목_금_토".split("_"),
+    longDateFormat : {
+        LT : "A h시 mm분",
+        L : "YYYY.MM.DD",
+        LL : "YYYY년 MMMM D일",
+        LLL : "YYYY년 MMMM D일 LT",
+        LLLL : "YYYY년 MMMM D일 dddd LT"
+    },
+    meridiem : function (hour, minute, isUpper) {
+        return hour < 12 ? '오전' : '오후';
+    },
+    calendar : {
+        sameDay : '오늘 LT',
+        nextDay : '내일 LT',
+        nextWeek : 'dddd LT',
+        lastDay : '어제 LT',
+        lastWeek : '지난주 dddd LT',
+        sameElse : 'L'
+    },
+    relativeTime : {
+        future : "%s 후",
+        past : "%s 전",
+        s : "%d초",
+        ss : "%d초",
+        m : "일분",
+        mm : "%d분",
+        h : "한시간",
+        hh : "%d시간",
+        d : "하루",
+        dd : "%d일",
+        M : "한달",
+        MM : "%d달",
+        y : "일년",
+        yy : "%d년"
+    },
+    ordinal : '%d일'
+});
+
 parent.d3 = d3;
 
 var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
@@ -486,7 +530,23 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				interval: parseInt(attrs.interval)
 			};
 
-			function getData(qString, onDataLoaded, elRefresh) {
+			function updateTimer(guid, elTimeStamp) {
+				var mm = moment();
+				var from = mm.fromNow();
+				elTimeStamp.text(from);
+
+				clearInterval(timer[guid])
+				timer[guid] = null;
+
+				timer[guid] = setInterval(function() {
+					if(from != mm.fromNow()) {
+						from = mm.fromNow();
+						elTimeStamp.text(from);
+					}
+				}, 1000);
+			}
+
+			function getData(qString, onDataLoaded, elRefresh, elPause, elResume) {
 				var timer, qInst, isLoaded = false;
 
 				function created(m) {
@@ -570,25 +630,48 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 					timer = null;
 					query();
 				});
+
+				elPause.on('click', function() {
+					console.log('pause')
+					clearTimeout(timer);
+					timer = null;
+					elRefresh.hide();
+					elPause.hide();
+					elResume.show();
+				});
+
+				elResume.on('click', function() {
+					console.log('resume')
+					query();
+					elRefresh.show();
+					elPause.show();
+					elResume.hide();
+				})
 			}
 
 			var elWidget = angular.element('<div class="widget"></div>');
 			var elCard = angular.element('<div class="card"></div>');
 			var elFront = angular.element('<figure class="front"></figure>');
 			var elBack = angular.element('<figure class="back"><button class="close">back</button></figure>');
-			var titlebar = angular.element('<h5>' + attrs.name + '</h5>' +
+			var titlebar = angular.element('<div><h5>' + attrs.name + '</h5>' +
+				'<h5 class="timestamp"></h5>' +
 				'<button style="margin-left: 10px" class="close widget-close">&times;</button>' +
+				'<button class="close widget-refresh-pause"><i style="margin-top: 6px; margin-left:10px;" class="icon-pause pull-right"></i></button>' +
+				'<button class="close widget-refresh-resume" style="display:none"><i style="margin-top: 6px; margin-left:10px;" class="icon-play pull-right"></i></button>' +
 				'<button class="close widget-refresh"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
-				'<button class="close widget-property"><i style="margin-top: 6px; margin-left:10px;" class="icon-info-sign pull-right"></i></button>');
+				'<button class="close widget-property"><i style="margin-top: 6px; margin-left:10px;" class="icon-info-sign pull-right"></i></button></div>');
 
 			var info = angular.element('<span class="ninput" style="float:left"></span>');
+			var ninput = angular.element('<input type="number" min="5" ng-model="' + attrs.guid + '.interval" />');
+			var elQueryStr = $('<div class="clearboth">').append($('<pre>').text(decodeURIComponent(attrs.query)));
 
 			elFront.append(titlebar);
+			
 			elBack.append(info);
+			elBack.append(elQueryStr);
 
-			var ninput = angular.element('<input type="number" min="5" ng-model="' + attrs.guid + '.interval" />');
-			var elquerystr = $('<div class="clearboth">').append($('<pre>').text(decodeURIComponent(attrs.query)));
-			elBack.append(elquerystr);
+			var elTimeStamp = titlebar.find('.timestamp');
+			console.log(elTimeStamp)
 
 			if(attrs.type == 'grid') {
 
@@ -597,7 +680,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				$compile(table)(scope);
 				$compile(ninput)(scope);
 				elBack.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
-				elFront.append(table);
+				elFront.append(angular.element('<div class="cmpqr-cont">').append(table));
 				elCard.append(elFront);
 
 
@@ -605,6 +688,8 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 
 					scope.$apply();
 
+					//updateTimer(attrs.guid, elTimeStamp);
+					
 					elFront.find('button.widget-close').off('click').on('click', function() {
 						eventSender.onRemoveSingleWidget(attrs.guid);
 						self.dispose();
@@ -614,7 +699,10 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 						self.dispose();
 					}; 
 
-				}, elFront.find('button.widget-refresh'));
+				}, 
+				elFront.find('button.widget-refresh'),
+				elFront.find('button.widget-refresh-pause'),
+				elFront.find('button.widget-refresh-resume'));
 			}
 			else if (attrs.type == 'chart.bar' || attrs.type == 'chart.line' || attrs.type == 'chart.pie') { 
 
@@ -642,6 +730,8 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 						serviceChart.pie(svg[0], json);
 					}
 
+					//updateTimer(attrs.guid, elTimeStamp);
+
 					elFront.find('button.widget-close').off('click').on('click', function() {
 						eventSender.onRemoveSingleWidget(attrs.guid);
 						self.dispose();
@@ -651,7 +741,10 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 						self.dispose();
 					};
 
-				}, elFront.find('button.widget-refresh'));
+				},
+				elFront.find('button.widget-refresh'),
+				elFront.find('button.widget-refresh-pause'),
+				elFront.find('button.widget-refresh-resume'));
 			}
 
 			elCard.append(elBack);
