@@ -14,6 +14,7 @@ require([
 function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List, Util, loginManager) {
 
 	var vmTasks;
+	var nonce;
 
 	(function() {
 		var container = $(".navbar-fixed-bottom #task");
@@ -133,31 +134,38 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 		loginManager.doLogout();
 	});
 
-	$("#btnLogin").on("click", function(e) {
-		e.preventDefault();
-		e.stopPropagation();
-
-		var id = $("#txtId").val();
-		var pw = $("#txtPassword").val();
-
-		loginManager.doLogin(id, pw, function(m, raw) {
-			
-			if(m.isError) {
-				if(raw[0].errorCode === "already-logon"){
-					alert(raw[0].errorCode);
-				}
-				else {
-					alert(raw[0].errorMessage);
-					return;
-				}
-			}
-
-			//location.href = "home.html";
-			$("#login").hide();
-			getPrograms();
-
-		});
-	});
-
 	$("#txtId").focus();
+
+	function Hello() {
+		socket.send("org.araqne.dom.msgbus.LoginPlugin.hello", {}, function(m) {
+			nonce = m.body.nonce;
+			console.log('ok araqne');
+			$('#btnLogin').removeAttr('disabled').on("click", function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+
+				var id = $("#txtId").val();
+				var pw = $("#txtPassword").val();
+
+				loginManager.doLogin(id, pw, nonce, function(m, raw) {
+					
+					if(m.isError) {
+						if(raw[0].errorCode === "already-logon"){
+							alert(raw[0].errorCode);
+						}
+						else {
+							alert(raw[0].errorMessage);
+							return;
+						}
+					}
+					$("#login").hide();
+					getPrograms();
+
+					
+				});
+			});
+		});
+	}
+
+	setTimeout(Hello, 10);
 });

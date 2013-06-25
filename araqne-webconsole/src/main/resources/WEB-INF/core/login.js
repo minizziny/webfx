@@ -2,15 +2,11 @@ define(['/core/connection.js','/lib/sha1-amd.js'], function(socket, CryptoJS) {
 
 
 
-function doLogin(login_name, password, loginCallback) {
-	socket.send("org.araqne.dom.msgbus.LoginPlugin.hello", {}, function(m,b,c) {
+function doLogin(login_name, password, nonce, loginCallback) {
+	var hashedpwd = CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex);
+	var hash = CryptoJS.SHA1(hashedpwd + nonce).toString(CryptoJS.enc.Hex);
 
-		var nonce = m.body.nonce;
-		var hashedpwd = CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex);
-		var hash = CryptoJS.SHA1(hashedpwd + nonce).toString(CryptoJS.enc.Hex);
-
-		sendLogin(login_name, hash, loginCallback, false);
-	});
+	sendLogin(login_name, hash, loginCallback, false);
 }
 
 function sendLogin(login_name, hash, loginCallback, isForce) {
