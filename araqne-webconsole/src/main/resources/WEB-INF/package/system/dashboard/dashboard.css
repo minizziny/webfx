@@ -251,6 +251,10 @@
 		display: none !important;
 	}
 
+	.card.unflipped figure.back {
+		visibility: hidden;
+	}
+
 	figure.back {
 		-webkit-transform: rotateY(180deg);
 		background: white;

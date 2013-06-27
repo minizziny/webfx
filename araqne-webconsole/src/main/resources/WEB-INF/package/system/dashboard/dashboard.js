@@ -658,7 +658,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 			}
 
 			var elWidget = angular.element('<div class="widget"></div>');
-			var elCard = angular.element('<div class="card"></div>');
+			var elCard = angular.element('<div class="card unflipped"></div>');
 			var elFront = angular.element('<figure class="front"></figure>');
 			var elBack = angular.element('<figure class="back"><button class="close">back</button></figure>');
 			var titlebar = angular.element('<div><h5>' + attrs.name + '</h5>' +
@@ -773,11 +773,14 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 			};
 
 			elFront.find('button.widget-property').on('click', function() {
-				elCard.addClass('flipped');
+				elCard.addClass('flipped').removeClass('unflipped');
 			});
 
 			elBack.find('button.close').on('click', function() {
-				elCard.removeClass('flipped');
+				elCard.removeClass('flipped')
+				setTimeout(function() {
+					elCard.addClass('unflipped');
+				}, 500);
 			});
 
 			scope.$watch(attrs.guid + '.interval', function() {
