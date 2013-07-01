@@ -28,7 +28,6 @@ import org.araqne.confdb.ConfigService;
 import org.araqne.confdb.Predicates;
 import org.araqne.dom.api.ApplicationApi;
 import org.araqne.dom.api.AreaApi;
-import org.araqne.dom.api.ConfigManager;
 import org.araqne.dom.api.GlobalConfigApi;
 import org.araqne.dom.api.HostApi;
 import org.araqne.dom.api.HostUpdateApi;

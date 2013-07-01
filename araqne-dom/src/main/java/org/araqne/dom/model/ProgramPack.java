@@ -17,14 +17,19 @@ package org.araqne.dom.model;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.araqne.api.FieldOption;
+import org.araqne.api.MapTypeHint;
 import org.araqne.confdb.CollectionName;
 
 @CollectionName("program-pack")
 public class ProgramPack {
 	@FieldOption(nullable = false, length = 60)
 	private String name;
+
+	@MapTypeHint({ String.class, String.class })
+	private Map<String, String> displayNames;
 
 	@FieldOption(nullable = false, length = 255)
 	private String dll;
@@ -51,6 +56,14 @@ public class ProgramPack {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Map<String, String> getDisplayNames() {
+		return displayNames;
+	}
+
+	public void setDisplayNames(Map<String, String> displayNames) {
+		this.displayNames = displayNames;
 	}
 
 	public String getDll() {

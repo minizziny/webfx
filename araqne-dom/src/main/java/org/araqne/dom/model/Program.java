@@ -16,8 +16,10 @@
 package org.araqne.dom.model;
 
 import java.util.Date;
+import java.util.Map;
 
 import org.araqne.api.FieldOption;
+import org.araqne.api.MapTypeHint;
 import org.araqne.confdb.CollectionName;
 
 @CollectionName("program")
@@ -27,6 +29,9 @@ public class Program {
 
 	@FieldOption(nullable = false, length = 60)
 	private String name;
+
+	@MapTypeHint({ String.class, String.class })
+	private Map<String, String> displayNames;
 
 	@FieldOption(length = 255)
 	private String description;
@@ -57,6 +62,14 @@ public class Program {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Map<String, String> getDisplayNames() {
+		return displayNames;
+	}
+
+	public void setDisplayNames(Map<String, String> displayNames) {
+		this.displayNames = displayNames;
 	}
 
 	public String getDescription() {
@@ -105,7 +118,7 @@ public class Program {
 
 	public void setUpdated(Date updated) {
 		this.updated = updated;
-	}	
+	}
 
 	@Override
 	public int hashCode() {

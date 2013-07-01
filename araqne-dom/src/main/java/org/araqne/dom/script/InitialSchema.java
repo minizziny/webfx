@@ -16,7 +16,9 @@
 package org.araqne.dom.script;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.araqne.api.ScriptContext;
 import org.araqne.dom.api.AreaApi;
@@ -96,8 +98,13 @@ public class InitialSchema {
 
 	public static void createPrograms(ScriptContext context, OrganizationApi orgApi, ProgramApi programApi) {
 		if (programApi.findProgramPack(DEFAULT_DOMAIN, "System") == null) {
+			Map<String, String> displayNames = new HashMap<String, String>();
+			displayNames.put("en", "System");
+			displayNames.put("ko", "시스템");
+
 			ProgramPack pack = new ProgramPack();
 			pack.setName("System");
+			pack.setDisplayNames(displayNames);
 			pack.setDll("system");
 			pack.setSeq(1);
 			try {
@@ -109,11 +116,11 @@ public class InitialSchema {
 		}
 
 		List<Program> programs = new ArrayList<Program>();
-		programs.add(createProgram(context, programApi, "Dashboard", "dashboard", 1));
-		programs.add(createProgram(context, programApi, "Account", "orgchart", 2));
-		programs.add(createProgram(context, programApi, "Task Manager", "taskmanager", 3));
-		programs.add(createProgram(context, programApi, "Run", "run", 4));
-		programs.add(createProgram(context, programApi, "Developer Console", "devconsole", 5));
+		programs.add(createProgram(context, programApi, "Dashboard", "Dashboard", "대시보드", "dashboard", 1));
+		// programs.add(createProgram(context, programApi, "Account", "Account", "계정관리", "orgchart", 2));
+		// programs.add(createProgram(context, programApi, "Task Manager", "Task Manager", "작업관리자", "taskmanager", 3));
+		// programs.add(createProgram(context, programApi, "Run", "Run", "실행", "run", 4));
+		// programs.add(createProgram(context, programApi, "Developer Console", "Developer Console", "개발자콘솔", "devconsole", 5));
 
 		if (programApi.findProgramProfile(DEFAULT_DOMAIN, "all") == null) {
 			ProgramProfile profile = new ProgramProfile();
@@ -129,13 +136,19 @@ public class InitialSchema {
 		}
 	}
 
-	private static Program createProgram(ScriptContext context, ProgramApi programApi, String name, String type, int seq) {
+	private static Program createProgram(ScriptContext context, ProgramApi programApi, String name, String enName, String koName,
+			String type, int seq) {
 		if (programApi.findProgram(DEFAULT_DOMAIN, "System", name) != null)
 			return programApi.findProgram(DEFAULT_DOMAIN, "System", name);
+
+		Map<String, String> displayNames = new HashMap<String, String>();
+		displayNames.put("en", enName);
+		displayNames.put("ko", koName);
 
 		Program program = new Program();
 		program.setPack("System");
 		program.setName(name);
+		program.setDisplayNames(displayNames);
 		program.setPath(type);
 		program.setSeq(seq);
 		program.setVisible(true);
