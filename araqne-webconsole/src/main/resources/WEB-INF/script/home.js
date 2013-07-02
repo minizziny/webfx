@@ -77,7 +77,7 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 			$.each(packs, function(i, pack) {
 
 				var vmPrograms = new List.ViewModel(pack.programs);
-				vmPrograms.pack = pack.name;
+				vmPrograms.pack = pack;
 				vmPrograms.run = runProgram;
 
 				if(pack.name === "System") {

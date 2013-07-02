@@ -293,7 +293,7 @@ i.icon-logout {
 		<ul data-bind="foreach: items" class="nav">
 			<li data-bind="css: { 'active': $data.isSelected }">
 				<a data-bind="attr: { href: 'home.html?program=' + path }, click: $parent.select.callFn($parent, $data)">
-					<span data-bind="text: name"></span>
+					<span data-bind="text: display_names.ko"></span>
 					<span>
 						<i class="icon-remove" data-bind="click: $parent.remove.callFn($parent, $data), clickBubble: false"></i>
 					</span>
@@ -303,12 +303,12 @@ i.icon-logout {
 	</script>
 
 	<script type="text/html" id="launcher">
-		<legend data-bind="text: pack"></legend>
+		<legend data-bind="text: pack.display_names.ko"></legend>
 		<ul data-bind="foreach: items">
 			<li data-bind="click: $parent.run.callFn($parent, $data)">
 				<a data-bind="attr: { href: 'home.html?program=' + path }">
 					<img data-bind="attr: { src: icon() }"></img>
-					<span data-bind="text: name"></span>
+					<span data-bind="text: display_names.ko"></span>
 				</a>
 			</li>
 		</ul>
