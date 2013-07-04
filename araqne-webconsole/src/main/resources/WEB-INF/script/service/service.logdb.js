@@ -1,4 +1,4 @@
-angular.module('logdb', [])
+angular.module('App.Service.Logdb', [])
 .factory('serviceLogdb', function(servicePush, socket) {
 
 	function QueryClass(pid) {

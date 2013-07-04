@@ -1,0 +1,326 @@
+topbar { 
+	background-color: #eee;
+	height: auto;
+	display: none;
+}
+
+.ngViewport:focus {
+	outline: none;
+}
+
+.gridStyle {
+	border: 1px solid #aaa;
+}
+
+.gridStyle-fixed {
+	height: 186px;
+}
+
+.leftPane {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	width: 22%;
+	overflow: auto;
+}
+
+.rightPane {
+	float: left;
+	margin-left: 21.5%;
+	width: 78.5%;
+}
+
+.clearboth {
+	clear: both;
+}
+
+.ldbQueryBox {
+	width: 80%;
+}
+
+.well {
+	margin-right: 20px;
+	margin-bottom: 0;
+	padding: 10px;
+	border-radius: 0;
+}
+
+.modal {
+	position: absolute;
+	width: 900px;
+	margin-left: -450px;
+	padding: 10px;
+}
+
+.modal::after {
+	position: absolute;
+	display: table;
+	content: ' ';
+	height: 60px;
+}
+
+.wizard-contents {
+	float: left;
+	width: 140px;
+}
+
+.wizard-contents li.active {
+	font-weight: bold;
+}
+
+.wizard {
+	float: left;
+	width: 680px;
+	margin-left: 10px;
+	padding-left: 25px;
+	border-left: 1px solid #ccc;
+}
+
+.wizard legend {
+	font-size: 16px;
+}
+
+.wizard > li.active legend {
+	font-size: 21px;
+}
+
+.wizard > li {
+	display: none;
+}
+
+.wizard > li.active {
+	display: block;
+}
+
+eu-tree .hide {
+	display: none;
+}
+
+.nav-list i.tree-node-icon {
+	margin-right: 5px;
+}
+
+.raw {
+	width: 800px;
+	max-height: 400px;
+	overflow: scroll;
+	font-family: 'Consolas';
+	font-size: 10pt;
+}
+
+.cell-right, .table td.cell-right {
+	text-align: right; 
+}
+
+.cell-editable {
+	display: inline-block;
+	width: 90px !important;
+	height: 20px !important;
+	padding: 4px 6px;
+	margin-bottom: 10px;
+	font-size: 14px;
+	line-height: 20px;
+	color: #555555;
+	vertical-align: middle;
+	text-align: right;
+
+	background-color: #ffffff;
+	border: 1px solid #cccccc;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	-webkit-transition: border linear 0.2s, box-shadow linear 0.2s;
+	-moz-transition: border linear 0.2s, box-shadow linear 0.2s;
+	-o-transition: border linear 0.2s, box-shadow linear 0.2s;
+	transition: border linear 0.2s, box-shadow linear 0.2s;
+}
+
+.cell-editable:hover {
+	border-color: rgba(82, 168, 236, 0.8);
+	outline: 0;
+	outline: thin dotted 9;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+}
+
+input[type=number] {
+	text-align: right !important;
+}
+
+.fieldset-description {
+	margin-bottom: 10px;
+}
+
+.submit-group {
+	text-align: right;
+	margin-bottom: 0px !important;
+	border-top: 1px solid #ccc;
+	padding-top: 10px;
+}
+
+.selected .green {
+	background-color: transparent;
+}
+.green {
+	background-color: #D1FFD1;
+}
+
+.ngCell {
+	overflow: hidden;
+	position: absolute;
+	border-right: 0px;
+	border-left: 1px solid rgb(212,212,212);
+	top: 0;
+	bottom: 0;
+	background-color: inherit;
+}
+
+.general-detail {
+	margin-left: 0px;
+}
+
+.general-detail li {
+	margin-top: 20px;
+}
+
+.hide > .icon-chevron-down {
+	background-position: -456px -72px;
+	/* background-position: -313px -119px; */
+}
+
+.icon-refresh.pull-right {
+	margin-top: 15px;
+	cursor: pointer;
+}
+
+.pane {
+	list-style: none;
+	margin-left: 0;
+	padding: 10px 40px;
+}
+
+.paneSentry, .paneLocalLogger {
+	padding: 0;
+}
+
+.table-bordered {
+	border: 1px solid #aaa;
+	border-collapse: separate;
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+}
+
+.table th, .table td {
+	padding: 8px;
+	line-height: 17px;
+	text-align: left;
+	vertical-align: top;
+	border-top: 0;
+}
+
+.table-striped tbody > tr:nth-child(odd) > td, .table-striped tbody > tr:nth-child(odd) > th {
+	background-color: rgb(243,243,243);
+}
+
+thead tr {
+	background-color: rgb(234,234,234);
+}
+
+thead th {
+	border-bottom: 1px solid #ccc;
+	white-space: nowrap;
+}
+
+
+
+.modal-backdrop {
+	overflow-y: auto;
+}
+
+.modal-wrapper {
+	position: relative;
+	top: 50px;
+	left: 50%;
+	z-index: 1050;
+	width: 100%;
+	margin-left: -50%;
+	margin-bottom: 50px;
+	overflow: visible;
+}
+
+.modal-backdrop.in, .modal-backdrop.fade.in, .modal-backdrop {
+	opacity: 1.0;
+	filter: alpha(opacity=100);
+	background: rgba(0, 0, 0, 0.8);
+}
+
+
+.btnEditSentry, .btnRemoveSentry {
+	margin-top: -1px;
+	margin-left: 3px;
+	margin-right: -1px;
+}
+
+.mdlRemoveSentry, .mdlRemoveLogger, .mdlAnnounceLocalLogger {
+	position: absolute;
+	width: 550px;
+	margin-left: -275px;
+	padding: 10px 20px;
+}
+
+.tbl-container {
+	width: 100%;
+	border: 1px solid #aaa;
+	overflow-x: auto;
+	min-height: 220px;
+}
+
+.tbl-container > table {
+	display: table;
+	border: 0;
+	margin: 0;
+}
+
+tr[tr-selectable], tr[tr-multi-selectable] {
+	cursor: pointer;
+}
+
+tr[tr-selectable]:nth-child(odd).tr-selected > td, tr[tr-multi-selectable]:nth-child(odd).tr-selected > td {
+	background-color: rgba(0, 153, 255, .3) !important;
+}
+
+tr[tr-selectable]:nth-child(even).tr-selected > td, tr[tr-multi-selectable]:nth-child(even).tr-selected > td {
+	background-color: rgba(0, 153, 255, .2) !important;
+}
+
+.well.leftPane {
+	box-shadow: 0 0 40px #ccc;
+}
+
+
+ul.well1 {
+	margin-left: 0;
+	list-style: none;
+}
+
+li.well1 {
+	/*
+	border: 1px solid #ccc;
+	border-radius: 10px;
+	*/
+	border-bottom: 1px solid #ccc;
+
+	padding: 10px 40px;
+	/*box-sizing: border-box; */
+
+	margin-bottom: 5px;
+
+	background-color: white;
+}
+
+li.well1.wellnbr, li.well1:last-child {
+	margin-bottom: 20px;
+	border-bottom: 0;
+}

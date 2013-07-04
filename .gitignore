@@ -8,3 +8,5 @@ target
 obj
 bin
 *.dep
+araqne-webconsole/src/main/resources/WEB-INF/bower_components
+node_modules

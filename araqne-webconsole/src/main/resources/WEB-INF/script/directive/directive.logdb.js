@@ -1,4 +1,4 @@
-angular.module('logdb.input', ['logdb', 'util'])
+angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 .directive('queryInput', function($compile, serviceLogdb) {
 	return {
 		restrict: 'E',

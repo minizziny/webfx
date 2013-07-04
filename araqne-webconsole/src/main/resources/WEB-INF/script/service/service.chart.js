@@ -1,4 +1,4 @@
-angular.module('chart', ['util'])
+angular.module('App.Service.Chart', ['App.Service'])
 .factory('serviceChart', function(serviceGuid) {
 	function multiBarHorizontalChart(selector, data) {
 		$(selector).empty();
@@ -504,4 +504,4 @@ angular.module('chart', ['util'])
 		buildJSONStructure: buildJSONStructure,
 		getDataSeries: getDataSeries
 	}
-})
+});
