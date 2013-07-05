@@ -44,11 +44,7 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 							return obj.path == path;
 						});
 						if(found.length > 0) return found[0];
-						else {
-							var msg = 'Cannot find program.';
-							alert(msg);
-							throw new ReferenceError(msg);
-						}
+						return;
 					}
 
 					$.each(packs, function(i, pack) {
