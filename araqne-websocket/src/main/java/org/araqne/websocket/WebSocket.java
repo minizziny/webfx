@@ -34,6 +34,8 @@ import java.util.Random;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.araqne.websocket.WebSocketFrame.Opcode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @since 0.1.0
@@ -42,6 +44,7 @@ import org.araqne.websocket.WebSocketFrame.Opcode;
  */
 public class WebSocket {
 	private static final String WEBSOCKET_KEY_TRAILER = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+	private final Logger logger = LoggerFactory.getLogger(WebSocket.class);
 	private URI uri;
 	private Socket socket;
 	private CopyOnWriteArraySet<WebSocketListener> listeners;
@@ -169,7 +172,8 @@ public class WebSocket {
 		if (closed)
 			return;
 
-		if (socket != null) {
+		Socket captured = socket;
+		if (captured != null) {
 			try {
 				// getOutputStream can raise exception
 				ensureClose(socket.getOutputStream());
@@ -182,7 +186,7 @@ public class WebSocket {
 			} catch (Throwable t) {
 			}
 
-			socket.close();
+			captured.close();
 		}
 
 		closed = true;
@@ -234,9 +238,9 @@ public class WebSocket {
 							return;
 						if (socket.isClosed())
 							return;
-						e.printStackTrace();
+						logger.debug("araqne websocket: socket exception", e);
 					} catch (IOException e) {
-						e.printStackTrace();
+						logger.debug("araqne websocket: io exception", e);
 					}
 				}
 			} finally {
@@ -304,7 +308,7 @@ public class WebSocket {
 					try {
 						listener.onMessage(new WebSocketMessage(Opcode.TEXT.getCode(), text));
 					} catch (Throwable t) {
-						t.printStackTrace();
+						logger.warn("araqne websocket: websocket listener should not throw any exception", t);
 					}
 				}
 			}
