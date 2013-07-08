@@ -127,8 +127,11 @@ public class WebConsoleImpl implements WebConsole, WebSocketListener {
 
 		for (InetSocketAddress key : sessions.keySet()) {
 			WebSocketSession wss = sessions.get(key);
+			if (wss == null)
+				continue;
+
 			if (wss.getGuid().equals(session.getGuid())) {
-				logger.info("araqne webconsole: kill websocket session [{}]", wss);
+				logger.debug("araqne webconsole: kill websocket session [{}]", wss);
 				wss.close();
 				sessions.remove(key);
 				break;

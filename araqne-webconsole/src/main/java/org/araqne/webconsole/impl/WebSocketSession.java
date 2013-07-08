@@ -55,7 +55,7 @@ public class WebSocketSession extends AbstractSession {
 			socket.send(payload);
 	}
 
-	public void close() {
+	public synchronized void close() {
 		if (socket != null) {
 			socket.close();
 			socket = null;
@@ -64,7 +64,7 @@ public class WebSocketSession extends AbstractSession {
 
 	@Override
 	public String toString() {
-		return "websocket session, guid=" + getGuid() + ", remote=" + socket.getRemoteAddress() + ", lastAccessTime="
+		return "websocket session, guid=" + getGuid() + ", remote=" + getRemoteAddress() + ", lastAccessTime="
 				+ getLastAccessTime();
 	}
 }
