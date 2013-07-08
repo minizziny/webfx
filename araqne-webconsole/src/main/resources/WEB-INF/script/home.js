@@ -121,6 +121,17 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 		}
 
 		var program = Core.Program.findProgram(entry, entrypack);
+		if(program == undefined) {
+			program = {
+				display_names: {
+					ko: entry,
+					en: entry
+				},
+				name: entry,
+				path: entry,
+				pack: entrypack
+			}
+		}
 		runProgram(program);
 	}
 
