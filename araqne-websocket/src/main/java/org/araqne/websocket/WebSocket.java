@@ -176,13 +176,13 @@ public class WebSocket {
 		if (captured != null) {
 			try {
 				// getOutputStream can raise exception
-				ensureClose(socket.getOutputStream());
+				ensureClose(captured.getOutputStream());
 			} catch (Throwable t) {
 			}
 
 			try {
 				// getInputStream can raise exception
-				ensureClose(socket.getInputStream());
+				ensureClose(captured.getInputStream());
 			} catch (Throwable t) {
 			}
 
