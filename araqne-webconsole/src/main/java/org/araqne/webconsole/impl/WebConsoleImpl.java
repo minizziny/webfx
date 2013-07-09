@@ -15,7 +15,9 @@
  */
 package org.araqne.webconsole.impl;
 
+import java.io.File;
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -24,6 +26,10 @@ import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
+import org.araqne.confdb.Config;
+import org.araqne.confdb.ConfigCollection;
+import org.araqne.confdb.ConfigDatabase;
+import org.araqne.confdb.ConfigService;
 import org.araqne.httpd.BundleResourceServlet;
 import org.araqne.httpd.FileDownloadService;
 import org.araqne.httpd.FileDownloadServlet;
@@ -53,6 +59,9 @@ public class WebConsoleImpl implements WebConsole, WebSocketListener {
 	private BundleContext bc;
 
 	@Requires
+	private ConfigService conf;
+
+	@Requires
 	private HttpService httpd;
 
 	@Requires
@@ -72,7 +81,7 @@ public class WebConsoleImpl implements WebConsole, WebSocketListener {
 		sessions = new ConcurrentHashMap<InetSocketAddress, WebSocketSession>();
 		HttpContextRegistry contextRegistry = httpd.getContextRegistry();
 		HttpContext ctx = contextRegistry.ensureContext("webconsole");
-		ctx.addServlet("webconsole", new BundleResourceServlet(bc.getBundle(), "/WEB-INF"), "/*");
+		ctx.addServlet("webconsole", new BundleResourceServlet(bc.getBundle(), "/WEB-INF", getUiPath()), "/*");
 		ctx.addServlet("downloader", new FileDownloadServlet(downloadService), "/downloader");
 		ctx.getWebSocketManager().addListener(this);
 	}
@@ -86,6 +95,22 @@ public class WebConsoleImpl implements WebConsole, WebSocketListener {
 			ctx.removeServlet("downloader");
 			ctx.getWebSocketManager().removeListener(this);
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private File getUiPath() {
+		ConfigDatabase db = conf.ensureDatabase("araqne-webconsole");
+		ConfigCollection col = db.ensureCollection("global_configs");
+		Config c = col.findOne(null);
+		File uiPath = null;
+		if (c != null) {
+			Map<String, Object> m = (Map<String, Object>) c.getDocument();
+			String s = (String) m.get("ui_path");
+			if (s == null)
+				return null;
+			uiPath = new File(s);
+		}
+		return uiPath;
 	}
 
 	@Override

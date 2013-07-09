@@ -15,18 +15,29 @@
  */
 package org.araqne.webconsole.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.araqne.api.Script;
+import org.araqne.api.ScriptArgument;
 import org.araqne.api.ScriptContext;
+import org.araqne.api.ScriptUsage;
+import org.araqne.confdb.Config;
+import org.araqne.confdb.ConfigCollection;
+import org.araqne.confdb.ConfigDatabase;
+import org.araqne.confdb.ConfigService;
 import org.araqne.webconsole.CometMonitor;
 import org.araqne.webconsole.Program;
 import org.araqne.webconsole.ProgramApi;
 
 public class WebConsoleScript implements Script {
+	private ConfigService conf;
 	private ScriptContext context;
 	private ProgramApi programApi;
 	private CometMonitor cometMonitor;
 
-	public WebConsoleScript(ProgramApi programApi, CometMonitor cometMonitor) {
+	public WebConsoleScript(ConfigService conf, ProgramApi programApi, CometMonitor cometMonitor) {
+		this.conf = conf;
 		this.programApi = programApi;
 		this.cometMonitor = cometMonitor;
 	}
@@ -51,5 +62,46 @@ public class WebConsoleScript implements Script {
 		for (String sessionKey : cometMonitor.getSessionKeys()) {
 			context.println(sessionKey + ": " + cometMonitor.getAsyncContext(sessionKey));
 		}
+	}
+
+	/**
+	 * override default static resource files
+	 * 
+	 * @since 2.8.3
+	 */
+
+	@SuppressWarnings("unchecked")
+	@ScriptUsage(description = "override default static files", arguments = {
+			@ScriptArgument(name = "ui path", type = "string", description = "ui path for override default files", optional = true) })
+	public void uipath(String[] args) {
+		ConfigDatabase db = conf.ensureDatabase("araqne-webconsole");
+		ConfigCollection col = db.ensureCollection("global_configs");
+		Config c = col.findOne(null);
+
+		if (c != null) {
+			Map<String, Object> m = (Map<String, Object>) c.getDocument();
+			if (args.length == 0) {
+				Object uiPath = m.get("ui_path");
+				context.println(uiPath == null ? "null" : uiPath);
+				return;
+			}
+
+			String uiPath = args[0];
+			m.put("ui_path", uiPath.isEmpty() ? null : uiPath);
+			c.setDocument(m);
+			c.update();
+		} else {
+			if (args.length == 0) {
+				context.println("not set");
+				return;
+			}
+
+			String uiPath = args[0];
+			Map<String, Object> m = new HashMap<String, Object>();
+			m.put("ui_path", uiPath);
+			col.add(m);
+		}
+
+		context.println("set");
 	}
 }

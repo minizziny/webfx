@@ -15,6 +15,8 @@
  */
 package org.araqne.httpd;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -29,19 +31,36 @@ public class BundleResourceServlet extends ResourceServlet {
 	private final Logger logger = LoggerFactory.getLogger(BundleResourceServlet.class.getName());
 	private Bundle bundle;
 	private String basePath;
+	private final File overridePath;
 
 	public BundleResourceServlet(Bundle bundle, String basePath) {
+		this(bundle, basePath, null);
+	}
+
+	public BundleResourceServlet(Bundle bundle, String basePath, File overridePath) {
 		this.bundle = bundle;
 		this.basePath = basePath;
+		this.overridePath = overridePath;
 	}
 
 	@Override
 	protected InputStream getInputStream(HttpServletRequest req) {
 		try {
-			logger.trace("araqne httpd: trying to open bundle [{}] resource, base path [{}], path info [{}]", new Object[] {
-					bundle.getBundleId(), req.getRequestURI(), req.getPathInfo() });
+			if (logger.isTraceEnabled())
+				logger.trace("araqne httpd: override path [{}], req path [{}]", overridePath, req.getPathInfo());
+
+			File f = new File(overridePath, req.getPathInfo());
+			if (f.exists() && f.isFile() && f.canRead())
+				return new FileInputStream(f);
+
+			if (logger.isTraceEnabled())
+				logger.trace("araqne httpd: trying to open bundle [{}] resource, base path [{}], path info [{}]", new Object[] {
+						bundle.getBundleId(), req.getRequestURI(), req.getPathInfo() });
 
 			URL url = bundle.getResource(basePath + req.getPathInfo());
+			if (url == null)
+				return null;
+
 			return url.openStream();
 		} catch (Exception e) {
 			logger.trace("araqne httpd: cannot open bundle [{}] resource [{}]", bundle.getBundleId(), req.getRequestURI());

@@ -21,6 +21,7 @@ import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.ServiceProperty;
 import org.araqne.api.Script;
 import org.araqne.api.ScriptFactory;
+import org.araqne.confdb.ConfigService;
 import org.araqne.webconsole.CometMonitor;
 import org.araqne.webconsole.ProgramApi;
 
@@ -32,14 +33,17 @@ public class WebConsoleScriptFactory implements ScriptFactory {
 	private String alias;
 
 	@Requires
+	private ConfigService conf;
+
+	@Requires
 	private ProgramApi programApi;
-	
+
 	@Requires
 	private CometMonitor cometMonitor;
 
 	@Override
 	public Script createScript() {
-		return new WebConsoleScript(programApi, cometMonitor);
+		return new WebConsoleScript(conf, programApi, cometMonitor);
 	}
 
 }
