@@ -164,20 +164,32 @@ public class InitialSchema {
 
 	public static void createRoles(ScriptContext context, RoleApi roleApi) {
 		Role master = createRole(context, roleApi, "master", 4);
-		Permission permission = new Permission();
-		permission.setGroup("dom");
-		permission.setPermission("admin_grant");
-		master.getPermissions().add(permission);
+		addPermission(master, "dom", "admin_grant");
+		addPermission(master, "dom", "user_edit");
+		updateRole(context, roleApi, master);
+
+		Role admin = createRole(context, roleApi, "admin", 3);
+		addPermission(admin, "dom", "user_edit");
+		updateRole(context, roleApi, admin);
+
+		createRole(context, roleApi, "member", 2);
+		createRole(context, roleApi, "guest", 1);
+	}
+
+	private static void updateRole(ScriptContext context, RoleApi roleApi, Role master) {
 		try {
 			roleApi.updateRole(DEFAULT_DOMAIN, master);
 		} catch (Exception e) {
 			logger.error("araqne dom: master role initialize failed", e);
 			context.println("master role initialize failed");
 		}
+	}
 
-		createRole(context, roleApi, "admin", 3);
-		createRole(context, roleApi, "member", 2);
-		createRole(context, roleApi, "guest", 1);
+	private static void addPermission(Role master, String group, String name) {
+		Permission permission = new Permission();
+		permission.setGroup(group);
+		permission.setPermission(name);
+		master.getPermissions().add(permission);
 	}
 
 	private static Role createRole(ScriptContext context, RoleApi roleApi, String name, int level) {
