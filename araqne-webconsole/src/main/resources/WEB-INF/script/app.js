@@ -486,20 +486,6 @@ function ProgramController($scope) {
 
 }
 
-function UserController($scope) {
-	$scope.users = [];
-
-	function add() {
-		var obj = {
-			'name': 'Log Query',
-			'id': 'lq'
-		};
-		$scope.users.push(obj);
-	}
-
-	$scope.add = add;
-}
-
 
 function computerFormatPrefix(val) {
 	var computerFormatPrefixes = [ "", "K", "M", "G", "T", "P", "E", "Z", "Y" ];
@@ -519,7 +505,6 @@ function computerFormatPrefix(val) {
 
 app.controller('TaskController', TaskController);
 app.controller('ProgramController', ProgramController);
-app.controller('UserController', UserController);
 
 var myApp = {
 	disposeAll: function disposeAll() {
@@ -532,6 +517,19 @@ Array.prototype.forEach.call(['Arguments', 'Function', 'String', 'Number', 'Date
 		return toString.call(obj) == '[object ' + name + ']';
 	};
 });
+
+String.prototype.blank = function() {
+	return /^\s*$/.test(this);
+}
+
+String.prototype.isJSON = function() {
+	var str = this;
+	if (str.blank()) return false;
+	str = str.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@');
+	str = str.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']');
+	str = str.replace(/(?:^|:|,)(?:\s*\[)+/g, '');
+	return (/^[\],:{}\s]*$/).test(str);
+}
 
 /*
 $(parent.window).on('beforeunload', myApp.disposeAll);

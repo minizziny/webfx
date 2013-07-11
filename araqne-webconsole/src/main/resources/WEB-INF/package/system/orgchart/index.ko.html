@@ -1,0 +1,463 @@
+<!doctype html>
+<html ng-app="orgchart">
+<head>
+	<meta charset="utf-8" />
+
+	<!-- development -->
+	<script src="/bower_components/jquery/jquery.js"></script>
+	<script src="/bower_components/jquery-ui/ui/jquery-ui.js"></script>
+	<script src="/bower_components/angular/angular.js"></script>
+	<script src="/bower_components/d3/d3.js"></script>
+	<script src="/bootstrap/js/bootstrap.js"></script>
+	<script src="/bower_components/moment/moment.js"></script>
+	<script src="/bower_components/moment/min/lang/ko.js"></script>
+	<script src="/script/app.js"></script>
+	<script src="/script/filter/filter.js"></script>
+	<script src="/script/service/service.js"></script>
+	<script src="/script/service/service.logdb.js"></script>
+	<script src="/script/service/service.chart.js"></script>
+	<script src="/script/directive/directive.js"></script>
+	<script src="/script/directive/directive.logdb.js"></script>
+	<script src="/script/directive/directive.orgunit.js"></script>
+	<script src="/script/directive/sortable.js"></script>
+	<!-- /development -->
+
+	<!-- distribution -->
+	<!-- <script src="/script/app.dist.js"></script> -->
+	<!-- /distribution -->
+
+	<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="/css/app.css"/>
+	<link rel="stylesheet" href="/css/toggle-switch.css"/>
+	<style>
+.pane-nomargin {
+	padding: 0;
+}
+
+/** tree **/
+
+tree .hide {
+	display: none;
+}
+
+.tree-root {
+	margin-right: 15px;
+}
+
+.nav-list {
+	padding-right: 0;
+}
+
+.nav-list a {
+	/*border: 1px solid transparent;*/
+}
+
+.nav-list > li.check:not(.active) > a:first-child {
+	background-color: rgba(0, 153, 255, .1);
+}
+
+.nav-list > li.check:not(.active) > a:first-child:hover {
+	background-color: rgba(0, 153, 255, .2);
+}
+
+.nav-list i.tree-node-icon {
+	margin-right: 5px;
+}
+
+.ui-state-hover {
+	background-color: #ffff66 !important;
+	color: #08c !important;
+}
+
+.ui-state-active {
+	/*background-color: yellow !important;*/
+}
+
+.ui-draggable-dragging {
+	z-index: 9999;
+}
+
+
+/*  */
+.treetype {
+	position: relative;
+}
+
+.leftPane tree > ul {
+	clear: both;
+	padding-top: 40px;
+}
+
+input[type=search] {
+	left: 0;
+	-webkit-transition: 0.1s ease;
+	background: white;
+	text-align: left;
+	right: 0;
+	position: absolute;
+	width: auto;
+	top: 5px;
+}
+
+input[type=search]:focus {
+	background: white;
+}
+
+.li-edit {
+	padding: 3px 15px;
+	margin-right: -15px;
+	margin-left: -15px;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+	display: block;
+	white-space: nowrap;
+}
+
+.li-edit input {
+	margin: -3px 0;
+	display: inline-block;
+	width: 140px;
+	padding: 1px 5px;
+}
+
+.dropdown-menu.upper {
+	top: -110px !important;
+}
+
+/* */
+
+.extraPane, .leftPane, .rightPane {
+	-webkit-transition: .3s ease;
+}
+
+.leftPane {
+	left: 0;
+}
+
+.leftPane.out {
+	left: -24%;
+}
+
+.leftPane.glimpse {
+	/*-webkit-transition: none;*/
+	left: 0;
+}
+
+.leftPaneOverHandler {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	width: 10px;
+	background-color: #eee;
+	border-right: 1px #ccc solid;
+	box-shadow: 0 0 40px rgba(0,0,0,.4);
+}
+
+.rightPane.out {
+	margin-left: -2%;
+}
+
+.extraPane {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	right: -65%;
+	width: 50%;
+	overflow: auto;
+	border-left: 1px solid #ccc;
+	background-color: white;
+	box-shadow: 0 0 40px rgba(0,0,0,.4);
+}
+
+.extraPane.in {
+	right: 0;
+}
+
+.rightPaneBackdrop {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	background-color: rgba(0,0,0,.4);
+}
+
+button[el-type=dropdown] {
+	background: transparent;
+	border: 0;
+	width: 22px;
+	margin-right: -11px;
+}
+
+button[el-type=dropdown] span.caret {
+	margin-top: 6px;
+	border-top-color: #666;
+	border-width: 5px;
+}
+
+button[el-type=dropdown]:hover span.caret {
+	border-top-color: #333;
+}
+
+tr[tr-selectable]:nth-child(odd).tr-single-selected > td, tr[tr-multi-selectable]:nth-child(odd).tr-single-selected > td {
+	background-color: rgba(0, 153, 255, .3) !important;
+}
+
+tr[tr-selectable]:nth-child(even).tr-single-selected > td, tr[tr-multi-selectable]:nth-child(even).tr-single-selected > td {
+	background-color: rgba(0, 153, 255, .2) !important;
+}
+
+tr[tr-multi-selectable] > td:first-child, tr > th:first-child {
+	-webkit-transition: width .2s ease-out;
+}
+
+td.td-check-show, th.td-check-show {
+	width: 28px !important;
+}
+
+td.td-check-hide, th.td-check-hide {
+	width: 0px !important;
+	overflow-x: hidden;
+}
+
+.table-form td:first-child {
+	width: 120px;
+}
+
+.table-form td input, .table-form td textarea {
+	margin-bottom: 0;
+}
+
+table.listUsers {
+	table-layout: fixed;
+}
+
+
+	</style>
+</head>
+<body ng-controller="Controller">
+	<div class="leftPane well" style="z-index:8; overflow-x:visible" ng-controller="TreeController" ng-mouseover="glimpseLeftPane()" ng-mouseout="outLeftPane()">
+		<div class="switch android" ng-class="{ 'hidden':isEditMode }">
+			<input id="orgunit" name="view" type="radio" checked>
+			<label for="orgunit" ng-click="toggleLogTrendType('byorgunit')">부서별</label>
+			<input id="group" name="view" type="radio">	
+			<label for="group" ng-click="toggleLogTrendType('bygroup')">그룹별</label>
+			<span class="slide-button"></span>
+		</div>
+		<div class="treetype byorgunit">
+			<input class="searchbox" type="search" placeholder="검색">
+			<tree id="treeOrgUnit" class="clearboth" style="top: 50px" tree-data="treeDataSource"
+				node-id="guid"
+				node-name="name"
+				node-selected="_tables"
+				ng-click="closeExtraPane()">
+			</tree>
+		</div>
+		<div class="treetype bygroup" style="display:none">
+			<input class="searchbox" type="search" placeholder="검색">
+			<tree class="clearboth" style="top: 50px" tree-data="treeOtherSource"
+				node-id="guid"
+				node-name="name"
+				node-selected="_tables">
+			</tree>
+		</div>
+	</div>
+
+	<div class="leftPaneOverHandler" ng-mouseover="glimpseLeftPane()" ng-hide="isUserEditMode"></div>
+
+	<div class="rightPane">
+		<ul>
+			<li ng-controller="UserController" class="pane pane-nomargin">
+				<div class="navbar">
+					<div class="navbar-inner">
+						<button ng-click="closeExtraPane()" class="btnShowTree btn btn-primary pull-left" style="margin-right: 15px; display:none"><i class="icon-white icon-list"></i></button>
+						<a class="brand">{{currentOrgUnit.name}}</a>
+						<div ng-hide="isEditMode">
+							<button class="btn pull-left" ng-click="addUser()">새 사용자</button>
+							<button class="btn pull-right" ng-click="enterEditMode()">편집</button>
+						</div>
+						<div ng-show="isEditMode">
+							<div class="btn-group">
+								<button class="btn">새 사용자</button>
+								<button class="btn">이동</button>
+								<button class="btn">삭제</button>
+							</div>
+							<button class="btn btn-primary pull-right" ng-click="endEditMode()">완료</button>
+						</div>
+					</div>
+				</div>
+				<ul class="tab well1 tab-general">
+					<li class="section well1">
+						<table class="table table-bordered table-striped listUsers" ng-class="{'isEditMode': isEditMode}">
+							<thead>
+								<tr>
+									<th ng-class="{ 'td-check-show': isEditMode, 'td-check-hide': !isEditMode }" style="padding: 3px; vertical-align: middle">
+										<button class="btn btn-mini" ng-click="toggleSelectAll()">
+											<i class="icon-check"></i>
+										</button>
+									</th>
+									<th>로그인 이름</th>
+									<th>이름</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-click="showUser($event)" ng-repeat="user in dataUsers" draggable="isEditMode" el-type="user" tr-multi-selectable="{ 'data': user, 'condition': 'isEditMode' }">
+									<td ng-class="{ 'td-check-show': isEditMode, 'td-check-hide': !isEditMode }">
+										<input type="checkbox" ng-model="user.is_checked" ng-checked="user.is_checked">
+									</td>
+									<td>{{user.login_name}}</td>
+									<td>{{user.name}}</td>
+								</tr>
+							</tbody>
+						</table>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+
+	<div class="rightPaneBackdrop" ng-show="isUserEditMode"></div>
+
+	<div class="extraPane" style="background-color: #f5f5f5">
+		<ul style="margin: 0">
+			<li class="pane pane-nomargin">
+				<div class="navbar">
+					<div class="navbar-inner">
+						<input class="txtNewLoginName" type="text" ng-show="selectedUser._isNew && isUserEditMode" placeholder="아이디를 입력하세요" style="float: left; margin: 5px;">
+						<a class="brand">{{selectedUser.login_name}}</a>
+						<div ng-hide="isUserEditMode">
+							<div class="btn-group">
+								<button class="btn" ng-click="closeExtraPane()">닫기</button>
+							</div>
+							<div class="pull-right btn-group">
+								<button class="btn">비밀번호 변경</button>
+								<button class="btn" ng-click="enterUserEditMode()">편집</button>
+							</div>
+						</div>
+						<div ng-show="isUserEditMode">
+							<button class="btn btn-warning" ng-click="discardUserInfo()">취소</button>
+							<button class="btn btn-primary pull-right" ng-click="saveUserInfo()">완료</button>
+						</div>
+					</div>
+				</div>
+				<ul class="tab well1 tab-general" ng-show="isUserEditMode">
+					<li class="section area">
+						<table class="table table-form">
+							<tbody>
+								<tr>
+									<td>이름</td>
+									<td><input type="text" class="input-xlarge" placeholder="Email"></td>
+								</tr>
+								<tr>
+									<td>직함</td>
+									<td><input type="text" class="input-xlarge" placeholder="Email"></td>
+								</tr>
+								<tr>
+									<td>그룹</td>
+									<td>
+										<div class="btn-group">
+											<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+												eediom
+												<span class="caret"></span>
+											</a>
+											<div class="dropdown-menu" style="z-index:8888; margin-bottom: 20px" ng-click="supressEvent($event)">
+												<form class="form-search" style="margin: 2px 8px 6px">
+													<input type="text" class="input-medium search-query">
+													<button type="submit" class="btn">Search</button>
+												</form>
+												<tree id="treeToChangeOrgUnit" tree-data="treeDataSource"
+													node-id="guid"
+													node-name="name"
+													node-selected="_tables">
+												</tree>
+											</div>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td>E-mail</td>
+									<td><input type="text" class="input-xlarge" placeholder="Email"></td>
+								</tr>
+							</tbody>
+						</table>
+					</li>
+					<li class="section area">
+						<table class="table table-form">
+							<tbody>
+								<tr>
+									<td>설명</td>
+									<td><textarea class="input-xlarge"></textarea></td>
+								</tr>
+							</tbody>
+						</table>
+					</li>
+					<li class="section area" ng-hide="selectedUser._isNew" >
+						<button class="btn btn-danger" style="width: 100%">이 사용자 삭제</button>
+					</li>
+				</ul>
+				<ul class="tab area tab-general" ng-hide="isUserEditMode">
+					<li class="section area">
+						<table class="table table-form">
+							<tbody>
+								<tr>
+									<td>이름</td>
+									<td>{{selectedUser.name}}</td>
+								</tr>
+								<tr>
+									<td>직함</td>
+									<td>{{selectedUser.title}}</td>
+								</tr>
+								<tr>
+									<td>그룹</td>
+									<td>{{selectedUser.org_unit}}</td>
+								</tr>
+								<tr>
+									<td>E-mail</td>
+									<td>{{selectedUser.email}}</td>
+								</tr>
+							</tbody>
+						</table>
+					</li>
+					<li class="section area">
+						<table class="table table-form">
+							<tbody>
+								<tr>
+									<td>생성일</td>
+									<td>{{selectedUser.created}}</td>
+								</tr>
+								<tr>
+									<td>수정일</td>
+									<td>{{selectedUser.updated}}</td>
+								</tr>
+							</tbody>
+						</table>
+					</li>
+					<li class="section area">
+						<table class="table table-form">
+							<tbody>
+								<tr>
+									<td>설명</td>
+									<td>{{selectedUser.description}}</td>
+								</tr>
+							</tbody>
+						</table>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+
+	<br class="clearboth" />
+
+	<div class="modal errorWin" modal>
+		<a href="#" class="modal-close close" ng-click="clearError()">&times;</a>
+		<div class="raw"></div>
+	</div>
+
+	<div class="modal newUser" modal>
+		
+	</div>
+
+	<script src="orgchart.js"></script>
+
+</body>
+</html>

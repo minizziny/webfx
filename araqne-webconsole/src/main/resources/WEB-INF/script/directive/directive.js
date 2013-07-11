@@ -65,32 +65,65 @@ angular.module('App.Directive', [])
 					if(scope.$parent.$parent.hasOwnProperty(attrs.trSelectable)) {
 						scope.$parent.$parent[attrs.trSelectable] = radio.val();
 					}
+					else {
+						alert('not binding')
+					}
 				}
 				scope.$apply();
 			});
 		}
 	}
 })
-.directive('trMultiSelectable', function() {
+.directive('trMultiSelectable', function($parse) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs) {
-			var parentTbody = element.parent();
-			var model = scope[attrs.trMultiSelectable];
-			element.on('click', function(e) {
-				if(e.target.type != 'checkbox') {
-					model.is_checked = !model.is_checked;
-				}
-				
-				if(model.is_checked) {
-					element.addClass('tr-selected');
+
+			if($parse(attrs.trMultiSelectable)() == undefined) {
+				// data string only
+				var model = scope[attrs.trMultiSelectable];
+				bindingMultiEvent();
+			}
+			else {
+				// option object
+				attrs = scope.$eval(attrs.trMultiSelectable);
+				//console.log(attrs, scope);
+
+				var parentTbody = element.parent();
+				var model = attrs.data;
+
+				if(attrs.condition != undefined) {
+					scope.$parent.$watch(attrs.condition, function(vnew, vold) {
+						if(vnew) {
+							bindingMultiEvent();
+						}
+						else {
+							element.off('click.tr-multi').removeClass('tr-selected');
+							model.is_checked = false;
+						}
+					});
 				}
 				else {
-					element.removeClass('tr-selected');
-				}
+					bindingMultiEvent();
+				}	
+			}
 
-				scope.$apply();
-			});
+			function bindingMultiEvent() {
+				element.on('click.tr-multi', function(e) {
+					if(e.target.type != 'checkbox') {
+						model.is_checked = !model.is_checked;
+					}
+					
+					if(model.is_checked) {
+						element.addClass('tr-selected');
+					}
+					else {
+						element.removeClass('tr-selected');
+					}
+
+					scope.$apply();
+				});
+			}
 		}
 	}
 })
@@ -376,6 +409,114 @@ angular.module('App.Directive', [])
 			element.addClass('my-hidden');
 		}
 	}
+})
+.directive('ngModelOnblur', function() {
+	return {
+		restrict: 'A',
+		require: 'ngModel',
+		link: function(scope, element, attrs, ngModelCtrl) {
+			if (attrs.type === 'radio' || attrs.type === 'checkbox') return;
+			var cancel = false;
+
+			element.unbind('input').unbind('keydown').unbind('change');
+			element.bind('blur', function() {
+				if(!cancel) {
+					ngModelCtrl.$setViewValue(element.val());
+				}
+
+				scope[attrs.ngModelOnblur].is_edit_mode = false;
+				setTimeout(function() {
+					scope.$apply();
+					cancel = false;
+				}, 100);
+			}).bind('keydown', function(e) {
+				if(e.keyCode == 13) {
+					this.blur();
+				}
+				else if(e.keyCode == 27) {
+					cancel = true;
+					this.blur();
+				}
+			})
+		}
+	}
+})
+.directive('draggable', function() {
+	return {
+		restrict: 'A',
+		link: function ($scope, $element, $attrs) {
+
+			if($attrs.draggable === 'true') {
+				init($scope, $element, $attrs);
+				return;
+			}
+
+			function init(scope, element, attrs) {
+
+				if(element[0].nodeName == 'TR' && attrs.hasOwnProperty('trMultiSelectable')) {
+					function getDataSourceString() {
+						var expr = attrs.ngRepeat;
+						return expr.substring(expr.indexOf('in') + 3, expr.length);
+					}
+					
+					var dataSrc = scope.$parent[getDataSourceString()];
+
+					element.draggable({
+						cursorAt: { top: 20, left: 20 },
+						helper: function(event) {
+							var selected = dataSrc.filter(function(obj) {
+								return obj.is_checked;
+							});
+
+							if(selected.length == 0) {
+								element.click();
+								return $('<span class="badge badge-important">1</span>' );
+							}
+							else {
+								return $('<span class="badge badge-important">' + selected.length + '</span>' );
+							}
+						}
+					});
+				}
+				else {
+					element.draggable({ opacity: 0.7, helper: "clone" });
+				}
+				element.draggable('enable');
+
+				element[0].dragContext = {
+					scope: scope,
+					element: element,
+					attrs: attrs
+				};
+			}
+
+			$scope.$parent.$watch($attrs.draggable, function() {
+				if($scope.$parent == null) return;
+				//console.log($attrs.draggable, $scope)
+				if(!$scope.$parent[$attrs.draggable]) {
+					$element.draggable();
+					$element.draggable('disable');	
+					return;
+				}
+
+				init($scope, $element, $attrs)
+
+			}, false);
+		}
+	}
+})
+.directive('droppable', function() {
+	return {
+		restrict: 'A',
+		link: function (scope, element, attrs) {
+			element.droppable({
+				accept: attrs.droppableAccept,
+				activeClass: attrs.droppableActiveClass,
+				hoverClass: attrs.droppableHoverClass,
+				drop: function(e, ui) {
+					scope[attrs.droppableDrop].call(scope, ui.draggable[0].dragContext.scope, scope, ui.draggable[0], this, ui.draggable[0].dragContext, e);
+				}
+			});
+		}
+	}
 });
-
-
