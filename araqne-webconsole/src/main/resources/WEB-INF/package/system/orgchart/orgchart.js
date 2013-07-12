@@ -3,9 +3,27 @@ var proc;
 
 app.factory('eventSender', function() {
 	var e = {
-		onTreeSelectOrgUnit: null
+		onTreeSelectOrgUnit: null,
+		onDropUsersToOrgUnit: null,
+		onOpenDialogChangePassword: null
 	}
 	return e;
+});
+
+app.directive('passwordValidate', function($parse) {
+	return {
+		restrict: 'A',
+		require: 'ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			scope.$watch(attrs.ngModel, function(value) {
+				var cond = /[0-9]+/.test(value);
+				cond = cond & (/[a-zA-Z]+/.test(value));
+				cond = cond & (/[^0-9a-zA-Z]+/.test(value));
+				cond = cond & value.length >= 9;
+				ctrl.$setValidity('inadequacy', cond);
+			})
+		}
+	};
 });
 
 app.factory('serviceDom', function() {
@@ -14,14 +32,20 @@ app.factory('serviceDom', function() {
 	};
 });
 
-function Controller($scope, serviceTask, socket) {
+function Controller($scope, serviceTask, socket, eventSender) {
 	serviceTask.init();
 	proc = serviceTask.newProcess('logquery');
 
+	$scope.testAlert = function() {
+		var types = ['info', 'success', 'error'];
+		var random = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
+		notify(types[random], '안녕하세요', Math.random() < 0.5 ? true : false);
+	}
 
 	$scope.treeDataSource = [];
 
 	$scope.selectedUser = null;
+	$scope.selectedUserCopy = null;
 	$scope.isUserEditMode = false;
 
 	$scope.closeExtraPane = function() {
@@ -43,6 +67,7 @@ function Controller($scope, serviceTask, socket) {
 
 	$scope.enterUserEditMode = function() {
 		$scope.isUserEditMode = true;
+		$scope.selectedUserCopy = angular.copy($scope.selectedUser);
 	}
 
 	$scope.saveUserInfo = function() {
@@ -71,15 +96,34 @@ function Controller($scope, serviceTask, socket) {
 	$scope.exitUserEditMode = function() {
 		$scope.isUserEditMode = false;
 	}
+
+	$scope.openDialogChangePassword = function() {
+		eventSender.onOpenDialogChangePassword();
+	}
+
+	$scope.dropUsers = function(scopeSource, scopeTarget, elSource, elTarget, dragContext, e) {
+		eventSender.onDropUsersToOrgUnit(scopeTarget);
+		//console.log(scopeSource, scopeTarget, elSource, elTarget, dragContext, e, this)
+	}
+
 }
 
 function UserController($scope, $compile, socket, eventSender) {
+	eventSender.onDropUsersToOrgUnit = function(scopeTarget) {
+		var login_names = $scope.dataUsers.filter(function(user) {
+			return user.is_checked;
+		}).map(function(user) {
+			return user.login_name;
+		});
+
+		moveUsers(scopeTarget.node.guid, login_names);
+	}
 
 	$scope.currentOrgUnit;
 
 	eventSender.onTreeSelectOrgUnit = function(guid, orgunit) {
 		$scope.currentOrgUnit = orgunit;
-		$scope.getUsers(guid);
+		getUsers(guid);
 	}
 
 	$scope.dataUsers = [];
@@ -141,7 +185,7 @@ function UserController($scope, $compile, socket, eventSender) {
 		$('.btnShowTree').fadeIn();
 	}
 
-	$scope.getUsers = function(guid) {
+	function getUsers(guid) {
 		var option = {};
 		if(guid != undefined) {
 			option["ou_guid"] = guid;
@@ -153,24 +197,64 @@ function UserController($scope, $compile, socket, eventSender) {
 			$scope.dataUsers = m.body.users;
 			$scope.$apply();
 		})
-		.failed(msgbusFailed);	
+		.failed(msgbusFailed);
+	}
+
+	function moveUsers(target, users) {
+		var option = {
+			'org_unit_guid': target, 
+			'login_names': users
+		}
+		socket.send('org.araqne.dom.msgbus.UserPlugin.moveUsers', option, proc.pid)
+		.success(function(m) {
+			console.log(m.body)
+
+
+
+			// $scope.dataUsers = m.body.users;
+			// $scope.$apply();
+		})
+		.failed(msgbusFailed);
 	}
 
 	$scope.addUser = function() {
+		var targetOrgUnit = angular.copy($scope.currentOrgUnit);
+		delete targetOrgUnit.children;
+		delete targetOrgUnit.className;
+
 		$scope.$parent.selectedUser = {
-			'_isNew': true
+			'_isNew': true,
+			'org_unit': targetOrgUnit
 		};
+
+		console.log($scope.$parent.selectedUser)
 
 		$('tr.tr-single-selected').removeClass('tr-single-selected');
 		openExtraPane();
 
-		$scope.$parent.isUserEditMode = true;
+		$scope.$parent.enterUserEditMode();
 
 		setTimeout(function() {
 			$('.txtNewLoginName').focus();
 		}, 250);
 	}
 	
+}
+
+function ChangePasswordController($scope, socket, eventSender) {
+	eventSender.onOpenDialogChangePassword = function() {
+		$('[modal].changePassword')[0].showDialog();
+		$scope.valPassword = '';
+		$scope.valPasswordConfirm = '';
+		$('[modal].changePassword input#password').focus();
+	}
+
+	$scope.valPassword = '';
+	$scope.valPasswordConfirm = '';
+
+	$scope.changePassword = function() {
+		console.log('ssd')
+	}
 }
 
 function TreeController($scope, $compile, socket, eventSender) {
@@ -283,6 +367,43 @@ function TreeController($scope, $compile, socket, eventSender) {
 	})
 	.failed(openError);
 
+}
+
+function notify(type, msg, autohide) {
+	function makeRemoveClassHandler(regex) {
+		return function (index, classes) {
+			return classes.split(/\s+/).filter(function (el) { return regex.test(el);}).join(' ');
+		}
+	}
+
+	var btnClose = $('.alert-fix-side > .close');
+	if(autohide == true) btnClose.hide();
+	else btnClose.off('click').show();
+
+	if($('.alert-fix-side').hasClass('show')) {
+		$('.alert-fix-side.show').removeClass('show');
+	}
+	else {
+		$('.alert-fix-side').removeClass(makeRemoveClassHandler(/(alert-success|alert-info|alert-error)/))
+			.addClass('alert-' + type)
+			.addClass('show')
+			.find('span.msg')
+			.html(msg);
+	}
+
+	if(autohide == true) {
+		setTimeout(function() {
+			$('.alert-fix-side.show').removeClass('show');
+		}, 3000)
+	}
+	else {
+		btnClose.on('click', function() {
+			$('.alert-fix-side.show').hide().removeClass('show');
+			setTimeout(function() {
+				$('.alert-fix-side').css('display','block');
+			}, 200);
+		});
+	}
 }
 
 function openError(m, raw) {

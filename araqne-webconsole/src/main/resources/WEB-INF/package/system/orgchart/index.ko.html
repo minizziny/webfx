@@ -178,7 +178,7 @@ input[type=search]:focus {
 	right: 0;
 	top: 0;
 	bottom: 0;
-	background-color: rgba(0,0,0,.4);
+	background-color: rgba(0,0,0,.7);
 }
 
 button[el-type=dropdown] {
@@ -221,6 +221,7 @@ td.td-check-hide, th.td-check-hide {
 
 .table-form td:first-child {
 	width: 120px;
+	vertical-align: middle;
 }
 
 .table-form td input, .table-form td textarea {
@@ -231,6 +232,21 @@ table.listUsers {
 	table-layout: fixed;
 }
 
+.changePassword {
+	position: absolute;
+	width: 570px;
+	margin-left: -285px;
+	padding: 10px 20px;
+}
+
+input.searchbox {
+	border-radius: 15px;
+	padding: 4px 14px;
+}
+
+.help-inline {
+	margin-top: 6px;
+}
 
 	</style>
 </head>
@@ -244,16 +260,17 @@ table.listUsers {
 			<span class="slide-button"></span>
 		</div>
 		<div class="treetype byorgunit">
-			<input class="searchbox" type="search" placeholder="검색">
+			<input class="searchbox" type="search" placeholder="부서 검색">
 			<tree id="treeOrgUnit" class="clearboth" style="top: 50px" tree-data="treeDataSource"
 				node-id="guid"
 				node-name="name"
 				node-selected="_tables"
-				ng-click="closeExtraPane()">
+				ng-click="closeExtraPane()"
+				ng-drop="dropUsers">
 			</tree>
 		</div>
 		<div class="treetype bygroup" style="display:none">
-			<input class="searchbox" type="search" placeholder="검색">
+			<input class="searchbox" type="search" placeholder="그룹 검색">
 			<tree class="clearboth" style="top: 50px" tree-data="treeOtherSource"
 				node-id="guid"
 				node-name="name"
@@ -273,14 +290,21 @@ table.listUsers {
 						<a class="brand">{{currentOrgUnit.name}}</a>
 						<div ng-hide="isEditMode">
 							<button class="btn pull-left" ng-click="addUser()">새 사용자</button>
+							<form class="navbar-search pull-left" style="margin-left: 10px">
+								<input type="text" class="search-query" placeholder="사용자 검색">
+							</form>
 							<button class="btn pull-right" ng-click="enterEditMode()">편집</button>
+							<!-- <button class="btn pull-left" ng-click="testAlert()">test alert</button> -->
 						</div>
 						<div ng-show="isEditMode">
-							<div class="btn-group">
+							<div class="btn-group pull-left">
 								<button class="btn">새 사용자</button>
 								<button class="btn">이동</button>
 								<button class="btn">삭제</button>
 							</div>
+							<form class="navbar-search pull-left" style="margin-left: 10px">
+								<input type="text" class="search-query" placeholder="사용자 검색">
+							</form>
 							<button class="btn btn-primary pull-right" ng-click="endEditMode()">완료</button>
 						</div>
 					</div>
@@ -297,6 +321,7 @@ table.listUsers {
 									</th>
 									<th>로그인 이름</th>
 									<th>이름</th>
+									<th>부서</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -306,6 +331,7 @@ table.listUsers {
 									</td>
 									<td>{{user.login_name}}</td>
 									<td>{{user.name}}</td>
+									<td>{{user.org_unit.name}}</td>
 								</tr>
 							</tbody>
 						</table>
@@ -320,128 +346,134 @@ table.listUsers {
 	<div class="extraPane" style="background-color: #f5f5f5">
 		<ul style="margin: 0">
 			<li class="pane pane-nomargin">
-				<div class="navbar">
-					<div class="navbar-inner">
-						<input class="txtNewLoginName" type="text" ng-show="selectedUser._isNew && isUserEditMode" placeholder="아이디를 입력하세요" style="float: left; margin: 5px;">
-						<a class="brand">{{selectedUser.login_name}}</a>
-						<div ng-hide="isUserEditMode">
-							<div class="btn-group">
-								<button class="btn" ng-click="closeExtraPane()">닫기</button>
+				<form name="frmUser">
+					<div class="navbar">
+						<div class="navbar-inner">
+							<input class="txtNewLoginName" ng-model="selectedUserCopy.login_name" type="text" ng-show="selectedUser._isNew && isUserEditMode" placeholder="아이디를 입력하세요" style="float: left; margin: 5px;" required>
+							<a class="brand">{{selectedUser.login_name}}</a>
+							<div ng-hide="isUserEditMode">
+								<div class="btn-group">
+									<button class="btn" ng-click="closeExtraPane()">닫기</button>
+								</div>
+								<div class="pull-right btn-group">
+									<button class="btn" ng-click="openDialogChangePassword()">암호 변경</button>
+									<button class="btn" ng-click="enterUserEditMode()">편집</button>
+								</div>
 							</div>
-							<div class="pull-right btn-group">
-								<button class="btn">비밀번호 변경</button>
-								<button class="btn" ng-click="enterUserEditMode()">편집</button>
+							<div ng-show="isUserEditMode">
+								<button class="btn btn-warning" ng-click="discardUserInfo()">취소</button>
+								<button class="btn btn-primary pull-right" ng-disabled="frmUser.$invalid" ng-click="saveUserInfo()">완료</button>
 							</div>
-						</div>
-						<div ng-show="isUserEditMode">
-							<button class="btn btn-warning" ng-click="discardUserInfo()">취소</button>
-							<button class="btn btn-primary pull-right" ng-click="saveUserInfo()">완료</button>
 						</div>
 					</div>
-				</div>
-				<ul class="tab well1 tab-general" ng-show="isUserEditMode">
-					<li class="section area">
-						<table class="table table-form">
-							<tbody>
-								<tr>
-									<td>이름</td>
-									<td><input type="text" class="input-xlarge" placeholder="Email"></td>
-								</tr>
-								<tr>
-									<td>직함</td>
-									<td><input type="text" class="input-xlarge" placeholder="Email"></td>
-								</tr>
-								<tr>
-									<td>그룹</td>
-									<td>
-										<div class="btn-group">
-											<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-												eediom
-												<span class="caret"></span>
-											</a>
-											<div class="dropdown-menu" style="z-index:8888; margin-bottom: 20px" ng-click="supressEvent($event)">
-												<form class="form-search" style="margin: 2px 8px 6px">
-													<input type="text" class="input-medium search-query">
-													<button type="submit" class="btn">Search</button>
-												</form>
-												<tree id="treeToChangeOrgUnit" tree-data="treeDataSource"
-													node-id="guid"
-													node-name="name"
-													node-selected="_tables">
-												</tree>
+					<ul class="tab well1 tab-general" ng-show="isUserEditMode">
+						<li class="section area">
+							<table class="table table-form">
+								<tbody>
+									<tr>
+										<td>이름</td>
+										<td class="control-group" ng-class="{ 'error': frmUser.name.$error.required }">
+											<input type="text" name="name" class="input-xlarge" ng-model="selectedUserCopy.name" required>
+											<div ng-show="frmUser.name.$error.required" class="help-inline">이름은 반드시 필요합니다.</div>
+										</td>
+									</tr>
+									<tr>
+										<td>직함</td>
+										<td><input type="text" class="input-xlarge" ng-model="selectedUserCopy.title"></td>
+									</tr>
+									<tr>
+										<td>그룹</td>
+										<td>
+											<div class="btn-group">
+												<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+													{{selectedUserCopy.org_unit.name}}
+													<span class="caret"></span>
+												</a>
+												<div class="dropdown-menu" style="z-index:8888; margin-bottom: 20px" ng-click="supressEvent($event)">
+													<input type="text" class="input-large search-query" style="margin: 2px 8px 6px">
+													<tree id="treeToChangeOrgUnit" tree-data="treeDataSource"
+														node-id="guid"
+														node-name="name"
+														node-selected="_tables">
+													</tree>
+												</div>
 											</div>
-										</div>
-									</td>
-								</tr>
-								<tr>
-									<td>E-mail</td>
-									<td><input type="text" class="input-xlarge" placeholder="Email"></td>
-								</tr>
-							</tbody>
-						</table>
-					</li>
-					<li class="section area">
-						<table class="table table-form">
-							<tbody>
-								<tr>
-									<td>설명</td>
-									<td><textarea class="input-xlarge"></textarea></td>
-								</tr>
-							</tbody>
-						</table>
-					</li>
-					<li class="section area" ng-hide="selectedUser._isNew" >
-						<button class="btn btn-danger" style="width: 100%">이 사용자 삭제</button>
-					</li>
-				</ul>
-				<ul class="tab area tab-general" ng-hide="isUserEditMode">
-					<li class="section area">
-						<table class="table table-form">
-							<tbody>
-								<tr>
-									<td>이름</td>
-									<td>{{selectedUser.name}}</td>
-								</tr>
-								<tr>
-									<td>직함</td>
-									<td>{{selectedUser.title}}</td>
-								</tr>
-								<tr>
-									<td>그룹</td>
-									<td>{{selectedUser.org_unit}}</td>
-								</tr>
-								<tr>
-									<td>E-mail</td>
-									<td>{{selectedUser.email}}</td>
-								</tr>
-							</tbody>
-						</table>
-					</li>
-					<li class="section area">
-						<table class="table table-form">
-							<tbody>
-								<tr>
-									<td>생성일</td>
-									<td>{{selectedUser.created}}</td>
-								</tr>
-								<tr>
-									<td>수정일</td>
-									<td>{{selectedUser.updated}}</td>
-								</tr>
-							</tbody>
-						</table>
-					</li>
-					<li class="section area">
-						<table class="table table-form">
-							<tbody>
-								<tr>
-									<td>설명</td>
-									<td>{{selectedUser.description}}</td>
-								</tr>
-							</tbody>
-						</table>
-					</li>
-				</ul>
+										</td>
+									</tr>
+									<tr>
+										<td>E-mail</td>
+										<td class="control-group" ng-class="{ 'error': frmUser.email.$error.email }">
+											<input type="email" name="email" class="input-xlarge" placeholder="user@domain.com" ng-model="selectedUserCopy.email">
+											<div ng-show="frmUser.email.$error.email" class="help-inline">올바른 E-mail 형식이 아닙니다.</div>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</li>
+						<li class="section area">
+							<table class="table table-form">
+								<tbody>
+									<tr>
+										<td>설명</td>
+										<td><textarea class="input-xlarge" ng-model="selectedUserCopy.description"></textarea></td>
+									</tr>
+								</tbody>
+							</table>
+						</li>
+						<li class="section area" ng-hide="selectedUserCopy._isNew" >
+							<button class="btn btn-danger" style="width: 100%">이 사용자 삭제</button>
+						</li>
+						<!-- {{selectedUserCopy}} -->
+					</ul>
+					<ul class="tab area tab-general" ng-hide="isUserEditMode">
+						<li class="section area">
+							<table class="table table-form">
+								<tbody>
+									<tr>
+										<td>이름</td>
+										<td>{{selectedUser.name}}</td>
+									</tr>
+									<tr>
+										<td>직함</td>
+										<td>{{selectedUser.title}}</td>
+									</tr>
+									<tr>
+										<td>그룹</td>
+										<td>{{selectedUser.org_unit.name}}</td>
+									</tr>
+									<tr>
+										<td>E-mail</td>
+										<td>{{selectedUser.email}}</td>
+									</tr>
+								</tbody>
+							</table>
+						</li>
+						<li class="section area">
+							<table class="table table-form">
+								<tbody>
+									<tr>
+										<td>생성일</td>
+										<td>{{selectedUser.created}}</td>
+									</tr>
+									<tr>
+										<td>수정일</td>
+										<td>{{selectedUser.updated}}</td>
+									</tr>
+								</tbody>
+							</table>
+						</li>
+						<li class="section area">
+							<table class="table table-form">
+								<tbody>
+									<tr>
+										<td>설명</td>
+										<td>{{selectedUser.description}}</td>
+									</tr>
+								</tbody>
+							</table>
+						</li>
+					</ul>
+				</form>
 			</li>
 		</ul>
 	</div>
@@ -453,10 +485,38 @@ table.listUsers {
 		<div class="raw"></div>
 	</div>
 
-	<div class="modal newUser" modal>
-		
+	<div class="modal changePassword" modal ng-controller="ChangePasswordController">
+		<a href="#" class="modal-close close" style="margin-bottom: -30px">×</a>
+		<legend>암호 변경</legend>
+		<form name="frmChangePassword">
+			<fieldset class="form-horizontal">
+				<div class="fieldset-description">{{selectedUser.login_name}}님의 암호를 변경합니다.</div>
+				<div class="control-group" ng-class="{ 'error': frmChangePassword.password.$error.inadequacy }">
+					<label class="control-label" for="password">암호</label>
+					<div class="controls">
+						<input id="password" name="password" type="password" class="input-xlarge" ng-model="valPassword" password-validate>
+						<div class="help-inline" ng-show="frmChangePassword.password.$error.inadequacy">암호는 9자 이상의 영문, 숫자, 특수문자 조합으로<br>만들어야 합니다.</div>
+					</div>
+				</div>
+				<div class="control-group" ng-class="{ 'error': frmChangePassword.passwordConfirm.$error.mismatch }">
+					<label class="control-label" for="passwordConfirm">재입력</label>
+					<div class="controls">
+						<input id="passwordConfirm" name="passwordConfirm" type="password" class="input-xlarge" ng-model="valPasswordConfirm" match="valPassword">
+						<div class="help-inline" ng-show="frmChangePassword.passwordConfirm.$error.mismatch">암호가 서로 일치하지 않습니다.</div>
+					</div>
+				</div>
+				<div class="control-group submit-group">
+					<button class="btn btn-primary" ng-disabled="frmChangePassword.$invalid || (valPassword == '')" ng-click="changePassword()">변경</button>
+				</div>
+			</fieldset>
+		</form>
 	</div>
 
+	<div class="alert alert-success alert-fix-side"> 
+		<button type="button" class="close">&times;</button>
+		<span class="msg">성공적으로 이동했습니다.</span>
+	</div>
+	
 	<script src="orgchart.js"></script>
 
 </body>

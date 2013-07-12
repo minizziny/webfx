@@ -219,11 +219,14 @@ angular.module('App.Directive.Tree', [])
 							scope.$apply();
 						},100);
 					}
-					else if($(elSource).attr('el-type') == 'user') {
-
-					}
+					// else if($(elSource).attr('el-type') == 'user') {
+					// 	
+					// }
 					else {
-						console.log(scopeSource, scopeTarget, elSource, elTarget, dragContext, e);
+						//console.log(scopeSource, scopeTarget, elSource, elTarget, dragContext, e);
+						if(attrs.ngDrop != undefined) {
+							scope[attrs.ngDrop].call(scope, scopeSource, scopeTarget, elSource, elTarget, dragContext, e);
+						}
 					}
 					
 				}

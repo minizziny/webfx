@@ -347,3 +347,33 @@ li.area {
 li.area:last-child {
 	margin-bottom: 20px;
 }
+
+
+.alert-cont {
+	float: right;
+	right: 50%;
+	position: relative;
+}
+
+.alert.alert-fix {
+	float: right;
+	right: -50%;
+	position: relative;
+	z-index: 9999;
+	
+	box-shadow: 0 0 40px #000;
+}
+
+.alert.alert-fix-side {
+	position: fixed;
+	right: 20px;
+	bottom: -40px;
+	opacity: 0;
+	-webkit-transition: bottom .5s ease, opacity .5s ease;
+}
+
+.alert.alert-fix-side.show {
+	
+	bottom: 0px;
+	opacity: 1;
+}
