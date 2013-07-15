@@ -125,8 +125,12 @@ input[type=search]:focus {
 
 /* */
 
-.extraPane, .leftPane, .rightPane {
+.leftPane, .rightPane {
 	-webkit-transition: .3s ease;
+}
+
+.extraPane {
+	-webkit-transition: right .3s ease;
 }
 
 .leftPane {
@@ -162,23 +166,37 @@ input[type=search]:focus {
 	bottom: 0;
 	right: -65%;
 	width: 50%;
-	overflow: auto;
-	border-left: 1px solid #ccc;
-	background-color: white;
+	overflow-y: auto;
+	overflow-x: hidden;
 	box-shadow: 0 0 40px rgba(0,0,0,.4);
+	background-color: rgba(0,0,0,.7);
+}
+
+.extraPane-inner {
+	position: relative;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	overflow: visible;
+	border-left: 1px solid #ccc;
+	box-shadow: 0 0 40px rgba(0,0,0,.4);
+
+	background-color: #f5f5f5;
+	padding-bottom: 50px;
 }
 
 .extraPane.in {
 	right: 0;
 }
 
-.rightPaneBackdrop {
-	position: fixed;
-	left: 0;
-	right: 0;
-	top: 0;
-	bottom: 0;
-	background-color: rgba(0,0,0,.7);
+.extraPane.in.extend {
+	width: 100%;
+}
+
+.extraPane.in.extend .extraPane-inner {
+	left: 50%;
+	width: 50%;
 }
 
 button[el-type=dropdown] {
@@ -244,8 +262,23 @@ input.searchbox {
 	padding: 4px 14px;
 }
 
-.help-inline {
-	margin-top: 6px;
+.popover {
+	display: block;
+	min-width: 276px;
+}
+
+.popover.popover-black {
+	background-color: rgba(0,0,0,.5);
+}
+
+.popover.popover-black .arrow:after {
+	border-left-color: rgba(0,0,0,0.25);
+}
+
+.popover.popover-black .popover-title {
+	background-color: rgba(0,0,0,.5);
+	border-bottom: #000;
+	color: white;
 }
 
 	</style>
@@ -341,15 +374,18 @@ input.searchbox {
 		</ul>
 	</div>
 
-	<div class="rightPaneBackdrop" ng-show="isUserEditMode"></div>
-
-	<div class="extraPane" style="background-color: #f5f5f5">
+	<div class="extraPane" ng-class="{ 'extend': isUserEditMode }">
+	<div class="extraPane-inner">
 		<ul style="margin: 0">
 			<li class="pane pane-nomargin">
 				<form name="frmUser">
 					<div class="navbar">
-						<div class="navbar-inner">
-							<input class="txtNewLoginName" ng-model="selectedUserCopy.login_name" type="text" ng-show="selectedUser._isNew && isUserEditMode" placeholder="아이디를 입력하세요" style="float: left; margin: 5px;" required>
+						<div class="navbar-inner" style="position:relative">
+							<input class="txtNewLoginName" name="login_name" ng-model="selectedUserCopy.login_name" type="text" ng-show="selectedUser._isNew && isUserEditMode" placeholder="아이디를 입력하세요" style="float: left; margin: 5px;" required>
+							<div class="popover popover-black fade left in" ng-show="frmUser.login_name.$error.required" style="left: -290px">
+								<div class="arrow"></div>
+								<div class="popover-content" style="color:#b94a48">아이디는 반드시 필요합니다.</div>
+							</div>
 							<a class="brand">{{selectedUser.login_name}}</a>
 							<div ng-hide="isUserEditMode">
 								<div class="btn-group">
@@ -372,9 +408,12 @@ input.searchbox {
 								<tbody>
 									<tr>
 										<td>이름</td>
-										<td class="control-group" ng-class="{ 'error': frmUser.name.$error.required }">
+										<td class="control-group" ng-class="{ 'error': frmUser.name.$error.required }" style="position: relative">
 											<input type="text" name="name" class="input-xlarge" ng-model="selectedUserCopy.name" required>
-											<div ng-show="frmUser.name.$error.required" class="help-inline">이름은 반드시 필요합니다.</div>
+											<div class="popover popover-black fade left in" ng-show="frmUser.name.$error.required" style="left: -465px">
+												<div class="arrow"></div>
+												<div class="popover-content help-inline">이름은 반드시 필요합니다.</div>
+											</div>
 										</td>
 									</tr>
 									<tr>
@@ -389,7 +428,7 @@ input.searchbox {
 													{{selectedUserCopy.org_unit.name}}
 													<span class="caret"></span>
 												</a>
-												<div class="dropdown-menu" style="z-index:8888; margin-bottom: 20px" ng-click="supressEvent($event)">
+												<div class="dropdown-menu" style="z-index:8888; max-height: 242px; overflow-y: auto" ng-click="supressEvent($event)">
 													<input type="text" class="input-large search-query" style="margin: 2px 8px 6px">
 													<tree id="treeToChangeOrgUnit" tree-data="treeDataSource"
 														node-id="guid"
@@ -402,9 +441,12 @@ input.searchbox {
 									</tr>
 									<tr>
 										<td>E-mail</td>
-										<td class="control-group" ng-class="{ 'error': frmUser.email.$error.email }">
+										<td class="control-group" ng-class="{ 'error': frmUser.email.$error.email }" style="position: relative">
 											<input type="email" name="email" class="input-xlarge" placeholder="user@domain.com" ng-model="selectedUserCopy.email">
-											<div ng-show="frmUser.email.$error.email" class="help-inline">올바른 E-mail 형식이 아닙니다.</div>
+											<div class="popover popover-black fade left in" ng-show="frmUser.email.$error.email" style="left: -465px">
+												<div class="arrow"></div>
+												<div class="popover-content help-inline">올바른 E-mail 형식이 아닙니다.</div>
+											</div>
 										</td>
 									</tr>
 								</tbody>
@@ -476,6 +518,7 @@ input.searchbox {
 				</form>
 			</li>
 		</ul>
+	</div>
 	</div>
 
 	<br class="clearboth" />
