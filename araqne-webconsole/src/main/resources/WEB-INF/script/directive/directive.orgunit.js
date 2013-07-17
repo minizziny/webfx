@@ -5,6 +5,11 @@ angular.module('App.Directive.Tree', [])
 		link: function (scope, element, attrs)
 		{
 			scope.tree = scope.node;
+
+			var ddIcon = '';
+			if(attrs.nodeEditable === 'true') {
+				ddIcon = '<button ng-click="showMenu($event)" el-type="dropdown" href="#" class="menu pull-right" style="display:none"><span class="caret"></span></button>'
+			}
 			
 			if(!!scope.tree.children) {
 				for(var i in scope.tree.children) {
@@ -26,27 +31,29 @@ angular.module('App.Directive.Tree', [])
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
 								'{{node.' + attrs.nodeName + '}}' +
-								'<button ng-click="showMenu($event)" el-type="dropdown" href="#" class="menu pull-right" style="display:none"><span class="caret"></span></button>' +
+								ddIcon +
 							'</a>' +
 							'<div class="li-edit" ng-show="node.is_edit_mode">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
 								'<input ng-model="node.' + attrs.nodeName + '" ng-model-onblur="node" ng-change="changeName()" type="text" >' +   /* value="{{node.' + attrs.nodeName + '}}">' + */
 							'</div>' +
-							'<hierachy-view tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '"></hierachy-view>' +
+							'<hierachy-view tree="node" node-editable="' + attrs.nodeEditable + '" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '"></hierachy-view>' +
 						'</li>' +
 					'</ul>');
 
-				var dd = angular.element(
-					'<ul ng-mousedown="supressEvent($event)" class="dropdown-menu" style="display:none; left:auto; right: 0px; top: 22px">' +
-						'<li><a ng-click="addChildNode()" tabindex="-1" href="#">새 그룹</a></li>' +
-						'<li><a ng-click="renameNode()" tabindex="-1" href="#">이름 바꾸기</a></li>' +
-						'<li class="divider"></li>' +
-						'<li><a ng-click="removeNode()" tabindex="-1" href="#">삭제</a></li>' +
-					'</ul>');
+				if(ddIcon != '') {
+					var dd = angular.element(
+						'<ul ng-mousedown="supressEvent($event)" class="dropdown-menu" style="display:none; left:auto; right: 0px; top: 22px">' +
+							'<li><a ng-click="addChildNode()" tabindex="-1" href="#">새 그룹</a></li>' +
+							'<li><a ng-click="renameNode()" tabindex="-1" href="#">이름 바꾸기</a></li>' +
+							'<li class="divider"></li>' +
+							'<li><a ng-click="removeNode()" tabindex="-1" href="#">삭제</a></li>' +
+						'</ul>');
 
-				template.find('button[el-type="dropdown"]').after(dd);
-
+					template.find('button[el-type="dropdown"]').after(dd);
+				}
+				
 				var linkFunction = $compile(template);
 				linkFunction(scope);
 				element.replaceWith(template);
@@ -64,6 +71,12 @@ angular.module('App.Directive.Tree', [])
 
 			scope.previousElement = null;
 			scope.currentElement = null;
+
+			var ddIcon = '';
+			if(attrs.nodeEditable === 'true') {
+				ddIcon = '<button ng-click="showMenu($event)" el-type="dropdown" href="#" class="menu pull-right" style="display:none"><span class="caret"></span></button>'
+			}
+
 			scope.$watch(attrs.treeData, function(val) {
 				for(var i in scope[attrs.treeData]) {
 					if(!!scope[attrs.treeData][i].children) {
@@ -85,24 +98,28 @@ angular.module('App.Directive.Tree', [])
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
 								'{{node.' + attrs.nodeName + '}}' +
-								'<button ng-click="showMenu($event)" el-type="dropdown" href="#" class="menu pull-right" style="display:none"><span class="caret"></span></button>' +
+								ddIcon +
 							'</a>' +
 							'<div class="li-edit" ng-show="node.is_edit_mode">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
 								'<input ng-model="node.' + attrs.nodeName + '" ng-model-onblur="node" ng-change="changeName()" type="text" >' +   /* value="{{node.' + attrs.nodeName + '}}">' + */
 							'</div>' +
-							'<hierachy-view tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '"></hierachy-view>' +
+							'<hierachy-view tree="node" node-editable="' + attrs.nodeEditable + '" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '"></hierachy-view>' +
 						'</li>' +
 					'</ul>');
 
-				var dd = angular.element(
-					'<ul ng-mousedown="supressEvent($event)" class="dropdown-menu" style="display:none; left:auto; right: 0px; top: 22px">' +
-						'<li><a ng-click="addChildNode()" tabindex="-1" href="#">새 그룹</a></li>' +
-						'<li><a ng-click="renameNode()" tabindex="-1" href="#">이름 바꾸기</a></li>' +
-						'<li class="divider"></li>' +
-						'<li><a ng-click="removeNode()" tabindex="-1" href="#">삭제</a></li>' +
-					'</ul>');
+				if(ddIcon != '') {
+					var dd = angular.element(
+						'<ul ng-mousedown="supressEvent($event)" class="dropdown-menu" style="display:none; left:auto; right: 0px; top: 22px">' +
+							'<li><a ng-click="addChildNode()" tabindex="-1" href="#">새 그룹</a></li>' +
+							'<li><a ng-click="renameNode()" tabindex="-1" href="#">이름 바꾸기</a></li>' +
+							'<li class="divider"></li>' +
+							'<li><a ng-click="removeNode()" tabindex="-1" href="#">삭제</a></li>' +
+						'</ul>');
+
+					template.find('button[el-type="dropdown"]').after(dd);
+				}
 				
 				scope.supressEvent = function(e) {
 					e.stopPropagation();

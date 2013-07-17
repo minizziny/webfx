@@ -4,24 +4,81 @@ var proc;
 app.factory('eventSender', function() {
 	var e = {
 		onTreeSelectOrgUnit: null,
+		onAssignOrgUnitToUser: null,
 		onDropUsersToOrgUnit: null,
 		onOpenDialogChangePassword: null
 	}
 	return e;
 });
 
+app.directive('ngUnique', function($parse) {
+	return {
+		restrict: 'A',
+		require: 'ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			
+			scope.$watch(attrs.ngModel, function(value) {
+				var option = scope.$eval(attrs.ngUnique);
+				if(option.condition) {
+					var has = option.source.some(function(obj) {
+						return obj[option.property] == value;
+					});
+
+					ctrl.$setValidity('unique', !has);
+				}
+			});
+		}
+	}
+})
+
 app.directive('passwordValidate', function($parse) {
 	return {
 		restrict: 'A',
 		require: 'ngModel',
 		link: function(scope, elem, attrs, ctrl) {
-			scope.$watch(attrs.ngModel, function(value) {
-				var cond = /[0-9]+/.test(value);
-				cond = cond & (/[a-zA-Z]+/.test(value));
-				cond = cond & (/[^0-9a-zA-Z]+/.test(value));
-				cond = cond & value.length >= 9;
-				ctrl.$setValidity('inadequacy', cond);
-			})
+			var mdlTree = attrs.ngModel.split('.');
+			
+			var getLastParent = function(obj, arr) {
+				if (arr.length > 0) {
+					if (arr.length == 1) {
+						return obj;
+					}
+					else {
+						//console.log( obj, arr, obj[arr[0]] );
+						if(obj[arr[0]] == null) {
+							return obj;
+						}
+						else return getLastParent(obj[arr[0]], (function() { 
+							arr.shift();
+							return arr;
+						})());
+					}
+				}
+				else {
+					return obj;
+				}
+			}
+
+			var scp = getLastParent(scope, mdlTree);
+			scp.$watch(mdlTree[0], function(value) {
+				var realValue = scp.$eval(mdlTree.join('.'));
+
+				var option = scope.$eval(attrs.passwordValidate);
+				if(option == null) {
+					option = { condition: true };
+				}
+
+				if(realValue == null || !option.condition) {
+					ctrl.$setValidity('inadequacy', true);
+				}
+				else {
+					var cond = /[0-9]+/.test(value);
+					cond = cond & (/[a-zA-Z]+/.test(value));
+					cond = cond & (/[^0-9a-zA-Z]+/.test(value));
+					cond = cond & (value.length >= 9);
+					ctrl.$setValidity('inadequacy', cond);
+				}
+			}, true);
 		}
 	};
 });
@@ -44,9 +101,16 @@ function Controller($scope, serviceTask, socket, eventSender) {
 
 	$scope.treeDataSource = [];
 
+	$scope.dataAllUsers = [];
+
 	$scope.selectedUser = null;
 	$scope.selectedUserCopy = null;
 	$scope.isUserEditMode = false;
+
+	eventSender.onGetAllUsers = function(body) {
+		$scope.dataAllUsers = body;
+		$scope.$apply();
+	}
 
 	$scope.closeExtraPane = function() {
 		$('.extraPane').removeClass('in');
@@ -67,20 +131,42 @@ function Controller($scope, serviceTask, socket, eventSender) {
 
 	$scope.enterUserEditMode = function() {
 		$scope.isUserEditMode = true;
+		$('body').css('overflow','hidden');
+
 		$scope.selectedUserCopy = angular.copy($scope.selectedUser);
+
+		//console.log('enter', $scope.selectedUserCopy, $scope.selectedUser)
+
+		$scope.selectedUserCopy.password = '';
+		$scope.selectedUserCopy.passwordConfirm = '';
+
 	}
 
 	$scope.saveUserInfo = function() {
-		var method = 'org.araqne.dom.msgbus.UserPlugin.updateUser';
-		if($scope.selectedUser._isNew) {
+		var method;
+		if($scope.selectedUserCopy._isNew) {
 			method = 'org.araqne.dom.msgbus.UserPlugin.createUser';
 		}
+		else {
+			method = 'org.araqne.dom.msgbus.UserPlugin.updateUser';
+			delete $scope.selectedUserCopy.created;
+			delete $scope.selectedUserCopy.updated;
+			delete $scope.selectedUserCopy.last_password_change;
+			delete $scope.selectedUserCopy.password;
+			delete $scope.selectedUserCopy.passwordConfirm;
+		}
 
-		var serializedUser = {};
-		
-		socket.send(method, serializedUser, proc.pid)
+		socket.send(method, $scope.selectedUserCopy, proc.pid)
 		.success(function(m) {
 			$scope.exitUserEditMode();
+
+			delete $scope.selectedUserCopy._isNew;
+			for (var prop in $scope.selectedUserCopy) {
+				$scope.selectedUser[prop] = $scope.selectedUserCopy[prop];
+			};
+
+			console.log('complete', $scope.selectedUserCopy, $scope.selectedUser)
+			$scope.$apply();
 		})
 		.failed(openError);
 	}
@@ -95,6 +181,7 @@ function Controller($scope, serviceTask, socket, eventSender) {
 
 	$scope.exitUserEditMode = function() {
 		$scope.isUserEditMode = false;
+		$('body').css('overflow','');
 	}
 
 	$scope.openDialogChangePassword = function() {
@@ -104,6 +191,13 @@ function Controller($scope, serviceTask, socket, eventSender) {
 	$scope.dropUsers = function(scopeSource, scopeTarget, elSource, elTarget, dragContext, e) {
 		eventSender.onDropUsersToOrgUnit(scopeTarget);
 		//console.log(scopeSource, scopeTarget, elSource, elTarget, dragContext, e, this)
+	}
+
+	eventSender.onAssignOrgUnitToUser = function(guid, orgunit) {
+		//console.log(orgunit)
+		//console.log(guid)
+		$scope.selectedUserCopy['org_unit'] = orgunit;
+		$('[data-toggle="dropdown"]').parent().removeClass('open');	
 	}
 
 }
@@ -195,6 +289,11 @@ function UserController($scope, $compile, socket, eventSender) {
 		.success(function(m) {
 			console.log(m.body)
 			$scope.dataUsers = m.body.users;
+
+			if(guid == undefined) {
+				eventSender.onGetAllUsers(m.body.users);
+			}
+
 			$scope.$apply();
 		})
 		.failed(msgbusFailed);
@@ -227,7 +326,7 @@ function UserController($scope, $compile, socket, eventSender) {
 			'org_unit': targetOrgUnit
 		};
 
-		console.log($scope.$parent.selectedUser)
+		//console.log($scope.$parent.selectedUser)
 
 		$('tr.tr-single-selected').removeClass('tr-single-selected');
 		openExtraPane();
@@ -262,50 +361,6 @@ function TreeController($scope, $compile, socket, eventSender) {
 		$('.treetype').hide();
 		$('.treetype.' + type).show();
 	}
-
-	var json =
-	[
-	{
-		"name" : "테이블",
-		"guid" : "_tables",
-		"children" : [{
-			"name" : "g1",
-			"guid" : "g1",
-			"children" : [{
-				"name" : "g11",
-				"guid" : "g11",
-				"tree-type" : "tree-top-header"
-			},{
-				"name" : "g12",
-				"guid" : "g12",
-				"tree-type" : "tree-top-header"
-			}],
-			"tree-type" : "tree-top-header"
-		},{
-			"name" : "g2",
-			"guid" : "g2",
-			"children" : [{
-				"name" : "g21",
-				"guid" : "g21",
-				"tree-type" : "tree-top-header"
-			},{
-				"name" : "g22",
-				"guid" : "g22",
-				"tree-type" : "tree-top-header"
-			}],
-			"tree-type" : "tree-top-header"
-		},{
-			"name" : "g3",
-			"guid" : "g3",
-			"tree-type" : "tree-top-header"
-		}
-		],
-		"tree-type" : "tree-top-header"
-	}
-	];
-
-	
-	$scope.treeOtherSource = json;
 
 	function buildTree(orgunits, parent) {
 		return orgunits.filter(function(obj, i) {
@@ -342,9 +397,12 @@ function TreeController($scope, $compile, socket, eventSender) {
 				eventSender.onTreeSelectOrgUnit(obj.selectedNode, found);	
 			}
 			else if(obj.delegateElement[0].id == 'treeToChangeOrgUnit') {
-				console.log('asdfsdfadf')
+				eventSender.onAssignOrgUnitToUser(obj.selectedNode, found);
 			}
 		});
+
+
+		$('#treeOrgUnit a:first').click();
 	}
 
 	socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.getOrganizationUnits', {}, proc.pid)

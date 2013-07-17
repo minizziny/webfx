@@ -181,9 +181,10 @@ input[type=search]:focus {
 	overflow: visible;
 	border-left: 1px solid #ccc;
 	box-shadow: 0 0 40px rgba(0,0,0,.4);
+	min-height: 100%;
+	height: auto;
 
 	background-color: #f5f5f5;
-	padding-bottom: 50px;
 }
 
 .extraPane.in {
@@ -281,35 +282,55 @@ input.searchbox {
 	color: white;
 }
 
+.controls > .help-inline {
+	margin-top: 6px;
+}
+
+input[type=text].input-single.error {
+	border-color: #b94a48;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+	-moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+	color: #b94a48;
+}
+
+input[type=text].input-single.error:focus {
+	border-color: #e9322d;
+	-webkit-box-shadow: 0 0 6px #f8b9b7;
+	-moz-box-shadow: 0 0 6px #f8b9b7;
+	box-shadow: 0 0 6px #f8b9b7;
+}
+
 	</style>
 </head>
 <body ng-controller="Controller">
 	<div class="leftPane well" style="z-index:8; overflow-x:visible" ng-controller="TreeController" ng-mouseover="glimpseLeftPane()" ng-mouseout="outLeftPane()">
-		<div class="switch android" ng-class="{ 'hidden':isEditMode }">
+		<!-- <div class="switch android" ng-class="{ 'hidden':isEditMode }">
 			<input id="orgunit" name="view" type="radio" checked>
 			<label for="orgunit" ng-click="toggleLogTrendType('byorgunit')">부서별</label>
 			<input id="group" name="view" type="radio">	
 			<label for="group" ng-click="toggleLogTrendType('bygroup')">그룹별</label>
 			<span class="slide-button"></span>
-		</div>
+		</div> -->
 		<div class="treetype byorgunit">
 			<input class="searchbox" type="search" placeholder="부서 검색">
 			<tree id="treeOrgUnit" class="clearboth" style="top: 50px" tree-data="treeDataSource"
 				node-id="guid"
 				node-name="name"
 				node-selected="_tables"
+				node-editable="true"
 				ng-click="closeExtraPane()"
 				ng-drop="dropUsers">
 			</tree>
 		</div>
-		<div class="treetype bygroup" style="display:none">
+		<!-- <div class="treetype bygroup" style="display:none">
 			<input class="searchbox" type="search" placeholder="그룹 검색">
 			<tree class="clearboth" style="top: 50px" tree-data="treeOtherSource"
 				node-id="guid"
 				node-name="name"
 				node-selected="_tables">
 			</tree>
-		</div>
+		</div> -->
 	</div>
 
 	<div class="leftPaneOverHandler" ng-mouseover="glimpseLeftPane()" ng-hide="isUserEditMode"></div>
@@ -378,13 +399,21 @@ input.searchbox {
 	<div class="extraPane-inner">
 		<ul style="margin: 0">
 			<li class="pane pane-nomargin">
-				<form name="frmUser">
+				<form name="frmUser" style="margin:0">
 					<div class="navbar">
 						<div class="navbar-inner" style="position:relative">
-							<input class="txtNewLoginName" name="login_name" ng-model="selectedUserCopy.login_name" type="text" ng-show="selectedUser._isNew && isUserEditMode" placeholder="아이디를 입력하세요" style="float: left; margin: 5px;" required>
+							<input type="text" class="txtNewLoginName input-single" name="login_name" placeholder="아이디를 입력하세요" style="float: left; margin: 5px;"
+								ng-model="selectedUserCopy.login_name"
+								ng-show="selectedUser._isNew && isUserEditMode"
+								ng-unique="{ source: dataAllUsers, property: 'login_name', condition: selectedUser._isNew }"
+								ng-class="{ 'error': frmUser.login_name.$error.unique || frmUser.login_name.$error.required }" required>
 							<div class="popover popover-black fade left in" ng-show="frmUser.login_name.$error.required" style="left: -290px">
 								<div class="arrow"></div>
 								<div class="popover-content" style="color:#b94a48">아이디는 반드시 필요합니다.</div>
+							</div>
+							<div class="popover popover-black fade left in" ng-show="frmUser.login_name.$error.unique" style="left: -290px">
+								<div class="arrow"></div>
+								<div class="popover-content" style="color:#b94a48">이미 존재하는 아이디입니다.</div>
 							</div>
 							<a class="brand">{{selectedUser.login_name}}</a>
 							<div ng-hide="isUserEditMode">
@@ -403,6 +432,32 @@ input.searchbox {
 						</div>
 					</div>
 					<ul class="tab well1 tab-general" ng-show="isUserEditMode">
+						<li class="section area" ng-show="selectedUserCopy._isNew">
+							<table class="table table-form">
+								<tbody>
+									<tr>
+										<td>암호</td>
+										<td class="control-group" ng-class="{ 'error': frmUser.password.$error.inadequacy }" style="position: relative">
+											<input type="password" name="password" class="input-xlarge" ng-model="selectedUserCopy.password" password-validate="{ condition: selectedUserCopy._isNew }">
+											<div class="popover popover-black fade left in" ng-show="frmUser.password.$error.inadequacy" style="left: -465px; top: -5px">
+												<div class="arrow"></div>
+												<div class="popover-content help-inline">암호는 9자 이상의 영문, 숫자, 특수문자 조합으로 만들어야 합니다.</div>
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td>재입력</td>
+										<td class="control-group" ng-class="{ 'error': frmUser.passwordConfirm.$error.mismatch }" style="position: relative">
+											<input type="password" name="passwordConfirm" class="input-xlarge" ng-model="selectedUserCopy.passwordConfirm" match="selectedUserCopy.password">
+											<div class="popover popover-black fade left in" ng-show="frmUser.passwordConfirm.$error.mismatch" style="left: -465px; top: 10px">
+												<div class="arrow"></div>
+												<div class="popover-content help-inline">암호가 서로 일치하지 않습니다.</div>
+											</div>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</li>
 						<li class="section area">
 							<table class="table table-form">
 								<tbody>
@@ -428,7 +483,7 @@ input.searchbox {
 													{{selectedUserCopy.org_unit.name}}
 													<span class="caret"></span>
 												</a>
-												<div class="dropdown-menu" style="z-index:8888; max-height: 242px; overflow-y: auto" ng-click="supressEvent($event)">
+												<div class="dropdown-menu" style="z-index:8888" ng-click="supressEvent($event)">
 													<input type="text" class="input-large search-query" style="margin: 2px 8px 6px">
 													<tree id="treeToChangeOrgUnit" tree-data="treeDataSource"
 														node-id="guid"
@@ -462,7 +517,7 @@ input.searchbox {
 								</tbody>
 							</table>
 						</li>
-						<li class="section area" ng-hide="selectedUserCopy._isNew" >
+						<li class="section area" ng-hide="selectedUserCopy._isNew">
 							<button class="btn btn-danger" style="width: 100%">이 사용자 삭제</button>
 						</li>
 						<!-- {{selectedUserCopy}} -->

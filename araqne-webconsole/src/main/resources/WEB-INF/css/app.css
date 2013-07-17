@@ -305,6 +305,7 @@ tr[tr-selectable]:nth-child(even).tr-selected > td, tr[tr-multi-selectable]:nth-
 ul.well1 {
 	margin-left: 0;
 	list-style: none;
+	padding-bottom: 20px;
 }
 
 li.well1 {
@@ -333,6 +334,7 @@ li.well1.wellnbr, li.well1:last-child {
 ul.area {
 	margin-left: 0;
 	list-style: none;
+	padding-bottom: 20px;
 }
 
 li.area {
@@ -345,7 +347,7 @@ li.area {
 }
 
 li.area:last-child {
-	margin-bottom: 20px;
+	margin-bottom: 0px;
 }
 
 
