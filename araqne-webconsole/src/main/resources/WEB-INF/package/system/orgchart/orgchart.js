@@ -4,12 +4,27 @@ var proc;
 app.factory('eventSender', function() {
 	var e = {
 		onTreeSelectOrgUnit: null,
-		onAssignOrgUnitToUser: null,
 		onDropUsersToOrgUnit: null,
 		onOpenDialogChangePassword: null
 	}
 	return e;
 });
+
+function getOrgUnit(guid, orgunits) {
+	var found = null;
+	orgunits.forEach(function(obj, i) {
+		if(obj.guid == guid) {
+			found = obj;
+		}
+		else {
+			if(obj.children.length) {
+				found = getOrgUnit(guid, obj.children);
+			}
+		}
+	});
+
+	return found;
+}
 
 app.directive('ngUnique', function($parse) {
 	return {
@@ -72,10 +87,10 @@ app.directive('passwordValidate', function($parse) {
 					ctrl.$setValidity('inadequacy', true);
 				}
 				else {
-					var cond = /[0-9]+/.test(value);
-					cond = cond & (/[a-zA-Z]+/.test(value));
-					cond = cond & (/[^0-9a-zA-Z]+/.test(value));
-					cond = cond & (value.length >= 9);
+					var cond = /[0-9]+/.test(realValue);
+					cond = cond & (/[a-zA-Z]+/.test(realValue));
+					cond = cond & (/[^0-9a-zA-Z]+/.test(realValue));
+					cond = cond & (realValue.length >= 9);
 					ctrl.$setValidity('inadequacy', cond);
 				}
 			}, true);
@@ -99,12 +114,10 @@ function Controller($scope, serviceTask, socket, eventSender) {
 		notify(types[random], '안녕하세요', Math.random() < 0.5 ? true : false);
 	}
 
+	$scope.treeDataSourceWithRoot = [];
 	$scope.treeDataSource = [];
 
 	$scope.dataAllUsers = [];
-
-	$scope.selectedUser = null;
-	$scope.selectedUserCopy = null;
 	$scope.isUserEditMode = false;
 
 	eventSender.onGetAllUsers = function(body) {
@@ -129,13 +142,63 @@ function Controller($scope, serviceTask, socket, eventSender) {
 		$('.leftPane').removeClass('glimpse');
 	}
 
+}
+
+function RemoveUsersController($scope, socket, eventSender) {
+	$scope.selectedUsers = [];
+	eventSender.onRemoveUsers = function(selected) {
+		$scope.selectedUsers = selected;
+		$('.mdlRemoveUsers')[0].showDialog();
+	}
+
+	$scope.removeUsers = function() {
+		var login_names = {
+			'login_names': $scope.selectedUsers.map(function(obj) {
+				return obj.login_name;
+			})
+		}
+
+		console.log(login_names);
+		
+		// socket.send('org.araqne.dom.msgbus.UserPlugin.removeUsers', login_names, proc.pid)
+		// .success(function(m) {
+
+			eventSender.onSuccessRemoveUsers($scope.selectedUsers);
+
+			$scope.$parent.isUserEditMode = false;
+			$('body').css('overflow','');
+			$scope.$parent.closeExtraPane();
+			$('.mdlRemoveUsers')[0].hideDialog();
+
+		// })
+		// .failed(openError);
+
+		$scope.selectedUsers = [];
+	}
+
+	$scope.cancelRemoveUsers = function() {
+		$('.mdlRemoveUsers')[0].hideDialog();
+	}
+}
+
+function UserController($scope, socket, eventSender) {
+	$scope.selectedUser = null;
+	$scope.selectedUserCopy = null;
+
+	eventSender.onShowUser = function(user) {
+		$scope.selectedUser = user;
+
+		if(user._isNew) {
+			$scope.enterUserEditMode();
+		}
+	}
+
 	$scope.enterUserEditMode = function() {
-		$scope.isUserEditMode = true;
+		$scope.$parent.isUserEditMode = true;
 		$('body').css('overflow','hidden');
 
 		$scope.selectedUserCopy = angular.copy($scope.selectedUser);
-
-		//console.log('enter', $scope.selectedUserCopy, $scope.selectedUser)
+		//console.log('enterUserEditMode', $scope.selectedUserCopy, $scope.selectedUser)
 
 		$scope.selectedUserCopy.password = '';
 		$scope.selectedUserCopy.passwordConfirm = '';
@@ -165,7 +228,7 @@ function Controller($scope, serviceTask, socket, eventSender) {
 				$scope.selectedUser[prop] = $scope.selectedUserCopy[prop];
 			};
 
-			console.log('complete', $scope.selectedUserCopy, $scope.selectedUser)
+			console.log('save completed', $scope.selectedUserCopy, $scope.selectedUser)
 			$scope.$apply();
 		})
 		.failed(openError);
@@ -175,34 +238,73 @@ function Controller($scope, serviceTask, socket, eventSender) {
 		$scope.exitUserEditMode();
 
 		if($scope.selectedUser._isNew) {
-			$scope.closeExtraPane();
+			$scope.$parent.closeExtraPane();
 		}
 	}
 
 	$scope.exitUserEditMode = function() {
-		$scope.isUserEditMode = false;
+		$scope.$parent.isUserEditMode = false;
 		$('body').css('overflow','');
 	}
+
 
 	$scope.openDialogChangePassword = function() {
 		eventSender.onOpenDialogChangePassword();
 	}
 
-	$scope.dropUsers = function(scopeSource, scopeTarget, elSource, elTarget, dragContext, e) {
-		eventSender.onDropUsersToOrgUnit(scopeTarget);
-		//console.log(scopeSource, scopeTarget, elSource, elTarget, dragContext, e, this)
+	$scope.$on('nodeSelected', function(e, obj) {
+		if(obj.delegateElement[0].id == 'treeToChangeOrgUnit') {
+			var found = getOrgUnit(obj.selectedNode, $scope.$parent.treeDataSourceWithRoot);
+			if(found == null) return;
+
+			$scope.selectedUserCopy['org_unit'] = found;
+			$('[data-toggle="dropdown"]').parent().removeClass('open');	
+		}
+
+		setTimeout(function() {
+			$scope.currentElement.addClass('deselected').removeClass('active');	
+		},250);
+	});
+
+	$scope.deallocateGroup = function() {
+		$scope.selectedUserCopy.org_unit = null;
 	}
 
-	eventSender.onAssignOrgUnitToUser = function(guid, orgunit) {
-		//console.log(orgunit)
-		//console.log(guid)
-		$scope.selectedUserCopy['org_unit'] = orgunit;
-		$('[data-toggle="dropdown"]').parent().removeClass('open');	
+	$scope.removeThisUser = function() {
+		eventSender.onRemoveUsers([$scope.selectedUser]);
 	}
+
+	$scope.$watch('selectedUser', function(valnew, valold) {
+		if(valnew == null || valold == null) return;
+		if(valnew.login_name != valold.login_name) {
+			return;
+		}
+
+		// updateUser 를 통해 org_unit 변경
+		var isDefinedOld = valold.org_unit != null;
+		var isDefinedNew = valnew.org_unit != null;
+		if(isDefinedOld | isDefinedNew) {
+			if(isDefinedOld && isDefinedNew) {
+				//console.log(valnew.org_unit.guid, valold.org_unit.guid)
+				if(valnew.org_unit.guid != valold.org_unit.guid) {
+					// 둘 다 defined 되어있는데 org_unit이 바뀌는 경우
+					console.log('aaa')
+					eventSender.onUpdateUserOrgUnit(valnew);
+				}	
+			}
+			else {
+				//console.log(valnew.org_unit, valold.org_unit)
+				console.log('ccc')
+				// 둘 중 하나라도 undefined -> defined 로 바뀌는 경우
+				eventSender.onUpdateUserOrgUnit(valnew);
+			}
+		}
+	}, true);
+
 
 }
 
-function UserController($scope, $compile, socket, eventSender) {
+function UserListController($scope, $compile, socket, eventSender) {
 	eventSender.onDropUsersToOrgUnit = function(scopeTarget) {
 		var login_names = $scope.dataUsers.filter(function(user) {
 			return user.is_checked;
@@ -211,6 +313,20 @@ function UserController($scope, $compile, socket, eventSender) {
 		});
 
 		moveUsers(scopeTarget.node.guid, login_names);
+	}
+
+	function refresh() {
+		getUsers($scope.currentOrgUnit.guid);
+	}
+
+	eventSender.onUpdateUserOrgUnit = function(user) {
+		refresh();
+	}
+
+	eventSender.onSuccessRemoveUsers = function(selected) {
+		selected.forEach(function(obj) {
+			$scope.dataUsers.splice($scope.dataUsers.indexOf(obj), 1);
+		});
 	}
 
 	$scope.currentOrgUnit;
@@ -222,6 +338,20 @@ function UserController($scope, $compile, socket, eventSender) {
 
 	$scope.dataUsers = [];
 	$scope.isEditMode = false;
+
+	$scope.canMoveOrRemove = function() {
+		return !$scope.dataUsers.some(function(obj) {
+			return obj.is_checked;
+		});
+	}
+
+	$scope.removeUsers = function() {
+		var selected = $scope.dataUsers.filter(function(obj) {
+			return obj.is_checked;
+		});
+
+		eventSender.onRemoveUsers(selected);
+	}
 
 	$scope.toggleSelectAll = function() {
 		if($scope.dataUsers.some(function(obj) {
@@ -264,7 +394,7 @@ function UserController($scope, $compile, socket, eventSender) {
 
 	$scope.showUser = function(e) {
 		if(!$scope.isEditMode) {
-			$scope.$parent.selectedUser = this.user;
+			eventSender.onShowUser(this.user);
 
 			$('tr.tr-single-selected').removeClass('tr-single-selected');
 			$(e.currentTarget).addClass('tr-single-selected');
@@ -308,10 +438,7 @@ function UserController($scope, $compile, socket, eventSender) {
 		.success(function(m) {
 			console.log(m.body)
 
-
-
-			// $scope.dataUsers = m.body.users;
-			// $scope.$apply();
+			refresh();
 		})
 		.failed(msgbusFailed);
 	}
@@ -321,17 +448,15 @@ function UserController($scope, $compile, socket, eventSender) {
 		delete targetOrgUnit.children;
 		delete targetOrgUnit.className;
 
-		$scope.$parent.selectedUser = {
+		eventSender.onShowUser({
 			'_isNew': true,
 			'org_unit': targetOrgUnit
-		};
+		});
 
 		//console.log($scope.$parent.selectedUser)
 
 		$('tr.tr-single-selected').removeClass('tr-single-selected');
 		openExtraPane();
-
-		$scope.$parent.enterUserEditMode();
 
 		setTimeout(function() {
 			$('.txtNewLoginName').focus();
@@ -342,10 +467,10 @@ function UserController($scope, $compile, socket, eventSender) {
 
 function ChangePasswordController($scope, socket, eventSender) {
 	eventSender.onOpenDialogChangePassword = function() {
-		$('[modal].changePassword')[0].showDialog();
+		$('[modal].mdlChangePassword')[0].showDialog();
 		$scope.valPassword = '';
 		$scope.valPasswordConfirm = '';
-		$('[modal].changePassword input#password').focus();
+		$('[modal].mdlChangePassword input#password').focus();
 	}
 
 	$scope.valPassword = '';
@@ -362,6 +487,11 @@ function TreeController($scope, $compile, socket, eventSender) {
 		$('.treetype.' + type).show();
 	}
 
+	$scope.dropUsers = function(scopeSource, scopeTarget, elSource, elTarget, dragContext, e) {
+		eventSender.onDropUsersToOrgUnit(scopeTarget);
+		//console.log(scopeSource, scopeTarget, elSource, elTarget, dragContext, e, this)
+	}
+
 	function buildTree(orgunits, parent) {
 		return orgunits.filter(function(obj, i) {
 			if(obj.parent == parent) {
@@ -372,35 +502,15 @@ function TreeController($scope, $compile, socket, eventSender) {
 		})
 	}
 
-	function getOrgUnit(guid, orgunits) {
-		var found = null;
-		orgunits.forEach(function(obj, i) {
-			if(obj.guid == guid) {
-				found = obj;
-			}
-			else {
-				if(obj.children.length) {
-					found = getOrgUnit(guid, obj.children);
-				}
-			}
-		});
-
-		return found;
-	}
-
 	function bindTreeEvent() {
 		$scope.$on('nodeSelected', function(e, obj) {
-			var found = getOrgUnit(obj.selectedNode, $scope.$parent.treeDataSource);
+			var found = getOrgUnit(obj.selectedNode, $scope.$parent.treeDataSourceWithRoot);
 			if(found == null) return;
 
 			if(obj.delegateElement[0].id == 'treeOrgUnit') {
 				eventSender.onTreeSelectOrgUnit(obj.selectedNode, found);	
 			}
-			else if(obj.delegateElement[0].id == 'treeToChangeOrgUnit') {
-				eventSender.onAssignOrgUnitToUser(obj.selectedNode, found);
-			}
 		});
-
 
 		$('#treeOrgUnit a:first').click();
 	}
@@ -414,11 +524,12 @@ function TreeController($scope, $compile, socket, eventSender) {
 		});
 
 		var tree = buildTree(m.body.org_units, null);
-		$scope.$parent.treeDataSource = [{
+		$scope.$parent.treeDataSourceWithRoot = [{
 			'name': '모든 사용자',
 			'guid': null,
 			'children': tree
 		}];
+		$scope.$parent.treeDataSource = tree;
 		$scope.$apply();
 
 		bindTreeEvent();
