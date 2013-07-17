@@ -352,7 +352,7 @@ input[type=text].input-single.error:focus {
 						</div>
 						<div ng-show="isEditMode">
 							<div class="btn-group pull-left">
-								<button class="btn">새 사용자</button>
+								<button class="btn" ng-click="addUser()">새 사용자</button>
 								<!-- <button class="btn" ng-disabled="canMoveOrRemove()">이동</button> -->
 								<button class="btn" ng-disabled="canMoveOrRemove()" ng-click="removeUsers()">삭제</button>
 							</div>
@@ -365,7 +365,9 @@ input[type=text].input-single.error:focus {
 				</div>
 				<ul class="tab well1 tab-general">
 					<li class="section well1">
-						<div class="pull-right">{{dataUsers.length}}명의 사용자</div>
+						<div class="pull-right">
+							{{dataUsers.length}}명의 사용자<span ng-hide="canMoveOrRemove()">, {{(dataUsers | isSelected: 'is_checked').length}}명 선택됨</span>
+						</div>
 						<table class="table table-bordered table-striped listUsers" ng-class="{'isEditMode': isEditMode}">
 							<thead>
 								<tr>

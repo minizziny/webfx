@@ -157,23 +157,25 @@ function RemoveUsersController($scope, socket, eventSender) {
 				return obj.login_name;
 			})
 		}
-
-		console.log(login_names);
 		
-		// socket.send('org.araqne.dom.msgbus.UserPlugin.removeUsers', login_names, proc.pid)
-		// .success(function(m) {
+		socket.send('org.araqne.dom.msgbus.UserPlugin.removeUsers', login_names, proc.pid)
+		.success(function(m) {
 
-			eventSender.onSuccessRemoveUsers($scope.selectedUsers);
+			if(m.body.failed_login_names.length > 0) {
+				eventSender.onPartiallySuccessRemoveUsers($scope.selectedUsers, m.body.failed_login_names);
+			}
+			else {
+				eventSender.onSuccessRemoveUsers($scope.selectedUsers);
+			}
 
 			$scope.$parent.isUserEditMode = false;
 			$('body').css('overflow','');
 			$scope.$parent.closeExtraPane();
 			$('.mdlRemoveUsers')[0].hideDialog();
 
-		// })
-		// .failed(openError);
-
-		$scope.selectedUsers = [];
+			$scope.selectedUsers = [];
+		})
+		.failed(openError);
 	}
 
 	$scope.cancelRemoveUsers = function() {
@@ -228,7 +230,11 @@ function UserController($scope, socket, eventSender) {
 				$scope.selectedUser[prop] = $scope.selectedUserCopy[prop];
 			};
 
-			console.log('save completed', $scope.selectedUserCopy, $scope.selectedUser)
+			if(method = 'org.araqne.dom.msgbus.UserPlugin.createUser') {
+				eventSender.refreshUserList();
+			}
+
+			console.log('save completed', $scope.selectedUserCopy, $scope.selectedUser);
 			$scope.$apply();
 		})
 		.failed(openError);
@@ -312,21 +318,56 @@ function UserListController($scope, $compile, socket, eventSender) {
 			return user.login_name;
 		});
 
-		moveUsers(scopeTarget.node.guid, login_names);
+		moveUsers(scopeTarget.node, login_names);
 	}
 
 	function refresh() {
 		getUsers($scope.currentOrgUnit.guid);
 	}
 
+	eventSender.refreshUserList = function() {
+		refresh();
+	}
+
 	eventSender.onUpdateUserOrgUnit = function(user) {
 		refresh();
 	}
 
+	eventSender.onPartiallySuccessRemoveUsers = function(selected, failed_login_names) {
+		function hasFailedList(login_name) {
+			return !failed_login_names.some(function(obj) {
+				return obj == login_name;
+			});
+		}
+
+		var names = selected.filter(function(obj) {
+			return hasFailedList(obj.login_name);
+		}).map(function(obj) {
+			return obj.login_name;
+		});
+
+		selected.forEach(function(obj) {
+			if(hasFailedList(obj.login_name)) {
+				$scope.dataUsers.splice($scope.dataUsers.indexOf(obj), 1);
+			}
+		});
+
+		$scope.$apply();
+
+		notify('info', '사용자 ' + names + '을 성공적으로 삭제했습니다.<br>사용자 ' + failed_login_names + '는 삭제하지 못했습니다. 더 높은 권한이 필요합니다.' , false);
+	}
+
 	eventSender.onSuccessRemoveUsers = function(selected) {
+		var names = selected.map(function(obj) {
+			return obj.login_name;
+		});
+
 		selected.forEach(function(obj) {
 			$scope.dataUsers.splice($scope.dataUsers.indexOf(obj), 1);
 		});
+		$scope.$apply();
+
+		notify('success', '사용자 ' + names + '을 성공적으로 삭제했습니다.' , true);
 	}
 
 	$scope.currentOrgUnit;
@@ -431,7 +472,7 @@ function UserListController($scope, $compile, socket, eventSender) {
 
 	function moveUsers(target, users) {
 		var option = {
-			'org_unit_guid': target, 
+			'org_unit_guid': target.guid, 
 			'login_names': users
 		}
 		socket.send('org.araqne.dom.msgbus.UserPlugin.moveUsers', option, proc.pid)
@@ -439,11 +480,14 @@ function UserListController($scope, $compile, socket, eventSender) {
 			console.log(m.body)
 
 			refresh();
+			notify('success', '사용자 ' + users.join() + '을 ' + target.name + '로 이동했습니다.' , true);
 		})
 		.failed(msgbusFailed);
 	}
 
 	$scope.addUser = function() {
+		$scope.endEditMode();
+
 		var targetOrgUnit = angular.copy($scope.currentOrgUnit);
 		delete targetOrgUnit.children;
 		delete targetOrgUnit.className;
