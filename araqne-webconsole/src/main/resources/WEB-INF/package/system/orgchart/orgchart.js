@@ -188,6 +188,8 @@ function UserController($scope, socket, eventSender) {
 	$scope.selectedUserCopy = null;
 
 	eventSender.onShowUser = function(user) {
+		console.log('----', user.login_name, '----');
+		console.log('::: onShowUser:\t', user);
 		$scope.selectedUser = user;
 
 		if(user._isNew) {
@@ -205,6 +207,8 @@ function UserController($scope, socket, eventSender) {
 		$scope.selectedUserCopy.password = '';
 		$scope.selectedUserCopy.passwordConfirm = '';
 
+		eventSender.onEditUserAdmin($scope.selectedUser);
+
 	}
 
 	$scope.saveUserInfo = function() {
@@ -214,11 +218,22 @@ function UserController($scope, socket, eventSender) {
 		}
 		else {
 			method = 'org.araqne.dom.msgbus.UserPlugin.updateUser';
+
+			// 저장할땐 아래 정보는 넣으면 안된다.
 			delete $scope.selectedUserCopy.created;
 			delete $scope.selectedUserCopy.updated;
+			delete $scope.selectedUserCopy.ext;
 			delete $scope.selectedUserCopy.last_password_change;
 			delete $scope.selectedUserCopy.password;
 			delete $scope.selectedUserCopy.passwordConfirm;
+		}
+
+		// 저장할땐, org_unit의 guid 정보만 넘겨야 한다.
+		if($scope.selectedUserCopy.org_unit != null) {
+			var org_unit_obj = {
+				'guid': $scope.selectedUserCopy.org_unit.guid
+			}
+			$scope.selectedUserCopy.org_unit = org_unit_obj;
 		}
 
 		socket.send(method, $scope.selectedUserCopy, proc.pid)
@@ -226,15 +241,21 @@ function UserController($scope, socket, eventSender) {
 			$scope.exitUserEditMode();
 
 			delete $scope.selectedUserCopy._isNew;
+			// selectedUserCopy 의 정보를 selectedUser에 덮어씌운다. 
+			// created 와 updated 의 정보를 남기기 위해 통째로 바꾸진 않는다.
 			for (var prop in $scope.selectedUserCopy) {
 				$scope.selectedUser[prop] = $scope.selectedUserCopy[prop];
 			};
 
-			if(method = 'org.araqne.dom.msgbus.UserPlugin.createUser') {
+			// createUser시에는 목록을 갱신해줄 필요가 있음
+			if(method == 'org.araqne.dom.msgbus.UserPlugin.createUser') {
 				eventSender.refreshUserList();
 			}
 
-			console.log('save completed', $scope.selectedUserCopy, $scope.selectedUser);
+			// admin 정보 저장
+			eventSender.onSaveUserAdmin($scope.selectedUserCopy);
+
+			console.log('::: Save Completed:\t', $scope.selectedUserCopy.login_name);
 			$scope.$apply();
 		})
 		.failed(openError);
@@ -242,6 +263,8 @@ function UserController($scope, socket, eventSender) {
 
 	$scope.discardUserInfo = function() {
 		$scope.exitUserEditMode();
+
+		eventSender.onDiscardUserAdmin();
 
 		if($scope.selectedUser._isNew) {
 			$scope.$parent.closeExtraPane();
@@ -281,12 +304,21 @@ function UserController($scope, socket, eventSender) {
 	}
 
 	$scope.$watch('selectedUser', function(valnew, valold) {
-		if(valnew == null || valold == null) return;
-		if(valnew.login_name != valold.login_name) {
+		if(valnew == null) {
 			return;
 		}
 
-		// updateUser 를 통해 org_unit 변경
+		if(valold == null) {
+			eventSender.onSelectUserAdmin(valnew);
+			return;
+		}
+
+		if(valnew.login_name != valold.login_name) {
+			eventSender.onSelectUserAdmin(valnew);
+			return;
+		}
+
+		// updateUser 를 통해 org_unit 변경시 불리는 코드
 		var isDefinedOld = valold.org_unit != null;
 		var isDefinedNew = valnew.org_unit != null;
 		if(isDefinedOld | isDefinedNew) {
@@ -308,6 +340,119 @@ function UserController($scope, socket, eventSender) {
 	}, true);
 
 
+}
+
+function AdminController($scope, socket, eventSender) {
+	$scope.listRoles = [];
+	$scope.currentUser;
+	$scope.currentRole;
+	$scope.currentRoleCopy;
+	$scope.canAdminGrant = false;
+
+	function getRoles() {
+		socket.send('org.araqne.dom.msgbus.RolePlugin.getRoles', {}, proc.pid)
+		.success(function(m) {
+			$scope.listRoles = m.body.roles;
+			console.log(m.body);
+
+			setRoleToDefault();
+			$scope.$apply();
+		})
+		.failed(openError)
+	}
+
+	function getAdmin() {
+		socket.send('org.araqne.dom.msgbus.AdminPlugin.getAdmin', { 'login_name': $scope.currentUser.login_name }, proc.pid)
+		.success(function(m) {
+			console.log('::: getAdmin:\t', m.body);
+			if(m.body.admin == null) {
+				setRoleToDefault();
+			}
+			else {
+				var r = getRoleByName(m.body.admin.role.name);
+				$scope.currentRole = r;
+			}
+			$scope.$apply();
+		})
+		.failed(openError);
+	}
+
+	function getRoleByName(name) {
+		var found = $scope.listRoles.filter(function(obj) {
+			return obj.name == name;
+		});
+		return found[0];
+	}
+
+	function setAdmin() {
+		var rolename = $scope.currentRoleCopy.name;
+		var option = {
+			'login_name': $scope.currentUser.login_name,
+			'role': {
+				'name': rolename
+			},
+			'use_login_lock': false,
+			'is_enabled': true
+		}
+
+		socket.send('org.araqne.dom.msgbus.AdminPlugin.setAdmin', option, proc.pid)
+		.success(function(m) {
+			$scope.currentRole = getRoleByName(rolename);
+			console.log('::: setAdmin:\t', option, rolename);
+			$scope.$apply();
+		})
+		.failed(openError);
+
+		setRoleCopyToDefault();
+	}	
+
+	function checkAdminGrant() {
+		socket.send('org.araqne.dom.msgbus.AdminPlugin.hasPermission', { 'group': 'dom', 'permission': 'admin_grant' }, proc.pid)
+		.success(function(m) {
+			$scope.canAdminGrant = m.body.result;
+			$scope.$apply();
+		})
+		.failed(openError);
+	}
+
+	function setRoleCopyToDefault() {
+		$scope.currentRoleCopy = $scope.listRoles[2]; // 기본값으로 돌려줌
+	}
+
+	function setRoleToDefault() {
+		$scope.currentRole = $scope.listRoles[2]; // 기본값으로 돌려줌
+	}
+
+	eventSender.onSelectUserAdmin = function(user) {
+		if(user._isNew) {
+			setRoleCopyToDefault();
+			return;
+		}
+
+		if(user.login_name == null) return;
+		$scope.currentUser = user;
+		getAdmin();
+	}
+
+	eventSender.onEditUserAdmin = function(user) {
+		if(user._isNew) {
+			setRoleToDefault();
+		}
+		$scope.currentRoleCopy = getRoleByName($scope.currentRole.name);
+	}
+
+	eventSender.onDiscardUserAdmin = function() {
+		setRoleCopyToDefault();
+	}
+
+	eventSender.onSaveUserAdmin = function(user) {
+		if(user.login_name == null) return;
+		$scope.currentUser = user;
+		setAdmin();
+	}
+	
+	getRoles();
+	checkAdminGrant();
 }
 
 function UserListController($scope, $compile, socket, eventSender) {
@@ -458,7 +603,6 @@ function UserListController($scope, $compile, socket, eventSender) {
 
 		socket.send('org.araqne.dom.msgbus.UserPlugin.getUsers', option, proc.pid)
 		.success(function(m) {
-			console.log(m.body)
 			$scope.dataUsers = m.body.users;
 
 			if(guid == undefined) {
@@ -598,6 +742,7 @@ function notify(type, msg, autohide) {
 	}
 	else {
 		$('.alert-fix-side').removeClass(makeRemoveClassHandler(/(alert-success|alert-info|alert-error)/))
+			.show()
 			.addClass('alert-' + type)
 			.addClass('show')
 			.find('span.msg')
@@ -607,13 +752,16 @@ function notify(type, msg, autohide) {
 	if(autohide == true) {
 		setTimeout(function() {
 			$('.alert-fix-side.show').removeClass('show');
-		}, 3000)
+		}, 3000);
+		setTimeout(function() {
+			$('.alert-fix-side').hide();
+		}, 3200)
 	}
 	else {
 		btnClose.on('click', function() {
 			$('.alert-fix-side.show').hide().removeClass('show');
 			setTimeout(function() {
-				$('.alert-fix-side').css('display','block');
+				$('.alert-fix-side').hide();
 			}, 200);
 		});
 	}

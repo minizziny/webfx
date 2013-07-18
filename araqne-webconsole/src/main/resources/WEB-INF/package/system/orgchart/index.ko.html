@@ -434,149 +434,183 @@ input[type=text].input-single.error:focus {
 								</div>
 							</div>
 						</div>
-						<ul class="tab well1 tab-general" ng-show="isUserEditMode">
-							<li class="section area" ng-show="selectedUserCopy._isNew">
-								<table class="table table-form">
-									<tbody>
-										<tr>
-											<td>암호</td>
-											<td class="control-group" ng-class="{ 'error': frmUser.password.$error.inadequacy }" style="position: relative">
-												<input type="password" name="password" class="input-xlarge" ng-model="selectedUserCopy.password" password-validate="{ condition: selectedUserCopy._isNew }">
-												<div class="popover popover-black fade left in" ng-show="frmUser.password.$error.inadequacy" style="left: -465px; top: -5px">
-													<div class="arrow"></div>
-													<div class="popover-content help-inline">암호는 9자 이상의 영문, 숫자, 특수문자 조합으로 만들어야 합니다.</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td>재입력</td>
-											<td class="control-group" ng-class="{ 'error': frmUser.passwordConfirm.$error.mismatch }" style="position: relative">
-												<input type="password" name="passwordConfirm" class="input-xlarge" ng-model="selectedUserCopy.passwordConfirm" match="selectedUserCopy.password">
-												<div class="popover popover-black fade left in" ng-show="frmUser.passwordConfirm.$error.mismatch" style="left: -465px; top: 10px">
-													<div class="arrow"></div>
-													<div class="popover-content help-inline">암호가 서로 일치하지 않습니다.</div>
-												</div>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</li>
-							<li class="section area">
-								<table class="table table-form">
-									<tbody>
-										<tr>
-											<td>이름</td>
-											<td class="control-group" ng-class="{ 'error': frmUser.name.$error.required }" style="position: relative">
-												<input type="text" name="name" class="input-xlarge" ng-model="selectedUserCopy.name" required>
-												<div class="popover popover-black fade left in" ng-show="frmUser.name.$error.required" style="left: -465px">
-													<div class="arrow"></div>
-													<div class="popover-content help-inline">이름은 반드시 필요합니다.</div>
-												</div>
-											</td>
-										</tr>
-										<tr>
-											<td>직함</td>
-											<td><input type="text" class="input-xlarge" ng-model="selectedUserCopy.title"></td>
-										</tr>
-										<tr>
-											<td>부서</td>
-											<td>
-												<div class="btn-group">
-													<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-														<span ng-show="selectedUserCopy.org_unit == null" style="color:#999">미지정</span>
-														{{selectedUserCopy.org_unit.name}}
-														<span class="caret"></span>
-													</a>
-													<div class="dropdown-menu" style="z-index:8888" ng-click="supressEvent($event)">
-														<input type="text" class="input-large search-query" style="margin: 2px 8px 6px">
-														<tree id="treeToChangeOrgUnit" tree-data="treeDataSource"
-															node-id="guid"
-															node-name="name"
-															node-selected="_tables">
-														</tree>
+						<section>
+							<ul class="tab well1 tab-general" ng-show="isUserEditMode">
+								<li class="section area" ng-show="selectedUserCopy._isNew">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>암호</td>
+												<td class="control-group" ng-class="{ 'error': frmUser.password.$error.inadequacy }" style="position: relative">
+													<input type="password" name="password" class="input-xlarge" ng-model="selectedUserCopy.password" password-validate="{ condition: selectedUserCopy._isNew }">
+													<div class="popover popover-black fade left in" ng-show="frmUser.password.$error.inadequacy" style="left: -465px; top: -5px">
+														<div class="arrow"></div>
+														<div class="popover-content help-inline">암호는 9자 이상의 영문, 숫자, 특수문자 조합으로 만들어야 합니다.</div>
 													</div>
-												</div>
-												<button ng-hide="selectedUserCopy.org_unit == null" class="btn btn-mini btn-inverse" ng-click="deallocateGroup()">
-													<i class="icon-white icon-remove"></i>
-												</button>
-											</td>
-										</tr>
-										<tr>
-											<td>E-mail</td>
-											<td class="control-group" ng-class="{ 'error': frmUser.email.$error.email }" style="position: relative">
-												<input type="email" name="email" class="input-xlarge" placeholder="user@domain.com" ng-model="selectedUserCopy.email">
-												<div class="popover popover-black fade left in" ng-show="frmUser.email.$error.email" style="left: -465px">
-													<div class="arrow"></div>
-													<div class="popover-content help-inline">올바른 E-mail 형식이 아닙니다.</div>
-												</div>
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</li>
-							<li class="section area">
-								<table class="table table-form">
-									<tbody>
-										<tr>
-											<td>설명</td>
-											<td><textarea class="input-xlarge" ng-model="selectedUserCopy.description"></textarea></td>
-										</tr>
-									</tbody>
-								</table>
-							</li>
-							<li class="section area" ng-hide="selectedUserCopy._isNew">
-								<button class="btn btn-danger" style="width: 100%" ng-click="removeThisUser()">이 사용자 삭제</button>
-							</li>
-							<!-- {{selectedUserCopy}} -->
-						</ul>
-						<ul class="tab area tab-general" ng-hide="isUserEditMode">
-							<li class="section area">
-								<table class="table table-form">
-									<tbody>
-										<tr>
-											<td>이름</td>
-											<td>{{selectedUser.name}}</td>
-										</tr>
-										<tr>
-											<td>직함</td>
-											<td>{{selectedUser.title}}</td>
-										</tr>
-										<tr>
-											<td>부서</td>
-											<td>{{selectedUser.org_unit.name}}</td>
-										</tr>
-										<tr>
-											<td>E-mail</td>
-											<td>{{selectedUser.email}}</td>
-										</tr>
-									</tbody>
-								</table>
-							</li>
-							<li class="section area">
-								<table class="table table-form">
-									<tbody>
-										<tr>
-											<td>생성일</td>
-											<td>{{selectedUser.created}}</td>
-										</tr>
-										<tr>
-											<td>수정일</td>
-											<td>{{selectedUser.updated}}</td>
-										</tr>
-									</tbody>
-								</table>
-							</li>
-							<li class="section area">
-								<table class="table table-form">
-									<tbody>
-										<tr>
-											<td>설명</td>
-											<td>{{selectedUser.description}}</td>
-										</tr>
-									</tbody>
-								</table>
-							</li>
-						</ul>
+												</td>
+											</tr>
+											<tr>
+												<td>재입력</td>
+												<td class="control-group" ng-class="{ 'error': frmUser.passwordConfirm.$error.mismatch }" style="position: relative">
+													<input type="password" name="passwordConfirm" class="input-xlarge" ng-model="selectedUserCopy.passwordConfirm" match="selectedUserCopy.password">
+													<div class="popover popover-black fade left in" ng-show="frmUser.passwordConfirm.$error.mismatch" style="left: -465px; top: 10px">
+														<div class="arrow"></div>
+														<div class="popover-content help-inline">암호가 서로 일치하지 않습니다.</div>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>이름</td>
+												<td class="control-group" ng-class="{ 'error': frmUser.name.$error.required }" style="position: relative">
+													<input type="text" name="name" class="input-xlarge" ng-model="selectedUserCopy.name" required>
+													<div class="popover popover-black fade left in" ng-show="frmUser.name.$error.required" style="left: -465px">
+														<div class="arrow"></div>
+														<div class="popover-content help-inline">이름은 반드시 필요합니다.</div>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td>직함</td>
+												<td><input type="text" class="input-xlarge" ng-model="selectedUserCopy.title"></td>
+											</tr>
+											<tr>
+												<td>부서</td>
+												<td>
+													<div class="btn-group">
+														<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+															<span ng-show="selectedUserCopy.org_unit == null" style="color:#999">미지정</span>
+															{{selectedUserCopy.org_unit.name}}
+															<span class="caret"></span>
+														</a>
+														<div class="dropdown-menu" style="z-index:8888" ng-click="supressEvent($event)">
+															<input type="text" class="input-large search-query" style="margin: 2px 8px 6px">
+															<tree id="treeToChangeOrgUnit" tree-data="treeDataSource"
+																node-id="guid"
+																node-name="name"
+																node-selected="_tables">
+															</tree>
+														</div>
+													</div>
+													<button ng-hide="selectedUserCopy.org_unit == null" class="btn btn-mini btn-inverse" ng-click="deallocateGroup()">
+														<i class="icon-white icon-remove"></i>
+													</button>
+												</td>
+											</tr>
+											<tr>
+												<td>E-mail</td>
+												<td class="control-group" ng-class="{ 'error': frmUser.email.$error.email }" style="position: relative">
+													<input type="email" name="email" class="input-xlarge" placeholder="user@domain.com" ng-model="selectedUserCopy.email">
+													<div class="popover popover-black fade left in" ng-show="frmUser.email.$error.email" style="left: -465px">
+														<div class="arrow"></div>
+														<div class="popover-content help-inline">올바른 E-mail 형식이 아닙니다.</div>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>설명</td>
+												<td><textarea class="input-xlarge" ng-model="selectedUserCopy.description"></textarea></td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+							</ul>
+							<ul class="tab area tab-general" ng-hide="isUserEditMode">
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>이름</td>
+												<td>{{selectedUser.name}}</td>
+											</tr>
+											<tr>
+												<td>직함</td>
+												<td>{{selectedUser.title}}</td>
+											</tr>
+											<tr>
+												<td>부서</td>
+												<td>{{selectedUser.org_unit.name}}</td>
+											</tr>
+											<tr>
+												<td>E-mail</td>
+												<td>{{selectedUser.email}}</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>생성일</td>
+												<td>{{selectedUser.created}}</td>
+											</tr>
+											<tr>
+												<td>수정일</td>
+												<td>{{selectedUser.updated}}</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>설명</td>
+												<td>{{selectedUser.description}}</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+							</ul>
+						</section>
+						<legend style="text-indent: 40px">관리자 설정</legend>
+						<section ng-controller="AdminController">
+							<ul class="tab area tab-general" ng-show="isUserEditMode && canAdminGrant">
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>권한</td>
+												<td>
+													<select ng-model="currentRoleCopy" ng-options="role.name for role in listRoles"></select>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+							</ul>
+							<ul class="tab area tab-general" ng-hide="isUserEditMode">
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>권한</td>
+												<td>{{currentRole.name}}</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+							</ul>
+						</section>
+						<section>
+							<ul class="tab area tab-general" ng-show="isUserEditMode">
+								<li class="section area" ng-hide="selectedUserCopy._isNew">
+									<button class="btn btn-danger" style="width: 100%" ng-click="removeThisUser()">이 사용자 삭제</button>
+								</li>
+							</ul>
+						</section>
 					</form>
 				</li>
 			</ul>
@@ -628,7 +662,7 @@ input[type=text].input-single.error:focus {
 		</div>
 	</div>
 
-	<div class="alert alert-success alert-fix-side"> 
+	<div class="alert alert-success alert-fix-side" style="display:none">
 		<button type="button" class="close">&times;</button>
 		<span class="msg">성공적으로 이동했습니다.</span>
 	</div>
