@@ -208,6 +208,7 @@ function UserController($scope, socket, eventSender) {
 		$scope.selectedUserCopy.passwordConfirm = '';
 
 		eventSender.onEditUserAdmin($scope.selectedUser);
+		eventSender.onEditUserPrivilege($scope.selectedUser);
 
 	}
 
@@ -254,8 +255,11 @@ function UserController($scope, socket, eventSender) {
 
 			// admin 정보 저장
 			eventSender.onSaveUserAdmin($scope.selectedUserCopy);
+			eventSender.onSaveUserPrivilage($scope.selectedUserCopy);
 
-			console.log('::: Save Completed:\t', $scope.selectedUserCopy.login_name);
+			console.log(':::'
+				, ((method == 'org.araqne.dom.msgbus.UserPlugin.createUser') ? 'createUser:\t' : 'updateUser:\t')
+				, $scope.selectedUserCopy.login_name);
 			$scope.$apply();
 		})
 		.failed(openError);
@@ -265,6 +269,7 @@ function UserController($scope, socket, eventSender) {
 		$scope.exitUserEditMode();
 
 		eventSender.onDiscardUserAdmin();
+		eventSender.onDiscardUserPrivileage();
 
 		if($scope.selectedUser._isNew) {
 			$scope.$parent.closeExtraPane();
@@ -310,11 +315,13 @@ function UserController($scope, socket, eventSender) {
 
 		if(valold == null) {
 			eventSender.onSelectUserAdmin(valnew);
+			eventSender.onSelectUserPrivilege(valnew);
 			return;
 		}
 
 		if(valnew.login_name != valold.login_name) {
 			eventSender.onSelectUserAdmin(valnew);
+			eventSender.onSelectUserPrivilege(valnew);
 			return;
 		}
 
@@ -355,7 +362,7 @@ function AdminController($scope, socket, eventSender) {
 			$scope.listRoles = m.body.roles;
 			console.log(m.body);
 
-			setRoleToDefault();
+			resetRole();
 			$scope.$apply();
 		})
 		.failed(openError)
@@ -366,7 +373,7 @@ function AdminController($scope, socket, eventSender) {
 		.success(function(m) {
 			console.log('::: getAdmin:\t', m.body);
 			if(m.body.admin == null) {
-				setRoleToDefault();
+				resetRole();
 			}
 			else {
 				var r = getRoleByName(m.body.admin.role.name);
@@ -403,7 +410,7 @@ function AdminController($scope, socket, eventSender) {
 		})
 		.failed(openError);
 
-		setRoleCopyToDefault();
+		resetRoleCopy();
 	}	
 
 	function checkAdminGrant() {
@@ -415,17 +422,17 @@ function AdminController($scope, socket, eventSender) {
 		.failed(openError);
 	}
 
-	function setRoleCopyToDefault() {
+	function resetRoleCopy() {
 		$scope.currentRoleCopy = $scope.listRoles[2]; // 기본값으로 돌려줌
 	}
 
-	function setRoleToDefault() {
+	function resetRole() {
 		$scope.currentRole = $scope.listRoles[2]; // 기본값으로 돌려줌
 	}
 
 	eventSender.onSelectUserAdmin = function(user) {
 		if(user._isNew) {
-			setRoleCopyToDefault();
+			resetRoleCopy();
 			return;
 		}
 
@@ -436,13 +443,13 @@ function AdminController($scope, socket, eventSender) {
 
 	eventSender.onEditUserAdmin = function(user) {
 		if(user._isNew) {
-			setRoleToDefault();
+			resetRole();
 		}
 		$scope.currentRoleCopy = getRoleByName($scope.currentRole.name);
 	}
 
 	eventSender.onDiscardUserAdmin = function() {
-		setRoleCopyToDefault();
+		resetRoleCopy();
 	}
 
 	eventSender.onSaveUserAdmin = function(user) {
@@ -453,6 +460,122 @@ function AdminController($scope, socket, eventSender) {
 	
 	getRoles();
 	checkAdminGrant();
+}
+
+function TablePrivilegeController($scope, socket, eventSender, serviceLogdbManagement) {
+	$scope.currentUser;
+
+	eventSender.onSelectUserPrivilege = function(user) {
+		//console.log('::: onSelectUserPrivilege\t');
+		$scope.limitDataPrivileges = $scope.limitDataPrivilegesDefault;
+		if(user._isNew) {
+			return;
+		}
+
+		$scope.currentUser = user;
+		getPrivilege(user.login_name);
+	}
+
+	eventSender.onEditUserPrivilege = function(user) {
+		//console.log('::: onEditUserPrivilege\t');
+		resetPrivilegeSetting();
+		if(user._isNew) {
+			return;
+		}
+
+		$scope.dataPrivileges.forEach(function(prv) {
+			var idx = -1;
+			if( $scope.dataTables.some(function(obj, i) {
+				idx = i;
+				return obj.table == prv.table;
+			})) {
+				$scope.dataTables[idx]['can_read'] = true;
+			}
+		});
+
+	}
+
+	eventSender.onDiscardUserPrivileage = function() {
+		resetPrivilegeSetting();
+	}
+
+	eventSender.onSaveUserPrivilage = function(user) {
+		var privilegeWillBeGranted = $scope.dataTables.filter(function(obj) {
+			return obj.can_read;
+		}).map(function(obj) {
+			return obj.table;
+		});
+		serviceLogdbManagement.setPrivileges(user.login_name, privilegeWillBeGranted).success(function(m) {
+			$scope.dataPrivileges.splice(0, $scope.dataPrivileges.length);
+
+			privilegeWillBeGranted.forEach(function(table) {
+				$scope.dataPrivileges.push({
+					'table': table,
+					'can_read': true
+				})
+			});
+			
+			$scope.$apply();
+			console.log('::: setPrivilege:\t', user.login_name, privilegeWillBeGranted);
+			resetPrivilegeSetting();
+		});	
+	}
+
+	function resetPrivilegeSetting(bool) {
+		if(bool == undefined) bool = false;
+		$scope.dataTables.forEach(function(obj) {
+			obj['can_read'] = bool;
+		});
+	}
+
+	$scope.dataTables = [];
+	$scope.dataPrivileges = [];
+	$scope.limitDataPrivilegesDefault = 10;
+	$scope.limitDataPrivileges = $scope.limitDataPrivilegesDefault;
+
+	$scope.toggleMorePrivileges = function() {
+		$scope.limitDataPrivileges = $scope.dataPrivileges.length;
+	}
+
+	function getPrivilege(login_name) {
+		serviceLogdbManagement.getPrivileges(login_name).success(function(m) {
+			$scope.dataPrivileges.splice(0, $scope.dataPrivileges.length);
+
+			for(var prop in m.body) {
+				$scope.dataPrivileges.push({
+					'table': prop,
+					'can_read': m.body[prop][0] == 'READ' ? true : false
+				})
+			}
+
+			$scope.$apply();
+			var tables = Object.keys(m.body);
+			console.log('::: getPrivilege:\t');
+		});	
+	}
+
+	$scope.toggleSelectAll = function() {
+		resetPrivilegeSetting($scope.dataTables.some(function(obj) {
+			return !obj.can_read;
+		}));
+	}
+
+	function deselectAll() {
+		$scope.dataUsers.forEach(function(obj) {
+			obj.is_checked = false;
+		});
+		$('tr.tr-selected').removeClass('tr-selected');
+	}
+	
+	serviceLogdbManagement.listTable().success(function(m) {
+		$scope.dataTables = Object.keys(m.body.tables).map(function(key) {
+			return {
+				'table': key,
+				'can_read': false
+			}
+		});
+		$scope.$apply();
+	});
 }
 
 function UserListController($scope, $compile, socket, eventSender) {

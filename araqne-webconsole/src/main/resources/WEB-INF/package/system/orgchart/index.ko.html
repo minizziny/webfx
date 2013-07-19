@@ -15,6 +15,7 @@
 	<script src="/script/filter/filter.js"></script>
 	<script src="/script/service/service.js"></script>
 	<script src="/script/service/service.logdb.js"></script>
+	<script src="/script/service/service.logdb.management.js"></script>
 	<script src="/script/service/service.chart.js"></script>
 	<script src="/script/directive/directive.js"></script>
 	<script src="/script/directive/directive.logdb.js"></script>
@@ -86,21 +87,6 @@ tree .hide {
 .leftPane tree > ul {
 	clear: both;
 	padding-top: 40px;
-}
-
-input[type=search] {
-	left: 0;
-	-webkit-transition: 0.1s ease;
-	background: white;
-	text-align: left;
-	right: 0;
-	position: absolute;
-	width: auto;
-	top: 5px;
-}
-
-input[type=search]:focus {
-	background: white;
 }
 
 .li-edit {
@@ -259,8 +245,18 @@ table.listUsers {
 }
 
 input.searchbox {
-	border-radius: 15px;
-	padding: 4px 14px;
+	left: 0;
+	-webkit-transition: 0.1s ease;
+	background: white;
+	text-align: left;
+	right: 0;
+	position: absolute;
+	width: auto;
+	top: 5px;
+}
+
+input.searchbox:focus {
+	background: white;
 }
 
 .popover {
@@ -299,6 +295,35 @@ input[type=text].input-single.error:focus {
 	-webkit-box-shadow: 0 0 6px #f8b9b7;
 	-moz-box-shadow: 0 0 6px #f8b9b7;
 	box-shadow: 0 0 6px #f8b9b7;
+}
+
+input[type=search] {
+	border-radius: 15px;
+	padding: 4px 14px;
+
+	background-position: 9px 7px;
+	background-image: url("/images/icon-search.gif");
+	background-repeat: no-repeat;
+
+	text-indent: 16px;
+}
+
+input[type=search]:focus {
+	background-position: -20px 7px;
+	text-indent: 0;
+}
+
+input[type=search].input-search-table {
+	width: 45%;
+	margin-bottom: 0;
+	-webkit-transition: border linear .2s,box-shadow linear .2s, width .1s ease-out;
+	-moz-transition: border linear .2s,box-shadow linear .2s, width .1s ease-out;
+	-o-transition: border linear .2s,box-shadow linear .2s, width .1s ease-out;
+	transition: border linear .2s,box-shadow linear .2s, width .1s ease-out;
+}
+
+input[type=search].input-search-table:focus {
+	width: 60%;
 }
 
 	</style>
@@ -403,7 +428,7 @@ input[type=text].input-single.error:focus {
 			<ul style="margin: 0">
 				<li class="pane pane-nomargin">
 					<form name="frmUser" style="margin:0">
-						<div class="navbar">
+						<div class="navbar extraPane-navbar">
 							<div class="navbar-inner" style="position:relative">
 								<input type="text" class="txtNewLoginName input-single" name="login_name" placeholder="아이디를 입력하세요" style="float: left; margin: 5px;"
 									ng-model="selectedUserCopy.login_name"
@@ -601,6 +626,59 @@ input[type=text].input-single.error:focus {
 											</tr>
 										</tbody>
 									</table>
+								</li>
+							</ul>
+						</section>
+						<legend style="text-indent: 40px">테이블 권한 설정</legend>
+						<section ng-controller="TablePrivilegeController">
+							<ul class="tab area tab-general" ng-show="isUserEditMode">
+								<li class="section area">
+									<table class="table table-bordered table-striped" style="margin-bottom: 0">
+										<thead>
+											<tr>
+												<th style="padding:0 8px; vertical-align:inherit; width: 70%">
+													<span class="pull-left" style="margin-top: 5px">테이블</span>
+													<input type="search" class="pull-right input-search-table">
+												</th>
+												<th>
+													<span>읽기 권한</span>
+													<button class="btn btn-mini pull-right" ng-click="toggleSelectAll()">
+														<i class="icon-check"></i>
+													</button>
+												</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr ng-repeat="prv in dataTables | orderBy:'table'">
+												<td>{{prv.table}}</td>
+												<td><input type="checkbox" ng-model="prv.can_read"></td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+							</ul>
+							<ul class="tab area tab-general" ng-hide="isUserEditMode">
+								<li class="section" style="margin: 10px 40px">
+									{{dataPrivileges.length}}개의 접근 가능한 테이블
+								</li>
+								<li class="section area" style="border: 0">
+									<table class="table table-bordered table-striped" style="margin-bottom: 0">
+										<thead>
+											<tr>
+												<th>테이블</th>
+												<th>읽기 권한</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr ng-repeat="prv in dataPrivileges | orderBy:'table' | limitTo:limitDataPrivileges">
+												<td>{{prv.table}}</td>
+												<td><i class="icon-ok" ng-show="prv.can_read"></i></td>
+											</tr>
+										</tbody>
+									</table>
+									<button class="btn" style="width: 100%" ng-show="(dataPrivileges.length > limitDataPrivilegesDefault) && (limitDataPrivileges != dataPrivileges.length)" ng-click="toggleMorePrivileges()">
+										{{dataPrivileges.length - 10}}개의 접근 가능한 테이블 더 보기
+									</button>
 								</li>
 							</ul>
 						</section>
