@@ -18,10 +18,12 @@ package org.araqne.websocket;
 /**
  * @since 0.1.0
  * @author xeraph
- *
+ * 
  */
 public interface WebSocketListener {
 	void onMessage(WebSocketMessage msg);
 
-	void onError(Exception e);
+	void onError(Throwable t);
+
+	void onClose(Throwable t);
 }
