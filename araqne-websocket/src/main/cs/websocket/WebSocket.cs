@@ -29,6 +29,7 @@ namespace Araqne.Web
 	{
 		public delegate void MessageHandler(WebSocketMessage msg);
 		public delegate void ErrorHandler(Exception e);
+		public delegate void CloseHandler(Exception cause);
 
 		private const string WEBSOCKET_KEY_TRAILER = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 		private Uri uri;
@@ -37,6 +38,7 @@ namespace Araqne.Web
 
 		public event MessageHandler OnMessage;
 		public event ErrorHandler OnError;
+		public event CloseHandler OnClose;
 
 		public WebSocket(Uri uri)
 		{
@@ -117,9 +119,15 @@ namespace Araqne.Web
 				ctx.expected = 2;
 				client.GetStream().BeginRead(ctx.headerBuffer, 0, ctx.expected, new AsyncCallback(ReadCallback), ctx);
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
-				client.Close();
+				if (OnError != null) 
+				{
+					try { OnError(e); } 
+					catch (Exception) {}
+				}
+
+				Close(e);
 				throw;
 			}
 		}
@@ -163,6 +171,11 @@ namespace Araqne.Web
 
 		public void Close()
 		{
+			Close(null);
+		}
+
+		public void Close(Exception cause)
+		{
 			if (closed)
 				return;
 
@@ -170,111 +183,120 @@ namespace Araqne.Web
 
 			if (client != null)
 				client.Close();
+
+			if (OnClose != null)
+				OnClose(cause);
 		}
+
 
 		private void ReadCallback(IAsyncResult result)
 		{
 			if (closed)
 				return;
 
-			int readBytes = client.GetStream().EndRead(result);
+			try 
+			{
+				int readBytes = client.GetStream().EndRead(result);
 	
-			ReadContext ctx = result.AsyncState as ReadContext;
+				ReadContext ctx = result.AsyncState as ReadContext;
 
-			if (ctx.stage == ReadStage.Header)
-			{
-				int payloadLen = ctx.headerBuffer[1] & 0x7f;
-				ctx.headerReadBytes += readBytes;
-				if (ctx.headerReadBytes >= 2)
+				if (ctx.stage == ReadStage.Header)
 				{
-					if (payloadLen < 126)
+					int payloadLen = ctx.headerBuffer[1] & 0x7f;
+					ctx.headerReadBytes += readBytes;
+					if (ctx.headerReadBytes >= 2)
 					{
-						ctx.stage = ReadStage.Payload;
-						ctx.payloadReadBytes = 0;
-						ctx.expected = 2 + payloadLen;
-					} 
-					else
-					{
-						ctx.stage = ReadStage.ExtendedHeader;
-						ctx.expected = payloadLen == 126 ? 4 : 10;
-					}
-				}
-			}
-			else if (ctx.stage == ReadStage.ExtendedHeader)
-			{
-				int payloadLen = ctx.headerBuffer[1] & 0x7f;
-				ctx.headerReadBytes += readBytes;
-				byte[] h = ctx.headerBuffer;
-				if (payloadLen == 126 && ctx.headerReadBytes == 4)
-				{
-					int l = (h[2] << 8 | h[3]) & 0xffff;
-					ctx.payloadReadBytes = 0;
-					ctx.payloadBuffer = new byte[l];
-					ctx.expected = l;
-					ctx.stage = ReadStage.Payload;
-				}
-				else if (payloadLen == 127 && ctx.headerReadBytes == 10)
-				{
-					byte[] b = new byte[8];
-					Array.Copy(h, 2, b, 0, 8);
-					Array.Reverse(b);
-					long l = BitConverter.ToInt64(b, 0);
-					ctx.payloadBuffer = new byte[l];
-					ctx.expected = (int)l;
-					ctx.stage = ReadStage.Payload;
-				}
-			}
-			else if (ctx.stage == ReadStage.Payload)
-			{
-				ctx.payloadReadBytes += readBytes;
-				if (ctx.payloadReadBytes == ctx.expected)
-				{
-					byte[] h = ctx.headerBuffer;
-					byte[] p = ctx.payloadBuffer;
-
-					bool fin = (h[0] & 0x80) == 0x80;
-					Opcode opcode = (Opcode)(h[0] & 0xf);
-
-					if (opcode == Opcode.Text)
-					{
-						ctx.fragments.Add(p);
-
-						if (fin)
+						if (payloadLen < 126)
 						{
-							string json = BuildText(ctx);
-							if (OnMessage != null)
-								OnMessage(new WebSocketMessage((int)opcode, json));
+							ctx.stage = ReadStage.Payload;
+							ctx.payloadReadBytes = 0;
+							ctx.expected = 2 + payloadLen;
+						} 
+						else
+						{
+							ctx.stage = ReadStage.ExtendedHeader;
+							ctx.expected = payloadLen == 126 ? 4 : 10;
 						}
 					}
-
-					// clear and ready for next frame
-					ctx.headerReadBytes = 0;
-					ctx.payloadReadBytes = 0;
-					ctx.payloadBuffer = null;
-					ctx.expected = 2;
-					ctx.fragments.Clear();
-					ctx.stage = ReadStage.Header;
 				}
-			}
-
-			if (ctx.stage == ReadStage.Payload)
-			{
-				int next = (ctx.expected - ctx.payloadReadBytes);
-				if (next == 0)
+				else if (ctx.stage == ReadStage.ExtendedHeader)
 				{
-					int i = 0;
+					int payloadLen = ctx.headerBuffer[1] & 0x7f;
+					ctx.headerReadBytes += readBytes;
+					byte[] h = ctx.headerBuffer;
+					if (payloadLen == 126 && ctx.headerReadBytes == 4)
+					{
+						int l = (h[2] << 8 | h[3]) & 0xffff;
+						ctx.payloadReadBytes = 0;
+						ctx.payloadBuffer = new byte[l];
+						ctx.expected = l;
+						ctx.stage = ReadStage.Payload;
+					}
+					else if (payloadLen == 127 && ctx.headerReadBytes == 10)
+					{
+						byte[] b = new byte[8];
+						Array.Copy(h, 2, b, 0, 8);
+						Array.Reverse(b);
+						long l = BitConverter.ToInt64(b, 0);
+						ctx.payloadBuffer = new byte[l];
+						ctx.expected = (int)l;
+						ctx.stage = ReadStage.Payload;
+					}
 				}
-				client.GetStream().BeginRead(ctx.payloadBuffer, ctx.payloadReadBytes, ctx.expected - ctx.payloadReadBytes, new AsyncCallback(ReadCallback), ctx);
-			}
-			else
-			{
-				int next = (ctx.expected - ctx.headerReadBytes);
-				if (next == 0)
+				else if (ctx.stage == ReadStage.Payload)
 				{
-					int i = 0;
+					ctx.payloadReadBytes += readBytes;
+					if (ctx.payloadReadBytes == ctx.expected)
+					{
+						byte[] h = ctx.headerBuffer;
+						byte[] p = ctx.payloadBuffer;
+
+						bool fin = (h[0] & 0x80) == 0x80;
+						Opcode opcode = (Opcode)(h[0] & 0xf);
+
+						if (opcode == Opcode.Text)
+						{
+							ctx.fragments.Add(p);
+
+							if (fin)
+							{
+								string json = BuildText(ctx);
+								if (OnMessage != null)
+									OnMessage(new WebSocketMessage((int)opcode, json));
+							}
+						}
+
+						// clear and ready for next frame
+						ctx.headerReadBytes = 0;
+						ctx.payloadReadBytes = 0;
+						ctx.payloadBuffer = null;
+						ctx.expected = 2;
+						ctx.fragments.Clear();
+						ctx.stage = ReadStage.Header;
+					}
 				}
 
-				client.GetStream().BeginRead(ctx.headerBuffer, ctx.headerReadBytes, ctx.expected - ctx.headerReadBytes, new AsyncCallback(ReadCallback), ctx);
+				if (ctx.stage == ReadStage.Payload)
+				{
+					int next = (ctx.expected - ctx.payloadReadBytes);
+					if (next == 0)
+					{
+						int i = 0;
+					}
+					client.GetStream().BeginRead(ctx.payloadBuffer, ctx.payloadReadBytes, ctx.expected - ctx.payloadReadBytes, new AsyncCallback(ReadCallback), ctx);
+				}
+				else
+				{
+					int next = (ctx.expected - ctx.headerReadBytes);
+					client.GetStream().BeginRead(ctx.headerBuffer, ctx.headerReadBytes, ctx.expected - ctx.headerReadBytes, new AsyncCallback(ReadCallback), ctx);
+				}
+			} 
+			catch (Exception e)
+			{
+				if (OnError != null)
+					OnError(e);
+
+				Close(e);
 			}
 		}
 
