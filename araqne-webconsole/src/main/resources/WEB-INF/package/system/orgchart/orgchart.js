@@ -666,30 +666,36 @@ function UserListController($scope, $compile, socket, eventSender) {
 		if($scope.dataUsers.some(function(obj) {
 			return !obj.is_checked;
 		})) {
-			selectAll();
+			checkAll();
 		}
 		else {
-			deselectAll();
+			uncheckAll();
 		}
 	}
 
-	function deselectAll() {
+	function uncheckAll() {
 		$scope.dataUsers.forEach(function(obj) {
 			obj.is_checked = false;
 		});
 		$('tr.tr-selected').removeClass('tr-selected');
 	}
 
-	function selectAll() {
+	function checkAll() {
 		$scope.dataUsers.forEach(function(obj) {
 			obj.is_checked = true;
 		});
 		$('tr').addClass('tr-selected');
 	}
 
+	function deselectAll() {
+		$scope.dataUsers.forEach(function(obj) {
+			obj.is_selected = false;
+		});
+	}
+
 	$scope.enterEditMode = function() {
 		$scope.isEditMode = true;
-		$('tr.tr-single-selected').removeClass('tr-single-selected');
+		deselectAll();
 	}
 
 	$scope.endEditMode = function() {
@@ -705,8 +711,8 @@ function UserListController($scope, $compile, socket, eventSender) {
 		if(!$scope.isEditMode) {
 			eventSender.onShowUser(this.user);
 
-			$('tr.tr-single-selected').removeClass('tr-single-selected');
-			$(e.currentTarget).addClass('tr-single-selected');
+			deselectAll();
+			this.user.is_selected = true;
 			openExtraPane();
 		}
 	}
@@ -765,8 +771,8 @@ function UserListController($scope, $compile, socket, eventSender) {
 		});
 
 		//console.log($scope.$parent.selectedUser)
+		deselectAll();
 
-		$('tr.tr-single-selected').removeClass('tr-single-selected');
 		openExtraPane();
 
 		setTimeout(function() {

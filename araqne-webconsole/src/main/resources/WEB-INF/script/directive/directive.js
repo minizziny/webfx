@@ -98,7 +98,7 @@ angular.module('App.Directive', [])
 							bindingMultiEvent();
 						}
 						else {
-							element.off('click.tr-multi').removeClass('tr-selected');
+							element.off('click.tr-multi');
 							model.is_checked = false;
 						}
 					});
@@ -112,13 +112,6 @@ angular.module('App.Directive', [])
 				element.on('click.tr-multi', function(e) {
 					if(e.target.type != 'checkbox') {
 						model.is_checked = !model.is_checked;
-					}
-					
-					if(model.is_checked) {
-						element.addClass('tr-selected');
-					}
-					else {
-						element.removeClass('tr-selected');
 					}
 
 					scope.$apply();
@@ -457,7 +450,7 @@ angular.module('App.Directive', [])
 				if(element[0].nodeName == 'TR' && attrs.hasOwnProperty('trMultiSelectable')) {
 					function getDataSourceString() {
 						var expr = attrs.ngRepeat;
-						return expr.substring(expr.indexOf('in') + 3, expr.length);
+						return expr.substring(expr.indexOf('in') + 3, expr.length).split('|')[0].trim();
 					}
 					
 					var dataSrc = scope.$parent[getDataSourceString()];

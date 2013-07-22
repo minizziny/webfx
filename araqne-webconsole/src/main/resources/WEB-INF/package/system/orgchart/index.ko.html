@@ -404,7 +404,11 @@ input[type=search].input-search-table:focus {
 								</tr>
 							</thead>
 							<tbody>
-								<tr ng-click="showUser($event)" ng-repeat="user in dataUsers | filter: search" draggable="isEditMode" el-type="user" tr-multi-selectable="{ 'data': user, 'condition': 'isEditMode' }">
+								<tr ng-click="showUser($event)"
+									ng-repeat="user in dataUsers | filter: search"
+									ng-class="{'tr-selected': user.is_checked, 'tr-single-selected': user.is_selected}"
+									draggable="isEditMode" el-type="user"
+									tr-multi-selectable="{ 'data': user, 'condition': 'isEditMode' }">
 									<td ng-class="{ 'td-check-show': isEditMode, 'td-check-hide': !isEditMode }">
 										<input type="checkbox" ng-model="user.is_checked" ng-checked="user.is_checked">
 									</td>
