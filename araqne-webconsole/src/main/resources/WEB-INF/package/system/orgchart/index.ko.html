@@ -388,7 +388,7 @@ input[type=search].input-search-table:focus {
 				<ul class="tab well1 tab-general">
 					<li class="section well1">
 						<div class="pull-right">
-							{{dataUsers.length}}명의 사용자<span ng-hide="canMoveOrRemove()">, {{(dataUsers | isSelected: 'is_checked').length}}명 선택됨</span>
+							{{dataUsers.length}}명의 사용자<span ng-hide="(dataUsers | filter:search).length == dataUsers.length"> / {{(dataUsers | filter:search).length}}명 검색됨</span><span ng-hide="canMoveOrRemove()">, {{(dataUsers | isSelected: 'is_checked').length}}명 선택됨</span>
 						</div>
 						<table class="table table-bordered table-striped listUsers" ng-class="{'isEditMode': isEditMode}">
 							<thead>
@@ -639,7 +639,7 @@ input[type=search].input-search-table:focus {
 											<tr>
 												<th style="padding:0 8px; vertical-align:inherit; width: 70%">
 													<span class="pull-left" style="margin-top: 5px">테이블</span>
-													<input type="search" class="pull-right input-search-table">
+													<input type="search" class="pull-right input-search-table" ng-model="search.table">
 												</th>
 												<th>
 													<span>읽기 권한</span>
@@ -650,7 +650,7 @@ input[type=search].input-search-table:focus {
 											</tr>
 										</thead>
 										<tbody>
-											<tr ng-repeat="prv in dataTables | orderBy:'table'">
+											<tr ng-repeat="prv in dataTables | filter:search | orderBy:'table'">
 												<td>{{prv.table}}</td>
 												<td><input type="checkbox" ng-model="prv.can_read"></td>
 											</tr>
