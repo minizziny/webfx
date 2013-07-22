@@ -36,7 +36,7 @@ angular.module('App.Directive.Tree', [])
 							'<div class="li-edit" ng-show="node.is_edit_mode">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
-								'<input ng-model="node.' + attrs.nodeName + '" ng-model-onblur="node" ng-change="changeName()" type="text" >' +   /* value="{{node.' + attrs.nodeName + '}}">' + */
+								'<input ng-class="{ \'input-now-edit\': node.is_edit_mode }" ng-model="node.' + attrs.nodeName + '" ng-model-onblur="node" ng-change="changeName()" ng-cancel="cancelCreateNode" type="text" >' +
 							'</div>' +
 							'<hierachy-view tree="node" node-editable="' + attrs.nodeEditable + '" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '"></hierachy-view>' +
 						'</li>' +
@@ -103,7 +103,7 @@ angular.module('App.Directive.Tree', [])
 							'<div class="li-edit" ng-show="node.is_edit_mode">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
-								'<input ng-model="node.' + attrs.nodeName + '" ng-model-onblur="node" ng-change="changeName()" type="text" >' +   /* value="{{node.' + attrs.nodeName + '}}">' + */
+								'<input ng-class="{ \'input-now-edit\': node.is_edit_mode }" ng-model="node.' + attrs.nodeName + '" ng-model-onblur="node" ng-change="changeName()" ng-cancel="cancelCreateNode" type="text" >' +
 							'</div>' +
 							'<hierachy-view tree="node" node-editable="' + attrs.nodeEditable + '" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '"></hierachy-view>' +
 						'</li>' +
@@ -126,7 +126,24 @@ angular.module('App.Directive.Tree', [])
 				}
 
 				scope.changeName = function() {
-					console.log('changed!!!')
+					console.log('changed!!!', this.node)
+					var is_new = this.node.is_new;
+					if(is_new) {
+						delete this.node.is_new;
+					}
+
+					if(attrs.nodeEvent == undefined) return;
+
+					if(is_new) {
+						if(scope[attrs.nodeEvent].onCreateChildNode != undefined) {
+							scope[attrs.nodeEvent].onCreateChildNode.call(this, scope);
+						}
+					}
+					else {
+						if(scope[attrs.nodeEvent].onRenameNode != undefined) {
+							scope[attrs.nodeEvent].onRenameNode.call(this, scope);
+						}
+					}
 				}
 
 				scope.showIcon = function(e) {
@@ -171,6 +188,13 @@ angular.module('App.Directive.Tree', [])
 					
 				}
 
+				scope.cancelCreateNode = function() {
+					if(this.node.is_new) {
+						var idx = this.$parent.node.children.indexOf(this.node);
+						this.$parent.node.children.splice(idx, 1);
+					}
+				}
+
 				scope.addChildNode = function() {
 					$('.li-edit input[type=text]').blur();
 
@@ -179,12 +203,13 @@ angular.module('App.Directive.Tree', [])
 						//guid: "newguid",
 						is_selected: undefined,
 						is_edit_mode: true,
-						name: "새그룹",
-						parent: this.node.guid
+						name: "",
+						parent: this.node.guid,
+						is_new: true
 					});
 
 					setTimeout(function() {
-						$('.li-edit input[type=text]').focus().select();
+						$('.li-edit input[type=text].input-now-edit').focus().val('새 그룹').select();
 					}, 100);
 				}
 
@@ -208,7 +233,19 @@ angular.module('App.Directive.Tree', [])
 				}
 
 				scope.removeNode = function() {
-					removeScope(this);
+					var self = this;
+					if(attrs.nodeEvent == undefined) {
+						removeScope(self);
+						return;
+					}
+
+					if(scope[attrs.nodeEvent].onRemoveNode != undefined) {
+						scope[attrs.nodeEvent].onRemoveNode.call(self, {
+							success: function() {
+								removeScope(self);
+							}
+						}, scope);
+					}
 				}
 
 				function checkMoveChildren(scopeSource, scopeTarget) {
@@ -227,23 +264,38 @@ angular.module('App.Directive.Tree', [])
 					console.log($(elSource).attr('el-type'));
 					if($(elSource).attr('el-type') == 'group') {
 						if(checkMoveChildren(scopeSource, scopeTarget)) return;
-						
 
-						removeScope(scopeSource);
-						scopeTarget.node.children.push(scopeSource.node);
+						function move() {
+							removeScope(scopeSource);
+							scopeTarget.node.children.push(scopeSource.node);
 
-						setTimeout(function() {
-							scope.$apply();
-						},100);
+							setTimeout(function() {
+								scope.$apply();
+							},100);
+						}
+
+						if(scope[attrs.nodeEvent].onMoveNode != undefined) {
+							scope[attrs.nodeEvent].onMoveNode.call(self, {
+								success: function() {
+									move();
+								}
+							}, scopeSource, scopeTarget);
+						}
+						else {
+							move();
+						}
 					}
 					// else if($(elSource).attr('el-type') == 'user') {
 					// 	
 					// }
 					else {
 						//console.log(scopeSource, scopeTarget, elSource, elTarget, dragContext, e);
-						if(attrs.ngDrop != undefined) {
-							scope[attrs.ngDrop].call(scope, scopeSource, scopeTarget, elSource, elTarget, dragContext, e);
+						if(attrs.nodeEvent != undefined) {
+							if(scope[attrs.nodeEvent].onDrop != undefined) {
+								scope[attrs.nodeEvent].onDrop.call(scope, scopeSource, scopeTarget, elSource, elTarget, dragContext, e);
+							}
 						}
+						
 					}
 					
 				}

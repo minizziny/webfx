@@ -255,10 +255,6 @@ input.searchbox {
 	top: 5px;
 }
 
-input.searchbox:focus {
-	background: white;
-}
-
 .popover {
 	display: block;
 	min-width: 276px;
@@ -305,21 +301,22 @@ input[type=search] {
 	background-image: url("/images/icon-search.gif");
 	background-repeat: no-repeat;
 
-	text-indent: 16px;
+	text-indent: 14px;
+
+	-webkit-transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	-moz-transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	-o-transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	margin-bottom: 0;
 }
 
 input[type=search]:focus {
-	background-position: -20px 7px;
-	text-indent: 0;
+	/*background-position: -20px 7px;
+	text-indent: 0;*/
 }
 
 input[type=search].input-search-table {
 	width: 45%;
-	margin-bottom: 0;
-	-webkit-transition: border linear .2s,box-shadow linear .2s, width .1s ease-out;
-	-moz-transition: border linear .2s,box-shadow linear .2s, width .1s ease-out;
-	-o-transition: border linear .2s,box-shadow linear .2s, width .1s ease-out;
-	transition: border linear .2s,box-shadow linear .2s, width .1s ease-out;
 }
 
 input[type=search].input-search-table:focus {
@@ -345,7 +342,7 @@ input[type=search].input-search-table:focus {
 				node-selected="_tables"
 				node-editable="true"
 				ng-click="closeExtraPane()"
-				ng-drop="dropUsers">
+				node-event="treeEvent">
 			</tree>
 		</div>
 		<!-- <div class="treetype bygroup" style="display:none">
@@ -370,7 +367,7 @@ input[type=search].input-search-table:focus {
 						<div ng-hide="isEditMode">
 							<button class="btn pull-left" ng-click="addUser()">새 사용자</button>
 							<form class="navbar-search pull-left" style="margin-left: 10px">
-								<input type="text" class="search-query" placeholder="사용자 검색">
+								<input type="search" placeholder="사용자 검색" ng-model="search.$">
 							</form>
 							<button class="btn pull-right" ng-click="enterEditMode()">편집</button>
 							<!-- <button class="btn pull-left" ng-click="testAlert()">test alert</button> -->
@@ -382,7 +379,7 @@ input[type=search].input-search-table:focus {
 								<button class="btn" ng-disabled="canMoveOrRemove()" ng-click="removeUsers()">삭제</button>
 							</div>
 							<form class="navbar-search pull-left" style="margin-left: 10px">
-								<input type="text" class="search-query" placeholder="사용자 검색">
+								<input type="search" placeholder="사용자 검색" ng-model="search.$">
 							</form>
 							<button class="btn btn-primary pull-right" ng-click="endEditMode()">완료</button>
 						</div>
@@ -407,7 +404,7 @@ input[type=search].input-search-table:focus {
 								</tr>
 							</thead>
 							<tbody>
-								<tr ng-click="showUser($event)" ng-repeat="user in dataUsers" draggable="isEditMode" el-type="user" tr-multi-selectable="{ 'data': user, 'condition': 'isEditMode' }">
+								<tr ng-click="showUser($event)" ng-repeat="user in dataUsers | filter: search" draggable="isEditMode" el-type="user" tr-multi-selectable="{ 'data': user, 'condition': 'isEditMode' }">
 									<td ng-class="{ 'td-check-show': isEditMode, 'td-check-hide': !isEditMode }">
 										<input type="checkbox" ng-model="user.is_checked" ng-checked="user.is_checked">
 									</td>

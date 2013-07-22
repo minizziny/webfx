@@ -803,6 +803,56 @@ function TreeController($scope, $compile, socket, eventSender) {
 		//console.log(scopeSource, scopeTarget, elSource, elTarget, dragContext, e, this)
 	}
 
+	$scope.treeEvent = {
+		'onDrop': $scope.dropUsers,
+		'onCreateChildNode': function(srcScope) {
+			var self = this;
+
+			socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.createOrganizationUnit', {
+				'name': this.node.name,
+				'parent': this.node.parent
+			}, proc.pid)
+			.success(function(m) {
+				self.node.guid = m.body.guid;
+			})
+			.failed(openError);
+		},
+		'onRenameNode': function(srcScope) {
+			socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.updateOrganizationUnit', {
+				'guid': this.node.guid,
+				'name': this.node.name,
+				'parent': this.node.parent
+			}, proc.pid)
+			.success(function(m) {
+				console.log(m.body)
+			})
+			.failed(openError);
+		},
+		'onRemoveNode': function(async, srcScope) {
+			socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.removeOrganizationUnit', {
+				'guid': this.node.guid
+			}, proc.pid)
+			.success(function(m) {
+				async.success();
+			})
+			.failed(openError);
+		},
+		'onMoveNode': function(async, sourceScope, targetScope) {
+			var obj = {
+				'guid': sourceScope.node.guid,
+				'name': sourceScope.node.name,
+				'parent': targetScope.node.guid
+			};
+			
+			socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.updateOrganizationUnit', obj, proc.pid)
+			.success(function(m) {
+				async.success();
+			})
+			.failed(openError);
+		}
+
+	}
+
 	function buildTree(orgunits, parent) {
 		return orgunits.filter(function(obj, i) {
 			if(obj.parent == parent) {
