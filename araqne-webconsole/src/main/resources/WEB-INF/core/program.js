@@ -26,19 +26,6 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 					programs = m.body.programs;
 					packs = m.body.packs;
 
-					if(programs.filter(function(obj) {
-						return obj.path == 'starter';
-					}).length == 0) {
-						var starter = {
-							name: "홈",
-							pack: "System",
-							path: "starter",
-							visible: true
-						};
-						packs[0].programs.splice(0, 0, starter);
-						programs.splice(0, 0, starter);
-					}
-
 					function findProgramByPath(path) {
 						var found = this.programs.filter(function(obj) {
 							return obj.path == path;

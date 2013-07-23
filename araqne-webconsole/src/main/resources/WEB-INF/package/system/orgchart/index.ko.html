@@ -1,0 +1,746 @@
+<!doctype html>
+<html ng-app="orgchart">
+<head>
+	<meta charset="utf-8" />
+
+	<script src="/script/app.dist.js"></script>
+
+	<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="/css/app.css"/>
+	<link rel="stylesheet" href="/css/toggle-switch.css"/>
+	<style>
+.pane-nomargin {
+	padding: 0;
+}
+
+/** tree **/
+
+tree .hide {
+	display: none;
+}
+
+.tree-root {
+	margin-right: 15px;
+}
+
+.nav-list {
+	padding-right: 0;
+}
+
+.nav-list a {
+	/*border: 1px solid transparent;*/
+}
+
+.nav-list > li.check:not(.active) > a:first-child {
+	background-color: rgba(0, 153, 255, .1);
+}
+
+.nav-list > li.check:not(.active) > a:first-child:hover {
+	background-color: rgba(0, 153, 255, .2);
+}
+
+.nav-list i.tree-node-icon {
+	margin-right: 5px;
+}
+
+.ui-state-hover {
+	background-color: #ffff66 !important;
+	color: #08c !important;
+}
+
+.ui-state-active {
+	/*background-color: yellow !important;*/
+}
+
+.ui-draggable-dragging {
+	z-index: 9999;
+}
+
+
+/*  */
+.treetype {
+	position: relative;
+}
+
+.leftPane tree > ul {
+	clear: both;
+	/*padding-top: 40px;*/
+}
+
+.li-edit {
+	padding: 3px 15px;
+	margin-right: -15px;
+	margin-left: -15px;
+	text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+	display: block;
+	white-space: nowrap;
+}
+
+.li-edit input {
+	margin: -3px 0;
+	display: inline-block;
+	width: 140px;
+	padding: 1px 5px;
+}
+
+.dropdown-menu.upper {
+	top: -110px !important;
+}
+
+/* */
+
+.leftPane, .rightPane {
+	-webkit-transition: .3s ease;
+}
+
+.extraPane {
+	-webkit-transition: right .3s ease;
+}
+
+.leftPane {
+	left: 0;
+}
+
+.leftPane.out {
+	left: -24%;
+}
+
+.leftPane.glimpse {
+	/*-webkit-transition: none;*/
+	left: 0;
+}
+
+.leftPaneOverHandler {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	width: 10px;
+	background-color: #eee;
+	border-right: 1px #ccc solid;
+	box-shadow: 0 0 40px rgba(0,0,0,.4);
+}
+
+.rightPane.out {
+	margin-left: -2%;
+}
+
+.extraPane {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	right: -65%;
+	width: 50%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	box-shadow: 0 0 40px rgba(0,0,0,.4);
+	background-color: rgba(0,0,0,.7);
+}
+
+.extraPane-inner {
+	position: relative;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	left: 0;
+	overflow: visible;
+	border-left: 1px solid #ccc;
+	box-shadow: 0 0 40px rgba(0,0,0,.4);
+	min-height: 100%;
+	height: auto;
+
+	background-color: #f5f5f5;
+}
+
+.extraPane.in {
+	right: 0;
+}
+
+.extraPane.in.extend {
+	width: 100%;
+}
+
+.extraPane.in.extend .extraPane-inner {
+	left: 50%;
+	width: 50%;
+}
+
+button[el-type=dropdown] {
+	background: transparent;
+	border: 0;
+	width: 22px;
+	margin-right: -11px;
+}
+
+button[el-type=dropdown] span.caret {
+	margin-top: 6px;
+	border-top-color: #666;
+	border-width: 5px;
+}
+
+button[el-type=dropdown]:hover span.caret {
+	border-top-color: #333;
+}
+
+tr[tr-selectable]:nth-child(odd).tr-single-selected > td, tr[tr-multi-selectable]:nth-child(odd).tr-single-selected > td {
+	background-color: rgba(0, 153, 255, .3) !important;
+}
+
+tr[tr-selectable]:nth-child(even).tr-single-selected > td, tr[tr-multi-selectable]:nth-child(even).tr-single-selected > td {
+	background-color: rgba(0, 153, 255, .2) !important;
+}
+
+tr[tr-multi-selectable] > td:first-child, tr > th:first-child {
+	-webkit-transition: width .2s ease-out;
+}
+
+td.td-check-show, th.td-check-show {
+	width: 28px !important;
+}
+
+td.td-check-hide, th.td-check-hide {
+	width: 0px !important;
+	overflow-x: hidden;
+}
+
+.table-form td:first-child {
+	width: 120px;
+	vertical-align: middle;
+}
+
+.table-form td input, .table-form td textarea {
+	margin-bottom: 0;
+}
+
+table.listUsers {
+	table-layout: fixed;
+}
+
+.mdlChangePassword, .mdlRemoveUsers, .mdlRemoveOrgUnit {
+	position: absolute;
+	width: 570px;
+	margin-left: -285px;
+	padding: 10px 20px;
+}
+
+input.searchbox {
+	left: 0;
+	-webkit-transition: 0.1s ease;
+	background: white;
+	text-align: left;
+	right: 0;
+	position: absolute;
+	width: auto;
+	top: 5px;
+}
+
+.popover {
+	display: block;
+	min-width: 276px;
+}
+
+.popover.popover-black {
+	background-color: rgba(0,0,0,.5);
+}
+
+.popover.popover-black .arrow:after {
+	border-left-color: rgba(0,0,0,0.25);
+}
+
+.popover.popover-black .popover-title {
+	background-color: rgba(0,0,0,.5);
+	border-bottom: #000;
+	color: white;
+}
+
+.controls > .help-inline {
+	margin-top: 6px;
+}
+
+input[type=text].input-single.error {
+	border-color: #b94a48;
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+	-moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+	box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+	color: #b94a48;
+}
+
+input[type=text].input-single.error:focus {
+	border-color: #e9322d;
+	-webkit-box-shadow: 0 0 6px #f8b9b7;
+	-moz-box-shadow: 0 0 6px #f8b9b7;
+	box-shadow: 0 0 6px #f8b9b7;
+}
+
+input[type=search] {
+	border-radius: 15px;
+	padding: 4px 14px;
+
+	background-position: 9px 7px;
+	background-image: url("/images/icon-search.gif");
+	background-repeat: no-repeat;
+
+	text-indent: 14px;
+
+	-webkit-transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	-moz-transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	-o-transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	margin-bottom: 0;
+}
+
+input[type=search]:focus {
+	/*background-position: -20px 7px;
+	text-indent: 0;*/
+}
+
+input[type=search].input-search-table {
+	width: 45%;
+}
+
+input[type=search].input-search-table:focus {
+	width: 60%;
+}
+
+	</style>
+</head>
+<body ng-controller="Controller">
+	<div class="leftPane well" style="z-index:8; overflow-x:visible" ng-controller="TreeController" ng-mouseover="glimpseLeftPane()" ng-mouseout="outLeftPane()">
+		<!-- <div class="switch android" ng-class="{ 'hidden':isEditMode }">
+			<input id="orgunit" name="view" type="radio" checked>
+			<label for="orgunit" ng-click="toggleLogTrendType('byorgunit')">부서별</label>
+			<input id="group" name="view" type="radio">	
+			<label for="group" ng-click="toggleLogTrendType('bygroup')">그룹별</label>
+			<span class="slide-button"></span>
+		</div> -->
+		<div class="treetype byorgunit">
+			<!-- <input class="searchbox" type="search" placeholder="부서 검색" ng-model="orgunitSearch.$"> -->
+			<tree id="treeOrgUnit" class="clearboth" style="top: 50px" tree-data="treeDataSourceWithRoot | filter:orgunitSearch"
+				node-id="guid"
+				node-name="name"
+				node-selected="_tables"
+				node-editable="true"
+				ng-click="closeExtraPane()"
+				node-event="treeEvent">
+			</tree>
+		</div>
+		<!-- <div class="treetype bygroup" style="display:none">
+			<input class="searchbox" type="search" placeholder="그룹 검색">
+			<tree class="clearboth" style="top: 50px" tree-data="treeOtherSource"
+				node-id="guid"
+				node-name="name"
+				node-selected="_tables">
+			</tree>
+		</div> -->
+
+		<div class="modal mdlRemoveOrgUnit" modal>
+			<a href="#" class="modal-close close" style="margin-bottom: -30px">&times;</a>
+			<legend>부서 삭제</legend>
+			<div style="margin-bottom: 20px">
+				정말 부서 <code>{{selectedOrgUnitName}}</code>을 삭제하시겠습니까?
+			</div>
+			<div class="control-group submit-group">
+				<button class="btn btn-danger" ng-click="removeOrgUnit()">삭제</button>
+				<button class="btn" ng-click="cancelRemoveOrgUnit()">취소</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="leftPaneOverHandler" ng-mouseover="glimpseLeftPane()" ng-hide="isUserEditMode"></div>
+
+	<div class="rightPane">
+		<ul>
+			<li ng-controller="UserListController" class="pane pane-nomargin">
+				<div class="navbar">
+					<div class="navbar-inner">
+						<button ng-click="closeExtraPane()" class="btnShowTree btn btn-primary pull-left" style="margin-right: 15px; display:none"><i class="icon-white icon-list"></i></button>
+						<a class="brand">{{currentOrgUnit.name}}</a>
+						<div ng-hide="isEditMode">
+							<button class="btn pull-left" ng-click="addUser()" ng-show="canUserEdit">새 사용자</button>
+							<form class="navbar-search pull-left" style="margin-left: 10px">
+								<input type="search" placeholder="사용자 검색" ng-model="search.$">
+							</form>
+							<button class="btn pull-right" ng-show="canUserEdit" ng-click="enterEditMode()">편집</button>
+							<!-- <button class="btn pull-left" ng-click="testAlert()">test alert</button> -->
+						</div>
+						<div ng-show="isEditMode">
+							<div class="btn-group pull-left">
+								<button class="btn" ng-click="addUser()">새 사용자</button>
+								<!-- <button class="btn" ng-disabled="canMoveOrRemove()">이동</button> -->
+								<button class="btn" ng-disabled="canMoveOrRemove()" ng-click="removeUsers()">삭제</button>
+							</div>
+							<form class="navbar-search pull-left" style="margin-left: 10px">
+								<input type="search" placeholder="사용자 검색" ng-model="search.$">
+							</form>
+							<button class="btn btn-primary pull-right" ng-click="endEditMode()">완료</button>
+						</div>
+					</div>
+				</div>
+				<ul class="tab well1 tab-general">
+					<li class="section well1">
+						<div class="pull-right">
+							{{dataUsers.length}}명의 사용자<span ng-hide="(dataUsers | filter:search).length == dataUsers.length"> / {{(dataUsers | filter:search).length}}명 검색됨</span><span ng-hide="canMoveOrRemove()">, {{(dataUsers | isSelected: 'is_checked').length}}명 선택됨</span>
+						</div>
+						<table class="table table-bordered table-striped listUsers" ng-class="{'isEditMode': isEditMode}">
+							<thead>
+								<tr>
+									<th ng-class="{ 'td-check-show': isEditMode, 'td-check-hide': !isEditMode }" style="padding: 3px; vertical-align: middle">
+										<button class="btn btn-mini" ng-click="toggleSelectAll()">
+											<i class="icon-check"></i>
+										</button>
+									</th>
+									<th>로그인 이름</th>
+									<th>이름</th>
+									<th>부서</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr ng-click="showUser($event)"
+									ng-repeat="user in dataUsers | filter: search"
+									ng-class="{'tr-selected': user.is_checked, 'tr-single-selected': user.is_selected}"
+									draggable="isEditMode" el-type="user"
+									tr-multi-selectable="{ 'data': user, 'condition': 'isEditMode' }">
+									<td ng-class="{ 'td-check-show': isEditMode, 'td-check-hide': !isEditMode }">
+										<input type="checkbox" ng-model="user.is_checked" ng-checked="user.is_checked">
+									</td>
+									<td>{{user.login_name}}</td>
+									<td>{{user.name}}</td>
+									<td>{{user.org_unit.name}}</td>
+								</tr>
+							</tbody>
+						</table>
+						<!-- canUserEdit: {{canUserEdit}}<br>
+						canConfigEdit: {{canConfigEdit}}<br>
+						canAdminGrant: {{canAdminGrant}}<br>
+						amI: {{amI}}<br> -->
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+
+	<div class="extraPane" ng-controller="UserController" ng-class="{ 'extend': isUserEditMode }">
+		<div class="extraPane-inner">
+			<ul style="margin: 0">
+				<li class="pane pane-nomargin">
+					<form name="frmUser" style="margin:0">
+						<div class="navbar extraPane-navbar">
+							<div class="navbar-inner" style="position:relative">
+								<input type="text" class="txtNewLoginName input-single" name="login_name" placeholder="아이디를 입력하세요" style="float: left; margin: 5px;"
+									ng-model="selectedUserCopy.login_name"
+									ng-show="selectedUser._isNew && isUserEditMode"
+									ng-unique="{ source: dataAllUsers, property: 'login_name', condition: selectedUser._isNew }"
+									ng-class="{ 'error': frmUser.login_name.$error.unique || frmUser.login_name.$error.required }" required>
+								<div class="popover popover-black fade left in" ng-show="frmUser.login_name.$error.required" style="left: -290px">
+									<div class="arrow"></div>
+									<div class="popover-content" style="color:#b94a48">아이디는 반드시 필요합니다.</div>
+								</div>
+								<div class="popover popover-black fade left in" ng-show="frmUser.login_name.$error.unique" style="left: -290px">
+									<div class="arrow"></div>
+									<div class="popover-content" style="color:#b94a48">이미 존재하는 아이디입니다.</div>
+								</div>
+								<a class="brand">{{selectedUser.login_name}}</a>
+								<div ng-hide="isUserEditMode">
+									<div class="btn-group">
+										<button class="btn" ng-click="closeExtraPane()">닫기</button>
+									</div>
+									<div class="pull-right btn-group" ng-show="(canUserEdit && isLowerLevel) || amI">
+										<button class="btn" ng-click="openDialogChangePassword()">암호 변경</button>
+										<button class="btn" ng-click="enterUserEditMode()">편집</button>
+									</div>
+								</div>
+								<div ng-show="isUserEditMode">
+									<button class="btn btn-warning" ng-click="discardUserInfo()">취소</button>
+									<button class="btn btn-primary pull-right" ng-disabled="frmUser.$invalid" ng-click="saveUserInfo()">완료</button>
+								</div>
+							</div>
+						</div>
+						<section>
+							<ul class="tab well1 tab-general" ng-show="isUserEditMode">
+								<li class="section area" ng-show="selectedUserCopy._isNew">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>암호</td>
+												<td class="control-group" ng-class="{ 'error': frmUser.password.$error.inadequacy }" style="position: relative">
+													<input type="password" name="password" class="input-xlarge" ng-model="selectedUserCopy.password" password-validate="{ condition: selectedUserCopy._isNew }">
+													<div class="popover popover-black fade left in" ng-show="frmUser.password.$error.inadequacy" style="left: -465px; top: -5px">
+														<div class="arrow"></div>
+														<div class="popover-content help-inline">암호는 9자 이상의 영문, 숫자, 특수문자 조합으로 만들어야 합니다.</div>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td>재입력</td>
+												<td class="control-group" ng-class="{ 'error': frmUser.passwordConfirm.$error.mismatch }" style="position: relative">
+													<input type="password" name="passwordConfirm" class="input-xlarge" ng-model="selectedUserCopy.passwordConfirm" match="selectedUserCopy.password">
+													<div class="popover popover-black fade left in" ng-show="frmUser.passwordConfirm.$error.mismatch" style="left: -465px; top: 10px">
+														<div class="arrow"></div>
+														<div class="popover-content help-inline">암호가 서로 일치하지 않습니다.</div>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>이름</td>
+												<td class="control-group" ng-class="{ 'error': frmUser.name.$error.required }" style="position: relative">
+													<input type="text" name="name" class="input-xlarge" ng-model="selectedUserCopy.name" required>
+													<div class="popover popover-black fade left in" ng-show="frmUser.name.$error.required" style="left: -465px">
+														<div class="arrow"></div>
+														<div class="popover-content help-inline">이름은 반드시 필요합니다.</div>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td>직함</td>
+												<td><input type="text" class="input-xlarge" ng-model="selectedUserCopy.title"></td>
+											</tr>
+											<tr>
+												<td>부서</td>
+												<td>
+													<div class="btn-group">
+														<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+															<span ng-show="selectedUserCopy.org_unit == null" style="color:#999">미지정</span>
+															{{selectedUserCopy.org_unit.name}}
+															<span class="caret"></span>
+														</a>
+														<div class="dropdown-menu" style="z-index:8888" ng-click="supressEvent($event)">
+															<!-- <input type="text" class="input-large search-query" style="margin: 2px 8px 6px"> -->
+															<tree id="treeToChangeOrgUnit" tree-data="treeDataSource"
+																node-id="guid"
+																node-name="name"
+																node-selected="_tables">
+															</tree>
+														</div>
+													</div>
+													<button ng-hide="selectedUserCopy.org_unit == null" class="btn btn-mini btn-inverse" ng-click="deallocateGroup()">
+														<i class="icon-white icon-remove"></i>
+													</button>
+												</td>
+											</tr>
+											<tr>
+												<td>E-mail</td>
+												<td class="control-group" ng-class="{ 'error': frmUser.email.$error.email }" style="position: relative">
+													<input type="email" name="email" class="input-xlarge" placeholder="user@domain.com" ng-model="selectedUserCopy.email">
+													<div class="popover popover-black fade left in" ng-show="frmUser.email.$error.email" style="left: -465px">
+														<div class="arrow"></div>
+														<div class="popover-content help-inline">올바른 E-mail 형식이 아닙니다.</div>
+													</div>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>설명</td>
+												<td><textarea class="input-xlarge" ng-model="selectedUserCopy.description"></textarea></td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+							</ul>
+							<ul class="tab area tab-general" ng-hide="isUserEditMode">
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>이름</td>
+												<td>{{selectedUser.name}}</td>
+											</tr>
+											<tr>
+												<td>직함</td>
+												<td>{{selectedUser.title}}</td>
+											</tr>
+											<tr>
+												<td>부서</td>
+												<td>{{selectedUser.org_unit.name}}</td>
+											</tr>
+											<tr>
+												<td>E-mail</td>
+												<td>{{selectedUser.email}}</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>생성일</td>
+												<td>{{selectedUser.created}}</td>
+											</tr>
+											<tr>
+												<td>수정일</td>
+												<td>{{selectedUser.updated}}</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>설명</td>
+												<td>{{selectedUser.description}}</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+							</ul>
+						</section>
+						<section ng-controller="AdminController">
+							<legend style="text-indent: 40px" ng-hide="isUserEditMode && !canAdminGrant">관리자 설정</legend>
+							<ul class="tab area tab-general" ng-show="isUserEditMode && canAdminGrant">
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>권한</td>
+												<td>
+													<select ng-model="currentRoleCopy" ng-options="role.name for role in listRoles"></select>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+							</ul>
+							<ul class="tab area tab-general" ng-hide="isUserEditMode">
+								<li class="section area">
+									<table class="table table-form">
+										<tbody>
+											<tr>
+												<td>권한</td>
+												<td>{{currentRole.name}}</td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+							</ul>
+						</section>
+						<section ng-controller="TablePrivilegeController">
+							<legend style="text-indent: 40px" ng-show="(!isUserEditMode && amI) || canAdminGrant">테이블 권한 설정</legend>
+							<ul class="tab area tab-general" ng-show="isUserEditMode && canAdminGrant">
+								<li class="section area">
+									<table class="table table-bordered table-striped" style="margin-bottom: 0">
+										<thead>
+											<tr>
+												<th style="padding:0 8px; vertical-align:inherit; width: 70%">
+													<span class="pull-left" style="margin-top: 5px">테이블</span>
+													<input type="search" class="pull-right input-search-table" ng-model="search.table">
+												</th>
+												<th>
+													<span>읽기 권한</span>
+													<button class="btn btn-mini pull-right" ng-click="toggleSelectAll()">
+														<i class="icon-check"></i>
+													</button>
+												</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr ng-repeat="prv in dataTables | filter:search | orderBy:'table'">
+												<td>{{prv.table}}</td>
+												<td><input type="checkbox" ng-model="prv.can_read"></td>
+											</tr>
+										</tbody>
+									</table>
+								</li>
+							</ul>
+							<ul class="tab area tab-general" ng-show="!isUserEditMode && (amI || canAdminGrant)">
+								<li class="section" style="margin: 10px 40px">
+									{{dataPrivileges.length}}개의 접근 가능한 테이블
+								</li>
+								<li class="section area" style="border: 0">
+									<table class="table table-bordered table-striped" style="margin-bottom: 0">
+										<thead>
+											<tr>
+												<th>테이블</th>
+												<th>읽기 권한</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr ng-repeat="prv in dataPrivileges | orderBy:'table' | limitTo:limitDataPrivileges">
+												<td>{{prv.table}}</td>
+												<td><i class="icon-ok" ng-show="prv.can_read"></i></td>
+											</tr>
+										</tbody>
+									</table>
+									<button class="btn" style="width: 100%" ng-show="(dataPrivileges.length > limitDataPrivilegesDefault) && (limitDataPrivileges != dataPrivileges.length)" ng-click="toggleMorePrivileges()">
+										{{dataPrivileges.length - 10}}개의 접근 가능한 테이블 더 보기
+									</button>
+								</li>
+							</ul>
+						</section>
+						<section>
+							<ul class="tab area tab-general" ng-show="isUserEditMode">
+								<li class="section area" ng-hide="selectedUserCopy._isNew">
+									<button class="btn btn-danger" style="width: 100%" ng-click="removeThisUser()">이 사용자 삭제</button>
+								</li>
+							</ul>
+						</section>
+					</form>
+				</li>
+			</ul>
+		</div>
+		<div class="modal mdlChangePassword" modal ng-controller="ChangePasswordController">
+			<a href="#" class="modal-close close" style="margin-bottom: -30px">×</a>
+			<legend>암호 변경</legend>
+			<form name="frmChangePassword">
+				<fieldset class="form-horizontal">
+					<div class="fieldset-description">{{selectedUser.login_name}}님의 암호를 변경합니다.</div>
+					<div class="control-group" ng-class="{ 'error': frmChangePassword.password.$error.inadequacy }">
+						<label class="control-label" for="password">암호</label>
+						<div class="controls">
+							<input id="password" name="password" type="password" class="input-xlarge" ng-model="valPassword" password-validate>
+							<div class="help-inline" ng-show="frmChangePassword.password.$error.inadequacy">암호는 9자 이상의 영문, 숫자, 특수문자 조합으로<br>만들어야 합니다.</div>
+						</div>
+					</div>
+					<div class="control-group" ng-class="{ 'error': frmChangePassword.passwordConfirm.$error.mismatch }">
+						<label class="control-label" for="passwordConfirm">재입력</label>
+						<div class="controls">
+							<input id="passwordConfirm" name="passwordConfirm" type="password" class="input-xlarge" ng-model="valPasswordConfirm" match="valPassword">
+							<div class="help-inline" ng-show="frmChangePassword.passwordConfirm.$error.mismatch">암호가 서로 일치하지 않습니다.</div>
+						</div>
+					</div>
+					<div class="control-group submit-group">
+						<button class="btn btn-primary" ng-disabled="frmChangePassword.$invalid || (valPassword == '')" ng-click="changePassword()">변경</button>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+	</div>
+
+	<br class="clearboth" />
+
+	<div class="modal errorWin" modal>
+		<a href="#" class="modal-close close" ng-click="clearError()">&times;</a>
+		<div class="raw"></div>
+	</div>
+
+	<div class="modal mdlRemoveUsers" ng-controller="RemoveUsersController" modal>
+		<a href="#" class="modal-close close" style="margin-bottom: -30px">&times;</a>
+		<legend>사용자 삭제</legend>
+		<div style="margin-bottom: 20px">
+			정말 사용자 <code>{{selectedUsers | namemap: 'login_name'}}</code>을 삭제하시겠습니까?
+		</div>
+		<div class="control-group submit-group">
+			<button class="btn btn-danger" ng-click="removeUsers()">삭제</button>
+			<button class="btn" ng-click="cancelRemoveUsers()">취소</button>
+		</div>
+	</div>
+
+	<div class="alert alert-success alert-fix-side">
+		<button type="button" class="close">&times;</button>
+		<span class="msg">성공적으로 이동했습니다.</span>
+	</div>
+	
+	<script src="orgchart.js"></script>
+
+</body>
+</html>

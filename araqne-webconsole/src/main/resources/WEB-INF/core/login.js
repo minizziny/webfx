@@ -6,10 +6,10 @@ function doLogin(login_name, password, nonce, loginCallback) {
 	var hashedpwd = CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex);
 	var hash = CryptoJS.SHA1(hashedpwd + nonce).toString(CryptoJS.enc.Hex);
 
-	sendLogin(login_name, hash, loginCallback, false);
+	sendLogin(login_name, password, hash, loginCallback, false);
 }
 
-function sendLogin(login_name, hash, loginCallback, isForce) {
+function sendLogin(login_name, plain_password, hash, loginCallback, isForce) {
 	socket.send("org.araqne.dom.msgbus.LoginPlugin.login", {
 		"nick": login_name,
 		"hash": hash,
@@ -58,8 +58,8 @@ function sendLogin(login_name, hash, loginCallback, isForce) {
 		if(m.body.result === "success") {
 
 			socket.send("org.araqne.logdb.msgbus.ManagementPlugin.login", {
-				"login_name": "araqne",
-				"password": ""
+				"login_name": login_name,
+				"password": plain_password
 			}, loginCallback);
 
 		}

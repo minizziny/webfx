@@ -204,6 +204,7 @@ input[type=number] {
 	padding: 0;
 }
 
+/*
 .table-bordered {
 	border: 1px solid #aaa;
 	border-collapse: separate;
@@ -219,6 +220,7 @@ input[type=number] {
 	vertical-align: top;
 	border-top: 0;
 }
+*/
 
 .table-striped tbody > tr:nth-child(odd) > td, .table-striped tbody > tr:nth-child(odd) > th {
 	background-color: rgb(243,243,243);
@@ -296,13 +298,14 @@ tr[tr-selectable]:nth-child(even).tr-selected > td, tr[tr-multi-selectable]:nth-
 }
 
 .well.leftPane {
-	box-shadow: 0 0 40px #ccc;
+	box-shadow: 0 0 40px rgba(0,0,0,.4);
 }
 
 
 ul.well1 {
 	margin-left: 0;
 	list-style: none;
+	padding-bottom: 20px;
 }
 
 li.well1 {
@@ -323,4 +326,56 @@ li.well1 {
 li.well1.wellnbr, li.well1:last-child {
 	margin-bottom: 20px;
 	border-bottom: 0;
+}
+
+
+
+
+ul.area {
+	margin-left: 0;
+	list-style: none;
+	padding-bottom: 20px;
+}
+
+li.area {
+	margin: 10px 40px;
+	border-bottom: 1px solid #ccc;
+	/*padding: 10px;*/
+	box-sizing: border-box;
+	margin-bottom: 10px;
+	background-color: white;
+}
+
+li.area:last-child {
+	margin-bottom: 0px;
+}
+
+
+.alert-cont {
+	float: right;
+	right: 50%;
+	position: relative;
+}
+
+.alert.alert-fix {
+	float: right;
+	right: -50%;
+	position: relative;
+	z-index: 9999;
+	
+	box-shadow: 0 0 40px #000;
+}
+
+.alert.alert-fix-side {
+	position: fixed;
+	right: 20px;
+	bottom: -40px;
+	opacity: 0;
+	-webkit-transition: bottom .5s ease, opacity .5s ease;
+}
+
+.alert.alert-fix-side.show {
+	
+	bottom: 0px;
+	opacity: 1;
 }

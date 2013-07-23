@@ -1,6 +1,8 @@
 var app = angular.module('App', [
 	'App.Service',
 	'App.Service.Logdb',
+	'App.Service.Logdb.Management',
+	'App.Service.Dom',
 	'App.Service.Chart',
 	'App.Filter',
 	'App.Directive.Logdb',
@@ -517,6 +519,19 @@ Array.prototype.forEach.call(['Arguments', 'Function', 'String', 'Number', 'Date
 		return toString.call(obj) == '[object ' + name + ']';
 	};
 });
+
+String.prototype.blank = function() {
+	return /^\s*$/.test(this);
+}
+
+String.prototype.isJSON = function() {
+	var str = this;
+	if (str.blank()) return false;
+	str = str.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@');
+	str = str.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']');
+	str = str.replace(/(?:^|:|,)(?:\s*\[)+/g, '');
+	return (/^[\],:{}\s]*$/).test(str);
+}
 
 /*
 $(parent.window).on('beforeunload', myApp.disposeAll);

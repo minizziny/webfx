@@ -161,6 +161,7 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 				loginManager.doLogin(id, pw, nonce, function(m, raw) {
 					
 					if(m.isError) {
+						console.log(raw)
 						if(raw[0].errorCode === "already-logon"){
 							alert(raw[0].errorCode);
 						}
@@ -170,6 +171,10 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 						}
 					}
 					$("#login").hide();
+					Core.Dom = {
+						'login_name': id
+					};
+					$('#lblLoginName').text(id);
 					getPrograms();
 
 					
