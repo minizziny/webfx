@@ -171,6 +171,10 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 						}
 					}
 					$("#login").hide();
+					Core.Dom = {
+						'login_name': id
+					};
+					$('#lblLoginName').text(id);
 					getPrograms();
 
 					
