@@ -260,7 +260,10 @@ function UserController($scope, socket, eventSender, serviceDom) {
 			var found = getOrgUnit(obj.selectedNode, $scope.$parent.treeDataSourceWithRoot);
 			if(found == null) return;
 
-			$scope.selectedUserCopy['org_unit'] = found;
+			if($scope.selectedUserCopy != null) {
+				$scope.selectedUserCopy['org_unit'] = found;
+			}
+			
 			$('[data-toggle="dropdown"]').parent().removeClass('open');	
 		}
 
@@ -870,6 +873,12 @@ function TreeController($scope, $compile, socket, eventSender) {
 				.success(function(m) {
 					async.success();
 					$('.mdlRemoveOrgUnit')[0].hideDialog();
+
+					if($('li[node-id=' +  self.node.guid + ']').hasClass('active')) {
+						setTimeout(function() {
+							$('li[node-id=' +  self.node.parent + '] a[el-type=group]').click();
+						}, 250);
+					}
 				})
 				.failed(openError);
 			}
