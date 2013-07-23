@@ -83,6 +83,9 @@ function Controller($scope, serviceTask, socket, eventSender, serviceDom) {
 		serviceDom.hasPermission('dom', 'admin_grant')
 		.success(function(m) {
 			$scope.canAdminGrant = m.body.result;
+			if(!$scope.canAdminGrant) {
+				$('#treeOrgUnit')[0].setNodeEditable(false);
+			}
 			$scope.$apply();
 		});
 	}
@@ -584,7 +587,12 @@ function UserListController($scope, $compile, socket, eventSender) {
 
 		$scope.$apply();
 
-		notify('info', '사용자 ' + names + '을 성공적으로 삭제했습니다.<br>사용자 ' + failed_login_names + '는 삭제하지 못했습니다. 더 높은 권한이 필요합니다.' , false);
+		if(names.length == 0) {
+			notify('danger', '사용자 ' + failed_login_names + '를 삭제할 수 없습니다. 더 높은 권한이 필요합니다.' , false)
+		}
+		else {
+			notify('info', '사용자 ' + names + '을 성공적으로 삭제했습니다.<br>사용자 ' + failed_login_names + '는 삭제하지 못했습니다. 더 높은 권한이 필요합니다.' , false);
+		}
 	}
 
 	eventSender.onSuccessRemoveUsers = function(selected) {
@@ -713,9 +721,31 @@ function UserListController($scope, $compile, socket, eventSender) {
 		socket.send('org.araqne.dom.msgbus.UserPlugin.moveUsers', option, proc.pid)
 		.success(function(m) {
 			console.log(m.body)
+			var failed_login_names = m.body.failed_login_names;
 
 			refresh();
-			notify('success', '사용자 ' + users.join() + '을 ' + target.name + '로 이동했습니다.' , true);
+
+			if(users.length - failed_login_names.length == 0) {
+				notify('danger', '사용자 ' + failed_login_names.join() + '를 ' + target.name + '로 이동할 수 없습니다. 더 높은 권한이 필요합니다.' , false)
+			}
+			else if(failed_login_names.length == 0) {
+				notify('success', '사용자 ' + users.join() + '을 ' + target.name + '로 이동했습니다.' , true);
+			}
+			else {
+
+				function hasFailedList(login_name) {
+					return !failed_login_names.some(function(obj) {
+						return obj == login_name;
+					});
+				}
+
+				var names = users.filter(function(obj) {
+					return hasFailedList(obj);
+				});
+
+				notify('info', '사용자 ' + names + '을 ' + target.name + '로 이동했습니다.<br>사용자 ' + failed_login_names.join() + '는 이동하지 못했습니다. 더 높은 권한이 필요합니다.' , false);
+			}
+			
 		})
 		.failed(msgbusFailed);
 	}

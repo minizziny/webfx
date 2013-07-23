@@ -68,7 +68,6 @@ angular.module('App.Directive.Tree', [])
 	return {
 		restrict: 'E',
 		link: function (scope, element, attrs) {
-
 			scope.previousElement = null;
 			scope.currentElement = null;
 
@@ -146,8 +145,14 @@ angular.module('App.Directive.Tree', [])
 					}
 				}
 
+				element[0].setNodeEditable = function(bool) {
+					attrs.nodeEditable = bool.toString();
+				}
+
 				scope.showIcon = function(e) {
-					$(e.currentTarget).find('button.menu').show();
+					if(attrs.nodeEditable == 'true') {
+						$(e.currentTarget).find('button.menu').show();	
+					}
 				}
 
 				scope.hideIcon = function(e) {
