@@ -199,7 +199,8 @@ function UserController($scope, socket, eventSender, serviceDom) {
 		// 저장할땐, org_unit의 guid 정보만 넘겨야 한다.
 		if($scope.selectedUserCopy.org_unit != null) {
 			var org_unit_obj = {
-				'guid': $scope.selectedUserCopy.org_unit.guid
+				'guid': $scope.selectedUserCopy.org_unit.guid,
+				'name': $scope.selectedUserCopy.org_unit.name
 			}
 			$scope.selectedUserCopy.org_unit = org_unit_obj;
 		}
@@ -209,6 +210,7 @@ function UserController($scope, socket, eventSender, serviceDom) {
 			$scope.exitUserEditMode();
 
 			delete $scope.selectedUserCopy._isNew;
+			delete $scope.selectedUser._isNew;
 			// selectedUserCopy 의 정보를 selectedUser에 덮어씌운다. 
 			// created 와 updated 의 정보를 남기기 위해 통째로 바꾸진 않는다.
 			for (var prop in $scope.selectedUserCopy) {
@@ -920,6 +922,7 @@ function TreeController($scope, $compile, socket, eventSender) {
 		});
 
 		$('#treeOrgUnit a:first').click();
+		$('#treeOrgUnit a:first > button').remove();
 	}
 
 	socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.getOrganizationUnits', {}, proc.pid)
