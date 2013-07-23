@@ -466,7 +466,7 @@ input[type=search].input-search-table:focus {
 									<div class="btn-group">
 										<button class="btn" ng-click="closeExtraPane()">닫기</button>
 									</div>
-									<div class="pull-right btn-group" ng-show="canUserEdit || amI">
+									<div class="pull-right btn-group" ng-show="(canUserEdit && isLowerLevel) || amI">
 										<button class="btn" ng-click="openDialogChangePassword()">암호 변경</button>
 										<button class="btn" ng-click="enterUserEditMode()">편집</button>
 									</div>

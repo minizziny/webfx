@@ -147,6 +147,8 @@ function UserController($scope, socket, eventSender, serviceDom) {
 	$scope.selectedUser = null;
 	$scope.selectedUserCopy = null;
 
+	$scope.isLowerLevel = false;
+
 	eventSender.onShowUser = function(user) {
 		console.log('----', user.login_name, '----');
 		console.log('::: onShowUser:\t', user);
@@ -329,11 +331,12 @@ function UserController($scope, socket, eventSender, serviceDom) {
 
 }
 
-function AdminController($scope, socket, eventSender) {
+function AdminController($scope, socket, eventSender, serviceDom) {
 	$scope.listRoles = [];
 	$scope.currentUser;
 	$scope.currentRole;
-	$scope.currentRoleCopy;	
+	$scope.currentRoleCopy;
+	var myRole;
 
 	function getRoles() {
 		socket.send('org.araqne.dom.msgbus.RolePlugin.getRoles', {}, proc.pid)
@@ -342,25 +345,51 @@ function AdminController($scope, socket, eventSender) {
 			console.log(m.body);
 
 			resetRole();
+			getMyRole();
 			$scope.$apply();
 		})
 		.failed(openError)
 	}
 
-	function getAdmin() {
-		socket.send('org.araqne.dom.msgbus.AdminPlugin.getAdmin', { 'login_name': $scope.currentUser.login_name }, proc.pid)
-		.success(function(m) {
+	function getMyRole() {
+		getAdminMsgbus(serviceDom.whoAmI()).success(function(m) {
+			if(m.body.admin != null) {
+				console.log('::: getMyRole:\t', m.body);
+				var r = getRoleByName(m.body.admin.role.name);
+				myRole = r;
+
+				if(myRole.name === 'master') {
+					$scope.$parent.isLowerLevel = true;
+				}
+			}
+		});
+	}
+
+	function getAdminMsgbus(login_name) {
+		return socket.send('org.araqne.dom.msgbus.AdminPlugin.getAdmin', { 'login_name': login_name }, proc.pid)
+		.failed(openError);
+	}
+
+	function getAdmin(login_name) {
+		getAdminMsgbus(login_name).success(function(m) {
 			console.log('::: getAdmin:\t', m.body);
 			if(m.body.admin == null) {
 				resetRole();
 			}
 			else {
+				//console.log(m.body.admin.role.ad)
 				var r = getRoleByName(m.body.admin.role.name);
 				$scope.currentRole = r;
+
+				if($scope.currentRole.level < myRole.level) {
+					$scope.$parent.isLowerLevel = true;
+				}
+				else {
+					$scope.$parent.isLowerLevel = false;
+				}
 			}
 			$scope.$apply();
-		})
-		.failed(openError);
+		});
 	}
 
 	function getRoleByName(name) {
@@ -408,7 +437,7 @@ function AdminController($scope, socket, eventSender) {
 
 		if(user.login_name == null) return;
 		$scope.currentUser = user;
-		getAdmin();
+		getAdmin($scope.currentUser.login_name);
 	}
 
 	eventSender.onEditUserAdmin = function(user) {
