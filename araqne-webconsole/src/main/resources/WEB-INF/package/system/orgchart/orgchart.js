@@ -986,37 +986,35 @@ function notify(type, msg, autohide) {
 		}
 	}
 
-	var btnClose = $('.alert-fix-side > .close');
-	if(autohide == true) btnClose.hide();
-	else btnClose.off('click').show();
+	function display() {
+		var btnClose = $('.alert-fix-side > .close');
+		if(autohide == true) btnClose.hide();
+		else btnClose.off('click').show();
 
-	if($('.alert-fix-side').hasClass('show')) {
-		$('.alert-fix-side.show').removeClass('show');
-	}
-	else {
-		$('.alert-fix-side').removeClass(makeRemoveClassHandler(/(alert-success|alert-info|alert-error)/))
-			.show()
+		$('.alert-fix-side').removeClass(makeRemoveClassHandler(/(alert-success|alert-info|alert-error|alert-danger)/))
 			.addClass('alert-' + type)
 			.addClass('show')
 			.find('span.msg')
 			.html(msg);
+
+		if(autohide == true) {
+			setTimeout(function() {
+				$('.alert-fix-side.show').removeClass('show');
+			}, 3000);
+		}
+		else {
+			btnClose.on('click', function() {
+				$('.alert-fix-side.show').removeClass('show');
+			});
+		}
 	}
 
-	if(autohide == true) {
-		setTimeout(function() {
-			$('.alert-fix-side.show').removeClass('show');
-		}, 3000);
-		setTimeout(function() {
-			$('.alert-fix-side').hide();
-		}, 3200)
+	if($('.alert-fix-side').hasClass('show')) {
+		$('.alert-fix-side.show').removeClass('show');
+		setTimeout(display, 200);
 	}
 	else {
-		btnClose.on('click', function() {
-			$('.alert-fix-side.show').hide().removeClass('show');
-			setTimeout(function() {
-				$('.alert-fix-side').hide();
-			}, 200);
-		});
+		display();
 	}
 }
 
