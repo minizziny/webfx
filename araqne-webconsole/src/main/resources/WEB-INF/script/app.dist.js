@@ -30013,7 +30013,7 @@ var styleDirective = valueFn({
 angular.element(document).find('head').append('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak{display:none;}ng\\:form{display:block;}</style>');
 d3 = function() {
   var d3 = {
-    version: "3.2.3"
+    version: "3.2.7"
   };
   if (!Date.now) Date.now = function() {
     return +new Date();
@@ -30022,7 +30022,13 @@ d3 = function() {
   try {
     d3_document.createElement("div").style.setProperty("opacity", 0, "");
   } catch (error) {
-    var d3_style_prototype = d3_window.CSSStyleDeclaration.prototype, d3_style_setProperty = d3_style_prototype.setProperty;
+    var d3_element_prototype = d3_window.Element.prototype, d3_element_setAttribute = d3_element_prototype.setAttribute, d3_element_setAttributeNS = d3_element_prototype.setAttributeNS, d3_style_prototype = d3_window.CSSStyleDeclaration.prototype, d3_style_setProperty = d3_style_prototype.setProperty;
+    d3_element_prototype.setAttribute = function(name, value) {
+      d3_element_setAttribute.call(this, name, value + "");
+    };
+    d3_element_prototype.setAttributeNS = function(space, local, value) {
+      d3_element_setAttributeNS.call(this, space, local, value + "");
+    };
     d3_style_prototype.setProperty = function(name, value, priority) {
       d3_style_setProperty.call(this, name, value + "", priority);
     };
@@ -30503,7 +30509,7 @@ d3 = function() {
       subgroup.parentNode = (group = this[j]).parentNode;
       for (var i = -1, n = group.length; ++i < n; ) {
         if (node = group[i]) {
-          subgroup.push(subnode = selector.call(node, node.__data__, i));
+          subgroup.push(subnode = selector.call(node, node.__data__, i, j));
           if (subnode && "__data__" in node) subnode.__data__ = node.__data__;
         } else {
           subgroup.push(null);
@@ -30523,7 +30529,7 @@ d3 = function() {
     for (var j = -1, m = this.length; ++j < m; ) {
       for (var group = this[j], i = -1, n = group.length; ++i < n; ) {
         if (node = group[i]) {
-          subgroups.push(subgroup = d3_array(selector.call(node, node.__data__, i)));
+          subgroups.push(subgroup = d3_array(selector.call(node, node.__data__, i, j)));
           subgroup.parentNode = node;
         }
       }
@@ -30910,7 +30916,6 @@ d3 = function() {
   d3.selection.enter = d3_selection_enter;
   d3.selection.enter.prototype = d3_selection_enterPrototype;
   d3_selection_enterPrototype.append = d3_selectionPrototype.append;
-  d3_selection_enterPrototype.insert = d3_selectionPrototype.insert;
   d3_selection_enterPrototype.empty = d3_selectionPrototype.empty;
   d3_selection_enterPrototype.node = d3_selectionPrototype.node;
   d3_selection_enterPrototype.call = d3_selectionPrototype.call;
@@ -30923,7 +30928,7 @@ d3 = function() {
       subgroup.parentNode = group.parentNode;
       for (var i = -1, n = group.length; ++i < n; ) {
         if (node = group[i]) {
-          subgroup.push(upgroup[i] = subnode = selector.call(group.parentNode, node.__data__, i));
+          subgroup.push(upgroup[i] = subnode = selector.call(group.parentNode, node.__data__, i, j));
           subnode.__data__ = node.__data__;
         } else {
           subgroup.push(null);
@@ -30932,9 +30937,27 @@ d3 = function() {
     }
     return d3_selection(subgroups);
   };
+  d3_selection_enterPrototype.insert = function(name, before) {
+    if (arguments.length < 2) before = d3_selection_enterInsertBefore(this);
+    return d3_selectionPrototype.insert.call(this, name, before);
+  };
+  function d3_selection_enterInsertBefore(enter) {
+    var i0, j0;
+    return function(d, i, j) {
+      var group = enter[j].update, n = group.length, node;
+      if (j != j0) j0 = j, i0 = 0;
+      if (i >= i0) i0 = i + 1;
+      while (!(node = group[i0]) && ++i0 < n) ;
+      return node;
+    };
+  }
   d3_selectionPrototype.transition = function() {
-    var id = d3_transitionInheritId || ++d3_transitionId, subgroups = [], subgroup, node, transition = Object.create(d3_transitionInherit);
-    transition.time = Date.now();
+    var id = d3_transitionInheritId || ++d3_transitionId, subgroups = [], subgroup, node, transition = d3_transitionInherit || {
+      time: Date.now(),
+      ease: d3_ease_cubicInOut,
+      delay: 0,
+      duration: 250
+    };
     for (var j = -1, m = this.length; ++j < m; ) {
       subgroups.push(subgroup = []);
       for (var group = this[j], i = -1, n = group.length; ++i < n; ) {
@@ -31026,12 +31049,12 @@ d3 = function() {
       }
     };
   }
-  var d3_event_dragSelect = d3_vendorSymbol(d3_documentElement.style, "userSelect");
-  function d3_event_dragSuppress(type) {
-    var selectstart = "selectstart." + type, dragstart = "dragstart." + type, click = "click." + type, w = d3.select(d3_window).on(selectstart, d3_eventPreventDefault).on(dragstart, d3_eventPreventDefault), style = d3_documentElement.style, select = style[d3_event_dragSelect];
+  var d3_event_dragSelect = d3_vendorSymbol(d3_documentElement.style, "userSelect"), d3_event_dragId = 0;
+  function d3_event_dragSuppress() {
+    var name = ".dragsuppress-" + ++d3_event_dragId, touchmove = "touchmove" + name, selectstart = "selectstart" + name, dragstart = "dragstart" + name, click = "click" + name, w = d3.select(d3_window).on(touchmove, d3_eventPreventDefault).on(selectstart, d3_eventPreventDefault).on(dragstart, d3_eventPreventDefault), style = d3_documentElement.style, select = style[d3_event_dragSelect];
     style[d3_event_dragSelect] = "none";
     return function(suppressClick) {
-      w.on(selectstart, null).on(dragstart, null);
+      w.on(name, null);
       style[d3_event_dragSelect] = select;
       if (suppressClick) {
         function off() {
@@ -31088,48 +31111,51 @@ d3 = function() {
     }) : [];
   };
   d3.behavior.drag = function() {
-    var event = d3_eventDispatch(drag, "drag", "dragstart", "dragend"), origin = null;
+    var event = d3_eventDispatch(drag, "drag", "dragstart", "dragend"), origin = null, mousedown = dragstart(d3_noop, d3.mouse, "mousemove", "mouseup"), touchstart = dragstart(touchid, touchposition, "touchmove", "touchend");
     function drag() {
-      this.on("mousedown.drag", mousedown).on("touchstart.drag", mousedown);
+      this.on("mousedown.drag", mousedown).on("touchstart.drag", touchstart);
     }
-    function mousedown() {
-      var target = this, event_ = event.of(target, arguments), eventTarget = d3.event.target, touchId = d3.event.touches ? d3.event.changedTouches[0].identifier : null, offset, origin_ = point(), moved = 0, dragRestore = d3_event_dragSuppress(touchId != null ? "drag-" + touchId : "drag");
-      var w = d3.select(d3_window).on(touchId != null ? "touchmove.drag-" + touchId : "mousemove.drag", dragmove).on(touchId != null ? "touchend.drag-" + touchId : "mouseup.drag", dragend, true);
-      if (origin) {
-        offset = origin.apply(target, arguments);
-        offset = [ offset.x - origin_[0], offset.y - origin_[1] ];
-      } else {
-        offset = [ 0, 0 ];
-      }
-      event_({
-        type: "dragstart"
-      });
-      function point() {
-        var p = target.parentNode;
-        return touchId != null ? d3.touches(p).filter(function(p) {
-          return p.identifier === touchId;
-        })[0] : d3.mouse(p);
-      }
-      function dragmove() {
-        if (!target.parentNode) return dragend();
-        var p = point(), dx = p[0] - origin_[0], dy = p[1] - origin_[1];
-        moved |= dx | dy;
-        origin_ = p;
+    function touchid() {
+      return d3.event.changedTouches[0].identifier;
+    }
+    function touchposition(parent, id) {
+      return d3.touches(parent).filter(function(p) {
+        return p.identifier === id;
+      })[0];
+    }
+    function dragstart(id, position, move, end) {
+      return function() {
+        var target = this, parent = target.parentNode, event_ = event.of(target, arguments), eventTarget = d3.event.target, eventId = id(), drag = eventId == null ? "drag" : "drag-" + eventId, origin_ = position(parent, eventId), dragged = 0, offset, w = d3.select(d3_window).on(move + "." + drag, moved).on(end + "." + drag, ended), dragRestore = d3_event_dragSuppress();
+        if (origin) {
+          offset = origin.apply(target, arguments);
+          offset = [ offset.x - origin_[0], offset.y - origin_[1] ];
+        } else {
+          offset = [ 0, 0 ];
+        }
         event_({
-          type: "drag",
-          x: p[0] + offset[0],
-          y: p[1] + offset[1],
-          dx: dx,
-          dy: dy
+          type: "dragstart"
         });
-      }
-      function dragend() {
-        w.on(touchId != null ? "touchmove.drag-" + touchId : "mousemove.drag", null).on(touchId != null ? "touchend.drag-" + touchId : "mouseup.drag", null);
-        dragRestore(moved && d3.event.target === eventTarget);
-        event_({
-          type: "dragend"
-        });
-      }
+        function moved() {
+          if (!parent) return ended();
+          var p = position(parent, eventId), dx = p[0] - origin_[0], dy = p[1] - origin_[1];
+          dragged |= dx | dy;
+          origin_ = p;
+          event_({
+            type: "drag",
+            x: p[0] + offset[0],
+            y: p[1] + offset[1],
+            dx: dx,
+            dy: dy
+          });
+        }
+        function ended() {
+          w.on(move + "." + drag, null).on(end + "." + drag, null);
+          dragRestore(dragged && d3.event.target === eventTarget);
+          event_({
+            type: "dragend"
+          });
+        }
+      };
     }
     drag.origin = function(x) {
       if (!arguments.length) return origin;
@@ -31139,9 +31165,9 @@ d3 = function() {
     return d3.rebind(drag, event, "on");
   };
   d3.behavior.zoom = function() {
-    var translate = [ 0, 0 ], translate0, scale = 1, distance0, scale0, scaleExtent = d3_behavior_zoomInfinity, event = d3_eventDispatch(zoom, "zoom"), x0, x1, y0, y1, touchtime;
+    var translate = [ 0, 0 ], translate0, scale = 1, scaleExtent = d3_behavior_zoomInfinity, mousedown = "mousedown.zoom", mousemove = "mousemove.zoom", mouseup = "mouseup.zoom", event = d3_eventDispatch(zoom, "zoom"), x0, x1, y0, y1, touchtime;
     function zoom() {
-      this.on("mousedown.zoom", mousedown).on("mousemove.zoom", mousemove).on(d3_behavior_zoomWheel + ".zoom", mousewheel).on("dblclick.zoom", dblclick).on("touchstart.zoom", touchstart).on("touchmove.zoom", touchmove).on("touchend.zoom", touchstart);
+      this.on(mousedown, mousedowned).on(d3_behavior_zoomWheel + ".zoom", mousewheeled).on(mousemove, mousewheelreset).on("dblclick.zoom", dblclicked).on("touchstart.zoom", touchstarted);
     }
     zoom.translate = function(x) {
       if (!arguments.length) return translate;
@@ -31200,75 +31226,78 @@ d3 = function() {
     }
     function dispatch(event) {
       rescale();
-      d3.event.preventDefault();
       event({
         type: "zoom",
         scale: scale,
         translate: translate
       });
     }
-    function mousedown() {
-      var target = this, event_ = event.of(target, arguments), eventTarget = d3.event.target, moved = 0, w = d3.select(d3_window).on("mousemove.zoom", mousemove).on("mouseup.zoom", mouseup), l = location(d3.mouse(target)), dragRestore = d3_event_dragSuppress("zoom");
-      function mousemove() {
-        moved = 1;
+    function mousedowned() {
+      var target = this, event_ = event.of(target, arguments), eventTarget = d3.event.target, dragged = 0, w = d3.select(d3_window).on(mousemove, moved).on(mouseup, ended), l = location(d3.mouse(target)), dragRestore = d3_event_dragSuppress();
+      function moved() {
+        dragged = 1;
         translateTo(d3.mouse(target), l);
         dispatch(event_);
       }
-      function mouseup() {
-        w.on("mousemove.zoom", null).on("mouseup.zoom", null);
-        dragRestore(moved && d3.event.target === eventTarget);
+      function ended() {
+        w.on(mousemove, d3_window === target ? mousewheelreset : null).on(mouseup, null);
+        dragRestore(dragged && d3.event.target === eventTarget);
       }
     }
-    function mousewheel() {
-      if (!translate0) translate0 = location(d3.mouse(this));
-      scaleTo(Math.pow(2, d3_behavior_zoomDelta() * .002) * scale);
-      translateTo(d3.mouse(this), translate0);
-      dispatch(event.of(this, arguments));
-    }
-    function mousemove() {
-      translate0 = null;
-    }
-    function dblclick() {
-      var p = d3.mouse(this), l = location(p), k = Math.log(scale) / Math.LN2;
-      scaleTo(Math.pow(2, d3.event.shiftKey ? Math.ceil(k) - 1 : Math.floor(k) + 1));
-      translateTo(p, l);
-      dispatch(event.of(this, arguments));
-    }
-    function touchstart() {
-      var touches = d3.touches(this), now = Date.now();
-      scale0 = scale;
-      translate0 = {};
-      distance0 = 0;
+    function touchstarted() {
+      var target = this, event_ = event.of(target, arguments), touches = d3.touches(target), locations = {}, distance0 = 0, scale0 = scale, now = Date.now(), name = "zoom-" + d3.event.changedTouches[0].identifier, touchmove = "touchmove." + name, touchend = "touchend." + name, w = d3.select(d3_window).on(touchmove, moved).on(touchend, ended), t = d3.select(target).on(mousedown, null), dragRestore = d3_event_dragSuppress();
       touches.forEach(function(t) {
-        translate0[t.identifier] = location(t);
+        locations[t.identifier] = location(t);
       });
       if (touches.length === 1) {
         if (now - touchtime < 500) {
           var p = touches[0], l = location(touches[0]);
           scaleTo(scale * 2);
           translateTo(p, l);
-          dispatch(event.of(this, arguments));
+          d3_eventPreventDefault();
+          dispatch(event_);
         }
         touchtime = now;
       } else if (touches.length > 1) {
         var p = touches[0], q = touches[1], dx = p[0] - q[0], dy = p[1] - q[1];
         distance0 = dx * dx + dy * dy;
       }
-    }
-    function touchmove() {
-      var touches = d3.touches(this), p0 = touches[0], l0 = translate0[p0.identifier];
-      if (p1 = touches[1]) {
-        var p1, l1 = translate0[p1.identifier], scale1 = d3.event.scale;
-        if (scale1 == null) {
-          var distance1 = (distance1 = p1[0] - p0[0]) * distance1 + (distance1 = p1[1] - p0[1]) * distance1;
-          scale1 = distance0 && Math.sqrt(distance1 / distance0);
+      function moved() {
+        var touches = d3.touches(target), p0 = touches[0], l0 = locations[p0.identifier];
+        if (p1 = touches[1]) {
+          var p1, l1 = locations[p1.identifier], scale1 = d3.event.scale;
+          if (scale1 == null) {
+            var distance1 = (distance1 = p1[0] - p0[0]) * distance1 + (distance1 = p1[1] - p0[1]) * distance1;
+            scale1 = distance0 && Math.sqrt(distance1 / distance0);
+          }
+          p0 = [ (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2 ];
+          l0 = [ (l0[0] + l1[0]) / 2, (l0[1] + l1[1]) / 2 ];
+          scaleTo(scale1 * scale0);
         }
-        p0 = [ (p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2 ];
-        l0 = [ (l0[0] + l1[0]) / 2, (l0[1] + l1[1]) / 2 ];
-        scaleTo(scale1 * scale0);
+        touchtime = null;
+        translateTo(p0, l0);
+        dispatch(event_);
       }
-      translateTo(p0, l0);
-      touchtime = null;
+      function ended() {
+        w.on(touchmove, null).on(touchend, null);
+        t.on(mousedown, mousedowned);
+        dragRestore();
+      }
+    }
+    function mousewheeled() {
+      d3_eventPreventDefault();
+      if (!translate0) translate0 = location(d3.mouse(this));
+      scaleTo(Math.pow(2, d3_behavior_zoomDelta() * .002) * scale);
+      translateTo(d3.mouse(this), translate0);
+      dispatch(event.of(this, arguments));
+    }
+    function mousewheelreset() {
+      translate0 = null;
+    }
+    function dblclicked() {
+      var p = d3.mouse(this), l = location(p), k = Math.log(scale) / Math.LN2;
+      scaleTo(Math.pow(2, d3.event.shiftKey ? Math.ceil(k) - 1 : Math.floor(k) + 1));
+      translateTo(p, l);
       dispatch(event.of(this, arguments));
     }
     return d3.rebind(zoom, event, "on");
@@ -31417,6 +31446,12 @@ d3 = function() {
   d3.rgb = function(r, g, b) {
     return arguments.length === 1 ? r instanceof d3_Rgb ? d3_rgb(r.r, r.g, r.b) : d3_rgb_parse("" + r, d3_rgb, d3_hsl_rgb) : d3_rgb(~~r, ~~g, ~~b);
   };
+  function d3_rgbNumber(value) {
+    return d3_rgb(value >> 16, value >> 8 & 255, value & 255);
+  }
+  function d3_rgbString(value) {
+    return d3_rgbNumber(value) + "";
+  }
   function d3_rgb(r, g, b) {
     return new d3_Rgb(r, g, b);
   }
@@ -31433,11 +31468,11 @@ d3 = function() {
     if (r && r < i) r = i;
     if (g && g < i) g = i;
     if (b && b < i) b = i;
-    return d3_rgb(Math.min(255, Math.floor(r / k)), Math.min(255, Math.floor(g / k)), Math.min(255, Math.floor(b / k)));
+    return d3_rgb(Math.min(255, ~~(r / k)), Math.min(255, ~~(g / k)), Math.min(255, ~~(b / k)));
   };
   d3_rgbPrototype.darker = function(k) {
     k = Math.pow(.7, arguments.length ? k : 1);
-    return d3_rgb(Math.floor(k * this.r), Math.floor(k * this.g), Math.floor(k * this.b));
+    return d3_rgb(~~(k * this.r), ~~(k * this.g), ~~(k * this.b));
   };
   d3_rgbPrototype.hsl = function() {
     return d3_rgb_hsl(this.r, this.g, this.b);
@@ -31512,156 +31547,156 @@ d3 = function() {
     return c.charAt(c.length - 1) === "%" ? Math.round(f * 2.55) : f;
   }
   var d3_rgb_names = d3.map({
-    aliceblue: "#f0f8ff",
-    antiquewhite: "#faebd7",
-    aqua: "#00ffff",
-    aquamarine: "#7fffd4",
-    azure: "#f0ffff",
-    beige: "#f5f5dc",
-    bisque: "#ffe4c4",
-    black: "#000000",
-    blanchedalmond: "#ffebcd",
-    blue: "#0000ff",
-    blueviolet: "#8a2be2",
-    brown: "#a52a2a",
-    burlywood: "#deb887",
-    cadetblue: "#5f9ea0",
-    chartreuse: "#7fff00",
-    chocolate: "#d2691e",
-    coral: "#ff7f50",
-    cornflowerblue: "#6495ed",
-    cornsilk: "#fff8dc",
-    crimson: "#dc143c",
-    cyan: "#00ffff",
-    darkblue: "#00008b",
-    darkcyan: "#008b8b",
-    darkgoldenrod: "#b8860b",
-    darkgray: "#a9a9a9",
-    darkgreen: "#006400",
-    darkgrey: "#a9a9a9",
-    darkkhaki: "#bdb76b",
-    darkmagenta: "#8b008b",
-    darkolivegreen: "#556b2f",
-    darkorange: "#ff8c00",
-    darkorchid: "#9932cc",
-    darkred: "#8b0000",
-    darksalmon: "#e9967a",
-    darkseagreen: "#8fbc8f",
-    darkslateblue: "#483d8b",
-    darkslategray: "#2f4f4f",
-    darkslategrey: "#2f4f4f",
-    darkturquoise: "#00ced1",
-    darkviolet: "#9400d3",
-    deeppink: "#ff1493",
-    deepskyblue: "#00bfff",
-    dimgray: "#696969",
-    dimgrey: "#696969",
-    dodgerblue: "#1e90ff",
-    firebrick: "#b22222",
-    floralwhite: "#fffaf0",
-    forestgreen: "#228b22",
-    fuchsia: "#ff00ff",
-    gainsboro: "#dcdcdc",
-    ghostwhite: "#f8f8ff",
-    gold: "#ffd700",
-    goldenrod: "#daa520",
-    gray: "#808080",
-    green: "#008000",
-    greenyellow: "#adff2f",
-    grey: "#808080",
-    honeydew: "#f0fff0",
-    hotpink: "#ff69b4",
-    indianred: "#cd5c5c",
-    indigo: "#4b0082",
-    ivory: "#fffff0",
-    khaki: "#f0e68c",
-    lavender: "#e6e6fa",
-    lavenderblush: "#fff0f5",
-    lawngreen: "#7cfc00",
-    lemonchiffon: "#fffacd",
-    lightblue: "#add8e6",
-    lightcoral: "#f08080",
-    lightcyan: "#e0ffff",
-    lightgoldenrodyellow: "#fafad2",
-    lightgray: "#d3d3d3",
-    lightgreen: "#90ee90",
-    lightgrey: "#d3d3d3",
-    lightpink: "#ffb6c1",
-    lightsalmon: "#ffa07a",
-    lightseagreen: "#20b2aa",
-    lightskyblue: "#87cefa",
-    lightslategray: "#778899",
-    lightslategrey: "#778899",
-    lightsteelblue: "#b0c4de",
-    lightyellow: "#ffffe0",
-    lime: "#00ff00",
-    limegreen: "#32cd32",
-    linen: "#faf0e6",
-    magenta: "#ff00ff",
-    maroon: "#800000",
-    mediumaquamarine: "#66cdaa",
-    mediumblue: "#0000cd",
-    mediumorchid: "#ba55d3",
-    mediumpurple: "#9370db",
-    mediumseagreen: "#3cb371",
-    mediumslateblue: "#7b68ee",
-    mediumspringgreen: "#00fa9a",
-    mediumturquoise: "#48d1cc",
-    mediumvioletred: "#c71585",
-    midnightblue: "#191970",
-    mintcream: "#f5fffa",
-    mistyrose: "#ffe4e1",
-    moccasin: "#ffe4b5",
-    navajowhite: "#ffdead",
-    navy: "#000080",
-    oldlace: "#fdf5e6",
-    olive: "#808000",
-    olivedrab: "#6b8e23",
-    orange: "#ffa500",
-    orangered: "#ff4500",
-    orchid: "#da70d6",
-    palegoldenrod: "#eee8aa",
-    palegreen: "#98fb98",
-    paleturquoise: "#afeeee",
-    palevioletred: "#db7093",
-    papayawhip: "#ffefd5",
-    peachpuff: "#ffdab9",
-    peru: "#cd853f",
-    pink: "#ffc0cb",
-    plum: "#dda0dd",
-    powderblue: "#b0e0e6",
-    purple: "#800080",
-    red: "#ff0000",
-    rosybrown: "#bc8f8f",
-    royalblue: "#4169e1",
-    saddlebrown: "#8b4513",
-    salmon: "#fa8072",
-    sandybrown: "#f4a460",
-    seagreen: "#2e8b57",
-    seashell: "#fff5ee",
-    sienna: "#a0522d",
-    silver: "#c0c0c0",
-    skyblue: "#87ceeb",
-    slateblue: "#6a5acd",
-    slategray: "#708090",
-    slategrey: "#708090",
-    snow: "#fffafa",
-    springgreen: "#00ff7f",
-    steelblue: "#4682b4",
-    tan: "#d2b48c",
-    teal: "#008080",
-    thistle: "#d8bfd8",
-    tomato: "#ff6347",
-    turquoise: "#40e0d0",
-    violet: "#ee82ee",
-    wheat: "#f5deb3",
-    white: "#ffffff",
-    whitesmoke: "#f5f5f5",
-    yellow: "#ffff00",
-    yellowgreen: "#9acd32"
+    aliceblue: 15792383,
+    antiquewhite: 16444375,
+    aqua: 65535,
+    aquamarine: 8388564,
+    azure: 15794175,
+    beige: 16119260,
+    bisque: 16770244,
+    black: 0,
+    blanchedalmond: 16772045,
+    blue: 255,
+    blueviolet: 9055202,
+    brown: 10824234,
+    burlywood: 14596231,
+    cadetblue: 6266528,
+    chartreuse: 8388352,
+    chocolate: 13789470,
+    coral: 16744272,
+    cornflowerblue: 6591981,
+    cornsilk: 16775388,
+    crimson: 14423100,
+    cyan: 65535,
+    darkblue: 139,
+    darkcyan: 35723,
+    darkgoldenrod: 12092939,
+    darkgray: 11119017,
+    darkgreen: 25600,
+    darkgrey: 11119017,
+    darkkhaki: 12433259,
+    darkmagenta: 9109643,
+    darkolivegreen: 5597999,
+    darkorange: 16747520,
+    darkorchid: 10040012,
+    darkred: 9109504,
+    darksalmon: 15308410,
+    darkseagreen: 9419919,
+    darkslateblue: 4734347,
+    darkslategray: 3100495,
+    darkslategrey: 3100495,
+    darkturquoise: 52945,
+    darkviolet: 9699539,
+    deeppink: 16716947,
+    deepskyblue: 49151,
+    dimgray: 6908265,
+    dimgrey: 6908265,
+    dodgerblue: 2003199,
+    firebrick: 11674146,
+    floralwhite: 16775920,
+    forestgreen: 2263842,
+    fuchsia: 16711935,
+    gainsboro: 14474460,
+    ghostwhite: 16316671,
+    gold: 16766720,
+    goldenrod: 14329120,
+    gray: 8421504,
+    green: 32768,
+    greenyellow: 11403055,
+    grey: 8421504,
+    honeydew: 15794160,
+    hotpink: 16738740,
+    indianred: 13458524,
+    indigo: 4915330,
+    ivory: 16777200,
+    khaki: 15787660,
+    lavender: 15132410,
+    lavenderblush: 16773365,
+    lawngreen: 8190976,
+    lemonchiffon: 16775885,
+    lightblue: 11393254,
+    lightcoral: 15761536,
+    lightcyan: 14745599,
+    lightgoldenrodyellow: 16448210,
+    lightgray: 13882323,
+    lightgreen: 9498256,
+    lightgrey: 13882323,
+    lightpink: 16758465,
+    lightsalmon: 16752762,
+    lightseagreen: 2142890,
+    lightskyblue: 8900346,
+    lightslategray: 7833753,
+    lightslategrey: 7833753,
+    lightsteelblue: 11584734,
+    lightyellow: 16777184,
+    lime: 65280,
+    limegreen: 3329330,
+    linen: 16445670,
+    magenta: 16711935,
+    maroon: 8388608,
+    mediumaquamarine: 6737322,
+    mediumblue: 205,
+    mediumorchid: 12211667,
+    mediumpurple: 9662683,
+    mediumseagreen: 3978097,
+    mediumslateblue: 8087790,
+    mediumspringgreen: 64154,
+    mediumturquoise: 4772300,
+    mediumvioletred: 13047173,
+    midnightblue: 1644912,
+    mintcream: 16121850,
+    mistyrose: 16770273,
+    moccasin: 16770229,
+    navajowhite: 16768685,
+    navy: 128,
+    oldlace: 16643558,
+    olive: 8421376,
+    olivedrab: 7048739,
+    orange: 16753920,
+    orangered: 16729344,
+    orchid: 14315734,
+    palegoldenrod: 15657130,
+    palegreen: 10025880,
+    paleturquoise: 11529966,
+    palevioletred: 14381203,
+    papayawhip: 16773077,
+    peachpuff: 16767673,
+    peru: 13468991,
+    pink: 16761035,
+    plum: 14524637,
+    powderblue: 11591910,
+    purple: 8388736,
+    red: 16711680,
+    rosybrown: 12357519,
+    royalblue: 4286945,
+    saddlebrown: 9127187,
+    salmon: 16416882,
+    sandybrown: 16032864,
+    seagreen: 3050327,
+    seashell: 16774638,
+    sienna: 10506797,
+    silver: 12632256,
+    skyblue: 8900331,
+    slateblue: 6970061,
+    slategray: 7372944,
+    slategrey: 7372944,
+    snow: 16775930,
+    springgreen: 65407,
+    steelblue: 4620980,
+    tan: 13808780,
+    teal: 32896,
+    thistle: 14204888,
+    tomato: 16737095,
+    turquoise: 4251856,
+    violet: 15631086,
+    wheat: 16113331,
+    white: 16777215,
+    whitesmoke: 16119285,
+    yellow: 16776960,
+    yellowgreen: 10145074
   });
   d3_rgb_names.forEach(function(key, value) {
-    d3_rgb_names.set(key, d3_rgb_parse(value, d3_rgb, d3_hsl_rgb));
+    d3_rgb_names.set(key, d3_rgbNumber(value));
   });
   function d3_functor(v) {
     return typeof v === "function" ? v : function() {
@@ -31863,14 +31898,14 @@ d3 = function() {
   };
   d3.csv = d3.dsv(",", "text/csv");
   d3.tsv = d3.dsv("	", "text/tab-separated-values");
-  var d3_timer_queueHead, d3_timer_queueTail, d3_timer_interval, d3_timer_timeout;
+  var d3_timer_queueHead, d3_timer_queueTail, d3_timer_interval, d3_timer_timeout, d3_timer_active, d3_timer_frame = d3_window[d3_vendorSymbol(d3_window, "requestAnimationFrame")] || function(callback) {
+    setTimeout(callback, 17);
+  };
   d3.timer = function(callback, delay, then) {
-    if (arguments.length < 3) {
-      if (arguments.length < 2) delay = 0; else if (!isFinite(delay)) return;
-      then = Date.now();
-    }
-    var time = then + delay;
-    var timer = {
+    var n = arguments.length;
+    if (n < 2) delay = 0;
+    if (n < 3) then = Date.now();
+    var time = then + delay, timer = {
       callback: callback,
       time: time,
       next: null
@@ -31900,11 +31935,19 @@ d3 = function() {
     d3_timer_mark();
     d3_timer_sweep();
   };
+  function d3_timer_replace(callback, delay, then) {
+    var n = arguments.length;
+    if (n < 2) delay = 0;
+    if (n < 3) then = Date.now();
+    d3_timer_active.callback = callback;
+    d3_timer_active.time = then + delay;
+  }
   function d3_timer_mark() {
-    var now = Date.now(), timer = d3_timer_queueHead;
-    while (timer) {
-      if (now >= timer.time) timer.flush = timer.callback(now - timer.time);
-      timer = timer.next;
+    var now = Date.now();
+    d3_timer_active = d3_timer_queueHead;
+    while (d3_timer_active) {
+      if (now >= d3_timer_active.time) d3_timer_active.flush = d3_timer_active.callback(now - d3_timer_active.time);
+      d3_timer_active = d3_timer_active.next;
     }
     return now;
   }
@@ -31921,10 +31964,7 @@ d3 = function() {
     d3_timer_queueTail = t0;
     return time;
   }
-  var d3_timer_frame = d3_window[d3_vendorSymbol(d3_window, "requestAnimationFrame")] || function(callback) {
-    setTimeout(callback, 17);
-  };
-  var d3_format_decimalPoint = ".", d3_format_thousandsSeparator = ",", d3_format_grouping = [ 3, 3 ];
+  var d3_format_decimalPoint = ".", d3_format_thousandsSeparator = ",", d3_format_grouping = [ 3, 3 ], d3_format_currencySymbol = "$";
   var d3_formatPrefixes = [ "y", "z", "a", "f", "p", "n", "µ", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y" ].map(d3_formatPrefix);
   d3.formatPrefix = function(value, precision) {
     var i = 0;
@@ -31951,7 +31991,7 @@ d3 = function() {
     return n ? Math.round(x * (n = Math.pow(10, n))) / n : Math.round(x);
   };
   d3.format = function(specifier) {
-    var match = d3_format_re.exec(specifier), fill = match[1] || " ", align = match[2] || ">", sign = match[3] || "", basePrefix = match[4] || "", zfill = match[5], width = +match[6], comma = match[7], precision = match[8], type = match[9], scale = 1, suffix = "", integer = false;
+    var match = d3_format_re.exec(specifier), fill = match[1] || " ", align = match[2] || ">", sign = match[3] || "", symbol = match[4] || "", zfill = match[5], width = +match[6], comma = match[7], precision = match[8], type = match[9], scale = 1, suffix = "", integer = false;
     if (precision) precision = +precision.substring(1);
     if (zfill || fill === "0" && align === "=") {
       zfill = fill = "0";
@@ -31980,7 +32020,7 @@ d3 = function() {
      case "o":
      case "x":
      case "X":
-      if (basePrefix) basePrefix = "0" + type.toLowerCase();
+      if (symbol === "#") symbol = "0" + type.toLowerCase();
 
      case "c":
      case "d":
@@ -31993,7 +32033,7 @@ d3 = function() {
       type = "r";
       break;
     }
-    if (basePrefix === "#") basePrefix = "";
+    if (symbol === "#") symbol = ""; else if (symbol === "$") symbol = d3_format_currencySymbol;
     if (type == "r" && !precision) type = "g";
     if (precision != null) {
       if (type == "g") precision = Math.max(1, Math.min(21, precision)); else if (type == "e" || type == "f") precision = Math.max(0, Math.min(20, precision));
@@ -32011,15 +32051,16 @@ d3 = function() {
         value *= scale;
       }
       value = type(value, precision);
-      if (!zfill && comma) value = d3_format_group(value);
-      var length = basePrefix.length + value.length + (zcomma ? 0 : negative.length), padding = length < width ? new Array(length = width - length + 1).join(fill) : "";
-      if (zcomma) value = d3_format_group(padding + value);
-      if (d3_format_decimalPoint) value.replace(".", d3_format_decimalPoint);
-      negative += basePrefix;
+      var i = value.lastIndexOf("."), before = i < 0 ? value : value.substring(0, i), after = i < 0 ? "" : d3_format_decimalPoint + value.substring(i + 1);
+      if (!zfill && comma) before = d3_format_group(before);
+      var length = symbol.length + before.length + after.length + (zcomma ? 0 : negative.length), padding = length < width ? new Array(length = width - length + 1).join(fill) : "";
+      if (zcomma) before = d3_format_group(padding + before);
+      negative += symbol;
+      value = before + after;
       return (align === "<" ? negative + value + padding : align === ">" ? padding + negative + value : align === "^" ? padding.substring(0, length >>= 1) + negative + value + padding.substring(length) : negative + (zcomma ? value : padding + value)) + suffix;
     };
   };
-  var d3_format_re = /(?:([^{])?([<>=^]))?([+\- ])?(#)?(0)?(\d+)?(,)?(\.-?\d+)?([a-z%])?/i;
+  var d3_format_re = /(?:([^{])?([<>=^]))?([+\- ])?([$#])?(0)?(\d+)?(,)?(\.-?\d+)?([a-z%])?/i;
   var d3_format_types = d3.map({
     b: function(x) {
       return x.toString(2);
@@ -32059,13 +32100,12 @@ d3 = function() {
   if (d3_format_grouping) {
     var d3_format_groupingLength = d3_format_grouping.length;
     d3_format_group = function(value) {
-      var i = value.lastIndexOf("."), f = i >= 0 ? "." + value.substring(i + 1) : (i = value.length, 
-      ""), t = [], j = 0, g = d3_format_grouping[0];
+      var i = value.length, t = [], j = 0, g = d3_format_grouping[0];
       while (i > 0 && g > 0) {
         t.push(value.substring(i -= g, i + g));
         g = d3_format_grouping[j = (j + 1) % d3_format_groupingLength];
       }
-      return t.reverse().join(d3_format_thousandsSeparator || "") + f;
+      return t.reverse().join(d3_format_thousandsSeparator);
     };
   }
   d3.geo = {};
@@ -34092,9 +34132,9 @@ d3 = function() {
   }
   function d3_svg_lineBasis(points) {
     if (points.length < 3) return d3_svg_lineLinear(points);
-    var i = 1, n = points.length, pi = points[0], x0 = pi[0], y0 = pi[1], px = [ x0, x0, x0, (pi = points[1])[0] ], py = [ y0, y0, y0, pi[1] ], path = [ x0, ",", y0 ];
-    d3_svg_lineBasisBezier(path, px, py);
-    while (++i < n) {
+    var i = 1, n = points.length, pi = points[0], x0 = pi[0], y0 = pi[1], px = [ x0, x0, x0, (pi = points[1])[0] ], py = [ y0, y0, y0, pi[1] ], path = [ x0, ",", y0, "L", d3_svg_lineDot4(d3_svg_lineBasisBezier3, px), ",", d3_svg_lineDot4(d3_svg_lineBasisBezier3, py) ];
+    points.push(points[n - 1]);
+    while (++i <= n) {
       pi = points[i];
       px.shift();
       px.push(pi[0]);
@@ -34102,14 +34142,8 @@ d3 = function() {
       py.push(pi[1]);
       d3_svg_lineBasisBezier(path, px, py);
     }
-    i = -1;
-    while (++i < 2) {
-      px.shift();
-      px.push(pi[0]);
-      py.shift();
-      py.push(pi[1]);
-      d3_svg_lineBasisBezier(path, px, py);
-    }
+    points.pop();
+    path.push("L", pi);
     return path.join("");
   }
   function d3_svg_lineBasisOpen(points) {
@@ -36788,9 +36822,15 @@ d3 = function() {
     }) : ",." + precision + "f");
   }
   d3.scale.log = function() {
-    return d3_scale_log(d3.scale.linear().domain([ 0, Math.LN10 ]), 10, d3_scale_logp, d3_scale_powp, [ 1, 10 ]);
+    return d3_scale_log(d3.scale.linear().domain([ 0, 1 ]), 10, true, [ 1, 10 ]);
   };
-  function d3_scale_log(linear, base, log, pow, domain) {
+  function d3_scale_log(linear, base, positive, domain) {
+    function log(x) {
+      return (positive ? Math.log(x < 0 ? 0 : x) : -Math.log(x > 0 ? 0 : -x)) / Math.log(base);
+    }
+    function pow(x) {
+      return positive ? Math.pow(base, x) : -Math.pow(base, -x);
+    }
     function scale(x) {
       return linear(log(x));
     }
@@ -36799,46 +36839,32 @@ d3 = function() {
     };
     scale.domain = function(x) {
       if (!arguments.length) return domain;
-      if (x[0] < 0) log = d3_scale_logn, pow = d3_scale_pown; else log = d3_scale_logp, 
-      pow = d3_scale_powp;
+      positive = x[0] >= 0;
       linear.domain((domain = x.map(Number)).map(log));
       return scale;
     };
     scale.base = function(_) {
       if (!arguments.length) return base;
       base = +_;
+      linear.domain(domain.map(log));
       return scale;
     };
     scale.nice = function() {
-      function floor(x) {
-        return Math.pow(base, Math.floor(Math.log(x) / Math.log(base)));
-      }
-      function ceil(x) {
-        return Math.pow(base, Math.ceil(Math.log(x) / Math.log(base)));
-      }
-      linear.domain(d3_scale_nice(domain, log === d3_scale_logp ? {
-        floor: floor,
-        ceil: ceil
-      } : {
-        floor: function(x) {
-          return -ceil(-x);
-        },
-        ceil: function(x) {
-          return -floor(-x);
-        }
-      }).map(log));
+      var niced = d3_scale_nice(domain.map(log), positive ? Math : d3_scale_logNiceNegative);
+      linear.domain(niced);
+      domain = niced.map(pow);
       return scale;
     };
     scale.ticks = function() {
-      var extent = d3_scaleExtent(linear.domain()), ticks = [];
+      var extent = d3_scaleExtent(domain), ticks = [];
       if (extent.every(isFinite)) {
-        var b = Math.log(base), i = Math.floor(extent[0] / b), j = Math.ceil(extent[1] / b), u = pow(extent[0]), v = pow(extent[1]), n = base % 1 ? 2 : base;
-        if (log === d3_scale_logn) {
-          ticks.push(-Math.pow(base, -i));
-          for (;i++ < j; ) for (var k = n - 1; k > 0; k--) ticks.push(-Math.pow(base, -i) * k);
+        var u = extent[0], v = extent[1], i = Math.floor(log(u)), j = Math.ceil(log(v)), n = base % 1 ? 2 : base;
+        if (positive) {
+          for (;i < j; i++) for (var k = 1; k < n; k++) ticks.push(pow(i) * k);
+          ticks.push(pow(i));
         } else {
-          for (;i < j; i++) for (var k = 1; k < n; k++) ticks.push(Math.pow(base, i) * k);
-          ticks.push(Math.pow(base, i));
+          ticks.push(pow(i));
+          for (;i++ < j; ) for (var k = n - 1; k > 0; k--) ticks.push(pow(i) * k);
         }
         for (i = 0; ticks[i] < u; i++) {}
         for (j = ticks.length; ticks[j - 1] > v; j--) {}
@@ -36849,30 +36875,25 @@ d3 = function() {
     scale.tickFormat = function(n, format) {
       if (!arguments.length) return d3_scale_logFormat;
       if (arguments.length < 2) format = d3_scale_logFormat; else if (typeof format !== "function") format = d3.format(format);
-      var b = Math.log(base), k = Math.max(.1, n / scale.ticks().length), f = log === d3_scale_logn ? (e = -1e-12, 
-      Math.floor) : (e = 1e-12, Math.ceil), e;
+      var k = Math.max(.1, n / scale.ticks().length), f = positive ? (e = 1e-12, Math.ceil) : (e = -1e-12, 
+      Math.floor), e;
       return function(d) {
-        return d / pow(b * f(log(d) / b + e)) <= k ? format(d) : "";
+        return d / pow(f(log(d) + e)) <= k ? format(d) : "";
       };
     };
     scale.copy = function() {
-      return d3_scale_log(linear.copy(), base, log, pow, domain);
+      return d3_scale_log(linear.copy(), base, positive, domain);
     };
     return d3_scale_linearRebind(scale, linear);
   }
-  var d3_scale_logFormat = d3.format(".0e");
-  function d3_scale_logp(x) {
-    return Math.log(x < 0 ? 0 : x);
-  }
-  function d3_scale_powp(x) {
-    return Math.exp(x);
-  }
-  function d3_scale_logn(x) {
-    return -Math.log(x > 0 ? 0 : -x);
-  }
-  function d3_scale_pown(x) {
-    return -Math.exp(-x);
-  }
+  var d3_scale_logFormat = d3.format(".0e"), d3_scale_logNiceNegative = {
+    floor: function(x) {
+      return -Math.ceil(-x);
+    },
+    ceil: function(x) {
+      return -Math.floor(-x);
+    }
+  };
   d3.scale.pow = function() {
     return d3_scale_pow(d3.scale.linear(), 1, [ 0, 1 ]);
   };
@@ -37012,10 +37033,10 @@ d3 = function() {
   d3.scale.category20c = function() {
     return d3.scale.ordinal().range(d3_category20c);
   };
-  var d3_category10 = [ "#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf" ];
-  var d3_category20 = [ "#1f77b4", "#aec7e8", "#ff7f0e", "#ffbb78", "#2ca02c", "#98df8a", "#d62728", "#ff9896", "#9467bd", "#c5b0d5", "#8c564b", "#c49c94", "#e377c2", "#f7b6d2", "#7f7f7f", "#c7c7c7", "#bcbd22", "#dbdb8d", "#17becf", "#9edae5" ];
-  var d3_category20b = [ "#393b79", "#5254a3", "#6b6ecf", "#9c9ede", "#637939", "#8ca252", "#b5cf6b", "#cedb9c", "#8c6d31", "#bd9e39", "#e7ba52", "#e7cb94", "#843c39", "#ad494a", "#d6616b", "#e7969c", "#7b4173", "#a55194", "#ce6dbd", "#de9ed6" ];
-  var d3_category20c = [ "#3182bd", "#6baed6", "#9ecae1", "#c6dbef", "#e6550d", "#fd8d3c", "#fdae6b", "#fdd0a2", "#31a354", "#74c476", "#a1d99b", "#c7e9c0", "#756bb1", "#9e9ac8", "#bcbddc", "#dadaeb", "#636363", "#969696", "#bdbdbd", "#d9d9d9" ];
+  var d3_category10 = [ 2062260, 16744206, 2924588, 14034728, 9725885, 9197131, 14907330, 8355711, 12369186, 1556175 ].map(d3_rgbString);
+  var d3_category20 = [ 2062260, 11454440, 16744206, 16759672, 2924588, 10018698, 14034728, 16750742, 9725885, 12955861, 9197131, 12885140, 14907330, 16234194, 8355711, 13092807, 12369186, 14408589, 1556175, 10410725 ].map(d3_rgbString);
+  var d3_category20b = [ 3750777, 5395619, 7040719, 10264286, 6519097, 9216594, 11915115, 13556636, 9202993, 12426809, 15186514, 15190932, 8666169, 11356490, 14049643, 15177372, 8077683, 10834324, 13528509, 14589654 ].map(d3_rgbString);
+  var d3_category20c = [ 3244733, 7057110, 10406625, 13032431, 15095053, 16616764, 16625259, 16634018, 3253076, 7652470, 10607003, 13101504, 7695281, 10394312, 12369372, 14342891, 6513507, 9868950, 12434877, 14277081 ].map(d3_rgbString);
   d3.scale.quantile = function() {
     return d3_scale_quantile([], []);
   };
@@ -37044,6 +37065,10 @@ d3 = function() {
     };
     scale.quantiles = function() {
       return thresholds;
+    };
+    scale.invertExtent = function(y) {
+      y = range.indexOf(y);
+      return y < 0 ? [ NaN, NaN ] : [ y > 0 ? thresholds[y - 1] : domain[0], y < thresholds.length ? thresholds[y] : domain[domain.length - 1] ];
     };
     scale.copy = function() {
       return d3_scale_quantile(domain, range);
@@ -37074,13 +37099,13 @@ d3 = function() {
       range = x;
       return rescale();
     };
-    scale.copy = function() {
-      return d3_scale_quantize(x0, x1, range);
-    };
     scale.invertExtent = function(y) {
       y = range.indexOf(y);
       y = y < 0 ? NaN : y / kx + x0;
       return [ y, y + 1 / kx ];
+    };
+    scale.copy = function() {
+      return d3_scale_quantize(x0, x1, range);
     };
     return rescale();
   }
@@ -37443,11 +37468,7 @@ d3 = function() {
     groups.id = id;
     return groups;
   }
-  var d3_transitionPrototype = [], d3_transitionId = 0, d3_transitionInheritId, d3_transitionInherit = {
-    ease: d3_ease_cubicInOut,
-    delay: 0,
-    duration: 250
-  };
+  var d3_transitionPrototype = [], d3_transitionId = 0, d3_transitionInheritId, d3_transitionInherit;
   d3_transitionPrototype.call = d3_selectionPrototype.call;
   d3_transitionPrototype.empty = d3_selectionPrototype.empty;
   d3_transitionPrototype.node = d3_selectionPrototype.node;
@@ -37462,7 +37483,7 @@ d3 = function() {
     for (var j = -1, m = this.length; ++j < m; ) {
       subgroups.push(subgroup = []);
       for (var group = this[j], i = -1, n = group.length; ++i < n; ) {
-        if ((node = group[i]) && (subnode = selector.call(node, node.__data__, i))) {
+        if ((node = group[i]) && (subnode = selector.call(node, node.__data__, i, j))) {
           if ("__data__" in node) subnode.__data__ = node.__data__;
           d3_transitionNode(subnode, i, id, node.__transition__[id]);
           subgroup.push(subnode);
@@ -37480,7 +37501,7 @@ d3 = function() {
       for (var group = this[j], i = -1, n = group.length; ++i < n; ) {
         if (node = group[i]) {
           transition = node.__transition__[id];
-          subnodes = selector.call(node, node.__data__, i);
+          subnodes = selector.call(node, node.__data__, i, j);
           subgroups.push(subgroup = []);
           for (var k = -1, o = subnodes.length; ++k < o; ) {
             if (subnode = subnodes[k]) d3_transitionNode(subnode, k, id, transition);
@@ -37502,7 +37523,7 @@ d3 = function() {
         }
       }
     }
-    return d3_transition(subgroups, this.id, this.time).ease(this.ease());
+    return d3_transition(subgroups, this.id);
   };
   d3_transitionPrototype.tween = function(name, tween) {
     var id = this.id;
@@ -37652,7 +37673,8 @@ d3 = function() {
       d3_transitionInheritId = inheritId;
     } else {
       d3_selection_each(this, function(node) {
-        node.__transition__[id].event.on(type, listener);
+        var transition = node.__transition__[id];
+        (transition.event || (transition.event = d3.dispatch("start", "end"))).on(type, listener);
       });
     }
     return this;
@@ -37681,7 +37703,6 @@ d3 = function() {
       var time = inherit.time;
       transition = lock[id] = {
         tween: new d3_Map(),
-        event: d3.dispatch("start", "end"),
         time: time,
         ease: inherit.ease,
         delay: inherit.delay,
@@ -37689,19 +37710,20 @@ d3 = function() {
       };
       ++lock.count;
       d3.timer(function(elapsed) {
-        var d = node.__data__, ease = transition.ease, event = transition.event, delay = transition.delay, duration = transition.duration, tweened = [];
-        return delay <= elapsed ? start(elapsed) : d3.timer(start, delay, time), 1;
+        var d = node.__data__, ease = transition.ease, delay = transition.delay, duration = transition.duration, tweened = [];
+        if (delay <= elapsed) return start(elapsed);
+        d3_timer_replace(start, delay, time);
         function start(elapsed) {
           if (lock.active > id) return stop();
           lock.active = id;
-          event.start.call(node, d, i);
+          transition.event && transition.event.start.call(node, d, i);
           transition.tween.forEach(function(key, value) {
             if (value = value.call(node, d, i)) {
               tweened.push(value);
             }
           });
-          if (!tick(elapsed)) d3.timer(tick, 0, time);
-          return 1;
+          if (tick(elapsed)) return 1;
+          d3_timer_replace(tick, 0, time);
         }
         function tick(elapsed) {
           if (lock.active !== id) return stop();
@@ -37711,7 +37733,7 @@ d3 = function() {
           }
           if (t >= 1) {
             stop();
-            event.end.call(node, d, i);
+            transition.event && transition.event.end.call(node, d, i);
             return 1;
           }
         }
@@ -37720,7 +37742,6 @@ d3 = function() {
           return 1;
         }
       }, 0, time);
-      return transition;
     }
   }
   d3.svg.axis = function() {
@@ -37795,19 +37816,19 @@ d3 = function() {
             break;
           }
         }
-        if (scale.ticks) {
+        if (scale.rangeBand) {
+          var dx = scale1.rangeBand() / 2, x = function(d) {
+            return scale1(d) + dx;
+          };
+          tickEnter.call(tickTransform, x);
+          tickUpdate.call(tickTransform, x);
+        } else {
           tickEnter.call(tickTransform, scale0);
           tickUpdate.call(tickTransform, scale1);
           tickExit.call(tickTransform, scale1);
           subtickEnter.call(tickTransform, scale0);
           subtickUpdate.call(tickTransform, scale1);
           subtickExit.call(tickTransform, scale1);
-        } else {
-          var dx = scale1.rangeBand() / 2, x = function(d) {
-            return scale1(d) + dx;
-          };
-          tickEnter.call(tickTransform, x);
-          tickUpdate.call(tickTransform, x);
         }
       });
     }
@@ -37935,7 +37956,7 @@ d3 = function() {
       g.selectAll(".extent,.e>rect,.w>rect").attr("height", extent[1][1] - extent[0][1]);
     }
     function brushstart() {
-      var target = this, eventTarget = d3.select(d3.event.target), event_ = event.of(target, arguments), g = d3.select(target), resizing = eventTarget.datum(), resizingX = !/^(n|s)$/.test(resizing) && x, resizingY = !/^(e|w)$/.test(resizing) && y, dragging = eventTarget.classed("extent"), dragRestore = d3_event_dragSuppress("brush"), center, origin = mouse(), offset;
+      var target = this, eventTarget = d3.select(d3.event.target), event_ = event.of(target, arguments), g = d3.select(target), resizing = eventTarget.datum(), resizingX = !/^(n|s)$/.test(resizing) && x, resizingY = !/^(e|w)$/.test(resizing) && y, dragging = eventTarget.classed("extent"), dragRestore = d3_event_dragSuppress(), center, origin = mouse(), offset;
       var w = d3.select(d3_window).on("keydown.brush", keydown).on("keyup.brush", keyup);
       if (d3.event.changedTouches) {
         w.on("touchmove.brush", brushmove).on("touchend.brush", brushend);
@@ -38671,7 +38692,7 @@ d3 = function() {
         var span = extent[1] - extent[0], target = span / m, i = d3.bisect(d3_time_scaleSteps, target);
         if (i == d3_time_scaleSteps.length) return methods.year(extent, m);
         if (!i) return linear.ticks(m).map(d3_time_scaleDate);
-        if (Math.log(target / d3_time_scaleSteps[i - 1]) < Math.log(d3_time_scaleSteps[i] / target)) --i;
+        if (target / d3_time_scaleSteps[i - 1] < d3_time_scaleSteps[i] / target) --i;
         m = methods[i];
         k = m[1];
         m = m[0].range;
@@ -41066,7 +41087,7 @@ d3 = function() {
 
 }(window.jQuery);
 // moment.js
-// version : 2.0.0
+// version : 2.1.0
 // author : Tim Wood
 // license : MIT
 // momentjs.com
@@ -41078,7 +41099,7 @@ d3 = function() {
     ************************************/
 
     var moment,
-        VERSION = "2.0.0",
+        VERSION = "2.1.0",
         round = Math.round, i,
         // internal storage for language config files
         languages = {},
@@ -41088,13 +41109,11 @@ d3 = function() {
 
         // ASP.NET json date format regex
         aspNetJsonRegex = /^\/?Date\((\-?\d+)/i,
+        aspNetTimeSpanJsonRegex = /(\-)?(\d*)?\.?(\d+)\:(\d+)\:(\d+)\.?(\d{3})?/,
 
         // format tokens
-        formattingTokens = /(\[[^\[]*\])|(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|YYYYY|YYYY|YY|a|A|hh?|HH?|mm?|ss?|SS?S?|X|zz?|ZZ?|.)/g,
+        formattingTokens = /(\[[^\[]*\])|(\\)?(Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|mm?|ss?|SS?S?|X|zz?|ZZ?|.)/g,
         localFormattingTokens = /(\[[^\[]*\])|(\\)?(LT|LL?L?L?|l{1,4})/g,
-
-        // parsing tokens
-        parseMultipleFormatChunker = /([0-9a-zA-Z\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+)/gi,
 
         // parsing token regexes
         parseTokenOneOrTwoDigits = /\d\d?/, // 0 - 99
@@ -41102,7 +41121,7 @@ d3 = function() {
         parseTokenThreeDigits = /\d{3}/, // 000 - 999
         parseTokenFourDigits = /\d{1,4}/, // 0 - 9999
         parseTokenSixDigits = /[+\-]?\d{1,6}/, // -999,999 - 999,999
-        parseTokenWord = /[0-9]*[a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+|[\u0600-\u06FF]+\s*?[\u0600-\u06FF]+/i, // any word (or two) characters or numbers including two word month in arabic.
+        parseTokenWord = /[0-9]*['a-z\u00A0-\u05FF\u0700-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]+|[\u0600-\u06FF\/]+(\s*?[\u0600-\u06FF]+){1,2}/i, // any word (or two) characters or numbers including two/three word month in arabic.
         parseTokenTimezone = /Z|[\+\-]\d\d:?\d\d/i, // +00:00 -00:00 +0000 -0000 or Z
         parseTokenT = /T/i, // T (ISO seperator)
         parseTokenTimestampMs = /[\+\-]?\d+(\.\d{1,3})?/, // 123456789 123456789.123
@@ -41124,7 +41143,7 @@ d3 = function() {
         parseTimezoneChunker = /([\+\-]|\d\d)/gi,
 
         // getter and setter names
-        proxyGettersAndSetters = 'Month|Date|Hours|Minutes|Seconds|Milliseconds'.split('|'),
+        proxyGettersAndSetters = 'Date|Hours|Minutes|Seconds|Milliseconds'.split('|'),
         unitMillisecondFactors = {
             'Milliseconds' : 1,
             'Seconds' : 1e3,
@@ -41133,6 +41152,17 @@ d3 = function() {
             'Days' : 864e5,
             'Months' : 2592e6,
             'Years' : 31536e6
+        },
+
+        unitAliases = {
+            ms : 'millisecond',
+            s : 'second',
+            m : 'minute',
+            h : 'hour',
+            d : 'day',
+            w : 'week',
+            M : 'month',
+            y : 'year'
         },
 
         // format function strings
@@ -41185,6 +41215,30 @@ d3 = function() {
             YYYYY : function () {
                 return leftZeroFill(this.year(), 5);
             },
+            gg   : function () {
+                return leftZeroFill(this.weekYear() % 100, 2);
+            },
+            gggg : function () {
+                return this.weekYear();
+            },
+            ggggg : function () {
+                return leftZeroFill(this.weekYear(), 5);
+            },
+            GG   : function () {
+                return leftZeroFill(this.isoWeekYear() % 100, 2);
+            },
+            GGGG : function () {
+                return this.isoWeekYear();
+            },
+            GGGGG : function () {
+                return leftZeroFill(this.isoWeekYear(), 5);
+            },
+            e : function () {
+                return this.weekday();
+            },
+            E : function () {
+                return this.isoWeekday();
+            },
             a    : function () {
                 return this.lang().meridiem(this.hours(), this.minutes(), true);
             },
@@ -41230,6 +41284,12 @@ d3 = function() {
                 }
                 return b + leftZeroFill(~~(10 * a / 6), 4);
             },
+            z : function () {
+                return this.zoneAbbr();
+            },
+            zz : function () {
+                return this.zoneName();
+            },
             X    : function () {
                 return this.unix();
             }
@@ -41240,15 +41300,15 @@ d3 = function() {
             return leftZeroFill(func.call(this, a), count);
         };
     }
-    function ordinalizeToken(func) {
+    function ordinalizeToken(func, period) {
         return function (a) {
-            return this.lang().ordinal(func.call(this, a));
+            return this.lang().ordinal(func.call(this, a), period);
         };
     }
 
     while (ordinalizeTokens.length) {
         i = ordinalizeTokens.pop();
-        formatTokenFunctions[i + 'o'] = ordinalizeToken(formatTokenFunctions[i]);
+        formatTokenFunctions[i + 'o'] = ordinalizeToken(formatTokenFunctions[i], i);
     }
     while (paddedTokens.length) {
         i = paddedTokens.pop();
@@ -41272,8 +41332,7 @@ d3 = function() {
 
     // Duration Constructor
     function Duration(duration) {
-        var data = this._data = {},
-            years = duration.years || duration.year || duration.y || 0,
+        var years = duration.years || duration.year || duration.y || 0,
             months = duration.months || duration.month || duration.M || 0,
             weeks = duration.weeks || duration.week || duration.w || 0,
             days = duration.days || duration.day || duration.d || 0,
@@ -41281,6 +41340,9 @@ d3 = function() {
             minutes = duration.minutes || duration.minute || duration.m || 0,
             seconds = duration.seconds || duration.second || duration.s || 0,
             milliseconds = duration.milliseconds || duration.millisecond || duration.ms || 0;
+
+        // store reference to input for deterministic cloning
+        this._input = duration;
 
         // representation for dateAddRemove
         this._milliseconds = milliseconds +
@@ -41297,29 +41359,9 @@ d3 = function() {
         this._months = months +
             years * 12;
 
-        // The following code bubbles up values, see the tests for
-        // examples of what that means.
-        data.milliseconds = milliseconds % 1000;
-        seconds += absRound(milliseconds / 1000);
+        this._data = {};
 
-        data.seconds = seconds % 60;
-        minutes += absRound(seconds / 60);
-
-        data.minutes = minutes % 60;
-        hours += absRound(minutes / 60);
-
-        data.hours = hours % 24;
-        days += absRound(hours / 24);
-
-        days += weeks * 7;
-        data.days = days % 30;
-
-        months += absRound(days / 30);
-
-        data.months = months % 12;
-        years += absRound(months / 12);
-
-        data.years = years;
+        this._bubble();
     }
 
 
@@ -41356,23 +41398,35 @@ d3 = function() {
     }
 
     // helper function for _.addTime and _.subtractTime
-    function addOrSubtractDurationFromMoment(mom, duration, isAdding) {
-        var ms = duration._milliseconds,
-            d = duration._days,
-            M = duration._months,
+    function addOrSubtractDurationFromMoment(mom, duration, isAdding, ignoreUpdateOffset) {
+        var milliseconds = duration._milliseconds,
+            days = duration._days,
+            months = duration._months,
+            minutes,
+            hours,
             currentDate;
 
-        if (ms) {
-            mom._d.setTime(+mom + ms * isAdding);
+        if (milliseconds) {
+            mom._d.setTime(+mom._d + milliseconds * isAdding);
         }
-        if (d) {
-            mom.date(mom.date() + d * isAdding);
+        // store the minutes and hours so we can restore them
+        if (days || months) {
+            minutes = mom.minute();
+            hours = mom.hour();
         }
-        if (M) {
-            currentDate = mom.date();
-            mom.date(1)
-                .month(mom.month() + M * isAdding)
-                .date(Math.min(currentDate, mom.daysInMonth()));
+        if (days) {
+            mom.date(mom.date() + days * isAdding);
+        }
+        if (months) {
+            mom.month(mom.month() + months * isAdding);
+        }
+        if (milliseconds && !ignoreUpdateOffset) {
+            moment.updateOffset(mom);
+        }
+        // restore the minutes and hours after possibly changing dst
+        if (days || months) {
+            mom.minute(minutes);
+            mom.hour(hours);
         }
     }
 
@@ -41393,6 +41447,10 @@ d3 = function() {
             }
         }
         return diffs + lengthDiff;
+    }
+
+    function normalizeUnits(units) {
+        return units ? unitAliases[units] || units.toLowerCase().replace(/(.)s$/, '$1') : units;
     }
 
 
@@ -41425,7 +41483,7 @@ d3 = function() {
         },
 
         monthsParse : function (monthName) {
-            var i, mom, regex, output;
+            var i, mom, regex;
 
             if (!this._monthsParse) {
                 this._monthsParse = [];
@@ -41460,6 +41518,27 @@ d3 = function() {
             return this._weekdaysMin[m.day()];
         },
 
+        weekdaysParse : function (weekdayName) {
+            var i, mom, regex;
+
+            if (!this._weekdaysParse) {
+                this._weekdaysParse = [];
+            }
+
+            for (i = 0; i < 7; i++) {
+                // make the regex if we don't have it already
+                if (!this._weekdaysParse[i]) {
+                    mom = moment([2000, 1]).day(i);
+                    regex = '^' + this.weekdays(mom, '') + '|^' + this.weekdaysShort(mom, '') + '|^' + this.weekdaysMin(mom, '');
+                    this._weekdaysParse[i] = new RegExp(regex.replace('.', ''), 'i');
+                }
+                // test the regex
+                if (this._weekdaysParse[i].test(weekdayName)) {
+                    return i;
+                }
+            }
+        },
+
         _longDateFormat : {
             LT : "h:mm A",
             L : "MM/DD/YYYY",
@@ -41478,6 +41557,11 @@ d3 = function() {
             return output;
         },
 
+        isPM : function (input) {
+            return ((input + '').toLowerCase()[0] === 'p');
+        },
+
+        _meridiemParse : /[ap]\.?m?\.?/i,
         meridiem : function (hours, minutes, isLower) {
             if (hours > 11) {
                 return isLower ? 'pm' : 'PM';
@@ -41491,7 +41575,7 @@ d3 = function() {
             nextDay : '[Tomorrow at] LT',
             nextWeek : 'dddd [at] LT',
             lastDay : '[Yesterday at] LT',
-            lastWeek : '[last] dddd [at] LT',
+            lastWeek : '[Last] dddd [at] LT',
             sameElse : 'L'
         },
         calendar : function (key, mom) {
@@ -41539,7 +41623,7 @@ d3 = function() {
         },
 
         week : function (mom) {
-            return weekOfYear(mom, this._week.dow, this._week.doy);
+            return weekOfYear(mom, this._week.dow, this._week.doy).week;
         },
         _week : {
             dow : 0, // Sunday is the first day of the week.
@@ -41571,7 +41655,12 @@ d3 = function() {
             return moment.fn._lang;
         }
         if (!languages[key] && hasModule) {
-            require('./lang/' + key);
+            try {
+                require('./lang/' + key);
+            } catch (e) {
+                // call with no params to set to default
+                return moment.fn._lang;
+            }
         }
         return languages[key];
     }
@@ -41603,7 +41692,7 @@ d3 = function() {
         return function (mom) {
             var output = "";
             for (i = 0; i < length; i++) {
-                output += typeof array[i].call === 'function' ? array[i].call(mom, format) : array[i];
+                output += array[i] instanceof Function ? array[i].call(mom, format) : array[i];
             }
             return output;
         };
@@ -41635,7 +41724,7 @@ d3 = function() {
 
 
     // get the regex to find the next token
-    function getParseRegexForToken(token) {
+    function getParseRegexForToken(token, config) {
         switch (token) {
         case 'DDDD':
             return parseTokenThreeDigits;
@@ -41653,9 +41742,10 @@ d3 = function() {
         case 'dd':
         case 'ddd':
         case 'dddd':
+            return parseTokenWord;
         case 'a':
         case 'A':
-            return parseTokenWord;
+            return getLangDefinition(config._l)._meridiemParse;
         case 'X':
             return parseTokenTimestampMs;
         case 'Z':
@@ -41683,10 +41773,17 @@ d3 = function() {
         }
     }
 
+    function timezoneMinutesFromString(string) {
+        var tzchunk = (parseTokenTimezone.exec(string) || [])[0],
+            parts = (tzchunk + '').match(parseTimezoneChunker) || ['-', 0, 0],
+            minutes = +(parts[1] * 60) + ~~parts[2];
+
+        return parts[0] === '+' ? -minutes : minutes;
+    }
+
     // function to convert string input to date
     function addTimeToArrayFromToken(token, input, config) {
-        var a, b,
-            datePartArray = config._a;
+        var a, datePartArray = config._a;
 
         switch (token) {
         // MONTH
@@ -41724,7 +41821,7 @@ d3 = function() {
         // AM / PM
         case 'a' : // fall through to A
         case 'A' :
-            config._isPm = ((input + '').toLowerCase() === 'pm');
+            config._isPm = getLangDefinition(config._l).isPM(input);
             break;
         // 24 HOUR
         case 'H' : // fall through to hh
@@ -41757,18 +41854,7 @@ d3 = function() {
         case 'Z' : // fall through to ZZ
         case 'ZZ' :
             config._useUTC = true;
-            a = (input + '').match(parseTimezoneChunker);
-            if (a && a[1]) {
-                config._tzh = ~~a[1];
-            }
-            if (a && a[2]) {
-                config._tzm = ~~a[2];
-            }
-            // reverse offsets
-            if (a && a[0] === '+') {
-                config._tzh = -config._tzh;
-                config._tzm = -config._tzm;
-            }
+            config._tzm = timezoneMinutesFromString(input);
             break;
         }
 
@@ -41794,8 +41880,8 @@ d3 = function() {
         }
 
         // add the offsets to the time to be parsed so that we can have a clean array for checking isValid
-        input[3] += config._tzh || 0;
-        input[4] += config._tzm || 0;
+        input[3] += ~~((config._tzm || 0) / 60);
+        input[4] += ~~((config._tzm || 0) % 60);
 
         date = new Date(0);
 
@@ -41820,7 +41906,7 @@ d3 = function() {
         config._a = [];
 
         for (i = 0; i < tokens.length; i++) {
-            parsedInput = (getParseRegexForToken(tokens[i]).exec(string) || [])[0];
+            parsedInput = (getParseRegexForToken(tokens[i], config).exec(string) || [])[0];
             if (parsedInput) {
                 string = string.slice(string.indexOf(parsedInput) + parsedInput.length);
             }
@@ -41829,6 +41915,12 @@ d3 = function() {
                 addTimeToArrayFromToken(tokens[i], parsedInput, config);
             }
         }
+
+        // add remaining unparsed input to the string
+        if (string) {
+            config._il = string;
+        }
+
         // handle am pm
         if (config._isPm && config._a[3] < 12) {
             config._a[3] += 12;
@@ -41849,21 +41941,21 @@ d3 = function() {
 
             scoreToBeat = 99,
             i,
-            currentDate,
             currentScore;
 
-        while (config._f.length) {
+        for (i = 0; i < config._f.length; i++) {
             tempConfig = extend({}, config);
-            tempConfig._f = config._f.pop();
+            tempConfig._f = config._f[i];
             makeDateFromStringAndFormat(tempConfig);
             tempMoment = new Moment(tempConfig);
 
-            if (tempMoment.isValid()) {
-                bestMoment = tempMoment;
-                break;
-            }
-
             currentScore = compareArrays(tempConfig._a, tempMoment.toArray());
+
+            // if there is any input that was not parsed
+            // add a penalty for that format
+            if (tempMoment._il) {
+                currentScore += tempMoment._il.length;
+            }
 
             if (currentScore < scoreToBeat) {
                 scoreToBeat = currentScore;
@@ -41877,9 +41969,12 @@ d3 = function() {
     // date from iso format
     function makeDateFromString(config) {
         var i,
-            string = config._i;
-        if (isoRegex.exec(string)) {
-            config._f = 'YYYY-MM-DDT';
+            string = config._i,
+            match = isoRegex.exec(string);
+
+        if (match) {
+            // match[2] should be "T" or undefined
+            config._f = 'YYYY-MM-DD' + (match[2] || " ");
             for (i = 0; i < 4; i++) {
                 if (isoTimes[i][1].exec(string)) {
                     config._f += isoTimes[i][0];
@@ -41961,7 +42056,8 @@ d3 = function() {
     //                      (eg. ISO weeks use thursday (4))
     function weekOfYear(mom, firstDayOfWeek, firstDayOfWeekOfYear) {
         var end = firstDayOfWeekOfYear - firstDayOfWeek,
-            daysToDayOfWeek = firstDayOfWeekOfYear - mom.day();
+            daysToDayOfWeek = firstDayOfWeekOfYear - mom.day(),
+            adjustedMoment;
 
 
         if (daysToDayOfWeek > end) {
@@ -41972,7 +42068,11 @@ d3 = function() {
             daysToDayOfWeek += 7;
         }
 
-        return Math.ceil(moment(mom).add('d', daysToDayOfWeek).dayOfYear() / 7);
+        adjustedMoment = moment(mom).add('d', daysToDayOfWeek);
+        return {
+            week: Math.ceil(adjustedMoment.dayOfYear() / 7),
+            year: adjustedMoment.year()
+        };
     }
 
 
@@ -42037,7 +42137,9 @@ d3 = function() {
     moment.duration = function (input, key) {
         var isDuration = moment.isDuration(input),
             isNumber = (typeof input === 'number'),
-            duration = (isDuration ? input._data : (isNumber ? {} : input)),
+            duration = (isDuration ? input._input : (isNumber ? {} : input)),
+            matched = aspNetTimeSpanJsonRegex.exec(input),
+            sign,
             ret;
 
         if (isNumber) {
@@ -42046,6 +42148,16 @@ d3 = function() {
             } else {
                 duration.milliseconds = input;
             }
+        } else if (matched) {
+            sign = (matched[1] === "-") ? -1 : 1;
+            duration = {
+                y: 0,
+                d: ~~matched[2] * sign,
+                h: ~~matched[3] * sign,
+                m: ~~matched[4] * sign,
+                s: ~~matched[5] * sign,
+                ms: ~~matched[6] * sign
+            };
         }
 
         ret = new Duration(duration);
@@ -42063,12 +42175,14 @@ d3 = function() {
     // default format
     moment.defaultFormat = isoFormat;
 
+    // This function will be called whenever a moment is mutated.
+    // It is intended to keep the offset in sync with the timezone.
+    moment.updateOffset = function () {};
+
     // This function will load languages and then set the global language.  If
     // no arguments are passed in, it will simply return the current global
     // language key.
     moment.lang = function (key, values) {
-        var i;
-
         if (!key) {
             return moment.fn._lang._abbr;
         }
@@ -42111,11 +42225,11 @@ d3 = function() {
         },
 
         valueOf : function () {
-            return +this._d;
+            return +this._d + ((this._offset || 0) * 60000);
         },
 
         unix : function () {
-            return Math.floor(+this._d / 1000);
+            return Math.floor(+this / 1000);
         },
 
         toString : function () {
@@ -42123,11 +42237,11 @@ d3 = function() {
         },
 
         toDate : function () {
-            return this._d;
+            return this._offset ? new Date(+this) : this._d;
         },
 
-        toJSON : function () {
-            return moment.utc(this).format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
+        toISOString : function () {
+            return formatMoment(moment(this).utc(), 'YYYY-MM-DD[T]HH:mm:ss.SSS[Z]');
         },
 
         toArray : function () {
@@ -42155,11 +42269,11 @@ d3 = function() {
         },
 
         utc : function () {
-            this._isUTC = true;
-            return this;
+            return this.zone(0);
         },
 
         local : function () {
+            this.zone(0);
             this._isUTC = false;
             return this;
         },
@@ -42194,29 +42308,34 @@ d3 = function() {
         },
 
         diff : function (input, units, asFloat) {
-            var that = this._isUTC ? moment(input).utc() : moment(input).local(),
+            var that = this._isUTC ? moment(input).zone(this._offset || 0) : moment(input).local(),
                 zoneDiff = (this.zone() - that.zone()) * 6e4,
                 diff, output;
 
-            if (units) {
-                // standardize on singular form
-                units = units.replace(/s$/, '');
-            }
+            units = normalizeUnits(units);
 
             if (units === 'year' || units === 'month') {
+                // average number of days in the months in the given dates
                 diff = (this.daysInMonth() + that.daysInMonth()) * 432e5; // 24 * 60 * 60 * 1000 / 2
+                // difference in months
                 output = ((this.year() - that.year()) * 12) + (this.month() - that.month());
-                output += ((this - moment(this).startOf('month')) - (that - moment(that).startOf('month'))) / diff;
+                // adjust by taking difference in days, average number of days
+                // and dst in the given months.
+                output += ((this - moment(this).startOf('month')) -
+                        (that - moment(that).startOf('month'))) / diff;
+                // same as above but with zones, to negate all dst
+                output -= ((this.zone() - moment(this).startOf('month').zone()) -
+                        (that.zone() - moment(that).startOf('month').zone())) * 6e4 / diff;
                 if (units === 'year') {
                     output = output / 12;
                 }
             } else {
-                diff = (this - that) - zoneDiff;
+                diff = (this - that);
                 output = units === 'second' ? diff / 1e3 : // 1000
                     units === 'minute' ? diff / 6e4 : // 1000 * 60
                     units === 'hour' ? diff / 36e5 : // 1000 * 60 * 60
-                    units === 'day' ? diff / 864e5 : // 1000 * 60 * 60 * 24
-                    units === 'week' ? diff / 6048e5 : // 1000 * 60 * 60 * 24 * 7
+                    units === 'day' ? (diff - zoneDiff) / 864e5 : // 1000 * 60 * 60 * 24, negate dst
+                    units === 'week' ? (diff - zoneDiff) / 6048e5 : // 1000 * 60 * 60 * 24 * 7, negate dst
                     diff;
             }
             return asFloat ? output : absRound(output);
@@ -42247,18 +42366,52 @@ d3 = function() {
         },
 
         isDST : function () {
-            return (this.zone() < moment([this.year()]).zone() ||
-                this.zone() < moment([this.year(), 5]).zone());
+            return (this.zone() < this.clone().month(0).zone() ||
+                this.zone() < this.clone().month(5).zone());
         },
 
         day : function (input) {
             var day = this._isUTC ? this._d.getUTCDay() : this._d.getDay();
-            return input == null ? day :
-                this.add({ d : input - day });
+            if (input != null) {
+                if (typeof input === 'string') {
+                    input = this.lang().weekdaysParse(input);
+                    if (typeof input !== 'number') {
+                        return this;
+                    }
+                }
+                return this.add({ d : input - day });
+            } else {
+                return day;
+            }
+        },
+
+        month : function (input) {
+            var utc = this._isUTC ? 'UTC' : '',
+                dayOfMonth,
+                daysInMonth;
+
+            if (input != null) {
+                if (typeof input === 'string') {
+                    input = this.lang().monthsParse(input);
+                    if (typeof input !== 'number') {
+                        return this;
+                    }
+                }
+
+                dayOfMonth = this.date();
+                this.date(1);
+                this._d['set' + utc + 'Month'](input);
+                this.date(Math.min(dayOfMonth, this.daysInMonth()));
+
+                moment.updateOffset(this);
+                return this;
+            } else {
+                return this._d['get' + utc + 'Month']();
+            }
         },
 
         startOf: function (units) {
-            units = units.replace(/s$/, '');
+            units = normalizeUnits(units);
             // the following switch intentionally omits break keywords
             // to utilize falling through the cases.
             switch (units) {
@@ -42285,14 +42438,14 @@ d3 = function() {
 
             // weeks are a special case
             if (units === 'week') {
-                this.day(0);
+                this.weekday(0);
             }
 
             return this;
         },
 
         endOf: function (units) {
-            return this.startOf(units).add(units.replace(/s?$/, 's'), 1).subtract('ms', 1);
+            return this.startOf(units).add(units, 1).subtract('ms', 1);
         },
 
         isAfter: function (input, units) {
@@ -42310,8 +42463,42 @@ d3 = function() {
             return +this.clone().startOf(units) === +moment(input).startOf(units);
         },
 
-        zone : function () {
-            return this._isUTC ? 0 : this._d.getTimezoneOffset();
+        min: function (other) {
+            other = moment.apply(null, arguments);
+            return other < this ? this : other;
+        },
+
+        max: function (other) {
+            other = moment.apply(null, arguments);
+            return other > this ? this : other;
+        },
+
+        zone : function (input) {
+            var offset = this._offset || 0;
+            if (input != null) {
+                if (typeof input === "string") {
+                    input = timezoneMinutesFromString(input);
+                }
+                if (Math.abs(input) < 16) {
+                    input = input * 60;
+                }
+                this._offset = input;
+                this._isUTC = true;
+                if (offset !== input) {
+                    addOrSubtractDurationFromMoment(this, moment.duration(offset - input, 'm'), 1, true);
+                }
+            } else {
+                return this._isUTC ? offset : this._d.getTimezoneOffset();
+            }
+            return this;
+        },
+
+        zoneAbbr : function () {
+            return this._isUTC ? "UTC" : "";
+        },
+
+        zoneName : function () {
+            return this._isUTC ? "Coordinated Universal Time" : "";
         },
 
         daysInMonth : function () {
@@ -42323,14 +42510,36 @@ d3 = function() {
             return input == null ? dayOfYear : this.add("d", (input - dayOfYear));
         },
 
-        isoWeek : function (input) {
-            var week = weekOfYear(this, 1, 4);
-            return input == null ? week : this.add("d", (input - week) * 7);
+        weekYear : function (input) {
+            var year = weekOfYear(this, this.lang()._week.dow, this.lang()._week.doy).year;
+            return input == null ? year : this.add("y", (input - year));
+        },
+
+        isoWeekYear : function (input) {
+            var year = weekOfYear(this, 1, 4).year;
+            return input == null ? year : this.add("y", (input - year));
         },
 
         week : function (input) {
             var week = this.lang().week(this);
             return input == null ? week : this.add("d", (input - week) * 7);
+        },
+
+        isoWeek : function (input) {
+            var week = weekOfYear(this, 1, 4).week;
+            return input == null ? week : this.add("d", (input - week) * 7);
+        },
+
+        weekday : function (input) {
+            var weekday = (this._d.getDay() + 7 - this.lang()._week.dow) % 7;
+            return input == null ? weekday : this.add("d", input - weekday);
+        },
+
+        isoWeekday : function (input) {
+            // behaves the same as moment#day except
+            // as a getter, returns 7 instead of 0 (1-7 range instead of 0-6)
+            // as a setter, sunday should belong to the previous week.
+            return input == null ? this.day() || 7 : this.day(this.day() % 7 ? input : input - 7);
         },
 
         // If passed a language key, it will set the language for this
@@ -42352,6 +42561,7 @@ d3 = function() {
             var utc = this._isUTC ? 'UTC' : '';
             if (input != null) {
                 this._d['set' + utc + key](input);
+                moment.updateOffset(this);
                 return this;
             } else {
                 return this._d['get' + utc + key]();
@@ -42369,8 +42579,12 @@ d3 = function() {
 
     // add plural methods
     moment.fn.days = moment.fn.day;
+    moment.fn.months = moment.fn.month;
     moment.fn.weeks = moment.fn.week;
     moment.fn.isoWeeks = moment.fn.isoWeek;
+
+    // add aliased format methods
+    moment.fn.toJSON = moment.fn.toISOString;
 
     /************************************
         Duration Prototype
@@ -42378,6 +42592,36 @@ d3 = function() {
 
 
     moment.duration.fn = Duration.prototype = {
+        _bubble : function () {
+            var milliseconds = this._milliseconds,
+                days = this._days,
+                months = this._months,
+                data = this._data,
+                seconds, minutes, hours, years;
+
+            // The following code bubbles up values, see the tests for
+            // examples of what that means.
+            data.milliseconds = milliseconds % 1000;
+
+            seconds = absRound(milliseconds / 1000);
+            data.seconds = seconds % 60;
+
+            minutes = absRound(seconds / 60);
+            data.minutes = minutes % 60;
+
+            hours = absRound(minutes / 60);
+            data.hours = hours % 24;
+
+            days += absRound(hours / 24);
+            data.days = days % 30;
+
+            months += absRound(days / 30);
+            data.months = months % 12;
+
+            years = absRound(months / 12);
+            data.years = years;
+        },
+
         weeks : function () {
             return absRound(this.days() / 7);
         },
@@ -42385,7 +42629,8 @@ d3 = function() {
         valueOf : function () {
             return this._milliseconds +
               this._days * 864e5 +
-              this._months * 2592e6;
+              (this._months % 12) * 2592e6 +
+              ~~(this._months / 12) * 31536e6;
         },
 
         humanize : function (withSuffix) {
@@ -42397,6 +42642,41 @@ d3 = function() {
             }
 
             return this.lang().postformat(output);
+        },
+
+        add : function (input, val) {
+            // supports only 2.0-style add(1, 's') or add(moment)
+            var dur = moment.duration(input, val);
+
+            this._milliseconds += dur._milliseconds;
+            this._days += dur._days;
+            this._months += dur._months;
+
+            this._bubble();
+
+            return this;
+        },
+
+        subtract : function (input, val) {
+            var dur = moment.duration(input, val);
+
+            this._milliseconds -= dur._milliseconds;
+            this._days -= dur._days;
+            this._months -= dur._months;
+
+            this._bubble();
+
+            return this;
+        },
+
+        get : function (units) {
+            units = normalizeUnits(units);
+            return this[units.toLowerCase() + 's']();
+        },
+
+        as : function (units) {
+            units = normalizeUnits(units);
+            return this['as' + units.charAt(0).toUpperCase() + units.slice(1) + 's']();
         },
 
         lang : moment.fn.lang
@@ -42422,6 +42702,9 @@ d3 = function() {
     }
 
     makeDurationAsGetter('Weeks', 6048e5);
+    moment.duration.fn.asMonths = function () {
+        return (+this - this.years() * 31536e6) / 2592e6 + this.years() * 12;
+    };
 
 
     /************************************
@@ -42469,10 +42752,12 @@ d3 = function() {
 // moment.js language configuration
 // language : korean (ko)
 // author : Kyungwook, Park : https://github.com/kyungw00k
-(function(){function e(e){e.lang("ko",{months:"1\uc6d4_2\uc6d4_3\uc6d4_4\uc6d4_5\uc6d4_6\uc6d4_7\uc6d4_8\uc6d4_9\uc6d4_10\uc6d4_11\uc6d4_12\uc6d4".split("_"),monthsShort:"1\uc6d4_2\uc6d4_3\uc6d4_4\uc6d4_5\uc6d4_6\uc6d4_7\uc6d4_8\uc6d4_9\uc6d4_10\uc6d4_11\uc6d4_12\uc6d4".split("_"),weekdays:"\uc77c\uc694\uc77c_\uc6d4\uc694\uc77c_\ud654\uc694\uc77c_\uc218\uc694\uc77c_\ubaa9\uc694\uc77c_\uae08\uc694\uc77c_\ud1a0\uc694\uc77c".split("_"),weekdaysShort:"\uc77c_\uc6d4_\ud654_\uc218_\ubaa9_\uae08_\ud1a0".split("_"),weekdaysMin:"\uc77c_\uc6d4_\ud654_\uc218_\ubaa9_\uae08_\ud1a0".split("_"),longDateFormat:{LT:"A h\uc2dc mm\ubd84",L:"YYYY.MM.DD",LL:"YYYY\ub144 MMMM D\uc77c",LLL:"YYYY\ub144 MMMM D\uc77c LT",LLLL:"YYYY\ub144 MMMM D\uc77c dddd LT"},meridiem:function(e,t,n){return e<12?"\uc624\uc804":"\uc624\ud6c4"},calendar:{sameDay:"\uc624\ub298 LT",nextDay:"\ub0b4\uc77c LT",nextWeek:"dddd LT",lastDay:"\uc5b4\uc81c LT",lastWeek:"\uc9c0\ub09c\uc8fc dddd LT",sameElse:"L"},relativeTime:{future:"%s \ud6c4",past:"%s \uc804",s:"\uba87\ucd08",ss:"%d\ucd08",m:"\uc77c\ubd84",mm:"%d\ubd84",h:"\ud55c\uc2dc\uac04",hh:"%d\uc2dc\uac04",d:"\ud558\ub8e8",dd:"%d\uc77c",M:"\ud55c\ub2ec",MM:"%d\ub2ec",y:"\uc77c\ub144",yy:"%d\ub144"},ordinal:"%d\uc77c"})}typeof define=="function"&&define.amd&&define(["moment"],e),typeof window!="undefined"&&window.moment&&e(window.moment)})();
+!function(){function e(e){e.lang("ko",{months:"1\uc6d4_2\uc6d4_3\uc6d4_4\uc6d4_5\uc6d4_6\uc6d4_7\uc6d4_8\uc6d4_9\uc6d4_10\uc6d4_11\uc6d4_12\uc6d4".split("_"),monthsShort:"1\uc6d4_2\uc6d4_3\uc6d4_4\uc6d4_5\uc6d4_6\uc6d4_7\uc6d4_8\uc6d4_9\uc6d4_10\uc6d4_11\uc6d4_12\uc6d4".split("_"),weekdays:"\uc77c\uc694\uc77c_\uc6d4\uc694\uc77c_\ud654\uc694\uc77c_\uc218\uc694\uc77c_\ubaa9\uc694\uc77c_\uae08\uc694\uc77c_\ud1a0\uc694\uc77c".split("_"),weekdaysShort:"\uc77c_\uc6d4_\ud654_\uc218_\ubaa9_\uae08_\ud1a0".split("_"),weekdaysMin:"\uc77c_\uc6d4_\ud654_\uc218_\ubaa9_\uae08_\ud1a0".split("_"),longDateFormat:{LT:"A h\uc2dc mm\ubd84",L:"YYYY.MM.DD",LL:"YYYY\ub144 MMMM D\uc77c",LLL:"YYYY\ub144 MMMM D\uc77c LT",LLLL:"YYYY\ub144 MMMM D\uc77c dddd LT"},meridiem:function(e){return 12>e?"\uc624\uc804":"\uc624\ud6c4"},calendar:{sameDay:"\uc624\ub298 LT",nextDay:"\ub0b4\uc77c LT",nextWeek:"dddd LT",lastDay:"\uc5b4\uc81c LT",lastWeek:"\uc9c0\ub09c\uc8fc dddd LT",sameElse:"L"},relativeTime:{future:"%s \ud6c4",past:"%s \uc804",s:"\uba87\ucd08",ss:"%d\ucd08",m:"\uc77c\ubd84",mm:"%d\ubd84",h:"\ud55c\uc2dc\uac04",hh:"%d\uc2dc\uac04",d:"\ud558\ub8e8",dd:"%d\uc77c",M:"\ud55c\ub2ec",MM:"%d\ub2ec",y:"\uc77c\ub144",yy:"%d\ub144"},ordinal:"%d\uc77c"})}"function"==typeof define&&define.amd&&define(["moment"],e),"undefined"!=typeof window&&window.moment&&e(window.moment)}();
 var app = angular.module('App', [
 	'App.Service',
 	'App.Service.Logdb',
+	'App.Service.Logdb.Management',
+	'App.Service.Dom',
 	'App.Service.Chart',
 	'App.Filter',
 	'App.Directive.Logdb',
@@ -42958,20 +43243,6 @@ function ProgramController($scope) {
 
 }
 
-function UserController($scope) {
-	$scope.users = [];
-
-	function add() {
-		var obj = {
-			'name': 'Log Query',
-			'id': 'lq'
-		};
-		$scope.users.push(obj);
-	}
-
-	$scope.add = add;
-}
-
 
 function computerFormatPrefix(val) {
 	var computerFormatPrefixes = [ "", "K", "M", "G", "T", "P", "E", "Z", "Y" ];
@@ -42991,7 +43262,6 @@ function computerFormatPrefix(val) {
 
 app.controller('TaskController', TaskController);
 app.controller('ProgramController', ProgramController);
-app.controller('UserController', UserController);
 
 var myApp = {
 	disposeAll: function disposeAll() {
@@ -43004,6 +43274,19 @@ Array.prototype.forEach.call(['Arguments', 'Function', 'String', 'Number', 'Date
 		return toString.call(obj) == '[object ' + name + ']';
 	};
 });
+
+String.prototype.blank = function() {
+	return /^\s*$/.test(this);
+}
+
+String.prototype.isJSON = function() {
+	var str = this;
+	if (str.blank()) return false;
+	str = str.replace(/\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g, '@');
+	str = str.replace(/"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g, ']');
+	str = str.replace(/(?:^|:|,)(?:\s*\[)+/g, '');
+	return (/^[\],:{}\s]*$/).test(str);
+}
 
 /*
 $(parent.window).on('beforeunload', myApp.disposeAll);
@@ -43550,6 +43833,23 @@ angular.module('App.Service.Chart', ['App.Service'])
 		getDataSeries: getDataSeries
 	}
 });
+angular.module('App.Service.Dom', [])
+.factory('serviceDom', function(socket) {
+	
+	function hasPermission(group, permission) {
+		return socket.send('org.araqne.dom.msgbus.AdminPlugin.hasPermission', { 'group': group, 'permission': permission }, proc.pid)
+		.failed(openError);	
+	}
+
+	function whoAmI() {
+		return parent.Core.Dom.login_name;
+	}
+
+	return {
+		hasPermission: hasPermission,
+		whoAmI: whoAmI
+	}
+});
 angular.module('App.Service', [])
 .factory('serviceGuid', function() {
 	var s4 = function() {
@@ -43796,6 +44096,39 @@ window.addEventListener('unload', logdb.disposeAll);
 window.addEventListener('beforeunload', logdb.disposeAll);
 
 parent._logdb = logdb;
+angular.module('App.Service.Logdb.Management', [])
+.factory('serviceLogdbManagement', function(socket) {
+	function listTable() {
+		return socket.send('org.araqne.logdb.msgbus.ManagementPlugin.listTables', {}, proc.pid).failed(openError);
+	}
+
+	function grantPrivileges(login_name, table_names) {
+		return socket.send('org.araqne.logdb.msgbus.ManagementPlugin.grantPrivileges', {
+			'login_name': login_name,
+			'table_names': table_names
+		}, proc.pid).failed(openError);
+	}
+
+	function setPrivileges(login_name, table_names) {
+		return socket.send('org.araqne.logdb.msgbus.ManagementPlugin.setPrivileges', {
+			'login_name': login_name,
+			'table_names': table_names
+		}, proc.pid).failed(openError);
+	}
+
+	function getPrivileges(login_name) {
+		return socket.send('org.araqne.logdb.msgbus.ManagementPlugin.getPrivileges', {
+			'login_name': login_name
+		}, proc.pid).failed(openError);
+	}
+
+	return {
+		listTable: listTable,
+		grantPrivileges: grantPrivileges,
+		setPrivileges: setPrivileges,
+		getPrivileges: getPrivileges
+	}
+});
 angular.module('App.Directive', [])
 .directive('autosize', function() {
 	return {
@@ -43863,32 +44196,58 @@ angular.module('App.Directive', [])
 					if(scope.$parent.$parent.hasOwnProperty(attrs.trSelectable)) {
 						scope.$parent.$parent[attrs.trSelectable] = radio.val();
 					}
+					else {
+						alert('not binding')
+					}
 				}
 				scope.$apply();
 			});
 		}
 	}
 })
-.directive('trMultiSelectable', function() {
+.directive('trMultiSelectable', function($parse) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs) {
-			var parentTbody = element.parent();
-			var model = scope[attrs.trMultiSelectable];
-			element.on('click', function(e) {
-				if(e.target.type != 'checkbox') {
-					model.is_checked = !model.is_checked;
-				}
-				
-				if(model.is_checked) {
-					element.addClass('tr-selected');
+
+			if($parse(attrs.trMultiSelectable)() == undefined) {
+				// data string only
+				var model = scope[attrs.trMultiSelectable];
+				bindingMultiEvent();
+			}
+			else {
+				// option object
+				attrs = scope.$eval(attrs.trMultiSelectable);
+				//console.log(attrs, scope);
+
+				var parentTbody = element.parent();
+				var model = attrs.data;
+
+				if(attrs.condition != undefined) {
+					scope.$parent.$watch(attrs.condition, function(vnew, vold) {
+						if(vnew) {
+							bindingMultiEvent();
+						}
+						else {
+							element.off('click.tr-multi');
+							model.is_checked = false;
+						}
+					});
 				}
 				else {
-					element.removeClass('tr-selected');
-				}
+					bindingMultiEvent();
+				}	
+			}
 
-				scope.$apply();
-			});
+			function bindingMultiEvent() {
+				element.on('click.tr-multi', function(e) {
+					if(e.target.type != 'checkbox') {
+						model.is_checked = !model.is_checked;
+					}
+
+					scope.$apply();
+				});
+			}
 		}
 	}
 })
@@ -44174,9 +44533,200 @@ angular.module('App.Directive', [])
 			element.addClass('my-hidden');
 		}
 	}
+})
+.directive('ngModelOnblur', function() {
+	return {
+		restrict: 'A',
+		require: 'ngModel',
+		link: function(scope, element, attrs, ngModelCtrl) {
+			if (attrs.type === 'radio' || attrs.type === 'checkbox') return;
+			var cancel = false;
+
+			element.unbind('input').unbind('keydown').unbind('change');
+			element.bind('blur', function() {
+				if(!cancel) {
+					ngModelCtrl.$setViewValue(element.val());
+				}
+
+				scope[attrs.ngModelOnblur].is_edit_mode = false;
+				setTimeout(function() {
+					scope.$apply();
+					cancel = false;
+				}, 100);
+			}).bind('keydown', function(e) {
+				if(e.keyCode == 13) {
+					this.blur();
+				}
+				else if(e.keyCode == 27) {
+					cancel = true;
+					scope[attrs.ngCancel].call(scope, this);
+					this.blur();
+				}
+			})
+		}
+	}
+})
+.directive('draggable', function() {
+	return {
+		restrict: 'A',
+		link: function ($scope, $element, $attrs) {
+
+			if($attrs.draggable === 'true') {
+				init($scope, $element, $attrs);
+				return;
+			}
+
+			function init(scope, element, attrs) {
+
+				if(element[0].nodeName == 'TR' && attrs.hasOwnProperty('trMultiSelectable')) {
+					function getDataSourceString() {
+						var expr = attrs.ngRepeat;
+						return expr.substring(expr.indexOf('in') + 3, expr.length).split('|')[0].trim();
+					}
+					
+					var dataSrc = scope.$parent[getDataSourceString()];
+
+					element.draggable({
+						cursorAt: { top: 20, left: 20 },
+						helper: function(event) {
+							var selected = dataSrc.filter(function(obj) {
+								return obj.is_checked;
+							});
+
+							if(selected.length == 0) {
+								element.click();
+								return $('<span class="badge badge-important">1</span>' );
+							}
+							else {
+								return $('<span class="badge badge-important">' + selected.length + '</span>' );
+							}
+						}
+					});
+				}
+				else {
+					element.draggable({ opacity: 0.7, helper: "clone" });
+				}
+				element.draggable('enable');
+
+				element[0].dragContext = {
+					scope: scope,
+					element: element,
+					attrs: attrs
+				};
+			}
+
+			$scope.$parent.$watch($attrs.draggable, function() {
+				if($scope.$parent == null) return;
+				//console.log($attrs.draggable, $scope)
+				if(!$scope.$parent[$attrs.draggable]) {
+					$element.draggable();
+					$element.draggable('disable');	
+					return;
+				}
+
+				init($scope, $element, $attrs)
+
+			}, false);
+		}
+	}
+})
+.directive('droppable', function() {
+	return {
+		restrict: 'A',
+		link: function (scope, element, attrs) {
+			element.droppable({
+				accept: attrs.droppableAccept,
+				activeClass: attrs.droppableActiveClass,
+				hoverClass: attrs.droppableHoverClass,
+				drop: function(e, ui) {
+					scope[attrs.droppableDrop].call(scope, ui.draggable[0].dragContext.scope, scope, ui.draggable[0], this, ui.draggable[0].dragContext, e);
+				}
+			});
+		}
+	}
+})
+.directive('match', function($parse) {
+	return {
+		require: 'ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			scope.$watch(function() {
+				return $parse(attrs.match)(scope) === ctrl.$modelValue;
+			}, function(currentValue) {
+				ctrl.$setValidity('mismatch', currentValue);
+			});
+		}
+	};
+})
+.directive('ngUnique', function($parse) {
+	return {
+		restrict: 'A',
+		require: 'ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			
+			scope.$watch(attrs.ngModel, function(value) {
+				var option = scope.$eval(attrs.ngUnique);
+				if(option.condition) {
+					var has = option.source.some(function(obj) {
+						return obj[option.property] == value;
+					});
+
+					ctrl.$setValidity('unique', !has);
+				}
+			});
+		}
+	}
+})
+.directive('passwordValidate', function($parse) {
+	return {
+		restrict: 'A',
+		require: 'ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			var mdlTree = attrs.ngModel.split('.');
+			
+			var getLastParent = function(obj, arr) {
+				if (arr.length > 0) {
+					if (arr.length == 1) {
+						return obj;
+					}
+					else {
+						//console.log( obj, arr, obj[arr[0]] );
+						if(obj[arr[0]] == null) {
+							return obj;
+						}
+						else return getLastParent(obj[arr[0]], (function() { 
+							arr.shift();
+							return arr;
+						})());
+					}
+				}
+				else {
+					return obj;
+				}
+			}
+
+			var scp = getLastParent(scope, mdlTree);
+			scp.$watch(mdlTree[0], function(value) {
+				var realValue = scp.$eval(mdlTree.join('.'));
+
+				var option = scope.$eval(attrs.passwordValidate);
+				if(option == null) {
+					option = { condition: true };
+				}
+
+				if(realValue == null || !option.condition) {
+					ctrl.$setValidity('inadequacy', true);
+				}
+				else {
+					var cond = /[0-9]+/.test(realValue);
+					cond = cond & (/[a-zA-Z]+/.test(realValue));
+					cond = cond & (/[^0-9a-zA-Z]+/.test(realValue));
+					cond = cond & (realValue.length >= 9);
+					ctrl.$setValidity('inadequacy', cond);
+				}
+			}, true);
+		}
+	};
 });
-
-
 
 angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 .directive('queryInput', function($compile, serviceLogdb) {
@@ -44398,6 +44948,11 @@ angular.module('App.Directive.Tree', [])
 		link: function (scope, element, attrs)
 		{
 			scope.tree = scope.node;
+
+			var ddIcon = '';
+			if(attrs.nodeEditable === 'true') {
+				ddIcon = '<button ng-click="showMenu($event)" el-type="dropdown" href="#" class="menu pull-right" style="display:none"><span class="caret"></span></button>'
+			}
 			
 			if(!!scope.tree.children) {
 				for(var i in scope.tree.children) {
@@ -44414,20 +44969,37 @@ angular.module('App.Directive.Tree', [])
 
 				var template = angular.element(
 					'<ul class="nav nav-list">' + 
-						'<li ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
-							'<a href="#" el-type="item" draggable droppable>' +
-								'<input type="checkbox" ng-show="node.is_edit_mode">' +
+						'<li ng-show="node.is_visible" ng-class="{ \'active\': node.is_selected }" ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
+							'<a ng-hide="node.is_edit_mode" style="position:relative" href="#" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" ng-click="eventClickListAnchor($event)" el-type="group" draggable="true" droppable droppable-accept="[el-type=group],[el-type=user]" droppable-active-class="ui-state-active" droppable-hover-class="ui-state-hover" droppable-drop="onDrop">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
-								'<span>{{node.' + attrs.nodeName + '}}</span>' +
+								'{{node.' + attrs.nodeName + '}}' +
+								ddIcon +
 							'</a>' +
-							'<hierachy-view tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '"></hierachy-view>' +
+							'<div class="li-edit" ng-show="node.is_edit_mode">' +
+								'<tree-toggle></tree-toggle>' +
+								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
+								'<input ng-class="{ \'input-now-edit\': node.is_edit_mode }" ng-model="node.' + attrs.nodeName + '" ng-model-onblur="node" ng-change="changeName()" ng-cancel="cancelCreateNode" type="text" >' +
+							'</div>' +
+							'<hierachy-view tree="node" node-editable="' + attrs.nodeEditable + '" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '"></hierachy-view>' +
 						'</li>' +
 					'</ul>');
+
+				if(ddIcon != '') {
+					var dd = angular.element(
+						'<ul ng-mousedown="supressEvent($event)" class="dropdown-menu" style="display:none; left:auto; right: 0px; top: 22px">' +
+							'<li><a ng-click="addChildNode()" tabindex="-1" href="#">새 그룹</a></li>' +
+							'<li><a ng-click="renameNode()" tabindex="-1" href="#">이름 바꾸기</a></li>' +
+							'<li class="divider"></li>' +
+							'<li><a ng-click="removeNode()" tabindex="-1" href="#">삭제</a></li>' +
+						'</ul>');
+
+					template.find('button[el-type="dropdown"]').after(dd);
+				}
 				
 				var linkFunction = $compile(template);
 				linkFunction(scope);
-				element.replaceWith( template );
+				element.replaceWith(template);
 			}
 			else {
 				element.remove();
@@ -44439,7 +45011,14 @@ angular.module('App.Directive.Tree', [])
 	return {
 		restrict: 'E',
 		link: function (scope, element, attrs) {
-			scope.selectedNode = null;
+			scope.previousElement = null;
+			scope.currentElement = null;
+
+			var ddIcon = '';
+			if(attrs.nodeEditable === 'true') {
+				ddIcon = '<button ng-click="showMenu($event)" el-type="dropdown" href="#" class="menu pull-right" style="display:none"><span class="caret"></span></button>'
+			}
+
 			scope.$watch(attrs.treeData, function(val) {
 				for(var i in scope[attrs.treeData]) {
 					if(!!scope[attrs.treeData][i].children) {
@@ -44455,75 +45034,275 @@ angular.module('App.Directive.Tree', [])
 				}
 				
 				var template = angular.element(
-					'<ul class="nav nav-list tree-root">' +
-						'<li ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
-							'<a href="#" el-type="item">' +
-								'<tree-toggle></tree-toggle>root' +
-								'<span>{{node.' + attrs.nodeName + '}}</span>' +
+					'<ul class="nav nav-list tree-root">' + 
+						'<li ng-show="node.is_visible" ng-class="{ \'active\': node.is_selected }" ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
+							'<a ng-hide="node.is_edit_mode" style="position:relative" href="#" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" ng-click="eventClickListAnchor($event)" el-type="group" draggable="true" droppable droppable-accept="[el-type=group],[el-type=user]" droppable-active-class="ui-state-active" droppable-hover-class="ui-state-hover" droppable-drop="onDrop">' +
+								'<tree-toggle></tree-toggle>' +
+								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
+								'{{node.' + attrs.nodeName + '}}' +
+								ddIcon +
 							'</a>' +
-							'<hierachy-view tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '"></hierachy-view>' +
+							'<div class="li-edit" ng-show="node.is_edit_mode">' +
+								'<tree-toggle></tree-toggle>' +
+								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
+								'<input ng-class="{ \'input-now-edit\': node.is_edit_mode }" ng-model="node.' + attrs.nodeName + '" ng-model-onblur="node" ng-change="changeName()" ng-cancel="cancelCreateNode" type="text" >' +
+							'</div>' +
+							'<hierachy-view tree="node" node-editable="' + attrs.nodeEditable + '" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '"></hierachy-view>' +
 						'</li>' +
 					'</ul>');
+
+				if(ddIcon != '') {
+					var dd = angular.element(
+						'<ul ng-mousedown="supressEvent($event)" class="dropdown-menu" style="display:none; left:auto; right: 0px; top: 22px">' +
+							'<li><a ng-click="addChildNode()" tabindex="-1" href="#">새 그룹</a></li>' +
+							'<li><a ng-click="renameNode()" tabindex="-1" href="#">이름 바꾸기</a></li>' +
+							'<li class="divider"></li>' +
+							'<li><a ng-click="removeNode()" tabindex="-1" href="#">삭제</a></li>' +
+						'</ul>');
+
+					template.find('button[el-type="dropdown"]').after(dd);
+				}
 				
+				scope.supressEvent = function(e) {
+					e.stopPropagation();
+				}
+
+				scope.changeName = function() {
+					console.log('changed!!!', this.node)
+					var is_new = this.node.is_new;
+					if(is_new) {
+						delete this.node.is_new;
+					}
+
+					if(attrs.nodeEvent == undefined) return;
+
+					if(is_new) {
+						if(scope[attrs.nodeEvent].onCreateChildNode != undefined) {
+							scope[attrs.nodeEvent].onCreateChildNode.call(this, scope);
+						}
+					}
+					else {
+						if(scope[attrs.nodeEvent].onRenameNode != undefined) {
+							scope[attrs.nodeEvent].onRenameNode.call(this, scope);
+						}
+					}
+				}
+
+				element[0].setNodeEditable = function(bool) {
+					attrs.nodeEditable = bool.toString();
+				}
+
+				scope.showIcon = function(e) {
+					if(attrs.nodeEditable == 'true') {
+						$(e.currentTarget).find('button.menu').show();	
+					}
+				}
+
+				scope.hideIcon = function(e) {
+					$(e.currentTarget).find('button.menu').hide();
+				}
+
+				scope.showMenu = function(e) {
+					//console.log(e.pageY, $(document).height(), $(document).height() - e.pageY - 110)
+					var upper = $(document).height() - e.pageY - 110 < 0;
+					$('ul.dropdown-menu').hide();
+					$('li.check').removeClass('check');
+
+					e.stopPropagation();
+
+					var elmenu = $(e.currentTarget).next();
+					var elli = $(e.currentTarget).parent().parent();
+					elmenu.show();
+
+					if(upper) {
+						elmenu.addClass('upper');
+					}
+					elli.addClass('check');
+
+					$(document).on('mousedown.hideMenu', function() {
+						elmenu.hide().removeClass('upper');
+						elli.removeClass('check');
+						$(document).off('mousedown.hideMenu');
+					});
+
+					$(document).on('click.hideMenu', function() {
+						elmenu.hide().removeClass('upper');
+						elli.removeClass('check');
+						$(document).off('click.hideMenu');
+					});
+				}
+				
+				scope.eventClickListAnchor = function(e) {
+					
+				}
+
+				scope.cancelCreateNode = function() {
+					if(this.node.is_new) {
+						var idx = this.$parent.node.children.indexOf(this.node);
+						this.$parent.node.children.splice(idx, 1);
+					}
+				}
+
+				scope.addChildNode = function() {
+					$('.li-edit input[type=text]').blur();
+
+					this.node.children.push( {
+						children: [],
+						//guid: "newguid",
+						is_selected: undefined,
+						is_edit_mode: true,
+						name: "",
+						parent: this.node.guid,
+						is_new: true,
+						is_visible: true
+					});
+
+					setTimeout(function() {
+						$('.li-edit input[type=text].input-now-edit').focus().val('새 그룹').select();
+					}, 100);
+				}
+
+				scope.renameNode = function() {
+					$('.li-edit input[type=text]').blur();
+
+					this.node.is_edit_mode = true;
+
+					setTimeout(function() {
+						$('.li-edit input[type=text]').focus().select();
+					}, 100);
+				}
+
+				function removeScope(s) {
+					if(s.$parent.node == undefined) {
+						s.$parent[attrs.treeData].splice(s.$parent[attrs.treeData].indexOf(s.node), 1);
+					}
+					else {
+						s.$parent.node.children.splice(s.$parent.node.children.indexOf(s.node), 1);
+					}
+				}
+
+				scope.removeNode = function() {
+					var self = this;
+					if(attrs.nodeEvent == undefined) {
+						removeScope(self);
+						return;
+					}
+
+					if(scope[attrs.nodeEvent].onRemoveNode != undefined) {
+						scope[attrs.nodeEvent].onRemoveNode.call(self, {
+							success: function() {
+								removeScope(self);
+							}
+						}, scope);
+					}
+				}
+
+				function checkMoveChildren(scopeSource, scopeTarget) {
+
+					if(scopeTarget.$parent == null) return false;
+
+					if(scopeTarget.$parent == scopeSource) {
+						return true;
+					}
+					else {
+						return checkMoveChildren(scopeSource, scopeTarget.$parent);
+					}
+				}
+
+				scope.onDrop = function(scopeSource, scopeTarget, elSource, elTarget, dragContext, e) {
+					console.log($(elSource).attr('el-type'));
+					if($(elSource).attr('el-type') == 'group') {
+						if(checkMoveChildren(scopeSource, scopeTarget)) return;
+
+						function move() {
+							removeScope(scopeSource);
+							scopeTarget.node.children.push(scopeSource.node);
+
+							setTimeout(function() {
+								scope.$apply();
+							},100);
+						}
+
+						if(scope[attrs.nodeEvent].onMoveNode != undefined) {
+							scope[attrs.nodeEvent].onMoveNode.call(self, {
+								success: function() {
+									move();
+								}
+							}, scopeSource, scopeTarget);
+						}
+						else {
+							move();
+						}
+					}
+					// else if($(elSource).attr('el-type') == 'user') {
+					// 	
+					// }
+					else {
+						//console.log(scopeSource, scopeTarget, elSource, elTarget, dragContext, e);
+						if(attrs.nodeEvent != undefined) {
+							if(scope[attrs.nodeEvent].onDrop != undefined) {
+								scope[attrs.nodeEvent].onDrop.call(scope, scopeSource, scopeTarget, elSource, elTarget, dragContext, e);
+							}
+						}
+						
+					}
+					
+				}
+
+				template.find('button[el-type="dropdown"]').after(dd);
+	
 				var linkFunction = $compile(template);
 				linkFunction(scope);
-				element.html(null).append( template );
-
+				element.html(null).append(template);
+				
 				setTimeout(function() {
-					scope.currentElement = template.find('li.active');
+					//console.log(scope.currentElement, scope.previousElement)
+					if(scope.previousElement) {
+						scope.previousElement.addClass('active');// = template.find('li.active');
+					}
 				}, 250)
-
 				
 				// Event
 				template.unbind().bind('click', function(e) {
-					e.preventDefault();
-					e.stopPropagation();
+					//e.stopPropagation();
 
 					if(angular.element(e.target).length) {
-						if($(e.target).attr('el-type') == 'item') {
+						if($(e.target).attr('el-type') == 'group') {
+							e.preventDefault();
+							$(e.target).focus();
+
 							scope.previousElement = scope.currentElement;
 							scope.currentElement = angular.element(e.target).parent();
 							
-							scope.$broadcast('nodeSelected', { selectedNode: scope.currentElement.attr('node-id'), selectedNodeType: scope.currentElement.attr('node-tree-type'), selectedNodeRaw: scope.currentElement, selectedNodeScope: scope });
+							scope.$broadcast('nodeSelected', {
+								selectedNode: (scope.currentElement.attr('node-id') == '') ? undefined : scope.currentElement.attr('node-id'),
+								selectedNodeType: (scope.currentElement.attr('node-tree-type') == '') ? undefined : scope.currentElement.attr('node-tree-type'),
+								selectedNodeRaw: scope.currentElement,
+								selectedNodeScope: scope,
+								delegateElement: element
+							});
 							
 							if(scope.previousElement) {
-								scope.previousElement.addClass("deselected").removeClass("active");
+								scope.previousElement.addClass('deselected').removeClass('active');
 							}
-							scope.currentElement.addClass("active").removeClass("deselected");
+							scope.currentElement.addClass('active').removeClass('deselected');
 						}
 						
 						if($(e.target).attr('el-type') == 'toggle') {
+							e.preventDefault();
 							var currentElement = angular.element(e.target).parent().parent();
 							if(currentElement.children().length) {
 								currentElement.children().toggleClass("hide");
-								
-								currentElement.toggleClass("collapse");
-								currentElement.toggleClass("expand");
 							}
+						}
+
+						if($(e.target).attr('el-type') == 'dropdown') {
+							e.preventDefault();
+							
 						}
 					}
 				});
-			}, true);
-		}
-	}
-})
-.directive('draggable', function() {
-	return {
-		restrict: 'A',
-		link: function (scope, element, attrs) {
-			element.draggable({ opacity: 0.7, helper: "clone" });
-		}
-	}
-})
-.directive('droppable', function() {
-	return {
-		restrict: 'A',
-		link: function (scope, element, attrs) {
-			element.droppable({
-				accept: "[el-type=item]",
-				activeClass: "ui-state-active",
-				hoverClass: "ui-state-hover"
-			});
+			}, false);
 		}
 	}
 });
