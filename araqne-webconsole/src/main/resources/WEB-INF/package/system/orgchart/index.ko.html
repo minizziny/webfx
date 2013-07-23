@@ -4,7 +4,7 @@
 	<meta charset="utf-8" />
 
 	<script src="/script/app.dist.js"></script>
-
+	
 	<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css"/>
 	<link rel="stylesheet" href="/css/app.css"/>
 	<link rel="stylesheet" href="/css/toggle-switch.css"/>
@@ -678,7 +678,7 @@ input[type=search].input-search-table:focus {
 							</ul>
 						</section>
 						<section>
-							<ul class="tab area tab-general" ng-show="isUserEditMode">
+							<ul class="tab area tab-general" ng-show="(isUserEditMode && !amI) && isLowerLevel">
 								<li class="section area" ng-hide="selectedUserCopy._isNew">
 									<button class="btn btn-danger" style="width: 100%" ng-click="removeThisUser()">이 사용자 삭제</button>
 								</li>

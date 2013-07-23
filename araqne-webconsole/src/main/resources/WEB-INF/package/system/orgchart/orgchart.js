@@ -951,7 +951,7 @@ function TreeController($scope, $compile, socket, eventSender) {
 		});
 
 		$('#treeOrgUnit a:first').click();
-		$('#treeOrgUnit a:first > button').remove();
+		$('#treeOrgUnit a:first .dropdown-menu li:not(:first)').remove();
 	}
 
 	socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.getOrganizationUnits', {}, proc.pid)
