@@ -354,6 +354,18 @@ input[type=search].input-search-table:focus {
 				node-selected="_tables">
 			</tree>
 		</div> -->
+
+		<div class="modal mdlRemoveOrgUnit" modal>
+			<a href="#" class="modal-close close" style="margin-bottom: -30px">&times;</a>
+			<legend>부서 삭제</legend>
+			<div style="margin-bottom: 20px">
+				정말 부서 <code>{{selectedOrgUnitName}}</code>을 삭제하시겠습니까?
+			</div>
+			<div class="control-group submit-group">
+				<button class="btn btn-danger" ng-click="removeOrgUnit()">삭제</button>
+				<button class="btn" ng-click="cancelRemoveOrgUnit()">취소</button>
+			</div>
+		</div>
 	</div>
 
 	<div class="leftPaneOverHandler" ng-mouseover="glimpseLeftPane()" ng-hide="isUserEditMode"></div>

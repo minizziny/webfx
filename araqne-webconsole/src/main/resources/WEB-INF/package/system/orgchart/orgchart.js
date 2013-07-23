@@ -828,6 +828,10 @@ function TreeController($scope, $compile, socket, eventSender) {
 		//console.log(scopeSource, scopeTarget, elSource, elTarget, dragContext, e, this)
 	}
 
+	$scope.cancelRemoveOrgUnit = function() {
+		$('.mdlRemoveOrgUnit')[0].hideDialog();
+	}
+
 	$scope.treeEvent = {
 		'onDrop': $scope.dropUsers,
 		'onCreateChildNode': function(srcScope) {
@@ -854,13 +858,21 @@ function TreeController($scope, $compile, socket, eventSender) {
 			.failed(openError);
 		},
 		'onRemoveNode': function(async, srcScope) {
-			socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.removeOrganizationUnit', {
-				'guid': this.node.guid
-			}, proc.pid)
-			.success(function(m) {
-				async.success();
-			})
-			.failed(openError);
+			var self = this;
+			$('.mdlRemoveOrgUnit')[0].showDialog();
+
+			$scope.selectedOrgUnitName = self.node.name;
+
+			$scope.removeOrgUnit = function() {
+				socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.removeOrganizationUnit', {
+					'guid': self.node.guid
+				}, proc.pid)
+				.success(function(m) {
+					async.success();
+					$('.mdlRemoveOrgUnit')[0].hideDialog();
+				})
+				.failed(openError);
+			}
 		},
 		'onMoveNode': function(async, sourceScope, targetScope) {
 			var obj = {
