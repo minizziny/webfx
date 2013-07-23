@@ -525,4 +525,74 @@ angular.module('App.Directive', [])
 			});
 		}
 	};
+})
+.directive('ngUnique', function($parse) {
+	return {
+		restrict: 'A',
+		require: 'ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			
+			scope.$watch(attrs.ngModel, function(value) {
+				var option = scope.$eval(attrs.ngUnique);
+				if(option.condition) {
+					var has = option.source.some(function(obj) {
+						return obj[option.property] == value;
+					});
+
+					ctrl.$setValidity('unique', !has);
+				}
+			});
+		}
+	}
+})
+.directive('passwordValidate', function($parse) {
+	return {
+		restrict: 'A',
+		require: 'ngModel',
+		link: function(scope, elem, attrs, ctrl) {
+			var mdlTree = attrs.ngModel.split('.');
+			
+			var getLastParent = function(obj, arr) {
+				if (arr.length > 0) {
+					if (arr.length == 1) {
+						return obj;
+					}
+					else {
+						//console.log( obj, arr, obj[arr[0]] );
+						if(obj[arr[0]] == null) {
+							return obj;
+						}
+						else return getLastParent(obj[arr[0]], (function() { 
+							arr.shift();
+							return arr;
+						})());
+					}
+				}
+				else {
+					return obj;
+				}
+			}
+
+			var scp = getLastParent(scope, mdlTree);
+			scp.$watch(mdlTree[0], function(value) {
+				var realValue = scp.$eval(mdlTree.join('.'));
+
+				var option = scope.$eval(attrs.passwordValidate);
+				if(option == null) {
+					option = { condition: true };
+				}
+
+				if(realValue == null || !option.condition) {
+					ctrl.$setValidity('inadequacy', true);
+				}
+				else {
+					var cond = /[0-9]+/.test(realValue);
+					cond = cond & (/[a-zA-Z]+/.test(realValue));
+					cond = cond & (/[^0-9a-zA-Z]+/.test(realValue));
+					cond = cond & (realValue.length >= 9);
+					ctrl.$setValidity('inadequacy', cond);
+				}
+			}, true);
+		}
+	};
 });

@@ -26,85 +26,7 @@ function getOrgUnit(guid, orgunits) {
 	return found;
 }
 
-app.directive('ngUnique', function($parse) {
-	return {
-		restrict: 'A',
-		require: 'ngModel',
-		link: function(scope, elem, attrs, ctrl) {
-			
-			scope.$watch(attrs.ngModel, function(value) {
-				var option = scope.$eval(attrs.ngUnique);
-				if(option.condition) {
-					var has = option.source.some(function(obj) {
-						return obj[option.property] == value;
-					});
-
-					ctrl.$setValidity('unique', !has);
-				}
-			});
-		}
-	}
-})
-
-app.directive('passwordValidate', function($parse) {
-	return {
-		restrict: 'A',
-		require: 'ngModel',
-		link: function(scope, elem, attrs, ctrl) {
-			var mdlTree = attrs.ngModel.split('.');
-			
-			var getLastParent = function(obj, arr) {
-				if (arr.length > 0) {
-					if (arr.length == 1) {
-						return obj;
-					}
-					else {
-						//console.log( obj, arr, obj[arr[0]] );
-						if(obj[arr[0]] == null) {
-							return obj;
-						}
-						else return getLastParent(obj[arr[0]], (function() { 
-							arr.shift();
-							return arr;
-						})());
-					}
-				}
-				else {
-					return obj;
-				}
-			}
-
-			var scp = getLastParent(scope, mdlTree);
-			scp.$watch(mdlTree[0], function(value) {
-				var realValue = scp.$eval(mdlTree.join('.'));
-
-				var option = scope.$eval(attrs.passwordValidate);
-				if(option == null) {
-					option = { condition: true };
-				}
-
-				if(realValue == null || !option.condition) {
-					ctrl.$setValidity('inadequacy', true);
-				}
-				else {
-					var cond = /[0-9]+/.test(realValue);
-					cond = cond & (/[a-zA-Z]+/.test(realValue));
-					cond = cond & (/[^0-9a-zA-Z]+/.test(realValue));
-					cond = cond & (realValue.length >= 9);
-					ctrl.$setValidity('inadequacy', cond);
-				}
-			}, true);
-		}
-	};
-});
-
-app.factory('serviceDom', function() {
-	return {
-
-	};
-});
-
-function Controller($scope, serviceTask, socket, eventSender) {
+function Controller($scope, serviceTask, socket, eventSender, serviceDom) {
 	serviceTask.init();
 	proc = serviceTask.newProcess('logquery');
 
@@ -119,6 +41,12 @@ function Controller($scope, serviceTask, socket, eventSender) {
 
 	$scope.dataAllUsers = [];
 	$scope.isUserEditMode = false;
+
+	// 권한 관련 
+	$scope.canAdminGrant = false;
+	$scope.canUserEdit = false;
+	$scope.canConfigEdit = false;
+	$scope.amI = false;
 
 	eventSender.onGetAllUsers = function(body) {
 		$scope.dataAllUsers = body;
@@ -141,6 +69,35 @@ function Controller($scope, serviceTask, socket, eventSender) {
 	$scope.outLeftPane = function() {
 		$('.leftPane').removeClass('glimpse');
 	}
+
+	function checkUserEdit() {
+		serviceDom.hasPermission('dom', 'user_edit')
+		.success(function(m) {
+			console.log(m.body)
+			$scope.canUserEdit = m.body.result;
+			$scope.$apply();
+		});
+	}
+
+	function checkAdminGrant() {
+		serviceDom.hasPermission('dom', 'admin_grant')
+		.success(function(m) {
+			$scope.canAdminGrant = m.body.result;
+			$scope.$apply();
+		});
+	}
+
+	function checkConfigEdit() {
+		serviceDom.hasPermission('dom', 'config_edit')
+		.success(function(m) {
+			$scope.canConfigEdit = m.body.result;
+			$scope.$apply();
+		});
+	}
+
+	checkAdminGrant();
+	checkUserEdit();
+	checkConfigEdit();
 
 }
 
@@ -183,7 +140,7 @@ function RemoveUsersController($scope, socket, eventSender) {
 	}
 }
 
-function UserController($scope, socket, eventSender) {
+function UserController($scope, socket, eventSender, serviceDom) {
 	$scope.selectedUser = null;
 	$scope.selectedUserCopy = null;
 
@@ -191,6 +148,13 @@ function UserController($scope, socket, eventSender) {
 		console.log('----', user.login_name, '----');
 		console.log('::: onShowUser:\t', user);
 		$scope.selectedUser = user;
+		console.log(user)
+		if(serviceDom.whoAmI() == user.login_name) {
+			$scope.$parent.amI = true;
+		}
+		else {
+			$scope.$parent.amI = false;
+		}
 
 		if(user._isNew) {
 			$scope.enterUserEditMode();
@@ -253,9 +217,11 @@ function UserController($scope, socket, eventSender) {
 				eventSender.refreshUserList();
 			}
 
-			// admin 정보 저장
-			eventSender.onSaveUserAdmin($scope.selectedUserCopy);
-			eventSender.onSaveUserPrivilage($scope.selectedUserCopy);
+			if($scope.$parent.canAdminGrant) {
+				// admin 정보 저장
+				eventSender.onSaveUserAdmin($scope.selectedUserCopy);
+				eventSender.onSaveUserPrivilage($scope.selectedUserCopy);	
+			}
 
 			console.log(':::'
 				, ((method == 'org.araqne.dom.msgbus.UserPlugin.createUser') ? 'createUser:\t' : 'updateUser:\t')
@@ -283,7 +249,7 @@ function UserController($scope, socket, eventSender) {
 
 
 	$scope.openDialogChangePassword = function() {
-		eventSender.onOpenDialogChangePassword();
+		eventSender.onOpenDialogChangePassword($scope.selectedUser);
 	}
 
 	$scope.$on('nodeSelected', function(e, obj) {
@@ -313,15 +279,21 @@ function UserController($scope, socket, eventSender) {
 			return;
 		}
 
+		var canPrivilege = (serviceDom.whoAmI() == valnew.login_name) || $scope.$parent.canAdminGrant;
+
 		if(valold == null) {
 			eventSender.onSelectUserAdmin(valnew);
-			eventSender.onSelectUserPrivilege(valnew);
+			if(canPrivilege) {
+				eventSender.onSelectUserPrivilege(valnew);
+			}
 			return;
 		}
 
 		if(valnew.login_name != valold.login_name) {
 			eventSender.onSelectUserAdmin(valnew);
-			eventSender.onSelectUserPrivilege(valnew);
+			if(canPrivilege) {
+				eventSender.onSelectUserPrivilege(valnew);
+			}
 			return;
 		}
 
@@ -353,8 +325,7 @@ function AdminController($scope, socket, eventSender) {
 	$scope.listRoles = [];
 	$scope.currentUser;
 	$scope.currentRole;
-	$scope.currentRoleCopy;
-	$scope.canAdminGrant = false;
+	$scope.currentRoleCopy;	
 
 	function getRoles() {
 		socket.send('org.araqne.dom.msgbus.RolePlugin.getRoles', {}, proc.pid)
@@ -413,15 +384,6 @@ function AdminController($scope, socket, eventSender) {
 		resetRoleCopy();
 	}	
 
-	function checkAdminGrant() {
-		socket.send('org.araqne.dom.msgbus.AdminPlugin.hasPermission', { 'group': 'dom', 'permission': 'admin_grant' }, proc.pid)
-		.success(function(m) {
-			$scope.canAdminGrant = m.body.result;
-			$scope.$apply();
-		})
-		.failed(openError);
-	}
-
 	function resetRoleCopy() {
 		$scope.currentRoleCopy = $scope.listRoles[2]; // 기본값으로 돌려줌
 	}
@@ -459,7 +421,6 @@ function AdminController($scope, socket, eventSender) {
 	}
 	
 	getRoles();
-	checkAdminGrant();
 }
 
 function TablePrivilegeController($scope, socket, eventSender, serviceLogdbManagement) {
@@ -568,6 +529,7 @@ function TablePrivilegeController($scope, socket, eventSender, serviceLogdbManag
 	}
 	
 	serviceLogdbManagement.listTable().success(function(m) {
+		console.log(Object.keys(m.body.tables))
 		$scope.dataTables = Object.keys(m.body.tables).map(function(key) {
 			return {
 				'table': key,
@@ -783,7 +745,9 @@ function UserListController($scope, $compile, socket, eventSender) {
 }
 
 function ChangePasswordController($scope, socket, eventSender) {
-	eventSender.onOpenDialogChangePassword = function() {
+	var currentUser;
+	eventSender.onOpenDialogChangePassword = function(user) {
+		currentUser = angular.copy(user);
 		$('[modal].mdlChangePassword')[0].showDialog();
 		$scope.valPassword = '';
 		$scope.valPasswordConfirm = '';
@@ -794,7 +758,32 @@ function ChangePasswordController($scope, socket, eventSender) {
 	$scope.valPasswordConfirm = '';
 
 	$scope.changePassword = function() {
-		console.log('ssd')
+
+		// 저장할땐 아래 정보는 넣으면 안된다.
+		delete currentUser.created;
+		delete currentUser.updated;
+		delete currentUser.ext;
+		delete currentUser.last_password_change;
+		delete currentUser.password;
+
+		// 저장할땐, org_unit의 guid 정보만 넘겨야 한다.
+		if(currentUser.org_unit != null) {
+			var org_unit_obj = {
+				'guid': currentUser.org_unit.guid
+			}
+			currentUser.org_unit = org_unit_obj;
+		}
+
+		currentUser.password = $scope.valPassword;
+
+		// console.log(currentUser);
+		socket.send('org.araqne.dom.msgbus.UserPlugin.updateUser', currentUser, proc.pid)
+		.success(function(m) {
+			console.log(m.body);
+			notify('success', '사용자 ' + currentUser.login_name + '의 비밀번호를 변경했습니다.' , true);
+			$('[modal].mdlChangePassword')[0].hideDialog();
+		})
+		.failed(openError);
 	}
 }
 
@@ -888,13 +877,15 @@ function TreeController($scope, $compile, socket, eventSender) {
 
 		m.body.org_units.forEach(function(obj) {
 			obj.is_selected = undefined;
+			obj.is_visible = true;
 		});
 
 		var tree = buildTree(m.body.org_units, null);
 		$scope.$parent.treeDataSourceWithRoot = [{
 			'name': '모든 사용자',
 			'guid': null,
-			'children': tree
+			'children': tree,
+			'is_visible': true
 		}];
 		$scope.$parent.treeDataSource = tree;
 		$scope.$apply();
@@ -949,14 +940,4 @@ function notify(type, msg, autohide) {
 function openError(m, raw) {
 	$('.errorWin')[0].showDialog();
 	$('.errorWin .raw').text(JSON.stringify(raw[0]));
-}
-
-function makeid() {
-	var text = "";
-	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-	for( var i=0; i < 5; i++ )
-	text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-	return text;
 }

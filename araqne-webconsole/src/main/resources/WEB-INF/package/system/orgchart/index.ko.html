@@ -14,6 +14,7 @@
 	<script src="/script/app.js"></script>
 	<script src="/script/filter/filter.js"></script>
 	<script src="/script/service/service.js"></script>
+	<script src="/script/service/service.dom.js"></script>
 	<script src="/script/service/service.logdb.js"></script>
 	<script src="/script/service/service.logdb.management.js"></script>
 	<script src="/script/service/service.chart.js"></script>
@@ -86,7 +87,7 @@ tree .hide {
 
 .leftPane tree > ul {
 	clear: both;
-	padding-top: 40px;
+	/*padding-top: 40px;*/
 }
 
 .li-edit {
@@ -335,8 +336,8 @@ input[type=search].input-search-table:focus {
 			<span class="slide-button"></span>
 		</div> -->
 		<div class="treetype byorgunit">
-			<input class="searchbox" type="search" placeholder="부서 검색">
-			<tree id="treeOrgUnit" class="clearboth" style="top: 50px" tree-data="treeDataSourceWithRoot"
+			<!-- <input class="searchbox" type="search" placeholder="부서 검색" ng-model="orgunitSearch.$"> -->
+			<tree id="treeOrgUnit" class="clearboth" style="top: 50px" tree-data="treeDataSourceWithRoot | filter:orgunitSearch"
 				node-id="guid"
 				node-name="name"
 				node-selected="_tables"
@@ -365,11 +366,11 @@ input[type=search].input-search-table:focus {
 						<button ng-click="closeExtraPane()" class="btnShowTree btn btn-primary pull-left" style="margin-right: 15px; display:none"><i class="icon-white icon-list"></i></button>
 						<a class="brand">{{currentOrgUnit.name}}</a>
 						<div ng-hide="isEditMode">
-							<button class="btn pull-left" ng-click="addUser()">새 사용자</button>
+							<button class="btn pull-left" ng-click="addUser()" ng-show="canUserEdit">새 사용자</button>
 							<form class="navbar-search pull-left" style="margin-left: 10px">
 								<input type="search" placeholder="사용자 검색" ng-model="search.$">
 							</form>
-							<button class="btn pull-right" ng-click="enterEditMode()">편집</button>
+							<button class="btn pull-right" ng-show="canUserEdit" ng-click="enterEditMode()">편집</button>
 							<!-- <button class="btn pull-left" ng-click="testAlert()">test alert</button> -->
 						</div>
 						<div ng-show="isEditMode">
@@ -418,6 +419,10 @@ input[type=search].input-search-table:focus {
 								</tr>
 							</tbody>
 						</table>
+						<!-- canUserEdit: {{canUserEdit}}<br>
+						canConfigEdit: {{canConfigEdit}}<br>
+						canAdminGrant: {{canAdminGrant}}<br>
+						amI: {{amI}}<br> -->
 					</li>
 				</ul>
 			</li>
@@ -449,7 +454,7 @@ input[type=search].input-search-table:focus {
 									<div class="btn-group">
 										<button class="btn" ng-click="closeExtraPane()">닫기</button>
 									</div>
-									<div class="pull-right btn-group">
+									<div class="pull-right btn-group" ng-show="canUserEdit || amI">
 										<button class="btn" ng-click="openDialogChangePassword()">암호 변경</button>
 										<button class="btn" ng-click="enterUserEditMode()">편집</button>
 									</div>
@@ -515,7 +520,7 @@ input[type=search].input-search-table:focus {
 															<span class="caret"></span>
 														</a>
 														<div class="dropdown-menu" style="z-index:8888" ng-click="supressEvent($event)">
-															<input type="text" class="input-large search-query" style="margin: 2px 8px 6px">
+															<!-- <input type="text" class="input-large search-query" style="margin: 2px 8px 6px"> -->
 															<tree id="treeToChangeOrgUnit" tree-data="treeDataSource"
 																node-id="guid"
 																node-name="name"
@@ -601,8 +606,8 @@ input[type=search].input-search-table:focus {
 								</li>
 							</ul>
 						</section>
-						<legend style="text-indent: 40px">관리자 설정</legend>
 						<section ng-controller="AdminController">
+							<legend style="text-indent: 40px" ng-hide="isUserEditMode && !canAdminGrant">관리자 설정</legend>
 							<ul class="tab area tab-general" ng-show="isUserEditMode && canAdminGrant">
 								<li class="section area">
 									<table class="table table-form">
@@ -630,9 +635,9 @@ input[type=search].input-search-table:focus {
 								</li>
 							</ul>
 						</section>
-						<legend style="text-indent: 40px">테이블 권한 설정</legend>
 						<section ng-controller="TablePrivilegeController">
-							<ul class="tab area tab-general" ng-show="isUserEditMode">
+							<legend style="text-indent: 40px" ng-show="(!isUserEditMode && amI) || canAdminGrant">테이블 권한 설정</legend>
+							<ul class="tab area tab-general" ng-show="isUserEditMode && canAdminGrant">
 								<li class="section area">
 									<table class="table table-bordered table-striped" style="margin-bottom: 0">
 										<thead>
@@ -658,7 +663,7 @@ input[type=search].input-search-table:focus {
 									</table>
 								</li>
 							</ul>
-							<ul class="tab area tab-general" ng-hide="isUserEditMode">
+							<ul class="tab area tab-general" ng-show="!isUserEditMode && (amI || canAdminGrant)">
 								<li class="section" style="margin: 10px 40px">
 									{{dataPrivileges.length}}개의 접근 가능한 테이블
 								</li>

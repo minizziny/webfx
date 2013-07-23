@@ -26,7 +26,7 @@ angular.module('App.Directive.Tree', [])
 
 				var template = angular.element(
 					'<ul class="nav nav-list">' + 
-						'<li ng-class="{ \'active\': node.is_selected }" ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
+						'<li ng-show="node.is_visible" ng-class="{ \'active\': node.is_selected }" ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
 							'<a ng-hide="node.is_edit_mode" style="position:relative" href="#" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" ng-click="eventClickListAnchor($event)" el-type="group" draggable="true" droppable droppable-accept="[el-type=group],[el-type=user]" droppable-active-class="ui-state-active" droppable-hover-class="ui-state-hover" droppable-drop="onDrop">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
@@ -93,7 +93,7 @@ angular.module('App.Directive.Tree', [])
 				
 				var template = angular.element(
 					'<ul class="nav nav-list tree-root">' + 
-						'<li ng-class="{ \'active\': node.is_selected }" ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
+						'<li ng-show="node.is_visible" ng-class="{ \'active\': node.is_selected }" ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
 							'<a ng-hide="node.is_edit_mode" style="position:relative" href="#" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" ng-click="eventClickListAnchor($event)" el-type="group" draggable="true" droppable droppable-accept="[el-type=group],[el-type=user]" droppable-active-class="ui-state-active" droppable-hover-class="ui-state-hover" droppable-drop="onDrop">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
@@ -205,7 +205,8 @@ angular.module('App.Directive.Tree', [])
 						is_edit_mode: true,
 						name: "",
 						parent: this.node.guid,
-						is_new: true
+						is_new: true,
+						is_visible: true
 					});
 
 					setTimeout(function() {

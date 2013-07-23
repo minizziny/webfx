@@ -2,6 +2,7 @@ var app = angular.module('App', [
 	'App.Service',
 	'App.Service.Logdb',
 	'App.Service.Logdb.Management',
+	'App.Service.Dom',
 	'App.Service.Chart',
 	'App.Filter',
 	'App.Directive.Logdb',
