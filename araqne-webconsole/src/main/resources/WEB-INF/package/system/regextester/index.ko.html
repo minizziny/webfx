@@ -32,7 +32,7 @@
 					<label for="txtLine">테스트 문자열</label>
 					<textarea id="txtLine" ng-model="txtLine" ng-change="change()" autosize></textarea>
 				</div>
-				<div class="span6 row">
+				<div class="span6 row" ng-hide="isWrongRegex">
 					<label>결과</label>
 					<div id="divResult" class="well" ng-bind-html-unsafe="formatted"></div>
 					<hr>
@@ -41,6 +41,11 @@
 						<ul>
 							<li ng-repeat="group in raw.groups">{{group}}</li>
 						</ul>
+					</div>
+				</div>
+				<div class="span6 row" ng-show="isWrongRegex">
+					<div class="alert alert-error">
+						잘못된 정규 표현식
 					</div>
 				</div>
 			</div>

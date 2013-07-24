@@ -5,13 +5,12 @@ function Controller($scope, serviceTask, socket) {
 	serviceTask.init();
 	proc = serviceTask.newProcess('regextester');
 
-	// $scope.txtRegex = '(\\d+)*.+(\\d+)';
-	// $scope.txtLine = 'a1s23 a43a5 2v23';
 	$scope.txtRegex = '';
 	$scope.txtLine = '';
 
 	$scope.raw;
 	$scope.formatted;
+	$scope.isWrongRegex = false;
 
 	function format(group) {
 		if($scope.raw == null) return "";
@@ -34,6 +33,7 @@ function Controller($scope, serviceTask, socket) {
 	$scope.test = function() {
 		socket.send('org.logpresso.core.msgbus.RegexTesterPlugin.match', { regex: $scope.txtRegex, line: $scope.txtLine }, proc.pid)
 		.success(function(m) {
+			$scope.isWrongRegex = false;
 			$scope.raw = m.body;
 
 			if(m.isError) {
@@ -42,6 +42,10 @@ function Controller($scope, serviceTask, socket) {
 			}
 
 			$scope.formatted = format(m.body.group);
+			$scope.$apply();
+		})
+		.failed(function(m) {
+			$scope.isWrongRegex = true;
 			$scope.$apply();
 		});
 	}
