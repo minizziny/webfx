@@ -1,0 +1,54 @@
+<!doctype html>
+<html ng-app="regextester">
+<head>
+	<meta charset="utf-8" />
+
+	<script src="/script/app.dist.js"></script>
+
+	<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="/css/app.css"/>
+	<link rel="stylesheet" href="/css/toggle-switch.css"/>
+	<style>
+	b { 
+		background-color: yellow;
+	}
+
+	#txtLine, #divResult, #divGroupResult {
+		width: 91%;
+	}
+	</style>
+</head>
+<body ng-controller="Controller">
+	<div class="container">
+		<form>
+			<legend>정규 표현식 테스터</legend>
+			<div class="row">
+				<label class="span2" for="txtRegex">정규 표현식</label>
+				<input type="text" class="span10" id="txtRegex" ng-model="txtRegex" ng-change="change()"></input>
+			</div>
+			<hr>
+			<div class="row">
+				<div class="span6 row">
+					<label for="txtLine">테스트 문자열</label>
+					<textarea id="txtLine" ng-model="txtLine" ng-change="change()" autosize></textarea>
+				</div>
+				<div class="span6 row">
+					<label>결과</label>
+					<div id="divResult" class="well" ng-bind-html-unsafe="formatted"></div>
+					<hr>
+					<label>그룹 결과</label>
+					<div id="divGroupResult" class="well">
+						<ul>
+							<li ng-repeat="group in raw.groups">{{group}}</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<pre style="display:none">
+				{{raw}}
+			</pre>
+		</form>
+	</div>
+	<script src="regextester.js"></script>
+</body>
+</html>
