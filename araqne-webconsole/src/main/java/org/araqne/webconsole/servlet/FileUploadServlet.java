@@ -28,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.araqne.dom.api.FileUploadApi;
@@ -58,10 +59,19 @@ public class FileUploadServlet extends HttpServlet {
 		ctx.addServlet("upload", this, "/upload");
 	}
 
+	@Invalidate
+	public void stop() {
+		HttpService captured = httpd;
+		if (captured != null) {
+			HttpContext ctx = captured.ensureContext("webconsole");
+			ctx.removeServlet("upload");
+		}
+	}
+
 	@Override
 	public void log(String message, Throwable t) {
 		logger.warn("araqne webconsole: upload servlet error", t);
-	}	
+	}
 
 	public void setFileUploadApi(FileUploadApi upload) {
 		this.upload = upload;
