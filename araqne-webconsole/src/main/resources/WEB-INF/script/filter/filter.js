@@ -28,4 +28,12 @@ angular.module('App.Filter', [])
 	return function(val, prefix) {
 		return prefix + val;
 	}
-});
+})
+.filter('crlf', function() { 
+	return function(val) {
+		if(toString.call(val) == '[object String]') {
+			return val.replace(/\n/gi, '<br>');
+		}
+		else return val;
+	}
+})
