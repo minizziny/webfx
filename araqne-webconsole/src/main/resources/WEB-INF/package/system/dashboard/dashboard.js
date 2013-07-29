@@ -15,14 +15,8 @@ setInterval(function() {
 
 parent.d3 = d3;
 
-var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
 var tooltip = $('<div class="tooltip fade top"><div class="tooltip-arrow"></div><div class="tooltip-inner">...</div></div>').appendTo($('body'));
 var color_map = ["#AFD8F8","#F6BD0F","#8BBA00","#FF8E46","#008E8E","#D64646","#8E468E","#588526","#B3AA00","#008ED6","#9D080D","#A186BE","#CC6600","#FDC689","#ABA000","#F26D7D","#FFF200","#0054A6","#F7941C","#CC3300","#006600","#663300","#6DCFF6"];
-
-function checkDate(member, i) {
-	if(member == undefined) return false;
-	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19)))
-}
 
 app.directive('widget', function($compile, serviceLogdb, eventSender, serviceChart) {
 	return {
@@ -30,7 +24,8 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 		link: function(scope, element, attrs) {
 			scope[attrs.guid] = {
 				data: [],
-				interval: parseInt(attrs.interval)
+				interval: Math.max(parseInt(attrs.interval), 5),
+				isLoaded: false
 			};
 
 			function updateTimer(guid, elTimeStamp) {
@@ -45,43 +40,47 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 			}
 
 			function getData(qString, onDataLoaded, elRefresh, elPause, elResume) {
-				var timer, qInst, isLoaded = false;
+				var timer, qInst;
 
 				function created(m) {
-					isLoaded = false;
 					console.log(attrs.type + ' ------------- ', qInst.id());
 					scope[attrs.guid].data = [];
 				}
 
 				function pageLoaded(m) {
-					console.log(attrs.type + ' pageloaded', qInst.id());
+					console.log(attrs.type + ' pageloaded', qInst.id(), m.body);
 					for (var i = 0; i < m.body.result.length; i++) {
 						scope[attrs.guid].data.push(m.body.result[i]);
 					};
 
-					if(isLoaded) {
+					if(scope[attrs.guid].isLoaded) {
 						dataLoaded(false);
 					}
 				}
 
 				function loaded(m) {
-					console.log(attrs.type + ' loaded', qInst.id());
+					console.log(attrs.type + ' loaded', qInst.id(), m.body);
 					var first_load_length = scope[attrs.guid].data.length;
+					// console.log(first_load_length, m.body.total_count, scope[attrs.guid])
 					
 					var amount = Math.max(m.body.total_count, first_load_length);
-					if(amount > 15) {
-						var total_count = Math.min(m.body.total_count, 1000);
+					if(amount > 1000 && first_load_length != 1000) {
+						var total_count = Math.min(amount, 1000);
+						// console.log(total_count)
 
 						// load more
 						qInst.getResult(first_load_length, total_count - first_load_length, function() {
 							dataLoaded(true);
-							isLoaded = true;
+							scope[attrs.guid].isLoaded = true;
+							scope.$apply();
 						});
 					}
 					else {
 						dataLoaded(true);
-						isLoaded = true;
+						scope[attrs.guid].isLoaded = true;
+						scope.$apply();
 					}
+
 				}
 
 				function dataLoaded(removeQuery) {
@@ -117,20 +116,31 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				}
 
 				function query() {
+					scope[attrs.guid].isLoaded = false;
+					scope.$apply();
+
 					qInst = serviceLogdb.create(proc.pid);
-					qInst.query(qString)
+					qInst.query(qString, 1000)
 					.created(created)
 					.pageLoaded(pageLoaded)
 					.loaded(loaded)
 					.failed(failed);
 				}
 
-				query();
+				setTimeout(function() {
+					query();
+				}, 100);
 
 				elRefresh.on('click', function() {
-					clearTimeout(timer);
-					timer = null;
-					query();
+					if(scope[attrs.guid].isLoaded == false) {
+						console.log('not working')
+					}
+					else {
+						clearTimeout(timer);
+						timer = null;
+						query();	
+					}
+					
 				});
 
 				elPause.on('click', function() {
@@ -160,7 +170,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				'<button style="margin-left: 10px" class="close widget-close">&times;</button>' +
 				'<button class="close widget-refresh-pause"><i style="margin-top: 6px; margin-left:10px;" class="icon-pause pull-right"></i></button>' +
 				'<button class="close widget-refresh-resume" style="display:none"><i style="margin-top: 6px; margin-left:10px;" class="icon-play pull-right"></i></button>' +
-				'<button class="close widget-refresh"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
+				'<button class="close widget-refresh" ng-disabled="!' + attrs.guid + '.isLoaded"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
 				'<button class="close widget-property"><i style="margin-top: 6px; margin-left:10px;" class="icon-info-sign pull-right"></i></button></div>' +
 				'<div class="alert alert-error clearboth" style="display:none"><b>쿼리를 실행하는데 문제가 있습니다!</b><br><span></span></div>');
 
@@ -180,6 +190,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 				var table = angular.element('<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
 					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table>');
 				$compile(table)(scope);
+				$compile(titlebar)(scope);
 				$compile(ninput)(scope);
 				elBack.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
 				elFront.append(angular.element('<div class="cmpqr-cont">').append(table));
@@ -211,6 +222,7 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 			else if (attrs.type == 'chart.bar' || attrs.type == 'chart.line' || attrs.type == 'chart.pie') { 
 
 				var svg = angular.element('<svg class="widget">');
+				$compile(titlebar)(scope);
 				$compile(ninput)(scope);
 				elBack.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
 				elFront.append(svg);
@@ -309,6 +321,9 @@ function Controller($scope, serviceSession, serviceTask, eventSender) {
 	$scope.openNewWidget = function() {
 		eventSender.onOpenNewWidget();
 	}
+
+	$scope.numCurrentPage = 0;
+	$scope.numPagerPagesize = 1000;
 
 }
 
@@ -562,22 +577,7 @@ function SelectColumnController($scope, eventSender) {
 	];
 	$scope.selectedCustomColumnType = $scope.dataCustomColumnTypes[0];
 	$scope.addCustomColumn = function() {
-
-		$scope.qrCols.push({
-			'name': $scope.dataCustomColumn,
-			'is_visible': true,
-			'is_checked': true,
-			'type': $scope.selectedCustomColumnType.name
-		});
-		
-		for (var i = $scope.qresult.length - 1; i >= 0; i--) {
-			$scope.qresult[i][$scope.dataCustomColumn] = '';
-		};
-
-		var tmp = $scope.qresult;
-		$scope.qresult = null;
-		$scope.qresult = tmp;
-		
+		$('.qr2.qr-selectable')[0].addColumn($scope.dataCustomColumn, $scope.selectedCustomColumnType.name);	
 		$scope.dataCustomColumn = '';
 	}
 
@@ -587,7 +587,7 @@ function SelectColumnController($scope, eventSender) {
 
 		var required = $scope.chartType.required;
 		var one = $scope.chartType.one;
-		var selected = $scope.qrCols.getSelectedItems();
+		var selected = $('.qr2.qr-selectable')[0].getSelectedItems();
 
 		var satisfy_one = true, satisfy_requirement = true;
 
@@ -619,11 +619,9 @@ function SelectColumnController($scope, eventSender) {
 	}
 
 	eventSender.onSelectColumnFinished = function() {
-		console.log($scope.qresult)
-		console.log($scope.qrCols)
 		// 바인딩 화면에 컬럼 정보를 넘겨줍니다.
 		return {
-			'cols': $scope.qrCols,
+			'cols': $('.qr2.qr-selectable')[0].getColumns(),
 			'result': $scope.qresult
 		}
 	}
@@ -642,12 +640,12 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 		}
 	}
 
-	$scope.qrTmpl = '<table ng-class="{ selectable: isSelectable }" class="cmpqr table table-striped table-condensed-custom">' +
-			'<thead><tr><th ng-class="{ selected: col.is_checked }" ng-style="{ backgroundColor: col.color }" ng-hide="!col.is_visible" ng-repeat="col in qrCols" after-iterate="columnChanged" ng-click="toggleCheck(col)">' +
-			'<input id="{{col.guid}}" ng-show="isSelectable" type="checkbox" ng-model="col.is_checked" style="margin-right: 5px">' +
-			'<span class="qr-th-type" ng-show="col.type == \'number\'">1</span><span class="qr-th-type" ng-show="col.type == \'string\'">A</span><span class="qr-th-type" ng-show="col.type == \'datetime\'"><i class="icon-white icon-time"></i></span>' + 
-			' {{col.name}} </th></tr></thead>' + 
-			'<tbody><tr ng-repeat="d in qrData"><td ng-class="{ selected: col.is_checked }" ng-style="{ backgroundColor: col.color }"" ng-hide="!col.is_visible" ng-repeat="col in qrCols" ng-click="toggleCheck(col)">{{d[col.name]}}</td></tr></tbody></table>',
+	// $scope.qrTmpl = '<table ng-class="{ selectable: isSelectable }" class="cmpqr table table-striped table-condensed-custom">' +
+	// 		'<thead><tr><th ng-class="{ selected: col.is_checked }" ng-style="{ backgroundColor: col.color }" ng-hide="!col.is_visible" ng-repeat="col in qrCols" after-iterate="columnChanged" ng-click="toggleCheck(col)">' +
+	// 		'<input id="{{col.guid}}" ng-show="isSelectable" type="checkbox" ng-model="col.is_checked" style="margin-right: 5px">' +
+	// 		'<span class="qr-th-type" ng-show="col.type == \'number\'">1</span><span class="qr-th-type" ng-show="col.type == \'string\'">A</span><span class="qr-th-type" ng-show="col.type == \'datetime\'"><i class="icon-white icon-time"></i></span>' + 
+	// 		' {{col.name}} </th></tr></thead>' + 
+	// 		'<tbody><tr ng-repeat="d in qrData"><td ng-class="{ selected: col.is_checked }" ng-style="{ backgroundColor: col.color }"" ng-hide="!col.is_visible" ng-repeat="col in qrCols" ng-click="toggleCheck(col)">{{d[col.name]}}</td></tr></tbody></table>',
 
 	$scope.dataSeries = [];
 	$scope.dataLabel;
@@ -663,10 +661,11 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 
 	$scope.$watch('dataSeries', function() {
 		var ignore_render = false;
-		for (var i = $scope.qrCols.length - 1; i >= 0; i--) {
-			$scope.qrCols[i].color = undefined;
-			$scope.qrCols[i].is_checked = false;
-		};
+		
+		// for (var i = $scope.qrCols.length - 1; i >= 0; i--) {
+		// 	$scope.qrCols[i].color = undefined;
+		// 	$scope.qrCols[i].is_checked = false;
+		// };
 		for (var i = $scope.dataSeries.length - 1; i >= 0; i--) {
 			var rgb = d3.rgb($scope.dataSeries[i].color);
 			if($scope.dataSeries[i].value == undefined) {
@@ -706,33 +705,35 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 		
 	}
 
+	$scope.qrCols;
 	eventSender.onChartBindingStarting = function() {
 		// 이전 단계에서 선택된 항목의 정보를 전달해준다
 		var sender = eventSender.onSelectColumnFinished();
-
 		$scope.qresult = null;
 		$scope.qresult = sender.result;
 
 		var qrOrder = sender.cols;
-		var qrOrderTarget = $scope.qrCols;
+		$scope.qrCols = $(".qr2.qr-selected")[0].getColumns();
 
-		// qrOrder가 더 많을 경우 qrOrderTarget 에 추가한다 (사용자 정의 컬럼)
-		if(qrOrder.length > qrOrderTarget.length) {
-			var qrOrderTargetName = qrOrderTarget.map(function(o) { return o.name; });
+		console.log(qrOrder.length, $scope.qrCols.length)
+
+		// qrOrder가 더 많을 경우 $scope.qrCols 에 추가한다 (사용자 정의 컬럼)
+		if(qrOrder.length > $scope.qrCols.length) {
+			var qrOrderTargetName = $scope.qrCols.map(function(o) { return o.name; });
 
 			var newOrders = qrOrder.filter(function(o) {
 				return !(qrOrderTargetName.indexOf(o.name) > -1);
 			});
 
 			for (var i = 0; i < newOrders.length; i++) {
-				qrOrderTarget.push(newOrders[i]);
+				$scope.qrCols.push(newOrders[i]);
 			};
 		}
 
-		// qrOrderTarget에 똑같이 체크 표시
+		// $scope.qrCols 똑같이 체크 표시
 		for (var i = qrOrder.length - 1; i >= 0; i--) {
 			if(qrOrder[i].is_checked) {
-				qrOrderTarget[i].is_checked = true;
+				$scope.qrCols[i].is_checked = true;
 			}
 		};
 		init();
@@ -910,12 +911,14 @@ function WizardController($scope, eventSender, serviceGuid) {
 	}
 
 	$scope.qresult;
+	$scope.qrCols;
 
 	$scope.inputOnloading = function() {
 		$('.qr1')[0].showLoadingIndicator();
 	}
 
-	$scope.inputOnpageloaded = function() {
+	$scope.inputOnpageloaded = function(m) {
+		$scope.qrCols = $('.qr2.qr-select-table')[0].getColumns();
 		$('.qr1')[0].showTable();
 	}
 

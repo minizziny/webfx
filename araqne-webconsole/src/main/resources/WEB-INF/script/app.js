@@ -10,6 +10,13 @@ var app = angular.module('App', [
 	'ui.sortable'
 ]);
 
+var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
+
+function checkDate(member, i) {
+	if(member == undefined) return false;
+	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19)))
+}
+
 function throttle(fn, threshhold, scope) {
 	threshhold || (threshhold = 250);
 	var last,

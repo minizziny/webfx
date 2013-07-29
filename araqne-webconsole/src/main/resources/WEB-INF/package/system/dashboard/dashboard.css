@@ -375,3 +375,15 @@
 		letter-spacing: -0.5px;
 		/*font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; */
 	}
+
+	button[disabled].close {
+		opacity: .1;
+	}
+
+	button[disabled].close:hover {
+		opacity: .1;
+	}
+
+	button[disabled].close:hover * {
+		cursor: not-allowed;
+	}

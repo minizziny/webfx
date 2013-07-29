@@ -31,6 +31,8 @@ angular.module('App.Filter', [])
 })
 .filter('crlf', function() { 
 	return function(val) {
+		if(val == null) return val;
+		
 		if(toString.call(val) == '[object String]') {
 			return val.replace(/\n/gi, '<br>');
 		}
