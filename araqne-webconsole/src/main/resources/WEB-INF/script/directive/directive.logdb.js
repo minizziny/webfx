@@ -161,8 +161,8 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				// 타입 체크 및 컬럼 정보에 타입 명시
 				function checkArrayMemberType(array) {
 					var types = ['number', 'datetime', 'string'];
-					if(array.every(myApp.isNumber)) return types[0];
-					if(array.every(checkDate)) return types[1];
+					if(array.some(myApp.isNumber)) return types[0];
+					if(array.some(checkDate)) return types[1];
 
 					return types[2];
 				}
