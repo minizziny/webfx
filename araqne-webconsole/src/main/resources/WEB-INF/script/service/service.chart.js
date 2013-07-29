@@ -97,8 +97,8 @@ angular.module('App.Service.Chart', ['App.Service'])
 		.enter().append("rect")
 			.attr("width", x1.rangeBand())
 			.attr("x", function(d, i, j) { return x0(d.label) + x1.rangeBand() * j; })
-			.attr("y", function(d) { return y(d.value); })
-			.attr("height", function(d) { return height - y(d.value); })
+			.attr("y", function(d) { return (d.value == undefined) ? y(0) : y(d.value); })
+			.attr("height", function(d) { return (d.value == undefined) ? (height - y(0)) : (height - y(d.value)); })
 			.style("fill", function(d, i, j) {
 				if(data.length == 1) {
 					return color_map[i];
@@ -333,7 +333,9 @@ angular.module('App.Service.Chart', ['App.Service'])
 
 		city.append("path")
 		.attr("class", "line")
-		.attr("d", function(d) { return line(d.values); })
+		.attr("d", function(d) { 
+			return line(d.values);
+		})
 		.style("stroke", function(d) { return d.color; });
 
 		city.append("text")

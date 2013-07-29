@@ -32,7 +32,7 @@ angular.module('App.Service.Logdb', [])
 				//console.log("eof unregistered")
 				unregisterTrap();
 
-				if(m.body.total_count < 15) {
+				if(m.body.total_count < defaultLimit) {
 					getResult(id, 0)
 				}
 
@@ -62,7 +62,17 @@ angular.module('App.Service.Logdb', [])
 			//console.log('onTimeline')
 		}
 
-		function createQuery(string) {
+		var defaultLimit = 15;
+
+		function createQuery(string, limit) {
+			if(limit != undefined) {
+				defaultLimit = limit;
+			}
+			else {
+				defaultLimit = 15;
+			}
+			console.log(string, limit);
+			
 			asyncQuery = this;
 
 			dispose();
@@ -114,7 +124,7 @@ angular.module('App.Service.Logdb', [])
 			{
 				'id': clazz.id,
 				'offset': 0,
-				'limit': 15,
+				'limit': defaultLimit,
 				'timeline_limit': 10
 			}, pid)
 			.success(function(m) {
@@ -130,13 +140,13 @@ angular.module('App.Service.Logdb', [])
 			{
 				id: id,
 				offset: offset,
-				limit: ((limit == undefined) ? 15 : limit),
+				limit: ((limit == undefined) ? defaultLimit : limit),
 			}, pid)
 			.success(function(m) {
 				asyncQuery.done('pageLoaded', m);
 
 				if(!!callback) {
-					callback();
+					callback(m);
 				}
 			})
 			.failed(function(m, resp) {
@@ -173,8 +183,8 @@ angular.module('App.Service.Logdb', [])
 		}
 
 		return {
-			query: function(string) {
-				return new Async(createQuery, string);
+			query: function(string, limit) {
+				return new Async(createQuery, string, limit);
 			},
 			dispose: function() {
 				return new Async(dispose);
@@ -182,6 +192,7 @@ angular.module('App.Service.Logdb', [])
 			getResult: function() {
 				var args = Array.prototype.slice.call(arguments);
 				args.splice(0, 0, clazz.id);
+				console.log(args)
 				getResult.apply(this, args);
 			},
 			id: function() {
