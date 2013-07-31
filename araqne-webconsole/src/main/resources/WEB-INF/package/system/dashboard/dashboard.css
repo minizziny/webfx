@@ -95,21 +95,6 @@
 		margin-bottom: 10px;
 	}
 
-
-	.qr1 > .cmpqr {
-		width: 100%;
-		max-width: 880px;
-	}
-
-	.qr2 > .cmpqr {
-		width: 100%;
-		max-width: 780px;
-	}
-
-	.qr2 > .cmpqr {
-		/* table-layout: fixed; */
-	}
-
 	.cmpqr td, .cmpqr th {
 		word-wrap: break-word;
 	}

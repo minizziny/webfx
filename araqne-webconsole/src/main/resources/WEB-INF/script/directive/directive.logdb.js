@@ -100,6 +100,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			}
 
 			element[0].offset = function(offset, limit) {
+				if(z == undefined) return;
 				z.getResult(offset, limit);
 			}
 
@@ -130,15 +131,23 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			isCheckType: '@',
 			isSelectable: '@'
 		},
-		template: '<table ng-class="{ selectable: isSelectable }" class="cmpqr table table-striped table-condensed">' +
-			'<thead>\
+		template: '<div style="display: inline-block; position: relative">'+
+		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: 0; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\
+			<span ng-show="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
+				{{numLimitColumnInterval}}개의 컬럼 더 보기\
+			</span>\
+			<span ng-hide="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
+				{{numTotalColumn - numLimitColumn}}개의 컬럼 더 보기\
+			</span>\
+		</button>\
+		<table ng-class="{ selectable: isSelectable, expandable: (numTotalColumn - numLimitColumn > 0) }" class="cmpqr table table-striped table-condensed">\
+			<thead>\
 				<tr>\
 					<th>#</th>\
 					<th ng-class="{ selected: col.is_checked }"\
 						ng-hide="!col.is_visible"\
-						ng-repeat="col in ngCols"\
-						ng-click="toggleCheck(col)"\
-						after-iterate="columnChanged">\
+						ng-repeat="col in ngCols | limitTo: numLimitColumn"\
+						ng-click="toggleCheck(col)">\
 						<input id="{{col.guid}}" type="checkbox" style="margin-right: 5px"\
 							ng-show="isSelectable"\
 							ng-click="stopPropation($event)"\
@@ -155,11 +164,12 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 					<td>{{ngPage * ngPageSize + (i+1)}}</td>\
 					<td ng-class="{ selected: col.is_checked }"\
 						ng-hide="!col.is_visible"\
-						ng-repeat="col in ngCols"\
+						ng-repeat="col in ngCols | limitTo: numLimitColumn"\
 						ng-click="toggleCheck(col)"\
 						ng-bind-html-unsafe="d[col.name] | crlf"></td>\
 				</tr>\
-			</tbody></table>',
+			</tbody>\
+		</table></div>',
 		link: function(scope, element, attrs) {
 			scope.stopPropation = function(event) {
 				event.stopPropagation();
@@ -186,6 +196,20 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				col.is_checked = !col.is_checked;
 			};
 
+			scope.next = function() {
+				scope.numLimitColumn = scope.numLimitColumn + scope.numLimitColumnInterval;
+				console.log(scope.numLimitColumn)
+			}
+
+			scope.numLimitColumnInterval = 50;
+			scope.numLimitColumn = 50;
+			scope.numTotalColumn;
+
+			function newSearch() {
+				scope.numLimitColumnInterval = 50;
+				scope.numLimitColumn = 50;
+			}
+
 			scope.ngCols = []; // ngModel의 컬럼 정보
 			scope.$watch('ngModel', function(val) {
 				if(!angular.isArray(val)) { return; } // 데이터가 배열이 아니면 리턴
@@ -209,13 +233,25 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				
 				cols.sort(function(a, b) {
 					if(a.indexOf('_') == 0) { return -1; }
-					else { return 1; }
+					else { 
+						if(a > b) {
+							return 1;
+						}
+						if(b > a) {
+							return -1;
+						}
+					}
 					return 0;
 				}).forEach(function(k, i) {
 					if(k == '$$hashKey') {
 						cols.splice(cols.indexOf(k), 1);
 					}
 				});
+
+				//console.log(cols.length)
+				if(cols.length > scope.numLimitColumn) {
+					scope.numTotalColumn = cols.length;
+				}
 				
 				scope.ngCols = cols.map(function(k) {
 					return {

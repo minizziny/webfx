@@ -398,3 +398,10 @@ li.area:last-child {
 .qr-th-type i {
 	margin: 0;
 }
+
+
+.cmpqr.expandable {
+	display: inline-table;
+	margin-right: 160px;
+}
+
