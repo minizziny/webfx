@@ -6,26 +6,27 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			onLoading: '&',
 			onPageLoaded: '&',
 			onLoaded: '&',
-			ngTemplate: '=template',
+			onStatusChange: '&',
+			onTimeline: '&',
+			ngTemplate: '=ngTemplate',
 			ngPageSize: '='
 		},
-		template: '<textarea autosize></textarea> <button class="search btn btn-primary">검색</button> <button class="stop btn btn-warning">중지</button>',
+		template: '<textarea autosize></textarea>\
+			<button class="search btn btn-primary">검색</button>\
+			<button class="stop btn btn-warning">중지</button>',
 		link: function(scope, element, attrs) {
 			var autoflush = attrs.isAutoFlush;
 
-			
-
 			$scope = scope;
-			console.log(scope, attrs.onPageLoaded)
 			scope = scope.$parent;
 
-			if(attrs.hasOwnProperty('template')) {
+			if(attrs.hasOwnProperty('ngTemplate')) {
 				element.empty();
-				var customEl = angular.element($scope.template);
+				var customEl = angular.element($scope.ngTemplate);
 				element.append(customEl);
 			}
 
-			element.addClass('loaded');
+			//element.addClass('loaded');
 			var textarea = element.find('textarea');
 			textarea.attr('ng-model', attrs.ngQueryString);
 			$compile(textarea)(scope);
@@ -78,8 +79,15 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 					
 					evalEvent(attrs.onLoaded, m);
 				})
+				.onTimeline(function(m) {
+					evalEvent(attrs.onTimeline, m);
+				})
+				.onStatusChange(function(m) {
+					evalEvent(attrs.onStatusChange, m);
+				})
 				.failed(function(m) {
-					alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.')
+					alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.');
+					scope.$apply();
 				})
 			}
 
@@ -90,7 +98,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 					serviceLogdb.remove(z);	
 				}
 
-				evalEvent(attrs.onLoaded, m);
+				evalEvent(attrs.onLoaded, null);
 			}
 
 			function evalEvent(expr, arg1) {
@@ -132,7 +140,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			isSelectable: '@'
 		},
 		template: '<div style="display: inline-block; position: relative">'+
-		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: 0; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\
+		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: -5px; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\
 			<span ng-show="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
 				{{numLimitColumnInterval}}개의 컬럼 더 보기\
 			</span>\
@@ -140,7 +148,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				{{numTotalColumn - numLimitColumn}}개의 컬럼 더 보기\
 			</span>\
 		</button>\
-		<table ng-class="{ selectable: isSelectable, expandable: (numTotalColumn - numLimitColumn > 0) }" class="cmpqr table table-striped table-condensed">\
+		<table ng-class="{ selectable: isSelectable, expandable: (numTotalColumn - numLimitColumn > 0) }" class="cmpqr table table-bordered table-striped table-condensed">\
 			<thead>\
 				<tr>\
 					<th>#</th>\
@@ -208,6 +216,8 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			function newSearch() {
 				scope.numLimitColumnInterval = 50;
 				scope.numLimitColumn = 50;
+				scope.numTotalColumn = 0;
+				scope.$apply();
 			}
 
 			scope.ngCols = []; // ngModel의 컬럼 정보
@@ -317,6 +327,8 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			element[0].hideLoadingIndicator = function() {
 				loadingInd.fadeOut();
 			}
+
+			element[0].newSearch = newSearch;
 		}
 	}
 });

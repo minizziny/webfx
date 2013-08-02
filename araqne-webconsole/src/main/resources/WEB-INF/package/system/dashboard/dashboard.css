@@ -67,28 +67,6 @@
 		top: 10px;
 	}
 
-	query-input.loading textarea {
-		width: calc(100% - 190px);
-	}
-
-	query-input.loaded textarea {
-		width: calc(100% - 105px);
-	}
-
-	query-input.loading .stop {
-		display: block;
-	}
-
-	query-input.loaded .stop {
-		display: none;
-	}
-
-	query-input .btn {
-		float: right;
-		width: 80px;
-		margin-left: 5px;
-	}
-
 	.qr-container {
 		overflow-x: scroll;
 		border: 1px solid #ddd;

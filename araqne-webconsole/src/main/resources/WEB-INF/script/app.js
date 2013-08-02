@@ -69,6 +69,16 @@ function Async(fn) {
 		return this;
 	}
 
+	this.onTimeline = function(fn) {
+		callback.onTimeline = fn;
+		return this;
+	}
+
+	this.onStatusChange = function(fn) {
+		callback.onStatusChange = fn;
+		return this;
+	}
+
 	this.done = function(fname) {
 		var args = Array.prototype.slice.call(arguments);
 		args.shift();

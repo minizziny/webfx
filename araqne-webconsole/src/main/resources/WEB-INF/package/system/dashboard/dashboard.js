@@ -124,7 +124,9 @@ app.directive('widget', function($compile, serviceLogdb, eventSender, serviceCha
 					.created(created)
 					.pageLoaded(pageLoaded)
 					.loaded(loaded)
-					.failed(failed);
+					.failed(failed)
+					.onTimeline(function() {})
+					.onStatusChange(function() {});
 				}
 
 				setTimeout(function() {
@@ -323,7 +325,7 @@ function Controller($scope, serviceSession, serviceTask, eventSender) {
 	}
 
 	$scope.numCurrentPage = 0;
-	$scope.numPagerPagesize = 1000;
+	$scope.numPagerPagesize = 100;
 
 }
 
@@ -914,7 +916,8 @@ function WizardController($scope, eventSender, serviceGuid) {
 	$scope.qrCols;
 
 	$scope.inputOnloading = function() {
-		$('.qr1')[0].showLoadingIndicator();
+		$('.qr1')[0].hideTable();
+		$('.qr1')[0].newSearch();
 	}
 
 	$scope.inputOnpageloaded = function(m) {
@@ -923,7 +926,6 @@ function WizardController($scope, eventSender, serviceGuid) {
 	}
 
 	$scope.inputOnloaded = function() {
-		$('.qr1')[0].hideLoadingIndicator();
 		$('.wiz-next.btn:eq(1)').focus();
 	}
 
