@@ -633,6 +633,17 @@ angular.module('App.Directive', [])
 							<a href="#" ng-click="lastPage()">마지막(<span>{{totalIndexCount}}</span>)</a>\
 						</li>\
 					</ul>\
+					<button class="btn btn-mini" style="vertical-align: top; margin: 2px 5px 0px 0px" ng-click="openJumpPopup($event)"><i class="icon-share-alt"></i></button>\
+					<div style="position: relative; float: right">\
+						<div class="popover top" style="display:block; left: -235px; top: -130px" ng-show="isShowJumpPopup" ng-click="stopPropagation($event)">\
+							<div class="arrow" style="left:94%"></div>\
+							<h3 class="popover-title">페이지 이동</h3>\
+							<div class="popover-content"><form>\
+								<input type="number" min="1" max="{{totalIndexCount}}" ng-model="targetIndex" style="float:left; width:120px">\
+								<button class="btn btn-primary" ng-click="goPage(targetIndex - 1)" style="margin-left: 10px">이동</button>\
+							</form></div>\
+						</div>\
+					</div>\
 					<div style="display:none"><br>\
 					ngTotalCount: {{ngTotalCount}}<br>\
 					ngItemsPerPage: {{ngItemsPerPage}}<br>\
@@ -645,6 +656,11 @@ angular.module('App.Directive', [])
 			scope.currentPage = 0;
 			scope.arrPageSize = [];
 			scope.totalIndexCount;
+			scope.targetIndex = 1;
+
+			elem[0].getCurrentIndex = function() {
+				return scope.currentIndex;
+			}
 
 			function getTotalPageCount() {
 				return Math.ceil(scope.ngTotalCount / scope.ngItemsPerPage);
@@ -692,11 +708,22 @@ angular.module('App.Directive', [])
 			}
 
 			scope.changePage = function(idx, e) {
-				e.preventDefault();
+				if(e != null) {
+					e.preventDefault();
+				}
 				scope.currentIndex = idx;
-
 				changePage(idx);
 			}
+
+			scope.goPage = function(idx) {
+				if(idx < 0 || idx > getTotalPageCount()-1) return;
+				if(idx == -1) return;
+				scope.currentIndex = idx;
+				changePage(idx);
+				scope.isShowJumpPopup = false;
+			}
+
+			elem[0].changePage = scope.goPage;
 
 			function changePage(idx) {
 				if(idx < 0) idx = 0;
@@ -736,8 +763,13 @@ angular.module('App.Directive', [])
 			elem[0].setTotalCount = setTotalCount;
 
 			scope.$watch('ngTotalCount', function() {
-				scope.currentIndex = 0;
-				scope.currentPage = 0;
+				if(scope.currentIndex == undefined) {
+					scope.currentIndex = 0;	
+				}
+				if(scope.currentPage == undefined) {
+					scope.currentPage = 0;	
+				}
+				
 				render();
 			});
 
@@ -758,6 +790,27 @@ angular.module('App.Directive', [])
 				render();
 				scope.$parent.$eval(attr.onItemsPerPageChange);
 			});
+
+			scope.isShowJumpPopup = false;
+
+			scope.openJumpPopup = function(e) {
+				e.stopPropagation();
+				scope.isShowJumpPopup = true;
+				$(document).on('click.pagerJumpPop', function(ee) {
+					scope.isShowJumpPopup = false;
+					$(document).off('click.pagerJumpPop');
+					scope.$apply();
+				});
+				//scope.$apply();
+
+				setTimeout(function() {
+					$('.popover input[type=number]').focus();
+				},250);
+			}
+
+			scope.stopPropagation = function(e) {
+				e.stopPropagation();
+			}
 		}
 	}
 });
