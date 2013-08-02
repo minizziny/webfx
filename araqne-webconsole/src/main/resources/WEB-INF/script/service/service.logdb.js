@@ -1,9 +1,37 @@
+
+var logdb;
+if(parent._logdb != null) {
+	logdb = parent._logdb;
+}
+else {
+	logdb = {
+		disposeAll: function disposeAll() {
+			for (var i = logdb.queries.length - 1; i >= 0; i--) {
+				logdb.queries[i].dispose();
+			};
+			console.log('disposeAll')
+		},
+		queries: [],
+		queriesEls: [],
+		$apply: function() {
+			for (var i = logdb.queriesEls.length - 1; i >= 0; i--) {
+				logdb.queriesEls[i].$apply();
+			};
+		}
+	};
+	parent._logdb = logdb;
+}
+
+
 angular.module('App.Service.Logdb', [])
 .factory('serviceLogdb', function(servicePush, socket) {
 
 	function QueryClass(pid) {
 		var clazz = this;
 		this.id = -1;
+		this.query = '';
+		this.status = 'idle';
+
 		var asyncQuery;
 		/* Start QueryClass */
 
@@ -36,6 +64,7 @@ angular.module('App.Service.Logdb', [])
 					getResult(id, 0)
 				}
 
+				clazz.status = 'loaded';
 				asyncQuery.done('loaded', m);
 				/*******
 				that.totalCount(m.body.total_count);
@@ -44,13 +73,14 @@ angular.module('App.Service.Logdb', [])
 				*****/
 			}
 			else if(m.body.type == "eof" && m.body.hasOwnProperty('span_field')) {
-				//console.log('timeline eof', m)
+				console.log('timeline eof', m)
 			}
 			else if(m.body.type == "periodic") {
-				//console.log('periodic', m);
+				console.log('periodic', m);
 			}
 			else if(m.body.type == "status_change") {
-				//console.log('status change', m);
+				//console.log('status change', m.body);
+				asyncQuery.done('onStatusChange', m);
 			}
 			else {
 				console.log("error");
@@ -58,13 +88,16 @@ angular.module('App.Service.Logdb', [])
 			}
 		}
 
-		function onTimeline() {
-			//console.log('onTimeline')
+		function onTimeline(resp) {
+			asyncQuery.done('onTimeline', resp[0]);
 		}
 
 		var defaultLimit = 15;
 
 		function createQuery(string, limit) {
+			clazz.status = 'creating';
+			clazz.query = string;
+
 			if(limit != undefined) {
 				defaultLimit = limit;
 			}
@@ -83,9 +116,12 @@ angular.module('App.Service.Logdb', [])
 			.success(function(m) {
 				
 				clazz.id = m.body.id;
+				clazz.status = 'starting';
 				registerTrap(m);
 			})
 			.failed(function(m, raw) {
+				clazz.status = 'failed';
+
 				asyncQuery.done('failed', m, raw);
 				console.log(raw, 'cannot create query');
 			})
@@ -128,7 +164,7 @@ angular.module('App.Service.Logdb', [])
 				'timeline_limit': 10
 			}, pid)
 			.success(function(m) {
-				
+				clazz.status = 'loading';
 			})
 			.failed(function(m) {
 				asyncQuery.done('failed', m);
@@ -192,11 +228,20 @@ angular.module('App.Service.Logdb', [])
 			getResult: function() {
 				var args = Array.prototype.slice.call(arguments);
 				args.splice(0, 0, clazz.id);
-				console.log(args)
+				//console.log(args)
 				getResult.apply(this, args);
 			},
 			id: function() {
 				return clazz.id;
+			},
+			getId: function() {
+				return clazz.id;
+			},
+			getQueryString: function() {
+				return clazz.query;
+			},
+			getStatus: function() {
+				return clazz.status;
 			}
 		}
 
@@ -207,6 +252,7 @@ angular.module('App.Service.Logdb', [])
 
 		var instance = new QueryClass(pid);
 		logdb.queries.push(instance);
+		logdb.$apply();
 		return instance;
 	}
 
@@ -214,6 +260,7 @@ angular.module('App.Service.Logdb', [])
 		instance.dispose();
 		var idx = logdb.queries.indexOf(instance);
 		logdb.queries.splice(idx, 1);
+		logdb.$apply();
 	}
 
 	return {
@@ -222,17 +269,7 @@ angular.module('App.Service.Logdb', [])
 	}
 });
 
-var logdb = {
-	disposeAll: function disposeAll() {
-		for (var i = logdb.queries.length - 1; i >= 0; i--) {
-			logdb.queries[i].dispose();
-		};
-		console.log('disposeAll')
-	},
-	queries: []
-}
 
 window.addEventListener('unload', logdb.disposeAll);
 window.addEventListener('beforeunload', logdb.disposeAll);
 
-parent._logdb = logdb;
