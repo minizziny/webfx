@@ -9,9 +9,11 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			onStatusChange: '&',
 			onTimeline: '&',
 			ngTemplate: '=ngTemplate',
-			ngPageSize: '='
+			ngPageSize: '=',
+			ngChange: '&',
+			ngQueryString: '='
 		},
-		template: '<textarea autosize></textarea>\
+		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" autosize></textarea>\
 			<button class="search btn btn-primary">검색</button>\
 			<button class="stop btn btn-warning">중지</button>',
 		link: function(scope, element, attrs) {
@@ -20,16 +22,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			$scope = scope;
 			scope = scope.$parent;
 
-			if(attrs.hasOwnProperty('ngTemplate')) {
-				element.empty();
-				var customEl = angular.element($scope.ngTemplate);
-				element.append(customEl);
-			}
-
-			//element.addClass('loaded');
 			var textarea = element.find('textarea');
-			textarea.attr('ng-model', attrs.ngQueryString);
-			$compile(textarea)(scope);
 
 			var pid = proc.pid;
 			
@@ -168,8 +161,8 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				</tr>\
 			</thead>\
 			<tbody>\
-				<tr ng-repeat="(i,d) in ngModel">\
-					<td>{{ngPage * ngPageSize + (i+1)}}</td>\
+				<tr ng-repeat="d in ngModel">\
+					<td>{{ngPage * ngPageSize + ($index+1)}}</td>\
 					<td ng-class="{ selected: col.is_checked }"\
 						ng-hide="!col.is_visible"\
 						ng-repeat="col in ngCols | limitTo: numLimitColumn"\
@@ -177,8 +170,10 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 						ng-bind-html-unsafe="d[col.name] | crlf"></td>\
 				</tr>\
 			</tbody>\
-		</table></div>',
+		</table>\
+		</div>',
 		link: function(scope, element, attrs) {
+			
 			scope.stopPropation = function(event) {
 				event.stopPropagation();
 			}
