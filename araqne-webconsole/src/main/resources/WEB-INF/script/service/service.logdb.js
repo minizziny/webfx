@@ -265,7 +265,6 @@ angular.module('App.Service.Logdb', [])
 			logdb.$apply();
 		});
 		logdb.queries.push(instance);
-		logdb.$apply();
 		return instance;
 	}
 
