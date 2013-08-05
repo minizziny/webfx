@@ -26,11 +26,12 @@ else {
 angular.module('App.Service.Logdb', [])
 .factory('serviceLogdb', function(servicePush, socket) {
 
-	function QueryClass(pid) {
+	function QueryClass(pid, applyFn) {
 		var clazz = this;
 		this.id = -1;
 		this.query = '';
 		this.status = 'idle';
+		this.pid = pid;
 
 		var asyncQuery;
 		/* Start QueryClass */
@@ -55,6 +56,7 @@ angular.module('App.Service.Logdb', [])
 
 			if(m.body.type == "page_loaded") {
 				asyncQuery.done('pageLoaded', m);
+				applyFn();
 			}
 			else if(m.body.type == "eof" && m.body.hasOwnProperty('total_count')) {
 				//console.log("eof unregistered")
@@ -66,6 +68,7 @@ angular.module('App.Service.Logdb', [])
 
 				clazz.status = 'loaded';
 				asyncQuery.done('loaded', m);
+				applyFn();
 				/*******
 				that.totalCount(m.body.total_count);
 
@@ -73,7 +76,7 @@ angular.module('App.Service.Logdb', [])
 				*****/
 			}
 			else if(m.body.type == "eof" && m.body.hasOwnProperty('span_field')) {
-				console.log('timeline eof', m)
+				console.log('timeline eof', m);
 			}
 			else if(m.body.type == "periodic") {
 				console.log('periodic', m);
@@ -81,6 +84,7 @@ angular.module('App.Service.Logdb', [])
 			else if(m.body.type == "status_change") {
 				//console.log('status change', m.body);
 				asyncQuery.done('onStatusChange', m);
+				applyFn();
 			}
 			else {
 				console.log("error");
@@ -123,6 +127,7 @@ angular.module('App.Service.Logdb', [])
 				clazz.status = 'failed';
 
 				asyncQuery.done('failed', m, raw);
+				applyFn();
 				console.log(raw, 'cannot create query');
 			})
 
@@ -136,6 +141,7 @@ angular.module('App.Service.Logdb', [])
 
 				servicePush.register(tname, pid, onTimeline, function(resp) {
 					asyncQuery.done('created', m);
+					applyFn();
 					startQuery();
 				});
 				
@@ -168,6 +174,7 @@ angular.module('App.Service.Logdb', [])
 			})
 			.failed(function(m) {
 				asyncQuery.done('failed', m);
+				applyFn();
 			});
 		}
 
@@ -180,6 +187,7 @@ angular.module('App.Service.Logdb', [])
 			}, pid)
 			.success(function(m) {
 				asyncQuery.done('pageLoaded', m);
+				applyFn();
 
 				if(!!callback) {
 					callback(m);
@@ -242,6 +250,9 @@ angular.module('App.Service.Logdb', [])
 			},
 			getStatus: function() {
 				return clazz.status;
+			},
+			getPid: function() {
+				return clazz.pid;
 			}
 		}
 
@@ -250,7 +261,9 @@ angular.module('App.Service.Logdb', [])
 
 	function create(pid) {
 
-		var instance = new QueryClass(pid);
+		var instance = new QueryClass(pid, function() {
+			logdb.$apply();
+		});
 		logdb.queries.push(instance);
 		logdb.$apply();
 		return instance;
