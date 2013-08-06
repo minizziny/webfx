@@ -109,6 +109,10 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				search();
 			}
 
+			element[0].getInstance = function() {
+				return z;
+			}
+
 		}
 	}
 })

@@ -262,6 +262,9 @@ angular.module('App.Service.Logdb', [])
 			},
 			getPid: function() {
 				return clazz.pid;
+			},
+			getQueryStatus: function() {
+				return socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.queryStatus', { id: clazz.id }, pid);
 			}
 		}
 
