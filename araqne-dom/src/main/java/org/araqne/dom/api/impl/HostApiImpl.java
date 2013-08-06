@@ -132,7 +132,8 @@ public class HostApiImpl extends DefaultEntityEventProvider<Host> implements Hos
 			areaApi.removeEntityEventListener(areaEventListener);
 		if (appApi != null)
 			appApi.getVendorEventProvider().removeEntityEventListener(vendorEventListener);
-		typeEventProvider.removeEntityEventListener(typeEventListener);
+		if (typeEventProvider != null)
+			typeEventProvider.removeEntityEventListener(typeEventListener);
 	}
 
 	private Predicate getPred(String guid) {
@@ -185,13 +186,13 @@ public class HostApiImpl extends DefaultEntityEventProvider<Host> implements Hos
 	public Collection<Host> findHosts(String domain, Collection<String> guids) {
 		// TODO Auto-generated method stub
 		List<String> guidList = new ArrayList<String>(guids);
-		
+
 		Predicate[] preds = new Predicate[guidList.size()];
 		int i = 0;
 		for (String guid : guidList)
 			preds[i++] = Predicates.field("guid", guid);
 		Predicate pred = Predicates.or(preds);
-		
+
 		return cfg.all(domain, host, pred);
 	}
 
