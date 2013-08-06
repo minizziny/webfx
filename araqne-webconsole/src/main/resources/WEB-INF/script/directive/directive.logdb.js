@@ -13,7 +13,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			ngChange: '&',
 			ngQueryString: '='
 		},
-		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" autosize></textarea>\
+		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" placeholder="여기에 쿼리를 입력하세요" autosize></textarea>\
 			<button class="search btn btn-primary">검색</button>\
 			<button class="stop btn btn-warning">중지</button>',
 		link: function(scope, element, attrs) {
@@ -103,6 +103,10 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			element[0].offset = function(offset, limit) {
 				if(z == undefined) return;
 				z.getResult(offset, limit);
+			}
+
+			element[0].run = function() {
+				search();
 			}
 
 		}

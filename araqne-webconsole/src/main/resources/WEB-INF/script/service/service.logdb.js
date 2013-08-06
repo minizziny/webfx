@@ -33,6 +33,8 @@ angular.module('App.Service.Logdb', [])
 		this.status = 'idle';
 		this.pid = pid;
 
+		var isDisposed = false;
+
 		var asyncQuery;
 		/* Start QueryClass */
 
@@ -99,6 +101,11 @@ angular.module('App.Service.Logdb', [])
 		var defaultLimit = 15;
 
 		function createQuery(string, limit) {
+			if(isDisposed) {
+				throw new TypeError('do not reuse this instance!');
+				return;
+			}
+
 			clazz.status = 'creating';
 			clazz.query = string;
 
@@ -224,6 +231,8 @@ angular.module('App.Service.Logdb', [])
 				removeQuery();
 			});
 			unregisterTrap();
+
+			isDisposed = true;
 		}
 
 		return {
