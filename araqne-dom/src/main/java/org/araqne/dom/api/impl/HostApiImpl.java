@@ -130,7 +130,7 @@ public class HostApiImpl extends DefaultEntityEventProvider<Host> implements Hos
 	public void invalidate() {
 		if (areaApi != null)
 			areaApi.removeEntityEventListener(areaEventListener);
-		if (appApi != null)
+		if (appApi != null && appApi.getVendorEventProvider() != null)
 			appApi.getVendorEventProvider().removeEntityEventListener(vendorEventListener);
 		if (typeEventProvider != null)
 			typeEventProvider.removeEntityEventListener(typeEventListener);
