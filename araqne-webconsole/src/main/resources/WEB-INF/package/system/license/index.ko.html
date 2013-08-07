@@ -1,0 +1,83 @@
+<!doctype html>
+<html ng-app="license">
+<head>
+	<meta charset="utf-8" />
+	<script src="/script/app.dist.js"></script>	
+	<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="/css/app.css"/>
+	<link rel="stylesheet" href="/css/toggle-switch.css"/>
+	<style>
+	#isLicense {
+		width: 91%;
+	}
+
+	.result {
+		height: 142px;
+	}
+
+	.is-licenced {
+		border: 1px solid red;
+		background: #FFCCCC;
+		font-size: 0.8em;
+		padding: 6px;
+	}
+	</style>
+</head>
+<body ng-controller="Controller">
+	<div class="container">
+		<form>
+			<legend>라이센스 관리</legend>
+			<div class="row">
+				<label class="span3" for="isLicense">라이센스 만료 여부 판단</label>
+				<div id="isLicense row" class="span10" ng-class="{'is-licenced': queryAllowed}">라이센스가 등록 되지 않았습니다.</div>
+			</div>
+			<br />
+			<div class="row">
+				<label class="span3" for="txtHardwarekey">하드웨어키</label>
+				<div class="span10 row">
+					{{hardwareKey}}
+				</div>
+			</div>
+			<br />
+			<div class="row">
+				<label class="span3">라이센스 설치 정보</label>
+				<div class="span10 row">
+					<table class="table table-bordered table-condensed">
+						<thead>
+							<th>하드웨어 키</th>
+							<th>사용기간</th>
+							<th>발급날자</th>
+							<th>설치일자</th>
+							<th>EPS 제한</th>
+							<th>1일 로그량 제한</th>
+						</thead>
+						<tr ng-repeat="license in licenseInfo">
+							<td>{{license.hardware_key}}</td>
+							<td>{{license.duration}}</td>
+							<td>{{license.issued}}</td>
+							<td>{{license.installed}}</td>
+							<td>{{license.rate_limit}}</td>
+							<td>{{license.volume_limit}}</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="row">
+				<labe class="span3">라이센스 설치</label>
+				<div>
+					<input type="file" file="licenseFile" class="license-file-upload" license="license" autosize />
+				</div>
+				<div>
+					<span class="btn btn-success fileinput-button" ng-click="setLicense()">
+            			<i class="icon-plus icon-white"></i>
+           				<span>라이센스 등록하기</span>
+    				</span>
+    				<input type="checkbox" ng-model="force" /> 강제설치
+				</div>
+			</div>
+
+		</form>
+	</div>
+	<script src="license.js"></script>
+</body>
+</html>
