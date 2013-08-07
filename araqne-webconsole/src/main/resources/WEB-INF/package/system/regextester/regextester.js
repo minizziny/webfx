@@ -7,10 +7,19 @@ function Controller($scope, serviceTask, socket) {
 
 	$scope.txtRegex = '';
 	$scope.txtLine = '';
+	$scope.txtFormat = '';
+	$scope.txtLocales = [
+		{name:'한글', value:'ko'},
+		{name:'영어', value:'en'}
+	];
+
+	$scope.txtLocale = $scope.txtLocales[1];
 
 	$scope.raw;
 	$scope.formatted;
+	$scope.parsed;
 	$scope.isWrongRegex = false;
+	$scope.isWrongParse = false;
 
 	function format(group) {
 		if($scope.raw == null) return "";
@@ -30,6 +39,10 @@ function Controller($scope, serviceTask, socket) {
 		$scope.test();
 	}
 
+	$scope.changeFormat = function() {
+		$scope.parse();
+	}
+
 	$scope.test = function() {
 		socket.send('org.logpresso.core.msgbus.RegexTesterPlugin.match', { regex: $scope.txtRegex, line: $scope.txtLine }, proc.pid)
 		.success(function(m) {
@@ -46,6 +59,26 @@ function Controller($scope, serviceTask, socket) {
 		})
 		.failed(function(m) {
 			$scope.isWrongRegex = true;
+			$scope.$apply();
+		});
+	}
+
+	$scope.parse = function() {
+		socket.send('org.logpresso.core.msgbus.RegexTesterPlugin.parse', {
+			result: $scope.raw.groups.join(""), format: $scope.txtFormat, locale: $scope.txtLocale.value }, proc.pid)
+		.success(function(m) {
+			$scope.isWrongParse = false;
+			$scope.parsed = m.body.parsedResult;
+
+			if(m.isError) {
+				console.log(m);
+				return;
+			}
+
+			$scope.$apply();
+		})
+		.failed(function(m){
+			$scope.isWrongParse = true;
 			$scope.$apply();
 		});
 	}

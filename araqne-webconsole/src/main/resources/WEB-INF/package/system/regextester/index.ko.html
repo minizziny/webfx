@@ -13,7 +13,7 @@
 		background-color: yellow;
 	}
 
-	#txtLine, #divResult, #divGroupResult {
+	#txtLine, #divResult, #divGroupResult, #txtFormat, #txtLocale, #parseResult {
 		width: 91%;
 	}
 	</style>
@@ -30,7 +30,7 @@
 			<div class="row">
 				<div class="span6 row">
 					<label for="txtLine">테스트 문자열</label>
-					<textarea id="txtLine" ng-model="txtLine" ng-change="change()" autosize></textarea>
+					<textarea id="txtLine" class="result" ng-model="txtLine" ng-change="change()"></textarea>
 				</div>
 				<div class="span6 row" ng-hide="isWrongRegex">
 					<label>결과</label>
@@ -52,6 +52,25 @@
 			<pre style="display:none">
 				{{raw}}
 			</pre>
+			<hr>
+			<div class="row">
+				<div class="span3 row">
+					<label for="txtFormat">문자열 포맷</label>
+					<textarea id="txtFormat" ng-model="txtFormat" ng-change="changeFormat()" autosize></textarea>
+				</div>
+				<div class="span3 row">
+					<label for="txtLocale">로케일</label>
+					<select ng-model="txtLocale" ng-options="l.name for l in txtLocales" ng-change="changeFormat()">          				
+        			</select>
+				</div>
+			</div>
+			<hr>
+			<div class="row">
+				<label class="span3" for="parseResult">결과</label>
+				<div id="parseResult" class="span11 well">
+					{{parsed}}
+				</div>
+			</div>
 		</form>
 	</div>
 	<script src="regextester.js"></script>
