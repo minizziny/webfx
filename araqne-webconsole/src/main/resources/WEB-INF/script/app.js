@@ -59,6 +59,11 @@ function Async(fn) {
 		return this;
 	}
 
+	this.started = function(fn){
+		callback.started = fn;
+		return this;
+	}
+
 	this.pageLoaded = function(fn) {
 		callback.pageLoaded = fn;
 		return this;
@@ -89,7 +94,7 @@ function Async(fn) {
 			callback[fname].apply(this, args);	
 		}
 		else {
-			if(fname != 'created') {
+			if(fname != 'created' && fname != 'onTimeline' && fname != 'onStatusChange' && fname != 'started') {
 				console.warn(name + '.' + fname + ', but do nothing')
 			}
 			//console.trace();

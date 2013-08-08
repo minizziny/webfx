@@ -7,9 +7,9 @@ else {
 	logdb = {
 		disposeAll: function disposeAll() {
 			for (var i = logdb.queries.length - 1; i >= 0; i--) {
+				if(logdb.queries[i].getBg()) continue;
 				logdb.queries[i].dispose();
-			};
-			console.log('disposeAll')
+			}
 		},
 		queries: [],
 		queriesEls: [],
@@ -26,11 +26,19 @@ else {
 angular.module('App.Service.Logdb', [])
 .factory('serviceLogdb', function(servicePush, socket) {
 
-	function QueryClass(pid, applyFn) {
+	function QueryClass(pid, applyFn, options) {
 		var clazz = this;
-		this.id = -1;
-		this.query = '';
-		this.status = 'idle';
+		var props = $.extend({
+			id: -1,
+			query: '',
+			status: 'Idle',
+			bg: false
+		}, options);
+
+		this.id = props.id;
+		this.query = props.query;
+		this.status = props.status;
+		this.bg = props.bg;
 		this.pid = pid;
 
 		var isDisposed = false;
@@ -68,7 +76,7 @@ angular.module('App.Service.Logdb', [])
 					getResult(id, 0)
 				}
 
-				clazz.status = 'loaded';
+				clazz.status = 'End';
 				asyncQuery.done('loaded', m);
 				applyFn();
 				/*******
@@ -106,7 +114,6 @@ angular.module('App.Service.Logdb', [])
 				return;
 			}
 
-			clazz.status = 'creating';
 			clazz.query = string;
 
 			if(limit != undefined) {
@@ -115,7 +122,7 @@ angular.module('App.Service.Logdb', [])
 			else {
 				defaultLimit = 15;
 			}
-			console.log(string, limit);
+			//console.log(string, limit);
 			
 			asyncQuery = this;
 
@@ -127,11 +134,15 @@ angular.module('App.Service.Logdb', [])
 			.success(function(m) {
 				
 				clazz.id = m.body.id;
-				clazz.status = 'starting';
-				registerTrap(m);
+				clazz.status = 'Waiting';
+				registerTrap(function() {
+					asyncQuery.done('created', m);
+					applyFn();
+					startQuery();
+				});
 			})
 			.failed(function(m, raw) {
-				clazz.status = 'failed';
+				clazz.status = 'Failed';
 
 				asyncQuery.done('failed', m, raw);
 				applyFn();
@@ -140,30 +151,35 @@ angular.module('App.Service.Logdb', [])
 
 		}
 
-		function registerTrap(m) {
+		function registerTrap(callback) {
+			if(asyncQuery == undefined) {
+				asyncQuery = this;	
+			}
+			
 			var name = 'logstorage-query-' + clazz.id;
 			var tname = 'logstorage-query-timeline-' + clazz.id;
 
 			servicePush.register(name, pid, onTrap, function(resp) {
 
 				servicePush.register(tname, pid, onTimeline, function(resp) {
-					asyncQuery.done('created', m);
-					applyFn();
-					startQuery();
+					if(callback != undefined) {
+						callback();	
+					}
 				});
 				
 			});
 		}
 
-		function unregisterTrap() {
+		function unregisterTrap(callback) {
 			var name = 'logstorage-query-' + clazz.id;
 			var tname = 'logstorage-query-timeline-' + clazz.id;
 
 			servicePush.unregister(name, pid, function(resp) {
-				//console.log('unregistered query', pid);
 
 				servicePush.unregister(tname, pid, function(resp) {
-					//console.log('unregistered timeline', pid);
+					if(callback != undefined) {
+						callback();	
+					}
 				});
 			});
 		}
@@ -177,7 +193,9 @@ angular.module('App.Service.Logdb', [])
 				'timeline_limit': 10
 			}, pid)
 			.success(function(m) {
-				clazz.status = 'loading';
+				clazz.status = 'Running';
+				asyncQuery.done('started', m);
+				applyFn();
 			})
 			.failed(function(m) {
 				asyncQuery.done('failed', m);
@@ -201,7 +219,7 @@ angular.module('App.Service.Logdb', [])
 				}
 			})
 			.failed(function(m, resp) {
-				console.log('getResult failed', resp)
+				console.log('getResult failed', resp, id)
 			});
 		}
 
@@ -242,6 +260,12 @@ angular.module('App.Service.Logdb', [])
 			dispose: function() {
 				return new Async(dispose);
 			},
+			registerTrap: function(callback) {
+				return new Async(registerTrap, callback)
+			},
+			unregisterTrap: function(callback) {
+				return new Async(unregisterTrap, callback)
+			},
 			getResult: function() {
 				var args = Array.prototype.slice.call(arguments);
 				args.splice(0, 0, clazz.id);
@@ -262,6 +286,12 @@ angular.module('App.Service.Logdb', [])
 			},
 			getPid: function() {
 				return clazz.pid;
+			},
+			getBg: function() {
+				return clazz.bg;
+			},
+			setBg: function(value) {
+				clazz.bg = value;
 			},
 			getQueryStatus: function() {
 				return socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.queryStatus', { id: clazz.id }, pid);
@@ -287,9 +317,93 @@ angular.module('App.Service.Logdb', [])
 		logdb.$apply();
 	}
 
+	function createFromBg(pid, id, str, status) {
+		var instance = new QueryClass(pid, function() {
+			logdb.$apply();
+		}, {
+			'id': id,
+			'query': str,
+			'status': status,
+			'bg': false
+		});
+		logdb.queries.push(instance);
+		logdb.$apply();
+		return instance;
+	}
+
+	function createBg(id, str, status) {
+		var instance = new QueryClass(0, function() {
+			logdb.$apply();
+		}, {
+			'id': id,
+			'query': str,
+			'status': status,
+			'bg': true
+		});
+		logdb.queries.push(instance);
+		logdb.$apply();
+		return instance;
+	}
+
+	function getQueries(callback) {
+		socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.queries', {}, 0)
+		.success(function(m) {
+			var queries = m.body.queries;
+			console.log('getQueries', m.body)
+			for (var i = 0; i < queries.length; i++) {
+				var has = logdb.queries.some(function(queryInst) {
+					return queryInst.getId() == queries[i].id;
+				});
+				if(has) {
+					//console.log('call twice', has)
+					continue;
+				}
+
+				var query = queries[i];
+				createBg(query.id, query.query_string, query.commands[query.commands.length - 1].status);
+			};
+			if(callback != undefined) {
+				callback(m);
+			}
+
+		})
+		.failed(function(m) {
+			console.log('get queries failed', m)
+		});	
+	}
+
+	function setRunMode(id, background, callback) {
+		socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.setRunMode', { 'id': id, 'background': background }, proc.pid)
+		.success(function(m) {
+			var found = logdb.queries.filter(function(query) {
+				return query.getId() == id;
+			});
+			console.log('setRunMode', found, background);
+			found[0].setBg(background);
+
+			if(callback != undefined){
+				callback(m);
+			}
+		})
+		.failed(msgbusFailed);
+	}
+
+	getQueries();
+
+	console.log('serviceLogdb init');
+	
+
 	return {
 		create: create,
-		remove: remove
+		createFromBg: createFromBg,
+		remove: remove,
+		getQueries: getQueries,
+		setForeground: function(id, callback) {
+			return setRunMode(id, false, callback);
+		},
+		setBackground: function(id, callback) {
+			return setRunMode(id, true, callback);
+		}
 	}
 });
 

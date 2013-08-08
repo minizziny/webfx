@@ -39,6 +39,42 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 
 			element.find('.stop').on('click', stop);
 
+			function createdFn(m) {
+				element.removeClass('loaded').addClass('loading');
+			}
+
+			function startedFn(m) {
+				evalEvent(attrs.onLoading, m);
+			}
+
+			function pageLoadedFn(m) {
+				scope[attrs.ngModel] = m.body.result;
+				scope.$apply();
+
+				evalEvent(attrs.onPageLoaded, m);
+			}
+
+			function loadedFn(m) {
+				element.removeClass('loading').addClass('loaded');
+				if(autoflush != 'false') {
+					serviceLogdb.remove(z);	
+				}
+				evalEvent(attrs.onLoaded, m);
+			}
+
+			function onTimelineFn(m) {
+				evalEvent(attrs.onTimeline, m);
+			}
+
+			function onStatusChangeFn(m) {
+				evalEvent(attrs.onStatusChange, m);
+			}
+
+			function failedFn(m) {
+				alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.');
+				scope.$apply();
+			}
+
 			var z;
 			function search() {
 				var limit = scope.$eval(attrs.ngPageSize);
@@ -51,37 +87,13 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				var queryValue = textarea.data('$ngModelController').$modelValue;
 
 				z.query(queryValue, limit)
-				.created(function(m) {
-					element.removeClass('loaded').addClass('loading');
-
-					evalEvent(attrs.onLoading, m);
-				})
-				.pageLoaded(function(m) {
-					scope[attrs.ngModel] = m.body.result;
-					scope._page = 1;
-					scope.$apply();
-
-					evalEvent(attrs.onPageLoaded, m);
-				})
-				.loaded(function(m) {
-					element.removeClass('loading').addClass('loaded');
-
-					if(autoflush != 'false') {
-						serviceLogdb.remove(z);	
-					}
-					
-					evalEvent(attrs.onLoaded, m);
-				})
-				.onTimeline(function(m) {
-					evalEvent(attrs.onTimeline, m);
-				})
-				.onStatusChange(function(m) {
-					evalEvent(attrs.onStatusChange, m);
-				})
-				.failed(function(m) {
-					alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.');
-					scope.$apply();
-				})
+				.created(createdFn)
+				.started(startedFn)
+				.pageLoaded(pageLoadedFn)
+				.loaded(loadedFn)
+				.onTimeline(onTimelineFn)
+				.onStatusChange(onStatusChangeFn)
+				.failed(failedFn)
 			}
 
 			function stop() {
@@ -111,6 +123,22 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 
 			element[0].getInstance = function() {
 				return z;
+			}
+
+			element[0].bindBackgroundQuery = function(id, str, status) {
+				z = serviceLogdb.createFromBg(pid, id, str, status);
+				z.registerTrap(function() {
+					console.log('registerTrap')
+				})
+				.created(createdFn)
+				.started(startedFn)
+				.pageLoaded(pageLoadedFn)
+				.loaded(loadedFn)
+				.onTimeline(onTimelineFn)
+				.onStatusChange(onStatusChangeFn)
+				.failed(failedFn);
+
+				element.removeClass('loaded').addClass('loading');
 			}
 
 		}
