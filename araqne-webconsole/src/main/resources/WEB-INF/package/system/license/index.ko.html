@@ -59,6 +59,7 @@
 				<div class="span10 row">
 					<table class="table table-bordered table-condensed">
 						<thead>
+							<th></th>
 							<th>하드웨어 키</th>
 							<th>사용기간</th>
 							<th>발급날자</th>
@@ -67,6 +68,7 @@
 							<th>1일 로그량 제한</th>
 						</thead>
 						<tr ng-repeat="license in licenseInfo">
+							<td><input type="button" ng-click="unsetLicense(license)" value="x" target="_self"></td>
 							<td>{{license.hardware_key}}</td>
 							<td>{{license.duration}}</td>
 							<td>{{license.issued}}</td>

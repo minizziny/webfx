@@ -65,7 +65,7 @@ function Controller($scope, serviceTask, socket) {
 		}, proc.pid)
 		.success(function(m) {
 			$scope.queryAllowed = m.body.isQueryAllowed;
-			console.log($scope.queryAllowed);
+			
 			if(m.isError) {
 				console.log(m);
 				return;
@@ -98,6 +98,24 @@ function Controller($scope, serviceTask, socket) {
 		socket.send('org.logpresso.core.msgbus.LicensePlugin.setLicense', { 
 			license: $scope.license, force: $scope.force }, proc.pid)
 		.success(function(m) {
+			getLicenseInfos();
+			$scope.licenseInfo.push($scope.license);
+			if(m.isError) {
+				console.log(m); 
+				return;
+			}
+			$scope.$apply();
+		})
+		.failed(function(m) {
+			$scope.$apply();
+		});
+	}
+
+	$scope.unsetLicense = function(val) {
+		socket.send('org.logpresso.core.msgbus.LicensePlugin.unsetLicense', { 
+			hardware_key: val.hardware_key }, proc.pid)
+		.success(function(m) {
+			getLicenseInfos();
 			if(m.isError) {
 				console.log(m);
 				return;
@@ -128,7 +146,7 @@ function Controller($scope, serviceTask, socket) {
 
 		socket.send(query, {}, proc.pid)
 		.success(function(m) {
-			console.log(m.body.stats);
+			//console.log(m.body.stats);
 
 			// var data = m.body.stats;	
 			var data = [				
