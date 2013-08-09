@@ -260,6 +260,9 @@ angular.module('App.Service.Logdb', [])
 			dispose: function() {
 				return new Async(dispose);
 			},
+			stop: function() {
+				return new Async(stopQuery);
+			},
 			registerTrap: function(callback) {
 				return new Async(registerTrap, callback)
 			},

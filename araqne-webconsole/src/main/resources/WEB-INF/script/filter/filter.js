@@ -39,3 +39,8 @@ angular.module('App.Filter', [])
 		else return val;
 	}
 })
+.filter('numformat', function() { 
+	return function(val) {
+		return d3.format(',')(val);
+	}
+})

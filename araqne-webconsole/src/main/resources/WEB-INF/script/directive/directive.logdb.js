@@ -97,11 +97,15 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			}
 
 			function stop() {
-				alert('쿼리를 중지합니다.')
 				element.removeClass('loading').addClass('loaded');
 				if(autoflush != 'false') {
 					serviceLogdb.remove(z);	
 				}
+
+				z.stop()
+				.success(function() {
+					console.log('stopped')
+				})
 
 				evalEvent(attrs.onLoaded, null);
 			}
@@ -138,7 +142,9 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				.onStatusChange(onStatusChangeFn)
 				.failed(failedFn);
 
-				element.removeClass('loaded').addClass('loading');
+				if(status == 'Running') {
+					element.removeClass('loaded').addClass('loading');	
+				}
 			}
 
 		}
