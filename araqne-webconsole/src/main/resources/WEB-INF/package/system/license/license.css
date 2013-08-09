@@ -1,0 +1,107 @@
+.area {
+	/*
+	border: 1px solid #ccc;
+	border-radius: 10px;
+	*/
+	border-bottom: 1px solid #ccc;
+
+	padding: 10px;
+	box-sizing: border-box;
+
+	margin-bottom: 5px;
+
+	background-color: white;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+text {
+	font-size: 13px;
+}
+
+
+.chart-usage {
+	margin-top: 3px;
+	height: 14px;
+	background-color: silver;
+}
+
+.chart-usage.use {
+	background-color: steelblue;
+}
+
+th {
+	background-color: rgba(232, 241, 247, 1);
+}
+
+.icon-refresh {
+	margin-top: 7px;
+}
+
+.bar rect {
+  fill: #1f77b4;
+  shape-rendering: crispEdges;
+}
+
+.bar .a {
+  fill: #aec7e8;
+}
+
+.bar text {
+  text-anchor: end;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+#isLicense {
+	width: 91%;
+}
+
+.result {
+	height: 142px;
+}
+
+.licenced {
+	display: none;
+}
+
+.nonlicenced {
+	display: block;
+	border: 1px solid red;
+	background: #FFCCCC;
+	font-size: 0.8em;
+	padding: 6px;
+}
+
+.bar-count {
+	fill: #D0F5A9;
+
+}
+
+.bar-overflow {
+	fill: #FA5882;
+
+}
+
+.bar-text {
+	fill: black;
+	font-size: 11px;
+	font-family: sans-serif;
+}
