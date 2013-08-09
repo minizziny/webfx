@@ -41,6 +41,8 @@ function Controller($scope, serviceTask, socket) {
 	$scope.queryAllowed;
 	$scope.license;
 	$scope.force = false;
+	$scope.alerts;
+	$scope.alert;
 
 	function hardwareKey() {
 		socket.send('org.logpresso.core.msgbus.LicensePlugin.getHardwareKey', {
@@ -111,20 +113,24 @@ function Controller($scope, serviceTask, socket) {
 		});
 	}
 
-	$scope.unsetLicense = function(val) {
-		socket.send('org.logpresso.core.msgbus.LicensePlugin.unsetLicense', { 
-			hardware_key: val.hardware_key }, proc.pid)
-		.success(function(m) {
-			getLicenseInfos();
-			if(m.isError) {
-				console.log(m);
-				return;
-			}
-			$scope.$apply();
-		})
-		.failed(function(m) {
-			$scope.$apply();
-		});
+	$scope.unsetLicense = function(val, comment) {
+		if(!confirm(comment)) {
+			return;
+		} else {
+			socket.send('org.logpresso.core.msgbus.LicensePlugin.unsetLicense', { 
+				hardware_key: val.hardware_key }, proc.pid)
+			.success(function(m) {
+				getLicenseInfos();
+				if(m.isError) {
+					console.log(m);
+					return;
+				}
+				$scope.$apply();
+			})
+			.failed(function(m) {
+				$scope.$apply();
+			});
+		}
 	}
 
 	function getLogScale(val) {
@@ -133,7 +139,7 @@ function Controller($scope, serviceTask, socket) {
 	}
 
 	function makeBarChart(el, query, width, height) {
-		var margin = {top: 10, right: 20, bottom: 30, left: 30},
+		var margin = {top: 10, right: 20, bottom: 30, left: 40},
 	    width = width - margin.left - margin.right,
 	    height = height - margin.top - margin.bottom,
 	    barPadding = 4;
@@ -150,20 +156,20 @@ function Controller($scope, serviceTask, socket) {
 
 			// var data = m.body.stats;	
 			var data = [				
-				{"day": "2013-07-31 00:00:00", "count" : 10, "volume": "100"},
-				{"day": "2013-08-01 00:00:00", "count" : 50, "volume": "100"},
-				{"day": "2013-08-02 00:00:00", "count" : 60, "volume": "100"},
-				{"day": "2013-08-03 00:00:00", "count" : 130, "volume": "100"},
-				{"day": "2013-08-04 00:00:00", "count" : 40, "volume": "100"},
-				{"day": "2013-08-05 00:00:00", "count" : 20, "volume": "100"},
-				{"day": "2013-08-06 00:00:00", "count" : 70, "volume": "100"},
-				{"day": "2013-08-07 00:00:00", "count" : 110, "volume": "100"},
-				{"day": "2013-08-08 00:00:00", "count" : 180, "volume": "100"},
-				{"day": "2013-08-09 00:00:00", "count" : 320, "volume": "100"},
-				{"day": "2013-08-10 00:00:00", "count" : 480, "volume": "100"},
-				{"day": "2013-08-11 00:00:00", "count" : 140, "volume": "100"},
-				{"day": "2013-08-12 00:00:00", "count" : 1110, "volume": "100"},
-				{"day": "2013-08-13 00:00:00", "count" : 80, "volume": "100"}
+				{"day": "2013-07-31 00:00:00", "count" : 145766000, "volume": 145766000000},
+				{"day": "2013-08-01 00:00:00", "count" : 265766000, "volume": 265766000000},
+				{"day": "2013-08-02 00:00:00", "count" : 185766000, "volume": 185766000000},
+				{"day": "2013-08-03 00:00:00", "count" : 265766000, "volume": 265766000000},
+				{"day": "2013-08-04 00:00:00", "count" : 205766000, "volume": 205766000000},
+				{"day": "2013-08-05 00:00:00", "count" : 195766000, "volume": 195766000000},
+				{"day": "2013-08-06 00:00:00", "count" : 145766000, "volume": 145766000000},
+				{"day": "2013-08-07 00:00:00", "count" : 245766000, "volume": 245766000000},
+				{"day": "2013-08-08 00:00:00", "count" : 345766000, "volume": 345766000000},
+				{"day": "2013-08-09 00:00:00", "count" : 285766000, "volume": 285766000000},
+				{"day": "2013-08-10 00:00:00", "count" : 215766000, "volume": 215766000000},
+				{"day": "2013-08-11 00:00:00", "count" : 445766000, "volume": 445766000000},
+				{"day": "2013-08-12 00:00:00", "count" : 545766000, "volume": 545766000000},
+				{"day": "2013-08-13 00:00:00", "count" : 245766000, "volume": 245766000000}
 			];
 
 			var x = d3.scale.linear()
@@ -171,10 +177,48 @@ function Controller($scope, serviceTask, socket) {
 				.range([0, width]);
 
 	        var y = d3.scale.linear()
-	            .domain([0, d3.max(data, function(d) { return d.count; })])
+	            .domain([0, d3.max(data, function(d) { return d.volume; })])
 	            .range([0, height]);
 
-			// data bar
+	        var y2 = d3.scale.linear()
+	            .domain([0, d3.max(data, function(d) { return d.volume / 400; })])
+	            .range([0, height]);
+
+			// text volume
+			svg.selectAll("text.bar-text-volume")
+				.data(data)
+				.enter()
+				.append("text")
+				.attr("class","bar-text-volume")
+				.text(function(d) {
+	        		return getLogScale(d.volume);
+	   			})
+	   			.attr("x", function(d, i) {
+	        		return i * (width / data.length) + (width / data.length - barPadding) / 2;
+	   			})
+	   			.attr("y", function(d) {
+	   				return height - y(d.volume) -2;
+	   			})
+	   			.attr("text-anchor", "middle");	 	            
+
+			// data volume
+	   		svg.selectAll("rect.bar-volume")
+			   .data(data)
+			   .enter()
+			   .append("rect")
+			   .attr("class","bar-volume")
+			   .attr("x", function(d, i) {
+			   		return i * (width / data.length);
+			   	})
+			   .attr("y", function(d) { 
+			   		return height - y(d.volume);		   		
+			   	})
+			   .attr("width", width / data.length - barPadding)
+			   .attr("height", function(d) {
+			   		return y(d.volume);
+			   	});
+
+			// data count
 			svg.selectAll("rect.bar-count")
 			   .data(data)
 			   .enter()
@@ -184,37 +228,20 @@ function Controller($scope, serviceTask, socket) {
 			   		return i * (width / data.length);
 			   	})
 			   .attr("y", function(d) {
-			   		return height - y(d.count);
+			   		return height - y2(d.count);
 			   	})
 			   .attr("width", width / data.length - barPadding)
 			   .attr("height", function(d) {
-			   		return y(d.count);
+			   		return y2(d.count);
 			   	});
 
-			// overflow bar
-	   		svg.selectAll("rect.bar-oveflow")
-			   .data(data)
-			   .enter()
-			   .append("rect")
-			   .attr("class","bar-overflow")
-			   .attr("x", function(d, i) {
-			   		return i * (width / data.length);
-			   	})
-			   .attr("y", function(d) { 
-			   		return height - y(d.count);		   		
-			   	})
-			   .attr("width", width / data.length - barPadding)
-			   .attr("height", function(d) {
-			   		var overflow = d.count - d.volume;
-			   		return overflow > 0 ? y(overflow) : 0; 
-			   	});
 
-			// overflow text
-			svg.selectAll("text.bar-text")
+			// text count
+			svg.selectAll("text.bar-text-count")
 				.data(data)
 				.enter()
 				.append("text")
-				.attr("class","bar-text")
+				.attr("class","bar-text-count")
 				.text(function(d) {
 	        		return getLogScale(d.count);
 	   			})
@@ -222,7 +249,7 @@ function Controller($scope, serviceTask, socket) {
 	        		return i * (width / data.length) + (width / data.length - barPadding) / 2;
 	   			})
 	   			.attr("y", function(d) {
-	   				return height - y(d.count);
+	   				return height - y2(d.count) - 2;
 	   			})
 	   			.attr("text-anchor", "middle");
 
@@ -248,7 +275,7 @@ function Controller($scope, serviceTask, socket) {
 
 	        
 	        var yScale = d3.scale.linear()
-	            .domain([0, d3.max(data, function(d) { return d.count; })])
+	            .domain([0, d3.max(data, function(d) { return d.volume; })])
 	            .range([height, 0]);
 
 			var xAxis = d3.svg.axis()
@@ -275,9 +302,41 @@ function Controller($scope, serviceTask, socket) {
 		});
 	}
 
+	function getAlerts() {
+		socket.send('org.logpresso.core.msgbus.LicensePlugin.getAlerts', {}, proc.pid)
+		.success(function(m) {
+
+			var data = [
+				{"day": "2013-08-03 00:00:00", "count" : 130, "volume": "100"},
+				{"day": "2013-08-07 00:00:00", "count" : 110, "volume": "100"},
+				{"day": "2013-08-08 00:00:00", "count" : 180, "volume": "100"},
+				{"day": "2013-08-09 00:00:00", "count" : 320, "volume": "100"},
+				{"day": "2013-08-10 00:00:00", "count" : 480, "volume": "100"},
+				{"day": "2013-08-11 00:00:00", "count" : 140, "volume": "100"},
+				{"day": "2013-08-12 00:00:00", "count" : 1110, "volume": "100"}
+			];
+
+			//$scope.alerts = m.body.alerts;
+			$scope.alerts = data;
+			console.log($scope.alerts);
+
+			if(m.isError) {
+				console.log(m);
+				return;
+			}
+			$scope.$apply();
+		})
+		.failed(function(m) {
+			$scope.$apply();
+		});
+			
+	}
+	
+
 	isQueryAllowed();
 	hardwareKey();
 	getLicenseInfos();
-	makeBarChart("div.chart1", "org.logpresso.core.msgbus.LicensePlugin.getDailyStats", 700, 300, "stats");
-	makeBarChart("div.chart2", "org.logpresso.core.msgbus.LicensePlugin.getAlerts", 600, 300, "alerts");
+	getAlerts();
+	makeBarChart("div.chart1", "org.logpresso.core.msgbus.LicensePlugin.getDailyStats", 700, 300);
+
 }

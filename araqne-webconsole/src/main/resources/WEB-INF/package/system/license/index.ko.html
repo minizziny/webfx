@@ -68,7 +68,7 @@
 							<th>1일 로그량 제한</th>
 						</thead>
 						<tr ng-repeat="license in licenseInfo">
-							<td><input type="button" ng-click="unsetLicense(license)" value="x" target="_self"></td>
+							<td><input type="button" ng-click="unsetLicense(license, '삭제하시겠습니까')" value="x"></td>
 							<td>{{license.hardware_key}}</td>
 							<td>{{license.duration}}</td>
 							<td>{{license.issued}}</td>
@@ -100,7 +100,20 @@
 			<br />
 			<div class="row">
 				<label class="span3">최근 30일간 경보 내역</label>
-				<div class="chart2 span10 row"></div>
+				<div class="span10 row">
+					<table class="table table-bordered table-condensed">
+						<thead>
+							<th>발생일</th>							
+							<th>카운트</th>
+							<th>볼륨</th>
+							</thead>
+						<tr ng-repeat="alert in alerts">
+							<td>{{alert.day}}</td>
+							<td>{{alert.count}}</td>
+							<td>{{alert.volume}}</td>
+						</tr>
+					</table>
+				</div>
 			</div>
 		</form>
 	</div>

@@ -91,17 +91,23 @@ th {
 }
 
 .bar-count {
+	fill: #58ACFA;
+}
+
+.bar-volume {
 	fill: #D0F5A9;
-
 }
 
-.bar-overflow {
-	fill: #FA5882;
-
-}
-
-.bar-text {
-	fill: black;
+.bar-text-volume {
+	fill: #688A08;
 	font-size: 11px;
 	font-family: sans-serif;
+	font-weight: bold;
+}
+
+.bar-text-count {
+	fill: #58ACFA;
+	font-size: 11px;
+	font-family: sans-serif;
+	font-weight: bold;
 }
