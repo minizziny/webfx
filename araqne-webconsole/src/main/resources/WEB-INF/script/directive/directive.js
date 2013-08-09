@@ -716,9 +716,12 @@ angular.module('App.Directive', [])
 			}
 
 			scope.goPage = function(idx) {
-				if(idx < 0 || idx > getTotalPageCount()-1) return;
+				var totalPageCount = getTotalPageCount();
+				if(idx < 0 || idx > totalPageCount-1) return;
 				if(idx == -1) return;
 				scope.currentIndex = idx;
+				scope.currentPage = Math.floor(scope.currentIndex / scope.ngPageSize);
+				render();
 				changePage(idx);
 				scope.isShowJumpPopup = false;
 			}
@@ -795,6 +798,11 @@ angular.module('App.Directive', [])
 
 			scope.openJumpPopup = function(e) {
 				e.stopPropagation();
+				if(scope.isShowJumpPopup) {
+					scope.isShowJumpPopup = false;
+					return;
+				}
+
 				scope.isShowJumpPopup = true;
 				$(document).on('click.pagerJumpPop', function(ee) {
 					scope.isShowJumpPopup = false;
