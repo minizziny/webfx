@@ -42765,6 +42765,13 @@ var app = angular.module('App', [
 	'ui.sortable'
 ]);
 
+var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
+
+function checkDate(member, i) {
+	if(member == undefined) return false;
+	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19)))
+}
+
 function throttle(fn, threshhold, scope) {
 	threshhold || (threshhold = 250);
 	var last,
@@ -42807,6 +42814,11 @@ function Async(fn) {
 		return this;
 	}
 
+	this.started = function(fn){
+		callback.started = fn;
+		return this;
+	}
+
 	this.pageLoaded = function(fn) {
 		callback.pageLoaded = fn;
 		return this;
@@ -42814,6 +42826,16 @@ function Async(fn) {
 
 	this.loaded = function(fn) {
 		callback.loaded = fn;
+		return this;
+	}
+
+	this.onTimeline = function(fn) {
+		callback.onTimeline = fn;
+		return this;
+	}
+
+	this.onStatusChange = function(fn) {
+		callback.onStatusChange = fn;
 		return this;
 	}
 
@@ -42827,7 +42849,7 @@ function Async(fn) {
 			callback[fname].apply(this, args);	
 		}
 		else {
-			if(fname != 'created') {
+			if(fname != 'created' && fname != 'onTimeline' && fname != 'onStatusChange' && fname != 'started') {
 				console.warn(name + '.' + fname + ', but do nothing')
 			}
 			//console.trace();
@@ -43324,8 +43346,24 @@ angular.module('App.Filter', [])
 	return function(val, prefix) {
 		return prefix + val;
 	}
-});
-
+})
+.filter('crlf', function() { 
+	return function(val) {
+		if(val === 0) {	return '0'; }
+		if(val === false) {	return 'false'; }
+		if(val === null) return val;
+		
+		if(toString.call(val) == '[object String]') {
+			return val.replace(/\n/gi, '<br>');
+		}
+		else return val;
+	}
+})
+.filter('numformat', function() { 
+	return function(val) {
+		return d3.format(',')(val);
+	}
+})
 angular.module('App.Service.Chart', ['App.Service'])
 .factory('serviceChart', function(serviceGuid) {
 	function multiBarHorizontalChart(selector, data) {
@@ -43425,8 +43463,8 @@ angular.module('App.Service.Chart', ['App.Service'])
 		.enter().append("rect")
 			.attr("width", x1.rangeBand())
 			.attr("x", function(d, i, j) { return x0(d.label) + x1.rangeBand() * j; })
-			.attr("y", function(d) { return y(d.value); })
-			.attr("height", function(d) { return height - y(d.value); })
+			.attr("y", function(d) { return (d.value == undefined) ? y(0) : y(d.value); })
+			.attr("height", function(d) { return (d.value == undefined) ? (height - y(0)) : (height - y(d.value)); })
 			.style("fill", function(d, i, j) {
 				if(data.length == 1) {
 					return color_map[i];
@@ -43661,7 +43699,9 @@ angular.module('App.Service.Chart', ['App.Service'])
 
 		city.append("path")
 		.attr("class", "line")
-		.attr("d", function(d) { return line(d.values); })
+		.attr("d", function(d) { 
+			return line(d.values);
+		})
 		.style("stroke", function(d) { return d.color; });
 
 		city.append("text")
@@ -43869,12 +43909,51 @@ angular.module('App.Service', [])
 	}
 });
 
+
+var logdb;
+if(parent._logdb != null) {
+	logdb = parent._logdb;
+}
+else {
+	logdb = {
+		disposeAll: function disposeAll() {
+			for (var i = logdb.queries.length - 1; i >= 0; i--) {
+				if(logdb.queries[i].getBg()) continue;
+				logdb.queries[i].dispose();
+			}
+		},
+		queries: [],
+		queriesEls: [],
+		$apply: function() {
+			for (var i = logdb.queriesEls.length - 1; i >= 0; i--) {
+				logdb.queriesEls[i].$apply();
+			};
+		}
+	};
+	parent._logdb = logdb;
+}
+
+
 angular.module('App.Service.Logdb', [])
 .factory('serviceLogdb', function(servicePush, socket) {
 
-	function QueryClass(pid) {
+	function QueryClass(pid, applyFn, options) {
 		var clazz = this;
-		this.id = -1;
+		var props = $.extend({
+			id: -1,
+			query: '',
+			status: 'Idle',
+			bg: false
+		}, options);
+
+		this.id = props.id;
+		this.query = props.query;
+		this.status = props.status;
+		this.bg = props.bg;
+		this.pid = pid;
+
+		var isDisposed = false;
+
 		var asyncQuery;
 		/* Start QueryClass */
 
@@ -43898,16 +43977,19 @@ angular.module('App.Service.Logdb', [])
 
 			if(m.body.type == "page_loaded") {
 				asyncQuery.done('pageLoaded', m);
+				applyFn();
 			}
 			else if(m.body.type == "eof" && m.body.hasOwnProperty('total_count')) {
 				//console.log("eof unregistered")
 				unregisterTrap();
 
-				if(m.body.total_count < 15) {
+				if(m.body.total_count < defaultLimit) {
 					getResult(id, 0)
 				}
 
+				clazz.status = 'End';
 				asyncQuery.done('loaded', m);
+				applyFn();
 				/*******
 				that.totalCount(m.body.total_count);
 
@@ -43915,13 +43997,15 @@ angular.module('App.Service.Logdb', [])
 				*****/
 			}
 			else if(m.body.type == "eof" && m.body.hasOwnProperty('span_field')) {
-				//console.log('timeline eof', m)
+				console.log('timeline eof', m);
 			}
 			else if(m.body.type == "periodic") {
-				//console.log('periodic', m);
+				console.log('periodic', m);
 			}
 			else if(m.body.type == "status_change") {
-				//console.log('status change', m);
+				//console.log('status change', m.body);
+				asyncQuery.done('onStatusChange', m);
+				applyFn();
 			}
 			else {
 				console.log("error");
@@ -43929,11 +44013,28 @@ angular.module('App.Service.Logdb', [])
 			}
 		}
 
-		function onTimeline() {
-			//console.log('onTimeline')
+		function onTimeline(resp) {
+			asyncQuery.done('onTimeline', resp[0]);
 		}
 
-		function createQuery(string) {
+		var defaultLimit = 15;
+
+		function createQuery(string, limit) {
+			if(isDisposed) {
+				throw new TypeError('do not reuse this instance!');
+				return;
+			}
+
+			clazz.query = string;
+
+			if(limit != undefined) {
+				defaultLimit = limit;
+			}
+			else {
+				defaultLimit = 15;
+			}
+			//console.log(string, limit);
+			
 			asyncQuery = this;
 
 			dispose();
@@ -43944,38 +44045,52 @@ angular.module('App.Service.Logdb', [])
 			.success(function(m) {
 				
 				clazz.id = m.body.id;
-				registerTrap(m);
+				clazz.status = 'Waiting';
+				registerTrap(function() {
+					asyncQuery.done('created', m);
+					applyFn();
+					startQuery();
+				});
 			})
 			.failed(function(m, raw) {
+				clazz.status = 'Failed';
+
 				asyncQuery.done('failed', m, raw);
+				applyFn();
 				console.log(raw, 'cannot create query');
 			})
 
 		}
 
-		function registerTrap(m) {
+		function registerTrap(callback) {
+			if(asyncQuery == undefined) {
+				asyncQuery = this;	
+			}
+			
 			var name = 'logstorage-query-' + clazz.id;
 			var tname = 'logstorage-query-timeline-' + clazz.id;
 
 			servicePush.register(name, pid, onTrap, function(resp) {
 
 				servicePush.register(tname, pid, onTimeline, function(resp) {
-					asyncQuery.done('created', m);
-					startQuery();
+					if(callback != undefined) {
+						callback();	
+					}
 				});
 				
 			});
 		}
 
-		function unregisterTrap() {
+		function unregisterTrap(callback) {
 			var name = 'logstorage-query-' + clazz.id;
 			var tname = 'logstorage-query-timeline-' + clazz.id;
 
 			servicePush.unregister(name, pid, function(resp) {
-				//console.log('unregistered query', pid);
 
 				servicePush.unregister(tname, pid, function(resp) {
-					//console.log('unregistered timeline', pid);
+					if(callback != undefined) {
+						callback();	
+					}
 				});
 			});
 		}
@@ -43985,14 +44100,17 @@ angular.module('App.Service.Logdb', [])
 			{
 				'id': clazz.id,
 				'offset': 0,
-				'limit': 15,
+				'limit': defaultLimit,
 				'timeline_limit': 10
 			}, pid)
 			.success(function(m) {
-				
+				clazz.status = 'Running';
+				asyncQuery.done('started', m);
+				applyFn();
 			})
 			.failed(function(m) {
 				asyncQuery.done('failed', m);
+				applyFn();
 			});
 		}
 
@@ -44001,17 +44119,18 @@ angular.module('App.Service.Logdb', [])
 			{
 				id: id,
 				offset: offset,
-				limit: ((limit == undefined) ? 15 : limit),
+				limit: ((limit == undefined) ? defaultLimit : limit),
 			}, pid)
 			.success(function(m) {
 				asyncQuery.done('pageLoaded', m);
+				applyFn();
 
 				if(!!callback) {
-					callback();
+					callback(m);
 				}
 			})
 			.failed(function(m, resp) {
-				console.log('getResult failed', resp)
+				console.log('getResult failed', resp, id)
 			});
 		}
 
@@ -44041,22 +44160,55 @@ angular.module('App.Service.Logdb', [])
 				removeQuery();
 			});
 			unregisterTrap();
+
+			isDisposed = true;
 		}
 
 		return {
-			query: function(string) {
-				return new Async(createQuery, string);
+			query: function(string, limit) {
+				return new Async(createQuery, string, limit);
 			},
 			dispose: function() {
 				return new Async(dispose);
 			},
+			stop: function() {
+				return new Async(stopQuery);
+			},
+			registerTrap: function(callback) {
+				return new Async(registerTrap, callback)
+			},
+			unregisterTrap: function(callback) {
+				return new Async(unregisterTrap, callback)
+			},
 			getResult: function() {
 				var args = Array.prototype.slice.call(arguments);
 				args.splice(0, 0, clazz.id);
+				//console.log(args)
 				getResult.apply(this, args);
 			},
 			id: function() {
 				return clazz.id;
+			},
+			getId: function() {
+				return clazz.id;
+			},
+			getQueryString: function() {
+				return clazz.query;
+			},
+			getStatus: function() {
+				return clazz.status;
+			},
+			getPid: function() {
+				return clazz.pid;
+			},
+			getBg: function() {
+				return clazz.bg;
+			},
+			setBg: function(value) {
+				clazz.bg = value;
+			},
+			getQueryStatus: function() {
+				return socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.queryStatus', { id: clazz.id }, pid);
 			}
 		}
 
@@ -44065,7 +44217,9 @@ angular.module('App.Service.Logdb', [])
 
 	function create(pid) {
 
-		var instance = new QueryClass(pid);
+		var instance = new QueryClass(pid, function() {
+			logdb.$apply();
+		});
 		logdb.queries.push(instance);
 		return instance;
 	}
@@ -44074,28 +44228,104 @@ angular.module('App.Service.Logdb', [])
 		instance.dispose();
 		var idx = logdb.queries.indexOf(instance);
 		logdb.queries.splice(idx, 1);
+		logdb.$apply();
 	}
+
+	function createFromBg(pid, id, str, status) {
+		var instance = new QueryClass(pid, function() {
+			logdb.$apply();
+		}, {
+			'id': id,
+			'query': str,
+			'status': status,
+			'bg': false
+		});
+		logdb.queries.push(instance);
+		logdb.$apply();
+		return instance;
+	}
+
+	function createBg(id, str, status) {
+		var instance = new QueryClass(0, function() {
+			logdb.$apply();
+		}, {
+			'id': id,
+			'query': str,
+			'status': status,
+			'bg': true
+		});
+		logdb.queries.push(instance);
+		logdb.$apply();
+		return instance;
+	}
+
+	function getQueries(callback) {
+		socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.queries', {}, 0)
+		.success(function(m) {
+			var queries = m.body.queries;
+			console.log('getQueries', m.body)
+			for (var i = 0; i < queries.length; i++) {
+				var has = logdb.queries.some(function(queryInst) {
+					return queryInst.getId() == queries[i].id;
+				});
+				if(has) {
+					//console.log('call twice', has)
+					continue;
+				}
+
+				var query = queries[i];
+				createBg(query.id, query.query_string, query.commands[query.commands.length - 1].status);
+			};
+			if(callback != undefined) {
+				callback(m);
+			}
+
+		})
+		.failed(function(m) {
+			console.log('get queries failed', m)
+		});	
+	}
+
+	function setRunMode(id, background, callback) {
+		socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.setRunMode', { 'id': id, 'background': background }, proc.pid)
+		.success(function(m) {
+			var found = logdb.queries.filter(function(query) {
+				return query.getId() == id;
+			});
+			console.log('setRunMode', found, background);
+			found[0].setBg(background);
+
+			if(callback != undefined){
+				callback(m);
+			}
+		})
+		.failed(msgbusFailed);
+	}
+
+	getQueries();
+
+	console.log('serviceLogdb init');
+	
 
 	return {
 		create: create,
-		remove: remove
+		createFromBg: createFromBg,
+		remove: remove,
+		getQueries: getQueries,
+		setForeground: function(id, callback) {
+			return setRunMode(id, false, callback);
+		},
+		setBackground: function(id, callback) {
+			return setRunMode(id, true, callback);
+		}
 	}
 });
 
-var logdb = {
-	disposeAll: function disposeAll() {
-		for (var i = logdb.queries.length - 1; i >= 0; i--) {
-			logdb.queries[i].dispose();
-		};
-		console.log('disposeAll')
-	},
-	queries: []
-}
 
 window.addEventListener('unload', logdb.disposeAll);
 window.addEventListener('beforeunload', logdb.disposeAll);
 
-parent._logdb = logdb;
+
 angular.module('App.Service.Logdb.Management', [])
 .factory('serviceLogdbManagement', function(socket) {
 	function listTable() {
@@ -44726,18 +44956,259 @@ angular.module('App.Directive', [])
 			}, true);
 		}
 	};
+})
+.directive('pager', function() {
+	return {
+		restrict: 'E',
+		scope: {
+			onPageChange: '&',
+			onItemsPerPageChange: '&',
+			ngTotalCount: '=',
+			ngItemsPerPage: '=',
+			ngPageSize: '=',
+			currentPage: '@',
+			currentIndex: '@'
+		},
+		require: 'ngModel',
+		template: '<div class="pagination" ng-hide="ngTotalCount == 0">\
+					<ul>\
+						<li>\
+							<a href="#" ng-click="firstPage()">처음</a>\
+						</li>\
+					</ul>\
+					<ul>\
+						<li>\
+							<a href="#" ng-click="prevPage()">&laquo;</a>\
+						</li>\
+						<li ng-class="{\'active\': currentIndex % ngPageSize == i}" ng-repeat="(i,z) in arrPageSize">\
+							<a href="#" ng-click="changePage($index + (currentPage * ngPageSize), $event)">\
+								{{ 1 + i + (currentPage * ngPageSize) }}\
+							</a>\
+						</li>\
+						<li>\
+							<a href="#" ng-click="nextPage()">&raquo;</a>\
+						</li>\
+					</ul>\
+					<ul>\
+						<li>\
+							<a href="#" ng-click="lastPage()">마지막(<span>{{totalIndexCount}}</span>)</a>\
+						</li>\
+					</ul>\
+					<button class="btn btn-mini" style="vertical-align: top; margin: 2px 5px 0px 0px" ng-click="openJumpPopup($event)"><i class="icon-share-alt"></i></button>\
+					<div style="position: relative; float: right">\
+						<div class="popover top" style="display:block; left: -235px; top: -130px" ng-show="isShowJumpPopup" ng-click="stopPropagation($event)">\
+							<div class="arrow" style="left:94%"></div>\
+							<h3 class="popover-title">페이지 이동</h3>\
+							<div class="popover-content"><form>\
+								<input type="number" min="1" max="{{totalIndexCount}}" ng-model="targetIndex" style="float:left; width:120px">\
+								<button class="btn btn-primary" ng-click="goPage(targetIndex - 1)" style="margin-left: 10px">이동</button>\
+							</form></div>\
+						</div>\
+					</div>\
+					<div style="display:none"><br>\
+					ngTotalCount: {{ngTotalCount}}<br>\
+					ngItemsPerPage: {{ngItemsPerPage}}<br>\
+					ngPageSize: {{ngPageSize}}<br>\
+					currentPage: {{currentPage}}<br>\
+					currentIndex: {{currentIndex}}<br></div>\
+				</div>',
+		link: function(scope, elem, attr, ctrl) {
+			scope.currentIndex = 0;
+			scope.currentPage = 0;
+			scope.arrPageSize = [];
+			scope.totalIndexCount;
+			scope.targetIndex = 1;
+
+			elem[0].getCurrentIndex = function() {
+				return scope.currentIndex;
+			}
+
+			function getTotalPageCount() {
+				return Math.ceil(scope.ngTotalCount / scope.ngItemsPerPage);
+			}
+
+			function getLastPage() {
+				var totalPageCount = getTotalPageCount();
+				return Math.ceil(totalPageCount / scope.ngPageSize) - 1;
+			}
+
+			scope.nextPage = function() {
+				if(scope.currentPage == getLastPage()) return;
+				scope.currentPage = scope.currentPage + 1;
+				render();
+				if(scope.currentIndex + scope.ngPageSize > getTotalPageCount() - 1) {
+					scope.currentIndex = getTotalPageCount() - 1;
+				}
+				else {
+					scope.currentIndex = scope.currentIndex + scope.ngPageSize;	
+				}
+				
+				changePage(scope.currentIndex);
+			}
+			
+			scope.prevPage = function() {
+				if(scope.currentPage == 0) return;
+				scope.currentPage = scope.currentPage - 1;
+				render();
+				scope.currentIndex = scope.currentIndex - scope.ngPageSize;
+				changePage(scope.currentIndex);
+			}
+
+			scope.firstPage = function() {
+				scope.currentPage = 0;
+				scope.currentIndex = 0;
+				render();
+				changePage(scope.currentIndex);
+			}
+
+			scope.lastPage = function() {
+				scope.currentPage = getLastPage();
+				scope.currentIndex = getTotalPageCount() - 1;
+				render();
+				changePage(scope.currentIndex);
+			}
+
+			scope.changePage = function(idx, e) {
+				if(e != null) {
+					e.preventDefault();
+				}
+				scope.currentIndex = idx;
+				changePage(idx);
+			}
+
+			scope.goPage = function(idx) {
+				var totalPageCount = getTotalPageCount();
+				if(idx < 0 || idx > totalPageCount-1) return;
+				if(idx == -1) return;
+				scope.currentIndex = idx;
+				scope.currentPage = Math.floor(scope.currentIndex / scope.ngPageSize);
+				render();
+				changePage(idx);
+				scope.isShowJumpPopup = false;
+			}
+
+			elem[0].changePage = scope.goPage;
+
+			function changePage(idx) {
+				if(idx < 0) idx = 0;
+				var expr = attr.onPageChange.replace('()', '(' + idx + ')')
+				scope.$parent.$eval(expr);
+			}
+
+			function render() {
+				// console.warn('render');
+				var totalPageCount = getTotalPageCount();
+				scope.totalIndexCount = totalPageCount;
+
+				if(getLastPage() == scope.currentPage) {
+					// console.log(totalPageCount % scope.ngPageSize, scope.ngPageSize);
+					if(totalPageCount % scope.ngPageSize == 0) {
+						scope.arrPageSize = new Array(scope.ngPageSize);
+					}
+					else if(totalPageCount % scope.ngPageSize < scope.ngPageSize) {
+						scope.arrPageSize = new Array(totalPageCount % scope.ngPageSize);
+					}
+				}
+				else {
+					if(totalPageCount > scope.ngPageSize) {
+						scope.arrPageSize = new Array(scope.ngPageSize);
+					}
+					else {
+						scope.arrPageSize = new Array(totalPageCount);
+					}	
+				}
+				
+			}
+
+			function setTotalCount(count) {
+				scope.ngTotalCount = count;
+			}
+
+			elem[0].setTotalCount = setTotalCount;
+
+			scope.$watch('ngTotalCount', function() {
+				if(scope.currentIndex == undefined) {
+					scope.currentIndex = 0;	
+				}
+				if(scope.currentPage == undefined) {
+					scope.currentPage = 0;	
+				}
+				
+				render();
+			});
+
+			scope.$watch('ngItemsPerPage', function(val) {
+
+				var totalPageCount = getTotalPageCount();
+				if(scope.currentIndex > totalPageCount - 1) {
+					scope.currentIndex = totalPageCount - 1;
+					changePage(scope.currentIndex);
+				}
+
+				// console.log(getTotalPageCount(), scope.ngPageSize, scope.currentPage, getLastPage())
+
+				if(getLastPage() < scope.currentPage) {
+					scope.currentPage = getLastPage();
+				}
+
+				render();
+				scope.$parent.$eval(attr.onItemsPerPageChange);
+			});
+
+			scope.isShowJumpPopup = false;
+
+			scope.openJumpPopup = function(e) {
+				e.stopPropagation();
+				if(scope.isShowJumpPopup) {
+					scope.isShowJumpPopup = false;
+					return;
+				}
+
+				scope.isShowJumpPopup = true;
+				$(document).on('click.pagerJumpPop', function(ee) {
+					scope.isShowJumpPopup = false;
+					$(document).off('click.pagerJumpPop');
+					scope.$apply();
+				});
+				//scope.$apply();
+
+				setTimeout(function() {
+					$('.popover input[type=number]').focus();
+				},250);
+			}
+
+			scope.stopPropagation = function(e) {
+				e.stopPropagation();
+			}
+		}
+	}
 });
 
 angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
-.directive('queryInput', function($compile, serviceLogdb) {
+.directive('queryInput', function($compile, $parse, serviceLogdb) {
 	return {
 		restrict: 'E',
-		template: '<textarea autosize></textarea> <button class="search btn btn-primary">검색</button> <button class="stop btn btn-warning">중지</button>',
+		scope: {
+			onLoading: '&',
+			onPageLoaded: '&',
+			onLoaded: '&',
+			onStatusChange: '&',
+			onTimeline: '&',
+			ngTemplate: '=ngTemplate',
+			ngPageSize: '=',
+			ngChange: '&',
+			ngQueryString: '='
+		},
+		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" placeholder="여기에 쿼리를 입력하세요" autosize></textarea>\
+			<button class="search btn btn-primary">검색</button>\
+			<button class="stop btn btn-warning">중지</button>',
 		link: function(scope, element, attrs) {
-			element.addClass('loaded');
+			var autoflush = attrs.isAutoFlush;
+
+			$scope = scope;
+			scope = scope.$parent;
+
 			var textarea = element.find('textarea');
-			textarea.attr('ng-model', attrs.queryModel);
-			$compile(textarea)(scope);
 
 			var pid = proc.pid;
 			
@@ -44748,12 +45219,51 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				}
 			});
 			
-			element.find('.search').on('click', search);
+			element.find('.search').on('click', function() {
+				search();
+			});
 
 			element.find('.stop').on('click', stop);
 
+			function createdFn(m) {
+				element.removeClass('loaded').addClass('loading');
+			}
+
+			function startedFn(m) {
+				evalEvent(attrs.onLoading, m);
+			}
+
+			function pageLoadedFn(m) {
+				scope[attrs.ngModel] = m.body.result;
+				scope.$apply();
+
+				evalEvent(attrs.onPageLoaded, m);
+			}
+
+			function loadedFn(m) {
+				element.removeClass('loading').addClass('loaded');
+				if(autoflush != 'false') {
+					serviceLogdb.remove(z);	
+				}
+				evalEvent(attrs.onLoaded, m);
+			}
+
+			function onTimelineFn(m) {
+				evalEvent(attrs.onTimeline, m);
+			}
+
+			function onStatusChangeFn(m) {
+				evalEvent(attrs.onStatusChange, m);
+			}
+
+			function failedFn(m) {
+				alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.');
+				scope.$apply();
+			}
+
 			var z;
 			function search() {
+				var limit = scope.$eval(attrs.ngPageSize);
 				textarea.blur();
 				if(z != undefined) {
 					serviceLogdb.remove(z);
@@ -44762,42 +45272,64 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				
 				var queryValue = textarea.data('$ngModelController').$modelValue;
 
-				z.query(queryValue)
-				.created(function(m) {
-					element.removeClass('loaded').addClass('loading');
-
-					if(scope[attrs.queryOnloading] != undefined) {
-						scope[attrs.queryOnloading].call(this);
-					}
-				})
-				.pageLoaded(function(m) {
-					scope[attrs.ngModel] = m.body.result;
-					scope.$apply();
-
-					if(scope[attrs.queryOnpageloaded] != undefined) {
-						scope[attrs.queryOnpageloaded].call(this);	
-					}
-				})
-				.loaded(function(m) {
-					element.removeClass('loading').addClass('loaded');
-					serviceLogdb.remove(z);
-
-					if(scope[attrs.queryOnloaded] != undefined) {
-						scope[attrs.queryOnloaded].call(this);	
-					}
-				})
-				.failed(function(m) {
-					alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.')
-				})
+				z.query(queryValue, limit)
+				.created(createdFn)
+				.started(startedFn)
+				.pageLoaded(pageLoadedFn)
+				.loaded(loadedFn)
+				.onTimeline(onTimelineFn)
+				.onStatusChange(onStatusChangeFn)
+				.failed(failedFn)
 			}
 
 			function stop() {
-				alert('쿼리를 중지합니다.')
 				element.removeClass('loading').addClass('loaded');
-				serviceLogdb.remove(z);
+				if(autoflush != 'false') {
+					serviceLogdb.remove(z);	
+				}
 
-				if(scope[attrs.queryOnloaded] != undefined) {
-					scope[attrs.queryOnloaded].call(this);	
+				z.stop()
+				.success(function() {
+					console.log('stopped')
+				})
+
+				evalEvent(attrs.onLoaded, null);
+			}
+
+			function evalEvent(expr, arg1) {
+				if(!angular.isString(expr)) return;
+				expr = expr.replace('()', '');
+				scope[expr].call(scope, arg1);
+			}
+
+			element[0].offset = function(offset, limit) {
+				if(z == undefined) return;
+				z.getResult(offset, limit);
+			}
+
+			element[0].run = function() {
+				search();
+			}
+
+			element[0].getInstance = function() {
+				return z;
+			}
+
+			element[0].bindBackgroundQuery = function(id, str, status) {
+				z = serviceLogdb.createFromBg(pid, id, str, status);
+				z.registerTrap(function() {
+					console.log('registerTrap')
+				})
+				.created(createdFn)
+				.started(startedFn)
+				.pageLoaded(pageLoadedFn)
+				.loaded(loadedFn)
+				.onTimeline(onTimelineFn)
+				.onStatusChange(onStatusChangeFn)
+				.failed(failedFn);
+
+				if(status == 'Running') {
+					element.removeClass('loaded').addClass('loading');	
 				}
 			}
 
@@ -44819,104 +45351,184 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 .directive('queryResult', function($compile, serviceGuid) {
 	return {
 		restrict: 'E',
-		template: '<table ng-class="{ selectable: isSelectable }" class="cmpqr table table-striped table-condensed">' +
-			'<thead><tr><th ng-class="{ selected: col.is_checked }" ng-hide="!col.is_visible" ng-repeat="col in qrCols" after-iterate="columnChanged" ng-click="toggleCheck(col)">' +
-			'<input id="{{col.guid}}" ng-show="isSelectable" type="checkbox" ng-click="_stopPropation($event)" ng-model="col.is_checked" style="margin-right: 5px">' +
-			'<span class="qr-th-type" ng-show="col.type == \'number\'">1</span><span class="qr-th-type" ng-show="col.type == \'string\'">A</span><span class="qr-th-type" ng-show="col.type == \'datetime\'"><i class="icon-white icon-time"></i></span>' + 
-			' {{col.name}} </th></tr></thead>' + 
-			'<tbody><tr ng-repeat="d in qrData"><td ng-class="{ selected: col.is_checked }" ng-hide="!col.is_visible" ng-repeat="col in qrCols" ng-click="toggleCheck(col)">{{d[col.name]}}</td></tr></tbody></table>',
+		scope: {
+			ngPage: '=',
+			ngPageSize: '=',
+			stopPropation: '@',
+			ngCols: '@',
+			ngModel: '=',
+			isCheckType: '@',
+			isSelectable: '@'
+		},
+		template: '<div style="display: inline-block; position: relative">'+
+		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: -5px; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\
+			<span ng-show="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
+				{{numLimitColumnInterval}}개의 컬럼 더 보기\
+			</span>\
+			<span ng-hide="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
+				{{numTotalColumn - numLimitColumn}}개의 컬럼 더 보기\
+			</span>\
+		</button>\
+		<table ng-class="{ selectable: isSelectable, expandable: (numTotalColumn - numLimitColumn > 0) }" class="cmpqr table table-bordered table-striped table-condensed">\
+			<thead>\
+				<tr>\
+					<th>#</th>\
+					<th ng-class="{ selected: col.is_checked }"\
+						ng-hide="!col.is_visible"\
+						ng-repeat="col in ngCols | limitTo: numLimitColumn"\
+						ng-click="toggleCheck(col)">\
+						<input id="{{col.guid}}" type="checkbox" style="margin-right: 5px"\
+							ng-show="isSelectable"\
+							ng-click="stopPropation($event)"\
+							ng-model="col.is_checked">\
+						<span class="qr-th-type" ng-show="col.type == \'number\'">1</span>\
+						<span class="qr-th-type" ng-show="col.type == \'string\'">A</span>\
+						<span class="qr-th-type" ng-show="col.type == \'datetime\'"><i class="icon-white icon-time"></i></span>\
+						{{col.name}}\
+					</th>\
+				</tr>\
+			</thead>\
+			<tbody>\
+				<tr ng-repeat="d in ngModel">\
+					<td>{{ngPage * ngPageSize + ($index+1)}}</td>\
+					<td ng-class="{ selected: col.is_checked }"\
+						ng-hide="!col.is_visible"\
+						ng-repeat="col in ngCols | limitTo: numLimitColumn"\
+						ng-click="toggleCheck(col)"\
+						ng-bind-html-unsafe="d[col.name] | crlf"></td>\
+				</tr>\
+			</tbody>\
+		</table>\
+		</div>',
 		link: function(scope, element, attrs) {
-			scope._stopPropation = function(event) {
+			
+			scope.stopPropation = function(event) {
 				event.stopPropagation();
 			}
 
-			if(attrs.qrCustomTemplate != undefined) {
+			// 타입 체크 및 컬럼 정보에 타입 명시
+			function checkArrayMemberType(array) {
+				var types = ['number', 'datetime', 'string'];
+				if(array.some(myApp.isNumber)) return types[0];
+				if(array.some(checkDate)) return types[1];
+
+				return types[2];
+			}
+
+			if(attrs.ngCustomTemplate != undefined) {
 				element.empty();
-				var customEl = angular.element(scope[attrs.qrCustomTemplate]);
+				var customEl = angular.element(scope[attrs.ngCustomTemplate]);
 				element.append(customEl);
 
 				$compile(customEl)(scope);
 			}
 
-			// qrCols는 컬럼만
-			// qrData는 데이타 전부 
-			// 둘 다 queryResult의 ng-model이 바뀔때마다 업데이트 된다.
-
-			scope.qrCols = [];
-			scope.qrCols.getSelectedItems = function() {
-				return this.filter(function(obj) {
-					return obj.is_checked;
-				});
+			scope.toggleCheck = function(col) {
+				col.is_checked = !col.is_checked;
 			};
 
-			scope.qrData = [];
-			scope.isSelectable = false;
+			scope.next = function() {
+				scope.numLimitColumn = scope.numLimitColumn + scope.numLimitColumnInterval;
+				console.log(scope.numLimitColumn)
+			}
 
-			scope.toggleCheck = function() {};
+			scope.numLimitColumnInterval = 50;
+			scope.numLimitColumn = 50;
+			scope.numTotalColumn;
 
-			scope.$watch(attrs.ngModel, function() {
-				// ng-model이 업데이트될 때 불림
-				var raw = scope[attrs.ngModel];
-				if(!angular.isArray(raw)) { return; } // 데이터가 배열이 아니면 리턴
+			function newSearch() {
+				scope.numLimitColumnInterval = 50;
+				scope.numLimitColumn = 50;
+				scope.numTotalColumn = 0;
+				scope.$apply();
+			}
 
-				// 클리어
-				scope.qrCols.splice(0, scope.qrCols.length);
-				scope.qrData.splice(0, scope.qrData.length);
+			scope.ngCols = []; // ngModel의 컬럼 정보
+			scope.$watch('ngModel', function(val) {
+				if(!angular.isArray(val)) { return; } // 데이터가 배열이 아니면 리턴
+				if(scope.isCheckType == undefined) scope.isCheckType = false;
 
-				var cols = []; // 컬럼 이름만 임시 저장
-				for (var i = 0; i < raw.length; i++) {
-					for (var col in raw[i]) {
-						if(cols.indexOf(col) == -1 && col != '$$hashKey') {
-							cols.push(col);
+				// 컬럼 추출
+				var cols = [];
+				for (var i = 0; i < val.length; i++) {
+					if(i == 0) {
+						cols = Object.keys(val[i]);
+					}
+					else {
+						var keys = Object.keys(val[i]);
+						keys.forEach(function(k) {
+							if( cols.indexOf(k) == -1 ) {
+								cols.push(k);
+							}
+						});
+					}
+				}
+				
+				cols.sort(function(a, b) {
+					if(a.indexOf('_') == 0) { return -1; }
+					else { 
+						if(a > b) {
+							return 1;
+						}
+						if(b > a) {
+							return -1;
 						}
 					}
-					scope.qrData.push(raw[i]);
-				};
-
-				cols.sort(function(a,b) {
-					if(a.indexOf('_') == 0) { return -1; }
-					else { return 1; }
 					return 0;
+				}).forEach(function(k, i) {
+					if(k == '$$hashKey') {
+						cols.splice(cols.indexOf(k), 1);
+					}
 				});
 
-				for (var i = 0; i < cols.length; i++) {
-					scope.qrCols.push({
-						'guid': serviceGuid.generateType2(),
-						'name': cols[i],
-						'is_visible': true,
-						'is_checked': undefined
-					});
+				//console.log(cols.length)
+				if(cols.length > scope.numLimitColumn) {
+					scope.numTotalColumn = cols.length;
 				}
+				
+				scope.ngCols = cols.map(function(k) {
+					return {
+						guid: serviceGuid.generateType2(),
+						name: k,
+						is_visible: true,
+						is_checked: undefined
+					}
+				});
 
-				// 타입 체크 및 컬럼 정보에 타입 명시
-				function checkArrayMemberType(array) {
-					var types = ['number', 'datetime', 'string'];
-					if(array.every(myApp.isNumber)) return types[0];
-					if(array.every(checkDate)) return types[1];
-
-					return types[2];
-				}
-
-				if(attrs.qrCheckType === 'true') {
-					for (var i = 0; i < scope.qrCols.length; i++) {
-						if(scope.qrCols[i].type == undefined) {
-							var mapAll = scope.qrData.map(function(obj, j) {
-								return obj[scope.qrCols[i].name];
+				if(scope.isCheckType.toString() == 'true') {
+					for (var i = 0; i < scope.ngCols.length; i++) {
+						if(scope.ngCols[i].type == undefined) {
+							var mapAll = val.map(function(obj, j) {
+								return obj[scope.ngCols[i].name];
 							});
 							var type = checkArrayMemberType(mapAll);
-							scope.qrCols[i]['type'] = type;
+							scope.ngCols[i]['type'] = type;
 						}
 					}
 				}
-
-				if(attrs.qrSelectable === 'true') {
-					scope.isSelectable = true;
-					scope.toggleCheck = function(col) {
-						col.is_checked = !col.is_checked;
-					};
-				}
-
 			});
+
+			element[0].addColumn = function(name, type) {
+				obj = {
+					guid: serviceGuid.generateType2(),
+					name: name,
+					is_visible: true,
+					is_checked: true,
+					type: type
+				};
+				scope.ngCols.push(obj);
+				return obj;
+			}
+
+			element[0].getSelectedItems = function() {
+				return scope.ngCols.filter(function(obj) {
+					return obj.is_checked;
+				});
+			}
+
+			element[0].getColumns = function() {
+				return scope.ngCols;
+			}
 
 			// 로딩 인디케이터
 			var loadingInd = angular.element('<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>')
@@ -44938,6 +45550,8 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			element[0].hideLoadingIndicator = function() {
 				loadingInd.fadeOut();
 			}
+
+			element[0].newSearch = newSearch;
 		}
 	}
 });
