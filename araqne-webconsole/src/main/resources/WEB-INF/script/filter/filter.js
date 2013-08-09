@@ -28,4 +28,21 @@ angular.module('App.Filter', [])
 	return function(val, prefix) {
 		return prefix + val;
 	}
-});
+})
+.filter('crlf', function() { 
+	return function(val) {
+		if(val === 0) {	return '0'; }
+		if(val === false) {	return 'false'; }
+		if(val === null) return val;
+		
+		if(toString.call(val) == '[object String]') {
+			return val.replace(/\n/gi, '<br>');
+		}
+		else return val;
+	}
+})
+.filter('numformat', function() { 
+	return function(val) {
+		return d3.format(',')(val);
+	}
+})

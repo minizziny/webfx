@@ -1,0 +1,124 @@
+<!doctype html>
+<html ng-app="license">
+<head>
+	<meta charset="utf-8" />
+	
+	<!-- development -->
+	<!--
+	<script src="/bower_components/jquery/jquery.js"></script>
+	<script src="/bower_components/jquery-ui/ui/jquery-ui.js"></script>
+	<script src="/bower_components/angular/angular.js"></script>
+	<script src="/bower_components/d3/d3.js"></script>
+	<script src="/bootstrap/js/bootstrap.js"></script>
+	<script src="/bower_components/moment/moment.js"></script>
+	<script src="/bower_components/moment/min/lang/ko.js"></script>
+	<script src="/script/app.js"></script>
+	<script src="/script/filter/filter.js"></script>
+	<script src="/script/service/service.js"></script>
+	<script src="/script/service/service.dom.js"></script>
+	<script src="/script/service/service.logdb.js"></script>
+	<script src="/script/service/service.logdb.management.js"></script>
+	<script src="/script/service/service.chart.js"></script>
+	<script src="/script/directive/directive.js"></script>
+	<script src="/script/directive/directive.logdb.js"></script>
+	<script src="/script/directive/directive.orgunit.js"></script>
+	<script src="/script/directive/sortable.js"></script>
+-->
+	<!-- /development -->
+
+	<!-- distribution -->
+	<script src="/script/app.dist.js"></script>
+	<!-- /distribution -->
+
+	<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css"/>
+	<link rel="stylesheet" href="/css/app.css"/>
+	<link rel="stylesheet" href="/css/toggle-switch.css"/>
+	<link rel="stylesheet" href="license.css"/>
+
+</head>
+<body ng-controller="Controller">
+	<div class="container">
+		<form>
+			<legend>라이센스 관리</legend>
+			<div class="row">
+				<label class="span3" for="isLicense">라이센스 만료 여부 판단</label>
+				<div id="isLicense" class="span10 row" ng-class="{true: 'licenced', false: 'nonlicenced'}[queryAllowed]">라이센스가 등록 되지 않았습니다.
+				</div>
+			</div>
+			<br />
+			<div class="row">
+				<label class="span3" for="txtHardwarekey">하드웨어키</label>
+				<div class="span10 row">
+					<table class="table table-bordered table-condensed">
+						<tr>
+							<td>{{hardwareKey}}</td>
+						</tr>
+					</table>					
+				</div>
+			</div>
+			<div class="row">
+				<label class="span3">라이센스 설치 정보</label>
+				<div class="span10 row">
+					<table class="table table-bordered table-condensed">
+						<thead>
+							<th></th>
+							<th>하드웨어 키</th>
+							<th>사용기간</th>
+							<th>발급날자</th>
+							<th>설치일자</th>
+							<th>EPS 제한</th>
+							<th>1일 로그량 제한</th>
+						</thead>
+						<tr ng-repeat="license in licenseInfo">
+							<td><input type="button" ng-click="unsetLicense(license, '삭제하시겠습니까')" value="x"></td>
+							<td>{{license.hardware_key}}</td>
+							<td>{{license.duration}}</td>
+							<td>{{license.issued}}</td>
+							<td>{{license.installed}}</td>
+							<td>{{license.rate_limit}}</td>
+							<td>{{license.volume_limit}}</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div class="row">
+				<label class="span3">라이센스 설치</label>
+				<div class="span10">
+					<input type="file" file="licenseFile" class="license-file-upload" license="license" autosize />
+				</div>
+				<div class="span10">
+					<span class="btn btn-success fileinput-button" ng-click="setLicense()">
+            			<i class="icon-plus icon-white"></i>
+           				<span>라이센스 등록하기</span>
+    				</span>
+    				<input type="checkbox" ng-model="force" /> 강제설치
+				</div>
+			</div>
+			<br />
+			<div class="row">
+				<label class="span3">일별 로그 추이 그래프</label>
+				<div class="chart1 span10 row"></div>
+			</div>
+			<br />
+			<div class="row">
+				<label class="span3">최근 30일간 경보 내역</label>
+				<div class="span10 row">
+					<table class="table table-bordered table-condensed">
+						<thead>
+							<th>발생일</th>							
+							<th>카운트</th>
+							<th>볼륨</th>
+							</thead>
+						<tr ng-repeat="alert in alerts">
+							<td>{{alert.day}}</td>
+							<td>{{alert.count}}</td>
+							<td>{{alert.volume}}</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</form>
+	</div>
+	<script src="license.js"></script>
+</body>
+</html>

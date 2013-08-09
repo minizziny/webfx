@@ -3,7 +3,30 @@
 <head>
 	<meta charset="utf-8" />
 
-	<script src="/script/app.dist.js"></script>
+	<!-- development -->
+	<script src="/bower_components/jquery/jquery.js"></script>
+	<script src="/bower_components/jquery-ui/ui/jquery-ui.js"></script>
+	<script src="/bower_components/angular/angular.js"></script>
+	<script src="/bower_components/d3/d3.js"></script>
+	<script src="/bootstrap/js/bootstrap.js"></script>
+	<script src="/bower_components/moment/moment.js"></script>
+	<script src="/bower_components/moment/min/lang/ko.js"></script>
+	<script src="/script/app.js"></script>
+	<script src="/script/filter/filter.js"></script>
+	<script src="/script/service/service.js"></script>
+	<script src="/script/service/service.dom.js"></script>
+	<script src="/script/service/service.logdb.js"></script>
+	<script src="/script/service/service.logdb.management.js"></script>
+	<script src="/script/service/service.chart.js"></script>
+	<script src="/script/directive/directive.js"></script>
+	<script src="/script/directive/directive.logdb.js"></script>
+	<script src="/script/directive/directive.orgunit.js"></script>
+	<script src="/script/directive/sortable.js"></script>
+	<!-- /development -->
+
+	<!-- distribution -->
+	<!-- <script src="/script/app.dist.js"></script> -->
+	<!-- /distribution -->
 
 	<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css"/>
 	<link rel="stylesheet" href="/css/app.css"/>
@@ -124,9 +147,19 @@
 				<fieldset>
 					<div class="fieldset-description">쿼리한 데이터를 바탕으로 위젯을 생성합니다. 원하는 데이터를 쿼리하십시오.</div>
 					<div>
-						<query-input ng-model="qresult" query-model="ctxWidget.data.query" query-onloading="inputOnloading" query-onloaded="inputOnloaded" query-onpageloaded="inputOnpageloaded"></query-input>
-						<div class="qr-container" style="width: 100%">
-							<query-result ng-model="qresult" class="qr1"></query-result>
+						<query-input
+							ng-model="qresult"
+							ng-page-size="numPagerPagesize"
+							ng-query-string="ctxWidget.data.query"
+							on-loading="inputOnloading()"
+							on-loaded="inputOnloaded()"
+							on-page-loaded="inputOnpageloaded()"></query-input>
+						<div class="qr-container" style="width: 880px">
+							<query-result class="qr1"
+								ng-model="qresult"
+								ng-page="numCurrentPage"
+								ng-page-size="numPagerPagesize"
+								is-check-type="true"></query-result>
 						</div>
 					</div>
 					<div class="control-group submit-group">
@@ -141,8 +174,12 @@
 				<fieldset>
 					<div class="fieldset-description">위젯에 표시할 필드를 선택하고, 오른쪽 목록에서 드래그 &amp; 드롭하여 컬럼 순서를 조절하십시오.</div>
 					<div>
-						<div class="qr-container" style="width: 80%; float: left">
-							<query-result ng-model="qresult" class="qr2"></query-result>
+						<div class="qr-container" style="width: 780px; float: left">
+							<query-result class="qr2 qr-select-table"
+								ng-model="qresult"
+								ng-page="numCurrentPage"
+								ng-page-size="numPagerPagesize"
+								is-check-type="true"></query-result>
 						</div>
 						<ul class="listbox arrangeCols" ui-sortable ng-model="qrCols">
 							<li ng-repeat="(i, col) in qrCols">
@@ -211,8 +248,14 @@
 								<button class="btn" style="margin-bottom:-2px" ng-click="addCustomColumn()">컬럼 추가 및 선택</button>
 							</div>
 						</div>
-						<div class="qr-container" style="width: 100%; height: 240px; overflow: scroll; margin-top: 5px">
-							<query-result qr-selectable="true" qr-check-type="true" ng-model="qresult" class="qr2"></query-result>
+						<div class="qr-container" style="width: 978px; height: 240px; overflow: scroll; margin-top: 5px">
+							<query-result
+								ng-model="qresult"
+								ng-page="numCurrentPage"
+								ng-page-size="numPagerPagesize"
+								is-check-type="true"
+								is-selectable="true"
+								class="qr2 qr-selectable"></query-result>
 						</div>
 					</div>
 					<div class="control-group submit-group">
@@ -227,8 +270,14 @@
 				<fieldset>
 					<div class="fieldset-description"></div>
 					<div style="width: 60%; float: left">
-						<div class="qr-container" style="width: 100%; height: 240px; overflow: scroll">
-							<query-result qr-custom-template="qrTmpl" qr-check-type="true" ng-model="qresult" class="qr2 qr-selected"></query-result>
+						<div class="qr-container" style="width: 772px; height: 240px; overflow: scroll">
+							<query-result
+								ng-template="qrTmpl"
+								ng-model="qresult"
+								ng-page="numCurrentPage"
+								ng-page-size="numPagerPagesize"
+								is-check-type="true"
+								class="qr2 qr-selected"></query-result>
 						</div>
 						<div style="width: 22%; float: left">
 							<ul class="nav nav-pills nav-stacked" style="max-height: 100px; overflow: auto; margin-left: 0; padding: 5px; border: 1px solid #ccc">

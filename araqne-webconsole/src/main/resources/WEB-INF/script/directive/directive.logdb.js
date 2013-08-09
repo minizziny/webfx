@@ -1,13 +1,28 @@
 angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
-.directive('queryInput', function($compile, serviceLogdb) {
+.directive('queryInput', function($compile, $parse, serviceLogdb) {
 	return {
 		restrict: 'E',
-		template: '<textarea autosize></textarea> <button class="search btn btn-primary">검색</button> <button class="stop btn btn-warning">중지</button>',
+		scope: {
+			onLoading: '&',
+			onPageLoaded: '&',
+			onLoaded: '&',
+			onStatusChange: '&',
+			onTimeline: '&',
+			ngTemplate: '=ngTemplate',
+			ngPageSize: '=',
+			ngChange: '&',
+			ngQueryString: '='
+		},
+		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" placeholder="여기에 쿼리를 입력하세요" autosize></textarea>\
+			<button class="search btn btn-primary">검색</button>\
+			<button class="stop btn btn-warning">중지</button>',
 		link: function(scope, element, attrs) {
-			element.addClass('loaded');
+			var autoflush = attrs.isAutoFlush;
+
+			$scope = scope;
+			scope = scope.$parent;
+
 			var textarea = element.find('textarea');
-			textarea.attr('ng-model', attrs.queryModel);
-			$compile(textarea)(scope);
 
 			var pid = proc.pid;
 			
@@ -18,12 +33,51 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				}
 			});
 			
-			element.find('.search').on('click', search);
+			element.find('.search').on('click', function() {
+				search();
+			});
 
 			element.find('.stop').on('click', stop);
 
+			function createdFn(m) {
+				element.removeClass('loaded').addClass('loading');
+			}
+
+			function startedFn(m) {
+				evalEvent(attrs.onLoading, m);
+			}
+
+			function pageLoadedFn(m) {
+				scope[attrs.ngModel] = m.body.result;
+				scope.$apply();
+
+				evalEvent(attrs.onPageLoaded, m);
+			}
+
+			function loadedFn(m) {
+				element.removeClass('loading').addClass('loaded');
+				if(autoflush != 'false') {
+					serviceLogdb.remove(z);	
+				}
+				evalEvent(attrs.onLoaded, m);
+			}
+
+			function onTimelineFn(m) {
+				evalEvent(attrs.onTimeline, m);
+			}
+
+			function onStatusChangeFn(m) {
+				evalEvent(attrs.onStatusChange, m);
+			}
+
+			function failedFn(m) {
+				alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.');
+				scope.$apply();
+			}
+
 			var z;
 			function search() {
+				var limit = scope.$eval(attrs.ngPageSize);
 				textarea.blur();
 				if(z != undefined) {
 					serviceLogdb.remove(z);
@@ -32,42 +86,64 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				
 				var queryValue = textarea.data('$ngModelController').$modelValue;
 
-				z.query(queryValue)
-				.created(function(m) {
-					element.removeClass('loaded').addClass('loading');
-
-					if(scope[attrs.queryOnloading] != undefined) {
-						scope[attrs.queryOnloading].call(this);
-					}
-				})
-				.pageLoaded(function(m) {
-					scope[attrs.ngModel] = m.body.result;
-					scope.$apply();
-
-					if(scope[attrs.queryOnpageloaded] != undefined) {
-						scope[attrs.queryOnpageloaded].call(this);	
-					}
-				})
-				.loaded(function(m) {
-					element.removeClass('loading').addClass('loaded');
-					serviceLogdb.remove(z);
-
-					if(scope[attrs.queryOnloaded] != undefined) {
-						scope[attrs.queryOnloaded].call(this);	
-					}
-				})
-				.failed(function(m) {
-					alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.')
-				})
+				z.query(queryValue, limit)
+				.created(createdFn)
+				.started(startedFn)
+				.pageLoaded(pageLoadedFn)
+				.loaded(loadedFn)
+				.onTimeline(onTimelineFn)
+				.onStatusChange(onStatusChangeFn)
+				.failed(failedFn)
 			}
 
 			function stop() {
-				alert('쿼리를 중지합니다.')
 				element.removeClass('loading').addClass('loaded');
-				serviceLogdb.remove(z);
+				if(autoflush != 'false') {
+					serviceLogdb.remove(z);	
+				}
 
-				if(scope[attrs.queryOnloaded] != undefined) {
-					scope[attrs.queryOnloaded].call(this);	
+				z.stop()
+				.success(function() {
+					console.log('stopped')
+				})
+
+				evalEvent(attrs.onLoaded, null);
+			}
+
+			function evalEvent(expr, arg1) {
+				if(!angular.isString(expr)) return;
+				expr = expr.replace('()', '');
+				scope[expr].call(scope, arg1);
+			}
+
+			element[0].offset = function(offset, limit) {
+				if(z == undefined) return;
+				z.getResult(offset, limit);
+			}
+
+			element[0].run = function() {
+				search();
+			}
+
+			element[0].getInstance = function() {
+				return z;
+			}
+
+			element[0].bindBackgroundQuery = function(id, str, status) {
+				z = serviceLogdb.createFromBg(pid, id, str, status);
+				z.registerTrap(function() {
+					console.log('registerTrap')
+				})
+				.created(createdFn)
+				.started(startedFn)
+				.pageLoaded(pageLoadedFn)
+				.loaded(loadedFn)
+				.onTimeline(onTimelineFn)
+				.onStatusChange(onStatusChangeFn)
+				.failed(failedFn);
+
+				if(status == 'Running') {
+					element.removeClass('loaded').addClass('loading');	
 				}
 			}
 
@@ -89,104 +165,184 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 .directive('queryResult', function($compile, serviceGuid) {
 	return {
 		restrict: 'E',
-		template: '<table ng-class="{ selectable: isSelectable }" class="cmpqr table table-striped table-condensed">' +
-			'<thead><tr><th ng-class="{ selected: col.is_checked }" ng-hide="!col.is_visible" ng-repeat="col in qrCols" after-iterate="columnChanged" ng-click="toggleCheck(col)">' +
-			'<input id="{{col.guid}}" ng-show="isSelectable" type="checkbox" ng-click="_stopPropation($event)" ng-model="col.is_checked" style="margin-right: 5px">' +
-			'<span class="qr-th-type" ng-show="col.type == \'number\'">1</span><span class="qr-th-type" ng-show="col.type == \'string\'">A</span><span class="qr-th-type" ng-show="col.type == \'datetime\'"><i class="icon-white icon-time"></i></span>' + 
-			' {{col.name}} </th></tr></thead>' + 
-			'<tbody><tr ng-repeat="d in qrData"><td ng-class="{ selected: col.is_checked }" ng-hide="!col.is_visible" ng-repeat="col in qrCols" ng-click="toggleCheck(col)">{{d[col.name]}}</td></tr></tbody></table>',
+		scope: {
+			ngPage: '=',
+			ngPageSize: '=',
+			stopPropation: '@',
+			ngCols: '@',
+			ngModel: '=',
+			isCheckType: '@',
+			isSelectable: '@'
+		},
+		template: '<div style="display: inline-block; position: relative">'+
+		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: -5px; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\
+			<span ng-show="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
+				{{numLimitColumnInterval}}개의 컬럼 더 보기\
+			</span>\
+			<span ng-hide="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
+				{{numTotalColumn - numLimitColumn}}개의 컬럼 더 보기\
+			</span>\
+		</button>\
+		<table ng-class="{ selectable: isSelectable, expandable: (numTotalColumn - numLimitColumn > 0) }" class="cmpqr table table-bordered table-striped table-condensed">\
+			<thead>\
+				<tr>\
+					<th>#</th>\
+					<th ng-class="{ selected: col.is_checked }"\
+						ng-hide="!col.is_visible"\
+						ng-repeat="col in ngCols | limitTo: numLimitColumn"\
+						ng-click="toggleCheck(col)">\
+						<input id="{{col.guid}}" type="checkbox" style="margin-right: 5px"\
+							ng-show="isSelectable"\
+							ng-click="stopPropation($event)"\
+							ng-model="col.is_checked">\
+						<span class="qr-th-type" ng-show="col.type == \'number\'">1</span>\
+						<span class="qr-th-type" ng-show="col.type == \'string\'">A</span>\
+						<span class="qr-th-type" ng-show="col.type == \'datetime\'"><i class="icon-white icon-time"></i></span>\
+						{{col.name}}\
+					</th>\
+				</tr>\
+			</thead>\
+			<tbody>\
+				<tr ng-repeat="d in ngModel">\
+					<td>{{ngPage * ngPageSize + ($index+1)}}</td>\
+					<td ng-class="{ selected: col.is_checked }"\
+						ng-hide="!col.is_visible"\
+						ng-repeat="col in ngCols | limitTo: numLimitColumn"\
+						ng-click="toggleCheck(col)"\
+						ng-bind-html-unsafe="d[col.name] | crlf"></td>\
+				</tr>\
+			</tbody>\
+		</table>\
+		</div>',
 		link: function(scope, element, attrs) {
-			scope._stopPropation = function(event) {
+			
+			scope.stopPropation = function(event) {
 				event.stopPropagation();
 			}
 
-			if(attrs.qrCustomTemplate != undefined) {
+			// 타입 체크 및 컬럼 정보에 타입 명시
+			function checkArrayMemberType(array) {
+				var types = ['number', 'datetime', 'string'];
+				if(array.some(myApp.isNumber)) return types[0];
+				if(array.some(checkDate)) return types[1];
+
+				return types[2];
+			}
+
+			if(attrs.ngCustomTemplate != undefined) {
 				element.empty();
-				var customEl = angular.element(scope[attrs.qrCustomTemplate]);
+				var customEl = angular.element(scope[attrs.ngCustomTemplate]);
 				element.append(customEl);
 
 				$compile(customEl)(scope);
 			}
 
-			// qrCols는 컬럼만
-			// qrData는 데이타 전부 
-			// 둘 다 queryResult의 ng-model이 바뀔때마다 업데이트 된다.
-
-			scope.qrCols = [];
-			scope.qrCols.getSelectedItems = function() {
-				return this.filter(function(obj) {
-					return obj.is_checked;
-				});
+			scope.toggleCheck = function(col) {
+				col.is_checked = !col.is_checked;
 			};
 
-			scope.qrData = [];
-			scope.isSelectable = false;
+			scope.next = function() {
+				scope.numLimitColumn = scope.numLimitColumn + scope.numLimitColumnInterval;
+				console.log(scope.numLimitColumn)
+			}
 
-			scope.toggleCheck = function() {};
+			scope.numLimitColumnInterval = 50;
+			scope.numLimitColumn = 50;
+			scope.numTotalColumn;
 
-			scope.$watch(attrs.ngModel, function() {
-				// ng-model이 업데이트될 때 불림
-				var raw = scope[attrs.ngModel];
-				if(!angular.isArray(raw)) { return; } // 데이터가 배열이 아니면 리턴
+			function newSearch() {
+				scope.numLimitColumnInterval = 50;
+				scope.numLimitColumn = 50;
+				scope.numTotalColumn = 0;
+				scope.$apply();
+			}
 
-				// 클리어
-				scope.qrCols.splice(0, scope.qrCols.length);
-				scope.qrData.splice(0, scope.qrData.length);
+			scope.ngCols = []; // ngModel의 컬럼 정보
+			scope.$watch('ngModel', function(val) {
+				if(!angular.isArray(val)) { return; } // 데이터가 배열이 아니면 리턴
+				if(scope.isCheckType == undefined) scope.isCheckType = false;
 
-				var cols = []; // 컬럼 이름만 임시 저장
-				for (var i = 0; i < raw.length; i++) {
-					for (var col in raw[i]) {
-						if(cols.indexOf(col) == -1 && col != '$$hashKey') {
-							cols.push(col);
+				// 컬럼 추출
+				var cols = [];
+				for (var i = 0; i < val.length; i++) {
+					if(i == 0) {
+						cols = Object.keys(val[i]);
+					}
+					else {
+						var keys = Object.keys(val[i]);
+						keys.forEach(function(k) {
+							if( cols.indexOf(k) == -1 ) {
+								cols.push(k);
+							}
+						});
+					}
+				}
+				
+				cols.sort(function(a, b) {
+					if(a.indexOf('_') == 0) { return -1; }
+					else { 
+						if(a > b) {
+							return 1;
+						}
+						if(b > a) {
+							return -1;
 						}
 					}
-					scope.qrData.push(raw[i]);
-				};
-
-				cols.sort(function(a,b) {
-					if(a.indexOf('_') == 0) { return -1; }
-					else { return 1; }
 					return 0;
+				}).forEach(function(k, i) {
+					if(k == '$$hashKey') {
+						cols.splice(cols.indexOf(k), 1);
+					}
 				});
 
-				for (var i = 0; i < cols.length; i++) {
-					scope.qrCols.push({
-						'guid': serviceGuid.generateType2(),
-						'name': cols[i],
-						'is_visible': true,
-						'is_checked': undefined
-					});
+				//console.log(cols.length)
+				if(cols.length > scope.numLimitColumn) {
+					scope.numTotalColumn = cols.length;
 				}
+				
+				scope.ngCols = cols.map(function(k) {
+					return {
+						guid: serviceGuid.generateType2(),
+						name: k,
+						is_visible: true,
+						is_checked: undefined
+					}
+				});
 
-				// 타입 체크 및 컬럼 정보에 타입 명시
-				function checkArrayMemberType(array) {
-					var types = ['number', 'datetime', 'string'];
-					if(array.some(myApp.isNumber)) return types[0];
-					if(array.some(checkDate)) return types[1];
-
-					return types[2];
-				}
-
-				if(attrs.qrCheckType === 'true') {
-					for (var i = 0; i < scope.qrCols.length; i++) {
-						if(scope.qrCols[i].type == undefined) {
-							var mapAll = scope.qrData.map(function(obj, j) {
-								return obj[scope.qrCols[i].name];
+				if(scope.isCheckType.toString() == 'true') {
+					for (var i = 0; i < scope.ngCols.length; i++) {
+						if(scope.ngCols[i].type == undefined) {
+							var mapAll = val.map(function(obj, j) {
+								return obj[scope.ngCols[i].name];
 							});
 							var type = checkArrayMemberType(mapAll);
-							scope.qrCols[i]['type'] = type;
+							scope.ngCols[i]['type'] = type;
 						}
 					}
 				}
-
-				if(attrs.qrSelectable === 'true') {
-					scope.isSelectable = true;
-					scope.toggleCheck = function(col) {
-						col.is_checked = !col.is_checked;
-					};
-				}
-
 			});
+
+			element[0].addColumn = function(name, type) {
+				obj = {
+					guid: serviceGuid.generateType2(),
+					name: name,
+					is_visible: true,
+					is_checked: true,
+					type: type
+				};
+				scope.ngCols.push(obj);
+				return obj;
+			}
+
+			element[0].getSelectedItems = function() {
+				return scope.ngCols.filter(function(obj) {
+					return obj.is_checked;
+				});
+			}
+
+			element[0].getColumns = function() {
+				return scope.ngCols;
+			}
 
 			// 로딩 인디케이터
 			var loadingInd = angular.element('<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>')
@@ -208,6 +364,8 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			element[0].hideLoadingIndicator = function() {
 				loadingInd.fadeOut();
 			}
+
+			element[0].newSearch = newSearch;
 		}
 	}
 });

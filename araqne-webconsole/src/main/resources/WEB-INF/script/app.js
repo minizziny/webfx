@@ -10,6 +10,13 @@ var app = angular.module('App', [
 	'ui.sortable'
 ]);
 
+var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
+
+function checkDate(member, i) {
+	if(member == undefined) return false;
+	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19)))
+}
+
 function throttle(fn, threshhold, scope) {
 	threshhold || (threshhold = 250);
 	var last,
@@ -52,6 +59,11 @@ function Async(fn) {
 		return this;
 	}
 
+	this.started = function(fn){
+		callback.started = fn;
+		return this;
+	}
+
 	this.pageLoaded = function(fn) {
 		callback.pageLoaded = fn;
 		return this;
@@ -59,6 +71,16 @@ function Async(fn) {
 
 	this.loaded = function(fn) {
 		callback.loaded = fn;
+		return this;
+	}
+
+	this.onTimeline = function(fn) {
+		callback.onTimeline = fn;
+		return this;
+	}
+
+	this.onStatusChange = function(fn) {
+		callback.onStatusChange = fn;
 		return this;
 	}
 
@@ -72,7 +94,7 @@ function Async(fn) {
 			callback[fname].apply(this, args);	
 		}
 		else {
-			if(fname != 'created') {
+			if(fname != 'created' && fname != 'onTimeline' && fname != 'onStatusChange' && fname != 'started') {
 				console.warn(name + '.' + fname + ', but do nothing')
 			}
 			//console.trace();
