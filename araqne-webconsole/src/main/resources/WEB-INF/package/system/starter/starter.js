@@ -87,7 +87,9 @@ function makeChart(el, query, elupdate) {
 	var yAxis = d3.svg.axis()
 	    .scale(y)
 	    .orient("left")
-	    .ticks(5);
+	    .ticks(5)
+	    .tickFormat(d3.format("d"))
+	    .tickSubdivide(0);
 
 	var line = d3.svg.line()
 	    .x(function(d) { return x(d.date); })
