@@ -4,7 +4,7 @@ angular.module('App.Directive', [])
 		restrict: 'A',
 		link: function(scope, $self, attrs) {
 			var shadow, minHeight, noFlickerPad;
-			$self.on('keydown', update).on('keyup', update);
+			$self.on('keydown', update).on('keyup', update).on('focus', update).on('click', update);
 
 			function update(e) {
 
