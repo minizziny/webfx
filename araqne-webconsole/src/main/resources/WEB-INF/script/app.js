@@ -14,7 +14,8 @@ var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
 
 function checkDate(member, i) {
 	if(member == undefined) return false;
-	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19)))
+	var rxTimezone = new RegExp('\\+\\d{4}');
+	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19))) && rxTimezone.test(member.substring(19, 24));
 }
 
 function throttle(fn, threshhold, scope) {
