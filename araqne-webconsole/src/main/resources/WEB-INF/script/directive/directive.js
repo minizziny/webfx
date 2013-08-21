@@ -765,6 +765,11 @@ angular.module('App.Directive', [])
 
 			elem[0].setTotalCount = setTotalCount;
 
+			elem[0].reset = function() {
+				scope.currentPage = 0;
+				scope.currentIndex = 0;
+			}
+
 			scope.$watch('ngTotalCount', function() {
 				if(scope.currentIndex == undefined) {
 					scope.currentIndex = 0;	
