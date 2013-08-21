@@ -20,6 +20,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.http.HttpServlet;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -51,6 +54,8 @@ public class BundleMetadataMonitor implements BundleListener {
 	@Requires
 	private HttpService httpd;
 
+	private ConcurrentHashMap<String, HttpServlet> servlets = new ConcurrentHashMap<String, HttpServlet>();
+
 	public BundleMetadataMonitor(BundleContext bc) {
 		this.bc = bc;
 	}
@@ -66,6 +71,15 @@ public class BundleMetadataMonitor implements BundleListener {
 
 	@Invalidate
 	public void stop() {
+		HttpService capturedHttpd = httpd;
+		if (capturedHttpd != null) {
+			HttpContext ctx = capturedHttpd.ensureContext("webconsole");
+			for (String servletName : servlets.keySet())
+				ctx.removeServlet(servletName);
+
+			servlets.clear();
+		}
+
 		if (bc != null)
 			bc.removeBundleListener(this);
 	}
@@ -177,7 +191,10 @@ public class BundleMetadataMonitor implements BundleListener {
 			URL url = bundle.getEntry("/WEB-INF");
 			if (url != null) {
 				HttpContext ctx = httpd.ensureContext("webconsole");
-				ctx.addServlet("bundle" + bundle.getBundleId(), new BundleResourceServlet(bundle, "/WEB-INF"), prefix);
+				String servletName = "bundle" + bundle.getBundleId();
+				BundleResourceServlet servlet = new BundleResourceServlet(bundle, "/WEB-INF");
+				ctx.addServlet(servletName, servlet, prefix);
+				servlets.put(servletName, servlet);
 				logger.info("araqne webconsole: prefix [{}] is mapped to bundle {}/WEB-INF", prefix, bundleId);
 			} else {
 				logger.warn("araqne webconsole: WEB-INF directory not found in bundle {}", bundleId);
@@ -188,5 +205,10 @@ public class BundleMetadataMonitor implements BundleListener {
 	}
 
 	private void unregisterStaticResource(Bundle bundle, String prefix) {
+		String servletName = "bundle" + bundle.getBundleId();
+		servlets.remove(servletName);
+
+		HttpContext ctx = httpd.ensureContext("webconsole");
+		ctx.removeServlet(servletName);
 	}
 }

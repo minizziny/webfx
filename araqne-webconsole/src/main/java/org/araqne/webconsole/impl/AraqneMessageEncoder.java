@@ -120,7 +120,7 @@ public class AraqneMessageEncoder {
 
 			jsonWriter.object();
 
-			properties = convertDate(properties);
+			properties = convert(properties);
 			for (String key : properties.keySet()) {
 				jsonWriter.key(key).value(properties.get(key));
 			}
@@ -136,7 +136,7 @@ public class AraqneMessageEncoder {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> convertDate(Map<String, Object> properties) {
+	private static Map<String, Object> convert(Map<String, Object> properties) {
 		Map<String, Object> m = new HashMap<String, Object>();
 		if (properties == null)
 			return m;
@@ -146,15 +146,21 @@ public class AraqneMessageEncoder {
 		for (String key : properties.keySet()) {
 			Object value = properties.get(key);
 
-			if (value instanceof Date)
+			if (value != null && value.getClass().isArray() && value.getClass().getComponentType() == byte.class) {
+				m.put(key, encodeBinary((byte[]) value));
+			} else if (value instanceof Date) {
 				m.put(key, dateFormat.format((Date) value));
-			else if (value instanceof Map)
-				m.put(key, convertDate((Map<String, Object>) value));
-			else if (value instanceof Collection) {
+			} else if (value instanceof Map) {
+				m.put(key, convert((Map<String, Object>) value));
+			} else if (value instanceof Collection) {
 				Collection<Object> c = new ArrayList<Object>();
 				for (Object v : (Collection<?>) value) {
 					if (v instanceof Date)
 						c.add(dateFormat.format((Date) v));
+					else if (v != null && v.getClass().isArray() && v.getClass().getComponentType() == byte.class)
+						c.add(encodeBinary((byte[]) v));
+					else if (v instanceof Map)
+						c.add(convert((Map<String, Object>) v));
 					else
 						c.add(v);
 				}
@@ -165,4 +171,13 @@ public class AraqneMessageEncoder {
 
 		return m;
 	}
+
+	private static String encodeBinary(byte[] b) {
+		StringBuilder sb = new StringBuilder(b.length * 2);
+		for (int i = 0; i < b.length; i++) {
+			sb.append(String.format("%02x", b[i]));
+		}
+		return sb.toString();
+	}
+
 }

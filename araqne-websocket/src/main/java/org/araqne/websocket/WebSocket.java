@@ -169,8 +169,14 @@ public class WebSocket {
 	}
 
 	public void close() throws IOException {
+		close(null);
+	}
+
+	private void close(Throwable cause) throws IOException {
 		if (closed)
 			return;
+
+		closed = true;
 
 		Socket captured = socket;
 		if (captured != null) {
@@ -189,7 +195,7 @@ public class WebSocket {
 			captured.close();
 		}
 
-		closed = true;
+		invokeOnCloseCallbacks(cause);
 	}
 
 	private void ensureClose(Closeable c) {
@@ -225,6 +231,7 @@ public class WebSocket {
 
 		@Override
 		public void run() {
+			Throwable lastError = null;
 			try {
 				while (!doStop) {
 					try {
@@ -234,25 +241,26 @@ public class WebSocket {
 						recv();
 					} catch (SocketTimeoutException e) {
 					} catch (SocketException e) {
+						lastError = e;
+						invokeOnErrorCallbacks(e);
+
 						if (e.getMessage().equalsIgnoreCase("Connection reset"))
 							return;
 						if (socket.isClosed())
 							return;
+
 						logger.debug("araqne websocket: socket exception", e);
 					} catch (IOException e) {
 						logger.debug("araqne websocket: io exception", e);
+						lastError = e;
+						invokeOnErrorCallbacks(e);
 					}
 				}
 			} finally {
-				if (socket != null) {
-					try {
-						socket.close();
-					} catch (IOException e) {
-					}
-					socket = null;
+				try {
+					close(lastError);
+				} catch (IOException e1) {
 				}
-
-				closed = true;
 			}
 		}
 
@@ -304,14 +312,39 @@ public class WebSocket {
 				String text = new String(os.toByteArray());
 				os = new ByteArrayOutputStream();
 
-				for (WebSocketListener listener : listeners) {
-					try {
-						listener.onMessage(new WebSocketMessage(Opcode.TEXT.getCode(), text));
-					} catch (Throwable t) {
-						logger.warn("araqne websocket: websocket listener should not throw any exception", t);
-					}
-				}
+				invokeOnMessageCallbacks(text);
 			}
 		}
 	}
+
+	private void invokeOnMessageCallbacks(String text) {
+		for (WebSocketListener listener : listeners) {
+			try {
+				listener.onMessage(new WebSocketMessage(Opcode.TEXT.getCode(), text));
+			} catch (Throwable t) {
+				logger.warn("araqne websocket: websocket listener should not throw any exception", t);
+			}
+		}
+	}
+
+	private void invokeOnErrorCallbacks(Throwable e) {
+		for (WebSocketListener listener : listeners) {
+			try {
+				listener.onError(e);
+			} catch (Throwable t) {
+				logger.warn("araqne websocket: websocket listener should not throw any exception", t);
+			}
+		}
+	}
+
+	private void invokeOnCloseCallbacks(Throwable cause) {
+		for (WebSocketListener listener : listeners) {
+			try {
+				listener.onClose(cause);
+			} catch (Throwable t) {
+				logger.warn("araqne websocket: websocket listener should not throw any exception", t);
+			}
+		}
+	}
+
 }

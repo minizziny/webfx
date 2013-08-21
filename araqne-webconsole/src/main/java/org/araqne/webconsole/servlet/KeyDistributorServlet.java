@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.araqne.httpd.HttpContext;
@@ -60,6 +61,15 @@ public class KeyDistributorServlet extends HttpServlet {
 	public void start() {
 		HttpContext ctx = httpd.ensureContext("webconsole");
 		ctx.addServlet("keydist", this, PREFIX);
+	}
+
+	@Invalidate
+	public void stop() {
+		HttpService captured = httpd;
+		if (captured != null) {
+			HttpContext ctx = captured.ensureContext("webconsole");
+			ctx.removeServlet("keydist");
+		}
 	}
 
 	@Override
