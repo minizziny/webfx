@@ -36,7 +36,7 @@ angular.module('App.Filter', [])
 		if(val === null) return val;
 		
 		if(toString.call(val) == '[object String]') {
-			return val.replace(/\n/gi, '<br>');
+			return val.replace(/\n/gi, '<br>').replace('<', '&lt;').replace('>', '&gt;');
 		}
 		else return val;
 	}
