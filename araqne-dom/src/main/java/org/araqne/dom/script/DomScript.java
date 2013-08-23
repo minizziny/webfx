@@ -301,6 +301,17 @@ public class DomScript implements Script {
 			context.println("interrupted");
 		}
 	}
+	
+	@ScriptUsage(description = "remove program pack", arguments = {
+			@ScriptArgument(name = "domain", type = "string", description = "org domain"),
+			@ScriptArgument(name = "pack name", type = "string", description = "pack name")})
+	public void removeProgramPack(String[] args) {
+		String domain = args[0];
+		String packName = args[1];
+
+		programApi.removeProgramPack(domain, packName);;
+		context.println("removed");
+	}
 
 	@ScriptUsage(description = "remove program", arguments = {
 			@ScriptArgument(name = "domain", type = "string", description = "org domain"),
