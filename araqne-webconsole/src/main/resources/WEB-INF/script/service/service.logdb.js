@@ -241,6 +241,7 @@ angular.module('App.Service.Logdb', [])
 		}
 
 		function dispose() {
+			if(isDisposed) return;
 			if(clazz.id == -1) return;
 
 			stopQuery().success(function(m) {
