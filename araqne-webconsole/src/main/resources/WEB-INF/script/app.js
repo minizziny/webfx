@@ -246,23 +246,8 @@ app.factory('serviceSession', function(socket) {
 		})
 	}
 
-	function getSessions(pid) {
-		var self = this;
-		var callback = function(resp, raw1) {
-			if(resp.body.admin_login_name == null && resp.body.org_domain == null) {
-				alert("로그인이 필요합니다.");
-				self.done('failed', resp);
-			}
-			else {
-				self.done('success', resp);
-			}
-		};
-
-		return socket.send("org.araqne.dom.msgbus.LoginPlugin.getPrincipal", {}, pid)
-			.success(callback)
-			.failed(function() {
-				self.done('failed', resp);
-			});
+	function getSessions() {
+		return socket.send("org.araqne.dom.msgbus.LoginPlugin.getPrincipal", {}, proc.pid)
 	}
 
 	var ret = {
@@ -270,9 +255,7 @@ app.factory('serviceSession', function(socket) {
 			return new Async(login, id, pw, window.proc.pid);
 		},
 		logout: logout,
-		getSessions: function(pid) {
-			return new Async(getSessions, pid);
-		}
+		getSessions: getSessions
 	};
 
 	return ret;
