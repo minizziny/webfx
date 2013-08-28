@@ -285,7 +285,7 @@ app.factory('servicePush', function(socket) {
 
 	}
 
-	var doPoll = function(self) {
+	var doPoll = function() {
 		//console.log('doPoll')
 
 		$.ajax({
@@ -302,10 +302,13 @@ app.factory('servicePush', function(socket) {
 				$.each(full, function(i, obj) {
 					onTrap(obj, resp);
 				});
+
+				doPoll();
 			},
 			timeout: 30000,
-			complete: function() {
-				doPoll(self);
+			error: function(jqxhr) {
+				console.log(jqxhr);
+				setTimeout(doPoll, 5000);
 			}
 		});
 	}
