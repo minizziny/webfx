@@ -477,3 +477,52 @@ query-input.loading textarea {
 	box-shadow: inset 0 -1px 0 rgba(0,0,0,0.15);*/	
 	
 }
+
+/* <input-file> directive */
+.file_input_textbox
+{
+	float: left
+}
+
+.file_input_div
+{
+	position: relative; 
+	width: 100px; 
+	height: 30px; 
+	overflow: hidden;
+}
+
+.file_input_button
+{
+	width: 100px; 
+	position: absolute; 
+	top: 0px;
+}
+
+.file_input_hidden
+{
+	font-size: 45px; 
+	position: absolute; 
+	right: 0px; 
+	top: 0px; 
+	opacity: 0; 
+	
+	filter: alpha(opacity=0); 
+	-ms-filter: "alpha(opacity=0)"; 
+	-khtml-opacity: 0; 
+	-moz-opacity: 0;
+
+	cursor: pointer;
+}
+
+.file_input_button.btn.hover {
+	color: #333;
+	text-decoration: none;
+	background-position: 0 -15px;
+	-webkit-transition: background-position .1s linear;
+	-moz-transition: background-position .1s linear;
+	-o-transition: background-position .1s linear;
+	transition: background-position .1s linear;
+
+	background-color: #e6e6e6;
+}

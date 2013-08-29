@@ -243,12 +243,29 @@ angular.module('App.Service.Chart', ['App.Service'])
 			xAxis.tickFormat(d3.format(',d'))
 			//.tickValues(d3.range(xDom[0], xDom[1], data[0].values.length / 5));
 		}
-		
-		y.domain([
-			d3.min(data, function(c) { return d3.min(c.values, function(v) { return v.value; }); }),
-			d3.max(data, function(c) { return d3.max(c.values, function(v) { return v.value; }); })
-			]);
 
+
+		var isSameValue = false;
+		var first;
+		if(data.length == 1) {
+			var isSameValue = data[0].values.every(function(v) { 
+				if(first == undefined) {
+					first = v.value;
+				}
+				return first == v.value;
+			});
+		}
+		
+		if(isSameValue) {
+			y.domain([0, first * 2]);
+		}
+		else {
+			y.domain([
+				d3.min(data, function(c) { return d3.min(c.values, function(v) { return v.value; }); }),
+				d3.max(data, function(c) { return d3.max(c.values, function(v) { return v.value; }); })
+			]);
+		}
+		
 		var xGroup = svg.append("g")
 		.attr("class", "x axis")
 		.attr("transform", "translate(0," + height + ")")
@@ -465,9 +482,17 @@ angular.module('App.Service.Chart', ['App.Service'])
 			};
 
 			series.values = dataResult.map(function(obj) {
-				return {
-					'value': obj[s.value.name],
-					'label': obj[dataLabel.name]
+				if(!!s.value) {
+					return {
+						'value': obj[s.value.name],
+						'label': obj[dataLabel.name]
+					}
+				}
+				else {
+					return {
+						'value': obj[s.name],
+						'label': obj[dataLabel.name]
+					}
 				}
 			});
 			st.push(series);
@@ -493,9 +518,8 @@ angular.module('App.Service.Chart', ['App.Service'])
 			var value = { name: obj.key }
 			delete obj.key;
 			obj.value = value;
-			return obj
+			return obj;
 		});
-
 		return dataSeries;
 	}
 

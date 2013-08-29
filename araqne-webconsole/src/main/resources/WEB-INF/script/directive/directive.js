@@ -826,4 +826,45 @@ angular.module('App.Directive', [])
 			}
 		}
 	}
+})
+.directive('inputFile', function($compile) {
+	return {
+		restrict: 'E',
+		scope: {
+			'onChange': '&',
+			'fileName': '@'
+		},
+		template: '<input type="text" ng-model="fileName" class="file_input_textbox" readonly="readonly">\
+			<div class="file_input_div">\
+				<input type="button" value="찾아보기" class="file_input_button btn" ng-class="{\'hover\': isHover}" />\
+				<input type="file" class="file_input_hidden" ng-mouseover="isHover = true" ng-mouseout="isHover = false" />\
+			</div>',
+		link: function(scope, el, attrs) {
+			var elInput = el.find('input[type=file]');
+			elInput.on('change', function(event) {
+				scope.fileName = this.value.split('\\').pop();
+				var file = event.target.files[0];
+
+				if (file) {
+					var fr = new FileReader();
+					fr.onload = function(e) { 
+						var contents = e.target.result;
+						scope.onChange({
+							'$file': contents,
+							'$filename': scope.fileName
+						});
+					}
+					fr.readAsText(file);
+				}
+				else {
+					scope.onChange({
+						'$file': null,
+						'$filename': null
+					});
+				}
+
+				scope.$apply();
+			});
+		}
+	}
 });
