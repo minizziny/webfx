@@ -238,7 +238,13 @@ angular.module('App.Service.Logdb', [])
 		function removeQuery() {
 			return socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.removeQuery', { id: clazz.id }, pid)
 				.success(function() {
-					console.log('removeQuery success', clazz.id)
+					try {
+						console.log('removeQuery success', clazz.id);	
+					}
+					catch(e) {
+						
+					}
+					
 				})
 				.failed(function() {
 					console.log('removeQuery error')
