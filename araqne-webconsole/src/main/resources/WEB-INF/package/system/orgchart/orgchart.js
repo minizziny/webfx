@@ -28,7 +28,7 @@ function getOrgUnit(guid, orgunits) {
 
 function Controller($scope, serviceTask, socket, eventSender, serviceDom) {
 	serviceTask.init();
-	proc = serviceTask.newProcess('logquery');
+	proc = serviceTask.newProcess('orgchart');
 
 	$scope.testAlert = function() {
 		var types = ['info', 'success', 'error'];

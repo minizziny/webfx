@@ -149,7 +149,7 @@ app.factory('socket', function() {
 			}, options
 		];
 
-		if(!!parent.Core) {////.Connection) {
+		if(!!parent) {////.Connection) {
 			//console.log(parent.Core.Connection);
 
 			parent.Core.Connection.send(method, options, function(resp, full) {
@@ -314,7 +314,7 @@ app.factory('servicePush', function(socket) {
 	}
 
 	function register(name, pid, ontrap, callback) {
-		if(!!parent.Core) {
+		if(!!parent) {
 			parent.Core.Connection.register(name, ontrap, callback, pid);
 			return;
 		}
@@ -339,7 +339,7 @@ app.factory('servicePush', function(socket) {
 	};
 
 	function unregister(name, pid, callback) {
-		if(!!parent.Core) {
+		if(!!parent) {
 			parent.Core.Connection.unregister(name, null, callback, pid);
 			return;
 		}
@@ -432,6 +432,11 @@ app.factory('serviceTask', function($http) {
 
 		this.pid = pid;
 
+		
+		var parentIframe = parent.document.querySelector('iframe[data-program=' + name + ']');
+		$(parentIframe).attr('pid', pid);
+		//console.log(parentIframe);
+
 		this.windows = [];
 
 		this.serialize = function() {
@@ -443,7 +448,17 @@ app.factory('serviceTask', function($http) {
 	}
 
 	function newPid() {
-		return Math.floor(Math.random() * (1000 - 1 + 1)) + 1;
+		if(!parent.pids) {
+			parent.pids = [];
+		}
+		var pid = Math.floor(Math.random() * (1000 - 1 + 1)) + 1;
+		if( parent.pids.indexOf(pid) == -1 ) {
+			parent.pids.push(pid);
+			return pid;
+		}
+		else {
+			return newPid();
+		}
 	}
 	
 	function newProcess(name) {
