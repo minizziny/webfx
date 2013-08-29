@@ -34,6 +34,19 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 		}
 
 		vmTasks.onAfterRemove = function(program) {
+			var pid = parseInt($('iframe[data-program=' + program.path + ']').attr('pid'));
+			var qmap = _logdb.queries.map(function(qInst) {
+				if(qInst.getPid() == pid) return qInst;
+			});
+
+			qmap.forEach(function(instance) {
+				console.log(instance)
+				instance.dispose();
+				var idx = _logdb.queries.indexOf(instance);
+				_logdb.queries.splice(idx, 1);
+				_logdb.$apply();
+			});
+
 			Core.Program.exit(program);
 			setTimeout(function() {
 				vmTasks.selectAt(vmTasks.length() - 1);
