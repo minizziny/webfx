@@ -9,7 +9,7 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>araqne-dom</artifactId>
-	<version>3.0.2</version>
+	<version>3.0.3</version>
 	<packaging>bundle</packaging>
 	<name>Araqne DOM</name>
 	<build>
@@ -60,7 +60,7 @@
 		<dependency>
 			<groupId>org.araqne</groupId>
 			<artifactId>araqne-api</artifactId>
-			<version>2.5.2</version>
+			<version>2.5.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.araqne</groupId>
