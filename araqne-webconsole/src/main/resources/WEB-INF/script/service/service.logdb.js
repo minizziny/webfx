@@ -241,17 +241,19 @@ angular.module('App.Service.Logdb', [])
 		}
 
 		function dispose() {
-			if(isDisposed) return;
+			if(isDisposed) {
+				return;
+			}
 			if(clazz.id == -1) return;
 
 			stopQuery().success(function(m) {
 				removeQuery();
+				isDisposed = true;
 			}).failed(function(m) {
 				removeQuery();
+				isDisposed = true;
 			});
 			unregisterTrap();
-
-			isDisposed = true;
 		}
 
 		return {

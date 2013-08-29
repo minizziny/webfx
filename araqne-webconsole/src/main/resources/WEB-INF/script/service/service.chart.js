@@ -482,9 +482,17 @@ angular.module('App.Service.Chart', ['App.Service'])
 			};
 
 			series.values = dataResult.map(function(obj) {
-				return {
-					'value': obj[s.value.name],
-					'label': obj[dataLabel.name]
+				if(!!s.value) {
+					return {
+						'value': obj[s.value.name],
+						'label': obj[dataLabel.name]
+					}
+				}
+				else {
+					return {
+						'value': obj[s.name],
+						'label': obj[dataLabel.name]
+					}
 				}
 			});
 			st.push(series);
@@ -506,10 +514,6 @@ angular.module('App.Service.Chart', ['App.Service'])
 	function getDataSeries(metadata) {
 		var metadataSeries = JSON.parse(decodeURIComponent(metadata));
 
-		return getDataSeries2(metadataSeries);
-	}
-
-	function getDataSeries2(metadataSeries) {
 		var dataSeries = metadataSeries.map(function(obj) {
 			var value = { name: obj.key }
 			delete obj.key;
@@ -524,7 +528,6 @@ angular.module('App.Service.Chart', ['App.Service'])
 		lineChart: lineChart,
 		pie: pie,
 		buildJSONStructure: buildJSONStructure,
-		getDataSeries: getDataSeries,
-		getDataSeries2: getDataSeries2
+		getDataSeries: getDataSeries
 	}
 });

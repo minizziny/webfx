@@ -183,14 +183,14 @@ angular.module('Widget', [])
 		
 				queryInst.query(scope.query, 200)
 				.created(function(m) {
-					console.log('created')
+					//console.log('created')
 					elProgressBar.addClass('ani');
 					scope.progress = { 'width': '20%' };
 					scope.$apply();
 				})
 				.pageLoaded(function(m) {
 
-					console.log('pageLoaded')
+					//console.log('pageLoaded')
 
 					var result = m.body.result;
 					scope.dataQueryResult.splice(0, scope.dataQueryResult.length); // array 비워주기
@@ -206,7 +206,7 @@ angular.module('Widget', [])
 					}
 				})
 				.loaded(function(m) {
-					console.log('loaded')
+					console.log('loaded', queryInst.getId(), scope.guid, scope.query);
 					serviceLogdb.remove(queryInst);
 
 					if(!!options.loaded) {
@@ -240,6 +240,9 @@ angular.module('Widget', [])
 				});
 
 				el[0].$dispose = function() {
+					console.log('$dispose', queryInst.getId(), scope.guid, scope.query);
+					$timeout.cancel(timer);
+					scope.isPaused = true;
 					serviceLogdb.remove(queryInst);
 					el.remove();
 				}
