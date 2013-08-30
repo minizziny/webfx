@@ -14,7 +14,8 @@ var dateFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
 
 function checkDate(member, i) {
 	if(member == undefined) return false;
-	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19)))
+	var rxTimezone = new RegExp('\\+\\d{4}');
+	return myApp.isDate(dateFormat.parse(member.toString().substring(0,19))) && rxTimezone.test(member.substring(19, 24));
 }
 
 function throttle(fn, threshhold, scope) {
@@ -148,7 +149,7 @@ app.factory('socket', function() {
 			}, options
 		];
 
-		if(!!parent.Core) {////.Connection) {
+		if(!!parent) {////.Connection) {
 			//console.log(parent.Core.Connection);
 
 			parent.Core.Connection.send(method, options, function(resp, full) {
@@ -245,23 +246,8 @@ app.factory('serviceSession', function(socket) {
 		})
 	}
 
-	function getSessions(pid) {
-		var self = this;
-		var callback = function(resp, raw1) {
-			if(resp.body.admin_login_name == null && resp.body.org_domain == null) {
-				alert("로그인이 필요합니다.");
-				self.done('failed', resp);
-			}
-			else {
-				self.done('success', resp);
-			}
-		};
-
-		return socket.send("org.araqne.dom.msgbus.LoginPlugin.getPrincipal", {}, pid)
-			.success(callback)
-			.failed(function() {
-				self.done('failed', resp);
-			});
+	function getSessions() {
+		return socket.send("org.araqne.dom.msgbus.LoginPlugin.getPrincipal", {}, proc.pid)
 	}
 
 	var ret = {
@@ -269,9 +255,7 @@ app.factory('serviceSession', function(socket) {
 			return new Async(login, id, pw, window.proc.pid);
 		},
 		logout: logout,
-		getSessions: function(pid) {
-			return new Async(getSessions, pid);
-		}
+		getSessions: getSessions
 	};
 
 	return ret;
@@ -301,7 +285,7 @@ app.factory('servicePush', function(socket) {
 
 	}
 
-	var doPoll = function(self) {
+	var doPoll = function() {
 		//console.log('doPoll')
 
 		$.ajax({
@@ -318,16 +302,19 @@ app.factory('servicePush', function(socket) {
 				$.each(full, function(i, obj) {
 					onTrap(obj, resp);
 				});
+
+				doPoll();
 			},
 			timeout: 30000,
-			complete: function() {
-				doPoll(self);
+			error: function(jqxhr) {
+				console.log(jqxhr);
+				setTimeout(doPoll, 5000);
 			}
 		});
 	}
 
 	function register(name, pid, ontrap, callback) {
-		if(!!parent.Core) {
+		if(!!parent) {
 			parent.Core.Connection.register(name, ontrap, callback, pid);
 			return;
 		}
@@ -352,7 +339,7 @@ app.factory('servicePush', function(socket) {
 	};
 
 	function unregister(name, pid, callback) {
-		if(!!parent.Core) {
+		if(!!parent) {
 			parent.Core.Connection.unregister(name, null, callback, pid);
 			return;
 		}
@@ -445,6 +432,11 @@ app.factory('serviceTask', function($http) {
 
 		this.pid = pid;
 
+		
+		var parentIframe = parent.document.querySelector('iframe[data-program=' + name + ']');
+		$(parentIframe).attr('pid', pid);
+		//console.log(parentIframe);
+
 		this.windows = [];
 
 		this.serialize = function() {
@@ -456,7 +448,17 @@ app.factory('serviceTask', function($http) {
 	}
 
 	function newPid() {
-		return Math.floor(Math.random() * (1000 - 1 + 1)) + 1;
+		if(!parent.pids) {
+			parent.pids = [];
+		}
+		var pid = Math.floor(Math.random() * (1000 - 1 + 1)) + 1;
+		if( parent.pids.indexOf(pid) == -1 ) {
+			parent.pids.push(pid);
+			return pid;
+		}
+		else {
+			return newPid();
+		}
 	}
 	
 	function newProcess(name) {

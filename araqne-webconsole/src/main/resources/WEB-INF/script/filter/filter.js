@@ -36,7 +36,7 @@ angular.module('App.Filter', [])
 		if(val === null) return val;
 		
 		if(toString.call(val) == '[object String]') {
-			return val.replace(/\n/gi, '<br>');
+			return val.replace(/\n/gi, '<br>').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 		}
 		else return val;
 	}
@@ -46,3 +46,19 @@ angular.module('App.Filter', [])
 		return d3.format(',')(val);
 	}
 })
+.filter('truncate', function () {
+	return function (text, length, end) {
+		if (isNaN(length))
+			length = 10;
+
+		if (end === undefined)
+			end = "...";
+
+		if (text.length <= length || text.length - end.length <= length) {
+			return text;
+		}
+		else {
+			return String(text).substring(0, length-end.length) + end;
+		}
+	};
+});

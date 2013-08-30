@@ -61,10 +61,11 @@ public class ProgramApiImpl extends DefaultEntityEventProvider<Program> implemen
 		public void entityRemoving(String domain, ProgramPack obj, ConfigTransaction xact, Object state) {
 			List<Program> programs = obj.getPrograms();
 			List<Predicate> preds = new ArrayList<Predicate>();
-			for (Program program : programs) {
-				preds.add(getPred(program.getPack(), program.getName()));
-				program.setPack(null);
-			}
+			if (programs != null)
+				for (Program program : programs) {
+					preds.add(getPred(program.getPack(), program.getName()));
+					program.setPack(null);
+				}
 
 			Transaction x = Transaction.getInstance(xact);
 			cfg.updates(x, prog, preds, programs, null);

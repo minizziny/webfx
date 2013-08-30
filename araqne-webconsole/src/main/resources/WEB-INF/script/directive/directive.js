@@ -4,7 +4,7 @@ angular.module('App.Directive', [])
 		restrict: 'A',
 		link: function(scope, $self, attrs) {
 			var shadow, minHeight, noFlickerPad;
-			$self.on('keydown', update).on('keyup', update);
+			$self.on('keydown', update).on('keyup', update).on('focus', update).on('click', update);
 
 			function update(e) {
 
@@ -765,6 +765,11 @@ angular.module('App.Directive', [])
 
 			elem[0].setTotalCount = setTotalCount;
 
+			elem[0].reset = function() {
+				scope.currentPage = 0;
+				scope.currentIndex = 0;
+			}
+
 			scope.$watch('ngTotalCount', function() {
 				if(scope.currentIndex == undefined) {
 					scope.currentIndex = 0;	
@@ -819,6 +824,47 @@ angular.module('App.Directive', [])
 			scope.stopPropagation = function(e) {
 				e.stopPropagation();
 			}
+		}
+	}
+})
+.directive('inputFile', function($compile) {
+	return {
+		restrict: 'E',
+		scope: {
+			'onChange': '&',
+			'fileName': '@'
+		},
+		template: '<input type="text" ng-model="fileName" class="file_input_textbox" readonly="readonly">\
+			<div class="file_input_div">\
+				<input type="button" value="찾아보기" class="file_input_button btn" ng-class="{\'hover\': isHover}" />\
+				<input type="file" class="file_input_hidden" ng-mouseover="isHover = true" ng-mouseout="isHover = false" />\
+			</div>',
+		link: function(scope, el, attrs) {
+			var elInput = el.find('input[type=file]');
+			elInput.on('change', function(event) {
+				scope.fileName = this.value.split('\\').pop();
+				var file = event.target.files[0];
+
+				if (file) {
+					var fr = new FileReader();
+					fr.onload = function(e) { 
+						var contents = e.target.result;
+						scope.onChange({
+							'$file': contents,
+							'$filename': scope.fileName
+						});
+					}
+					fr.readAsText(file);
+				}
+				else {
+					scope.onChange({
+						'$file': null,
+						'$filename': null
+					});
+				}
+
+				scope.$apply();
+			});
 		}
 	}
 });

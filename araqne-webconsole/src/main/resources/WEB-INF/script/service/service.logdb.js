@@ -214,6 +214,8 @@ angular.module('App.Service.Logdb', [])
 				asyncQuery.done('pageLoaded', m);
 				applyFn();
 
+				console.log('getResult', clazz.id);
+
 				if(!!callback) {
 					callback(m);
 				}
@@ -225,6 +227,9 @@ angular.module('App.Service.Logdb', [])
 
 		function stopQuery() {
 			return socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.stopQuery', { id: clazz.id }, pid)
+				.success(function() {
+					//console.log('stopQuery success')
+				})
 				.failed(function() {
 					console.log('stopQuery error')
 				});
@@ -233,7 +238,13 @@ angular.module('App.Service.Logdb', [])
 		function removeQuery() {
 			return socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.removeQuery', { id: clazz.id }, pid)
 				.success(function() {
-					//console.log('removeQuery success')
+					try {
+						console.log('removeQuery success', clazz.id);	
+					}
+					catch(e) {
+						
+					}
+					
 				})
 				.failed(function() {
 					console.log('removeQuery error')
@@ -241,16 +252,19 @@ angular.module('App.Service.Logdb', [])
 		}
 
 		function dispose() {
-			if(clazz.id == -1) return;
+			if(isDisposed) {
+				console.log('dispose failed isDisposed', clazz.id);
+				return;
+			}
+			if(clazz.id == -1) {
+				return;
+			}
 
-			stopQuery().success(function(m) {
-				removeQuery();
-			}).failed(function(m) {
-				removeQuery();
-			});
+			removeQuery();
 			unregisterTrap();
 
 			isDisposed = true;
+			console.log('dispose', clazz.id);
 		}
 
 		return {

@@ -403,6 +403,9 @@ public class ConfigManagerImpl implements ConfigManager {
 	@Override
 	public <T> void updates(Transaction xact, Class<T> cls, List<Predicate> preds, List<T> docs, String notFoundMessage,
 			Object state) {
+		if (docs == null)
+			return;
+		
 		if (docs.isEmpty())
 			return;
 
