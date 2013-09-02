@@ -10,7 +10,7 @@
     "tests"
   ],
   "dependencies": {
-    "angular": "git://github.com/angular/bower-angular.git",
+    "angular": "1.0.7",
     "d3": "git://github.com/mbostock/d3.git",
     "moment": "git://github.com/timrwood/moment.git",
     "jquery-ui": "git://github.com/components/jqueryui",
