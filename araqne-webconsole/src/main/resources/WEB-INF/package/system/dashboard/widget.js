@@ -207,7 +207,7 @@ angular.module('Widget', [])
 					}, 600);
 
 					if(!scope.isPaused) {
-						timer = $timeout(run, scope.interval * 300);// 3000);
+						timer = $timeout(run, scope.interval * 1000);// 3000);
 					}
 				}
 		
