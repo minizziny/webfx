@@ -1,316 +1,14 @@
-var app = angular.module('dashboard', ['App']);
+var app = angular.module('dashboard', ['App', 'Widget']);
 var proc;
 console.log('dashboard init');
-
-var timer = {};
-
-var reltimeTable = {};
-
-setInterval(function() {
-	for(var prop in reltimeTable) {
-		var obj = reltimeTable[prop];
-		obj.el.text(obj.lastUpdated.fromNow());
-	}
-}, 1000);
 
 parent.d3 = d3;
 
 var tooltip = $('<div class="tooltip fade top"><div class="tooltip-arrow"></div><div class="tooltip-inner">...</div></div>').appendTo($('body'));
 var color_map = ["#AFD8F8","#F6BD0F","#8BBA00","#FF8E46","#008E8E","#D64646","#8E468E","#588526","#B3AA00","#008ED6","#9D080D","#A186BE","#CC6600","#FDC689","#ABA000","#F26D7D","#FFF200","#0054A6","#F7941C","#CC3300","#006600","#663300","#6DCFF6"];
 
-app.directive('widget', function($compile, serviceLogdb, eventSender, serviceChart) {
-	return {
-		restrict: 'E',
-		link: function(scope, element, attrs) {
-			scope[attrs.guid] = {
-				data: [],
-				interval: Math.max(parseInt(attrs.interval), 5),
-				isLoaded: false
-			};
-
-			function updateTimer(guid, elTimeStamp) {
-				reltimeTable[guid] = {
-					'el': elTimeStamp,
-					'lastUpdated': moment()
-				};
-			}
-
-			function disposeTimer(guid) {
-				delete reltimeTable[guid];
-			}
-
-			function getData(qString, onDataLoaded, elRefresh, elPause, elResume) {
-				var timer, qInst;
-
-				function created(m) {
-					console.log(attrs.type + ' ------------- ', qInst.id());
-					scope[attrs.guid].data = [];
-				}
-
-				function pageLoaded(m) {
-					console.log(attrs.type + ' pageloaded', qInst.id(), m.body);
-					for (var i = 0; i < m.body.result.length; i++) {
-						scope[attrs.guid].data.push(m.body.result[i]);
-					};
-
-					if(scope[attrs.guid].isLoaded) {
-						dataLoaded(false);
-					}
-				}
-
-				function loaded(m) {
-					console.log(attrs.type + ' loaded', qInst.id(), m.body);
-					var first_load_length = scope[attrs.guid].data.length;
-					// console.log(first_load_length, m.body.total_count, scope[attrs.guid])
-					
-					var amount = Math.max(m.body.total_count, first_load_length);
-					if(amount > 1000 && first_load_length != 1000) {
-						var total_count = Math.min(amount, 1000);
-						// console.log(total_count)
-
-						// load more
-						qInst.getResult(first_load_length, total_count - first_load_length, function() {
-							dataLoaded(true);
-							scope[attrs.guid].isLoaded = true;
-							scope.$apply();
-						});
-					}
-					else {
-						dataLoaded(true);
-						scope[attrs.guid].isLoaded = true;
-						scope.$apply();
-					}
-
-				}
-
-				function dataLoaded(removeQuery) {
-					if(removeQuery == true) {
-						console.log(attrs.type + ' onDataLoaded', qInst.id(), Date.now())	
-					}
-					else {
-						console.warn(attrs.type + ' onDataLoaded', qInst.id(), Date.now());
-					}
-					
-					onDataLoaded({
-						dispose: function() {
-							disposeTimer(attrs.guid);
-							clearTimeout(timer);
-							timer = null;
-						}
-					});
-
-					if(removeQuery) {
-						serviceLogdb.remove(qInst);	
-						clearTimeout(timer);
-						timer = null;
-						timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
-					}
-				}
-
-				function failed(m, raw) {
-					element.find('.alert-error').show();
-					element.find('.alert-error span').text(raw[0].errorCode);
-					clearTimeout(timer);
-					timer = null;
-					timer = setTimeout(query, Math.max(5000, scope[attrs.guid].interval * 1000) );
-				}
-
-				function query() {
-					scope[attrs.guid].isLoaded = false;
-					scope.$apply();
-
-					qInst = serviceLogdb.create(proc.pid);
-					qInst.query(qString, 1000)
-					.created(created)
-					.pageLoaded(pageLoaded)
-					.loaded(loaded)
-					.failed(failed)
-					.onTimeline(function() {})
-					.onStatusChange(function() {});
-				}
-
-				setTimeout(function() {
-					query();
-				}, 100);
-
-				elRefresh.on('click', function() {
-					if(scope[attrs.guid].isLoaded == false) {
-						console.log('not working')
-					}
-					else {
-						clearTimeout(timer);
-						timer = null;
-						query();	
-					}
-					
-				});
-
-				elPause.on('click', function() {
-					console.log('pause')
-					clearTimeout(timer);
-					timer = null;
-					elRefresh.hide();
-					elPause.hide();
-					elResume.show();
-				});
-
-				elResume.on('click', function() {
-					console.log('resume')
-					query();
-					elRefresh.show();
-					elPause.show();
-					elResume.hide();
-				})
-			}
-
-			var elWidget = angular.element('<div class="widget"></div>');
-			var elCard = angular.element('<div class="card unflipped"></div>');
-			var elFront = angular.element('<figure class="front"></figure>');
-			var elBack = angular.element('<figure class="back"><button class="close">back</button></figure>');
-			var titlebar = angular.element('<div><h5>' + attrs.name + '</h5>' +
-				'<h5 class="timestamp"></h5>' +
-				'<button style="margin-left: 10px" class="close widget-close">&times;</button>' +
-				'<button class="close widget-refresh-pause"><i style="margin-top: 6px; margin-left:10px;" class="icon-pause pull-right"></i></button>' +
-				'<button class="close widget-refresh-resume" style="display:none"><i style="margin-top: 6px; margin-left:10px;" class="icon-play pull-right"></i></button>' +
-				'<button class="close widget-refresh" ng-disabled="!' + attrs.guid + '.isLoaded"><i style="margin-top: 6px; margin-left:10px;" class="icon-refresh pull-right"></i></button>' + 
-				'<button class="close widget-property"><i style="margin-top: 6px; margin-left:10px;" class="icon-info-sign pull-right"></i></button></div>' +
-				'<div class="alert alert-error clearboth" style="display:none"><b>쿼리를 실행하는데 문제가 있습니다!</b><br><span></span></div>');
-
-			var info = angular.element('<span class="ninput" style="float:left"></span>');
-			var ninput = angular.element('<input type="number" min="5" ng-model="' + attrs.guid + '.interval" />');
-			var elQueryStr = $('<div class="clearboth">').append($('<pre>').text(decodeURIComponent(attrs.query)));
-
-			elFront.append(titlebar);
-			
-			elBack.append(info);
-			elBack.append(elQueryStr);
-
-			var elTimeStamp = titlebar.find('.timestamp');
-
-			if(attrs.type == 'grid') {
-
-				var table = angular.element('<table class="cmpqr table table-striped table-condensed"><thead><tr><th ng-repeat="col in ' + attrs.fields + '">{{col}}</th></tr></thead>' +
-					'<tbody><tr ng-repeat="d in ' + attrs.guid + '.data"><td ng-repeat="col in ' + attrs.fields + '">{{d[col]}}</td></tr></tbody></table>');
-				$compile(table)(scope);
-				$compile(titlebar)(scope);
-				$compile(ninput)(scope);
-				elBack.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
-				elFront.append(angular.element('<div class="cmpqr-cont">').append(table));
-				elCard.append(elFront);
-
-
-				getData(decodeURIComponent(attrs.query), function(self) {
-
-					scope.$apply();
-
-					updateTimer(attrs.guid, elTimeStamp);
-					
-					elFront.find('button.widget-close').off('click').on('click', function() {
-						eventSender.onRemoveSingleWidget(attrs.guid);
-						self.dispose();
-						element.remove();
-					});
-
-					element[0].$dispose = function() {
-						self.dispose();
-						element.remove();
-					}; 
-
-				}, 
-				elFront.find('button.widget-refresh'),
-				elFront.find('button.widget-refresh-pause'),
-				elFront.find('button.widget-refresh-resume'));
-			}
-			else if (attrs.type == 'chart.bar' || attrs.type == 'chart.line' || attrs.type == 'chart.pie') { 
-
-				var svg = angular.element('<svg class="widget">');
-				$compile(titlebar)(scope);
-				$compile(ninput)(scope);
-				elBack.find('span.ninput').append(ninput).append(angular.element('<small style="vertical-align:2px"> 초</small>'));
-				elFront.append(svg);
-				elCard.append(elFront);
-
-
-				getData(decodeURIComponent(attrs.query), function(self) {
-
-					var dataResult = scope[attrs.guid].data;
-					var dataSeries = serviceChart.getDataSeries(attrs.series);
-					var dataLabel = {name: attrs.label, type: attrs.labeltype};
-
-					var json = serviceChart.buildJSONStructure(dataSeries, dataResult, dataLabel);
-					if(attrs.type == 'chart.line') {
-						serviceChart.lineChart(svg[0], json);
-					}
-					else if(attrs.type == 'chart.bar') {
-						serviceChart.multiBarHorizontalChart(svg[0], json);
-					}
-					else if(attrs.type == 'chart.pie') {
-						serviceChart.pie(svg[0], json);
-					}
-
-					updateTimer(attrs.guid, elTimeStamp);
-
-					elFront.find('button.widget-close').off('click').on('click', function() {
-						eventSender.onRemoveSingleWidget(attrs.guid);
-						self.dispose();
-						element.remove();
-					});
-
-					element[0].$dispose = function() {
-						self.dispose();
-						element.remove();
-					};
-
-				},
-				elFront.find('button.widget-refresh'),
-				elFront.find('button.widget-refresh-pause'),
-				elFront.find('button.widget-refresh-resume'));
-			}
-
-			elCard.append(elBack);
-			elWidget.append(elCard);
-			element.append(elWidget);
-
-			elFront.find('button.widget-close').off('click').on('click', function() {
-				eventSender.onRemoveSingleWidget(attrs.guid);
-				element.remove();
-			});
-
-			element[0].$dispose = function() {
-				element.remove();
-			};
-
-			elFront.find('button.widget-property').on('click', function() {
-				elCard.addClass('flipped').removeClass('unflipped');
-			});
-
-			elBack.find('button.close').on('click', function() {
-				elCard.removeClass('flipped')
-				setTimeout(function() {
-					elCard.addClass('unflipped');
-				}, 500);
-			});
-
-			scope.$watch(attrs.guid + '.interval', function() {
-				console.log('interval updated')
-			})
-			
-		}
-	}
-})
-
 app.factory('eventSender', function() {
 	var e = {
-		onCreateNewWidget: null,
-		onCreateNewWidgetAndSavePreset: null,
-		onOpenNewWidget: null,
-		onCurrentPresetChanged: null,
-		onRemoveSingleWidget: null,
-		onLabelLayoutUpdate: null,
-		onSendChartDataWizard: null,
-		onSelectColumnFinished: null,
-		onSelectColumnFinishing: null,
-		onChartBindingStarting: null
 	}
 	return e;
 });
@@ -326,6 +24,10 @@ function Controller($scope, serviceSession, serviceTask, eventSender) {
 
 	$scope.numCurrentPage = 0;
 	$scope.numPagerPagesize = 100;
+
+	$scope.onRemoveWidget = function(guid) {
+		eventSender.onRemoveSingleWidget(guid);
+	}
 
 }
 
@@ -364,23 +66,11 @@ function PresetController($scope, $compile, socket, eventSender, serviceGuid) {
 	}
 
 	eventSender.onCreateNewWidget = function(ctx) {
-		if(ctx.type == 'grid') {
-			var orderstr = "['" + ctx.data.order.join("','") + "']";
-			var query = encodeURIComponent(ctx.data.query);
-			var widget = angular.element('<widget guid="' + ctx.guid + '" name="' + ctx.name + '" type="' + ctx.type + '" interval="' + ctx.interval + '" query="' + query + '" fields="' + orderstr + '" >');
-			$compile(widget)($scope);
-			$('.board').append(widget);
-		}
-		else if(ctx.type == 'chart') {
-			if(ctx.data.type == 'bar' || ctx.data.type == 'line' || ctx.data.type == 'pie') {
-				var query = encodeURIComponent(ctx.data.query);
-				var series = encodeURIComponent(JSON.stringify(ctx.data.series));
-				var widget = angular.element('<widget guid="' + ctx.guid + '" name="' + ctx.name + '" type="' + ctx.type + '.' + ctx.data.type + '" interval="' + ctx.interval + '" query="' + query + '" series="' + series + '" label="' + ctx.data.label + '" labeltype="' + ctx.data.labelType + '">');
-				$compile(widget)($scope);
-				$('.board').append(widget);
-			}
-		}
+		var widget = angular.element('<widget guid="' + ctx.guid + '" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
+		$compile(widget)($scope);
+		widget[0].setContext(ctx);
 
+		$('.board').append(widget);
 	}
 
 	$scope.dataPresetList = [];

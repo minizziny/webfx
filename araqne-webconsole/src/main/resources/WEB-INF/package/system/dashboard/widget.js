@@ -177,21 +177,11 @@ angular.module('Widget', [])
 				scope.isLoaded = false;
 				elProgressBar.removeClass('ani');
 				scope.progress = { 'width': '0%' };
-				scope.$apply();
+				//scope.$apply();
 
 				var queryInst = serviceLogdb.create(proc.pid);
-		
-				queryInst.query(scope.query, 200)
-				.created(function(m) {
-					//console.log('created')
-					elProgressBar.addClass('ani');
-					scope.progress = { 'width': '20%' };
-					scope.$apply();
-				})
-				.pageLoaded(function(m) {
 
-					//console.log('pageLoaded')
-
+				function getResult(m) {
 					var result = m.body.result;
 					scope.dataQueryResult.splice(0, scope.dataQueryResult.length); // array 비워주기
 		
@@ -204,14 +194,9 @@ angular.module('Widget', [])
 					if(!!options.pageLoaded) {
 						options.pageLoaded(m);
 					}
-				})
-				.loaded(function(m) {
+
 					console.log('loaded', queryInst.getId(), scope.guid, scope.query);
 					serviceLogdb.remove(queryInst);
-
-					if(!!options.loaded) {
-						options.loaded(m);
-					}
 
 					scope.progress = { 'width': '100%' };
 					var time = timeFormat(new Date());
@@ -223,6 +208,21 @@ angular.module('Widget', [])
 
 					if(!scope.isPaused) {
 						timer = $timeout(run, scope.interval * 300);// 3000);
+					}
+				}
+		
+				queryInst.query(scope.query, 200)
+				.created(function(m) {
+					//console.log('created')
+					elProgressBar.addClass('ani');
+					scope.progress = { 'width': '20%' };
+					scope.$apply();
+				})
+				.pageLoaded(getResult)
+				.getResult(getResult)
+				.loaded(function(m) {
+					if(!!options.loaded) {
+						options.loaded(m);
 					}
 				})
 				.failed(function(m, raw) {

@@ -51,14 +51,16 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				scope[attrs.ngModel] = m.body.result;
 				scope.$apply();
 
+				if(autoflush != 'false') {
+					serviceLogdb.remove(z);	
+					element.removeClass('loading').addClass('loaded');
+				}
+
 				evalEvent(attrs.onPageLoaded, m);
 			}
 
 			function loadedFn(m) {
 				element.removeClass('loading').addClass('loaded');
-				if(autoflush != 'false') {
-					serviceLogdb.remove(z);	
-				}
 				evalEvent(attrs.onLoaded, m);
 			}
 
@@ -90,6 +92,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				.created(createdFn)
 				.started(startedFn)
 				.pageLoaded(pageLoadedFn)
+				.getResult(pageLoadedFn)
 				.loaded(loadedFn)
 				.onTimeline(onTimelineFn)
 				.onStatusChange(onStatusChangeFn)

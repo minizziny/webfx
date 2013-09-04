@@ -211,10 +211,8 @@ angular.module('App.Service.Logdb', [])
 				limit: ((limit == undefined) ? defaultLimit : limit),
 			}, pid)
 			.success(function(m) {
-				asyncQuery.done('pageLoaded', m);
+				asyncQuery.done('getResult', m);
 				applyFn();
-
-				console.log('getResult', clazz.id);
 
 				if(!!callback) {
 					callback(m);
@@ -238,13 +236,7 @@ angular.module('App.Service.Logdb', [])
 		function removeQuery() {
 			return socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.removeQuery', { id: clazz.id }, pid)
 				.success(function() {
-					try {
-						console.log('removeQuery success', clazz.id);	
-					}
-					catch(e) {
-						
-					}
-					
+
 				})
 				.failed(function() {
 					console.log('removeQuery error')
