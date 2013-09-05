@@ -393,9 +393,10 @@ angular.module('App.Service.Logdb', [])
 			});
 			console.log('setRunMode', found, background);
 			found[0].setBg(background);
+			logdb.$apply();
 
 			if(callback != undefined){
-				callback(m);
+				callback(m, found[0]);
 			}
 		})
 		.failed(msgbusFailed);
@@ -412,7 +413,12 @@ angular.module('App.Service.Logdb', [])
 		remove: remove,
 		getQueries: getQueries,
 		setForeground: function(id, callback) {
-			return setRunMode(id, false, callback);
+			return setRunMode(id, false, function(m, qinst) {
+				logdb.queries.splice(logdb.queries.indexOf(qinst), 1);
+				if(!!callback) {
+					callback(m, qinst);
+				}
+			});
 		},
 		setBackground: function(id, callback) {
 			return setRunMode(id, true, callback);
