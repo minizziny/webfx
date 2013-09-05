@@ -245,7 +245,9 @@ angular.module('App.Service.Logdb', [])
 
 		function dispose() {
 			if(isDisposed) {
-				console.log('dispose failed isDisposed', clazz.id);
+				try {
+					console.log('dispose failed isDisposed', clazz.id);
+				} catch(e) {}
 				return;
 			}
 			if(clazz.id == -1) {
@@ -256,7 +258,9 @@ angular.module('App.Service.Logdb', [])
 			unregisterTrap();
 
 			isDisposed = true;
-			console.log('dispose', clazz.id);
+			try {
+				console.log('dispose', clazz.id);
+			} catch(e) {}
 		}
 
 		return {
