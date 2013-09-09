@@ -37,16 +37,19 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 			var pid = parseInt($('iframe[data-program=' + program.path + ']').attr('pid'));
 
 			if(!!window._logdb) {
-				var qmap = _logdb.queries.map(function(qInst) {
-					if(qInst.getPid() == pid) return qInst;
+
+				var qmap = window._logdb.queries.filter(function(qInst) {
+					if(qInst.getPid() == pid && !qInst.getBg()) return qInst;
 				});
+
+				console.log(qmap, window._logdb.queries)
 
 				qmap.forEach(function(instance) {
 					console.log(instance)
 					instance.dispose();
-					var idx = _logdb.queries.indexOf(instance);
-					_logdb.queries.splice(idx, 1);
-					_logdb.$apply();
+					var idx = window._logdb.queries.indexOf(instance);
+					window._logdb.queries.splice(idx, 1);
+					window._logdb.$apply();
 				});
 			}
 

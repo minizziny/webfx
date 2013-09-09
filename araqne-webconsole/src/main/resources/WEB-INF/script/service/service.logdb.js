@@ -211,10 +211,8 @@ angular.module('App.Service.Logdb', [])
 				limit: ((limit == undefined) ? defaultLimit : limit),
 			}, pid)
 			.success(function(m) {
-				asyncQuery.done('pageLoaded', m);
+				asyncQuery.done('getResult', m);
 				applyFn();
-
-				console.log('getResult', clazz.id);
 
 				if(!!callback) {
 					callback(m);
@@ -238,13 +236,7 @@ angular.module('App.Service.Logdb', [])
 		function removeQuery() {
 			return socket.send('org.araqne.logdb.msgbus.LogQueryPlugin.removeQuery', { id: clazz.id }, pid)
 				.success(function() {
-					try {
-						console.log('removeQuery success', clazz.id);	
-					}
-					catch(e) {
-						
-					}
-					
+
 				})
 				.failed(function() {
 					console.log('removeQuery error')
@@ -253,7 +245,9 @@ angular.module('App.Service.Logdb', [])
 
 		function dispose() {
 			if(isDisposed) {
-				console.log('dispose failed isDisposed', clazz.id);
+				try {
+					console.log('dispose failed isDisposed', clazz.id);
+				} catch(e) {}
 				return;
 			}
 			if(clazz.id == -1) {
@@ -264,7 +258,9 @@ angular.module('App.Service.Logdb', [])
 			unregisterTrap();
 
 			isDisposed = true;
-			console.log('dispose', clazz.id);
+			try {
+				console.log('dispose', clazz.id);
+			} catch(e) {}
 		}
 
 		return {
@@ -397,9 +393,10 @@ angular.module('App.Service.Logdb', [])
 			});
 			console.log('setRunMode', found, background);
 			found[0].setBg(background);
+			logdb.$apply();
 
 			if(callback != undefined){
-				callback(m);
+				callback(m, found[0]);
 			}
 		})
 		.failed(msgbusFailed);
@@ -416,7 +413,12 @@ angular.module('App.Service.Logdb', [])
 		remove: remove,
 		getQueries: getQueries,
 		setForeground: function(id, callback) {
-			return setRunMode(id, false, callback);
+			return setRunMode(id, false, function(m, qinst) {
+				logdb.queries.splice(logdb.queries.indexOf(qinst), 1);
+				if(!!callback) {
+					callback(m, qinst);
+				}
+			});
 		},
 		setBackground: function(id, callback) {
 			return setRunMode(id, true, callback);

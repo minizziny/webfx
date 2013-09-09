@@ -70,6 +70,11 @@ function Async(fn) {
 		return this;
 	}
 
+	this.getResult = function(fn) {
+		callback.getResult = fn;
+		return this;
+	}
+
 	this.loaded = function(fn) {
 		callback.loaded = fn;
 		return this;
@@ -149,36 +154,37 @@ app.factory('socket', function() {
 			}, options
 		];
 
-		if(!!parent) {////.Connection) {
-			//console.log(parent.Core.Connection);
-
-			parent.Core.Connection.send(method, options, function(resp, full) {
-				if(resp.isError) {
-					self.done('failed', resp, full);
-				}
-				else {
-					self.done('success', resp, full);
-				}
-			}, { 'source': pid.toString() });
-		}
-		else {
-			$.ajax({
-				'type': 'POST',
-				'url': '/msgbus/request',
-				'data': JSON.stringify(request),
-				'success': function(raw, status, jqxhr) {
-					var full = JSON.parse(raw);
-					var resp = msgobj(full);
-
+		if(!!parent) {
+			if(!!parent.Core) {
+				parent.Core.Connection.send(method, options, function(resp, full) {
 					if(resp.isError) {
 						self.done('failed', resp, full);
 					}
 					else {
 						self.done('success', resp, full);
 					}
-				}
-			});
+				}, { 'source': pid.toString() });
+
+				return;
+			}
 		}
+
+		$.ajax({
+			'type': 'POST',
+			'url': '/msgbus/request',
+			'data': JSON.stringify(request),
+			'success': function(raw, status, jqxhr) {
+				var full = JSON.parse(raw);
+				var resp = msgobj(full);
+
+				if(resp.isError) {
+					self.done('failed', resp, full);
+				}
+				else {
+					self.done('success', resp, full);
+				}
+			}
+		});
 	}
 
 	return {
@@ -315,8 +321,10 @@ app.factory('servicePush', function(socket) {
 
 	function register(name, pid, ontrap, callback) {
 		if(!!parent) {
-			parent.Core.Connection.register(name, ontrap, callback, pid);
-			return;
+			if(!!parent.Core) {
+				parent.Core.Connection.register(name, ontrap, callback, pid);
+				return;
+			}
 		}
 
 		if(name == null) return;
@@ -340,8 +348,10 @@ app.factory('servicePush', function(socket) {
 
 	function unregister(name, pid, callback) {
 		if(!!parent) {
-			parent.Core.Connection.unregister(name, null, callback, pid);
-			return;
+			if(!!parent.Core) {
+				parent.Core.Connection.unregister(name, null, callback, pid);
+				return;
+			}
 		}
 
 		if(name == null) return;
