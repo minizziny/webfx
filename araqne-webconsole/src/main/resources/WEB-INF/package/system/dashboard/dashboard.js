@@ -347,7 +347,15 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 
 	$scope.$watch('dataLabel', function() {
 		console.log('dataLabel changed');
-		var st = serviceChart.buildJSONStructure($scope.dataSeries, $scope.qresult, $scope.dataLabel);
+		var series = [];
+		$scope.dataSeries.forEach(function(obj, i) {
+			series.push({
+				'key': obj.value.name,
+				'color': obj.color,
+				'name': obj.name
+			})
+		});
+		var st = serviceChart.buildJSONStructure(series, $scope.qresult, $scope.dataLabel);
 		render(st);
 	});
 
@@ -372,7 +380,15 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 		if(!ignore_render) {
 
 			console.log('dataSeries changed', $scope.dataSeries);
-			var st = serviceChart.buildJSONStructure($scope.dataSeries, $scope.qresult, $scope.dataLabel);
+			var series = [];
+			$scope.dataSeries.forEach(function(obj, i) {
+				series.push({
+					'key': obj.value.name,
+					'color': obj.color,
+					'name': obj.name
+				})
+			});
+			var st = serviceChart.buildJSONStructure(series, $scope.qresult, $scope.dataLabel);
 			render(st);
 
 		}

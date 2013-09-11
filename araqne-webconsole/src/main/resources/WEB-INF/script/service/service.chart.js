@@ -169,7 +169,7 @@ angular.module('App.Service.Chart', ['App.Service'])
 		.attr("y", 9)
 		.attr("dy", ".35em")
 		.style("text-anchor", "end")
-		.text(function(d) { return d.key; });
+		.text(function(d) { return (d.name == undefined) ? d.key : d.name; });
 	}
 
 	function lineChart(selector, data, options) {
@@ -393,7 +393,7 @@ angular.module('App.Service.Chart', ['App.Service'])
 		.attr("y", 9)
 		.attr("dy", ".35em")
 		.style("text-anchor", "end")
-		.text(function(d) { return d.key; });
+		.text(function(d) { return (d.name == undefined) ? d.key : d.name; });
 
 	}
 
@@ -475,7 +475,8 @@ angular.module('App.Service.Chart', ['App.Service'])
 		for (var i = 0; i < dataSeries.length; i++) {
 			var s = dataSeries[i];
 			var series = {
-				'key': s.name,
+				'key': s.key,
+				'name': s.name,
 				'color': s.color,
 				'values': undefined,
 				'labelType': dataLabel.type
@@ -484,13 +485,13 @@ angular.module('App.Service.Chart', ['App.Service'])
 			series.values = dataResult.map(function(obj) {
 				if(!!s.value) {
 					return {
-						'value': obj[s.value.name],
+						'value': obj[s.value.key],
 						'label': obj[dataLabel.name]
 					}
 				}
 				else {
 					return {
-						'value': obj[s.name],
+						'value': obj[s.key],
 						'label': obj[dataLabel.name]
 					}
 				}
