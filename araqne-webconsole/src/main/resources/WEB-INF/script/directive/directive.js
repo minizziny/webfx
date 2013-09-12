@@ -145,14 +145,14 @@ angular.module('App.Directive', [])
 
 				var template = angular.element(
 					'<ul class="nav nav-list" ' + visibility + '>' + 
-						'<li ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
+						'<li ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className" node-parent="{{node.' + attrs.nodeParent + '}}">' +
 							'<a href="#" el-type="item">' +
 								'<input type="checkbox" ng-show="node.is_edit_mode">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +  // src="{{node.' + attrs.nodeIcon + '}}">' +
 								'{{node.' + attrs.nodeName + '}}' +
 							'</a>' +
-							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '"></tree-element>' +
+							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '" node-parent="' + attrs.nodeParent + '"></tree-element>' +
 						'</li>' +
 					'</ul>');
 				
@@ -207,14 +207,14 @@ angular.module('App.Directive', [])
 				
 				var template = angular.element(
 					'<ul id="euTreeBrowser" class="nav nav-list tree-top">' +
-						'<li ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
+						'<li ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className" node-parent="{{node.' + attrs.nodeParent + '}}">' +
 							'<a href="#" el-type="item">' +
 								'<tree-toggle></tree-toggle>' +
 								//'<span ng-show="!!node.template" ng-bind-html-unsafe="node.template"></span>' +
 								//'<span ng-hide="!!node.template">{{node.' + attrs.nodeName + '}}</span>' + 
 								'{{node.' + attrs.nodeName + '}}' +
 							'</a>' +
-							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '"></tree-element>' +
+							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '" node-parent="' + attrs.nodeParent + '"></tree-element>' +
 						'</li>' +
 					'</ul>');
 				
@@ -235,8 +235,10 @@ angular.module('App.Directive', [])
 						if($(e.target).attr('el-type') == 'item') {
 							scope.previousElement = scope.currentElement;
 							scope.currentElement = angular.element(e.target).parent();
+
+							//console.log(scope.currentElement);
 							
-							scope.$broadcast('nodeSelected', { selectedNode: scope.currentElement.attr('node-id'), selectedNodeType: scope.currentElement.attr('node-tree-type'), selectedNodeRaw: scope.currentElement, selectedNodeScope: scope });
+							scope.$broadcast('nodeSelected', { selectedNode: scope.currentElement.attr('node-id'), selectedNodeType: scope.currentElement.attr('node-tree-type'), selectedNodeRaw: scope.currentElement, selectedNodeScope: scope, selectedNodeParent: scope.currentElement.attr('node-parent') });
 							
 							if(scope.previousElement) {
 								scope.previousElement.addClass("eu_deselected").removeClass("active");
