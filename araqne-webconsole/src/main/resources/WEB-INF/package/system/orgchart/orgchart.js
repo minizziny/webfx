@@ -1,4 +1,4 @@
-var app = angular.module('orgchart', ['App', 'App.Directive.Tree']);
+var app = angular.module('orgchart', ['App', 'App.Directive.Tree', 'localization']);
 var proc;
 
 app.factory('eventSender', function() {
