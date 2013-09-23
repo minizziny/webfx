@@ -9,7 +9,7 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>araqne-dom</artifactId>
-	<version>3.0.3</version>
+	<version>3.0.4</version>
 	<packaging>bundle</packaging>
 	<name>Araqne DOM</name>
 	<build>

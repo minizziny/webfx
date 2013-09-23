@@ -56,12 +56,12 @@ public class LoginPlugin {
 	@MsgbusMethod
 	public void hello(Request req, Response resp) {
 		String nonce = UUID.randomUUID().toString();
-		String lang = req.getString("lang");
-		if (lang == null)
-			lang = "en";
+		String locale = req.getString("locale");
+		if (locale == null)
+			locale = "en";
 
 		req.getSession().setProperty("nonce", nonce);
-		req.getSession().setProperty("lang", lang);
+		req.getSession().setProperty("locale", locale);
 
 		resp.put("nonce", nonce);
 		resp.put("session_id", req.getSession().getGuid());
