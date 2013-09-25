@@ -1,4 +1,4 @@
-var app = angular.module('dashboard', ['App', 'Widget']);
+var app = angular.module('dashboard', ['App', 'Widget', 'localization']);
 var proc;
 console.log('dashboard init');
 
@@ -13,13 +13,19 @@ app.factory('eventSender', function() {
 	return e;
 });
 
-function Controller($scope, serviceSession, serviceTask, eventSender) {
+function Controller($scope, $filter, serviceSession, serviceTask, eventSender) {
 
 	$scope.logout = serviceSession.logout;
 	proc = serviceTask.newProcess('dashboard');
 
 	$scope.openNewWidget = function() {
 		eventSender.onOpenNewWidget();
+	}
+
+	$scope.formSecond = {
+		'0': $filter('i18n')('$S_str_Seconds'),
+		'one': $filter('i18n')('$S_str_Second'),
+		'other': $filter('i18n')('$S_str_Seconds')
 	}
 
 	$scope.numCurrentPage = 0;

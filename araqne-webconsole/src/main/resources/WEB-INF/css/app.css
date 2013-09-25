@@ -59,16 +59,16 @@ topbar {
 	height: 60px;
 }
 
-.wizard-contents-parser, .wizard-contents-index {
+.wizard-contents, .wizard-contents-parser, .wizard-contents-index {
 	float: left;
 	width: 140px;
 }
 
-.wizard-contents-parse li.active, .wizard-contents-index li.active {
+.wizard-contents li.active, .wizard-contents-parse li.active, .wizard-contents-index li.active {
 	font-weight: bold;
 }
 
-.wizard-parser, .wizard-index {
+.wizard, .wizard-parser, .wizard-index {
 	float: left;
 	width: 680px;
 	margin-left: 10px;
@@ -76,19 +76,19 @@ topbar {
 	border-left: 1px solid #ccc;
 }
 
-.wizard-parser legend, .wizard-index legend {
+.wizard legend, .wizard-parser legend, .wizard-index legend {
 	font-size: 16px;
 }
 
-.wizard-parser > li.active legend, .wizard-index > li.active legend {
+.wizard > li.active legend, .wizard-parser > li.active legend, .wizard-index > li.active legend {
 	font-size: 21px;
 }
 
-.wizard-parser > li, .wizard-index > li{
+.wizard > li, .wizard-parser > li, .wizard-index > li{
 	display: none;
 }
 
-.wizard-parser > li.active, .wizard-index > li.active {
+.wizard > li.active, .wizard-parser > li.active, .wizard-index > li.active {
 	display: block;
 }
 
