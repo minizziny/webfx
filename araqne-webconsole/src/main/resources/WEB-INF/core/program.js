@@ -161,7 +161,7 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 							});
 
 							iframe.get(0).contentWindow.__pid = getPid();
-						}, 300)
+						}, 600)
 					});
 				}
 			})
