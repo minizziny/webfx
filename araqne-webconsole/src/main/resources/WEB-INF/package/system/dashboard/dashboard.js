@@ -124,7 +124,7 @@ function PresetController($scope, $compile, $filter, socket, eventSender, servic
 
 	function InitAutosave() {
 		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
-			{ "guid": "autosave", "name": $filter('i18n')('$S_str_Seconds'), "state": { "widgets": [] } }
+			{ "guid": "autosave", "name": $filter('i18n')('$S_str_Autosave'), "state": { "widgets": [] } }
 		, proc.pid);
 	}
 
