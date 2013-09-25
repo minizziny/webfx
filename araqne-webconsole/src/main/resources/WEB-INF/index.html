@@ -387,7 +387,16 @@ Core.Language = {
 		var scriptTag = doc.createElement('script');
 		scriptTag.type = 'text/javascript'; 
 		scriptTag.async = true;
-		scriptTag.src = '/package/system/system.' + lang + '.js';
+
+		var tagSource = '/package/system/system.' + lang + '.js'
+		var matches = doc.location.pathname.match(/\/[a-z]*/g);
+		if(matches != null) {
+			if(matches.length > 1) {
+				tagSource = matches[0] + matches[1] + matches[1] + '.' + lang + '.js';
+			}
+		}
+
+		scriptTag.src = tagSource;
 		scriptTag.onreadystatechange = function () {
 			if (this.readyState == 'complete') onScriptLoad();
 		}
