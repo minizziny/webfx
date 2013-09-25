@@ -128,6 +128,7 @@ angular.module('localization')
 	'$S_str_ManageLogger': '로그 수집 설정 관리',
 
 	/* Login */
+	'$S_str_ID': 'ID',
 	'$S_str_Login': '로그인',
 	'$S_str_Logout': '로그아웃',
 	'$S_msg_LoginErrorAdminNotFound': '로그인에 실패했습니다. 사용자를 찾을 수 없습니다.',

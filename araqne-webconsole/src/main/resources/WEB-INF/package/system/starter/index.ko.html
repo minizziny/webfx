@@ -86,21 +86,21 @@ th {
 		<div class="span12">
 			<div class="muted" style="text-align: right">version: 0.0.9</div>
 			<div class="clearfix" style="margin-bottom: 10px">
-				<p class="pull-left">로그 수집 설정을 추가하여 로그 수집을 시작하세요.</p>
+				<p class="pull-left">{{'$S_msg_AddLogger' | i18n}}</p>
 				<!--<button class="pull-right btn btn-primary">로그 수집 설정 시작</button>-->
 			</div>
 			<div class="area">
 				<legend>
-					로그 발생 추이
+					{{'$S_str_LogTrend' | i18n}}
 					<small id="ltLogTrend" class="timeago"></small>
 					<i id="rfLogTrend" class="icon-refresh pull-right"></i>
-					<button class="pull-right btn" style="margin-right: 10px" id="btnManageLogSource">로그 수집 설정 관리</button>
+					<button class="pull-right btn" style="margin-right: 10px" id="btnManageLogSource">{{'$S_str_ManageLogger' | i18n}}</button>
 				</legend>
 				<div class="chart1"></div>
 			</div>
 			<div class="area">
 				<legend>
-					경보 발생 추이
+					{{'$S_str_AlertTrend' | i18n}}
 					<small id="ltAlertTrend" class="timeago"></small>
 					<i id="rfAlertTrend" class="icon-refresh pull-right"></i>
 				</legend>
@@ -108,15 +108,15 @@ th {
 			</div>
 			<div class="area">
 				<legend>
-					디스크 파티션
+					{{'$S_str_DiskPartition' | i18n}}
 					<small id="ltPartition" class="timeago"></small>
 					<i id="rfPartition" class="icon-refresh pull-right"></i>
 				</legend>
 				<table id="tbPartition" class="table table-bordered table-condensed">
 					<thead>
 						<tr>
-							<th>파티션</th>
-							<th colspan="2">사용량/전체</th>
+							<th>{{'$S_str_Partition' | i18n}}</th>
+							<th colspan="2">{{'$S_str_Usage' | i18n}}</th>
 						</tr>
 					</thead>
 					<tbody data-bind="foreach: usages">
@@ -138,5 +138,19 @@ th {
 		</div>
 	</div>
 </div>
+
+
+<script src="/bower_components/angular/angular.js"></script>
+<script src="../system.ko-kr.js"></script>
+
+<script>
+
+angular.element(document).ready(function() {
+	angular.module('myApp', []);
+	angular.bootstrap(document, ['myApp', 'localization']);
+});
+
+</script>
+
 </body>
 </html>

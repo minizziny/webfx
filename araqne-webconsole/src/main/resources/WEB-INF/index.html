@@ -323,8 +323,8 @@ i.icon-logout {
 		<a id="start" class="brand"><span>Logpresso</span></a>
 		<div id="task" class="pull-left" data-bind="Kuro.List: self, tmpl: tasks"></div>
 
-		<a id="logout" href="#" class="pull-right" title="로그아웃">
-			<i class="icon-logout"></i><span id="lblLoginName"></span> 로그아웃
+		<a id="logout" href="#" class="pull-right">
+			<i class="icon-logout"></i><span id="lblLoginName"></span> {{'$S_str_Logout' | i18n}}
 		</a>
 	</div>
 </div>
@@ -335,24 +335,39 @@ i.icon-logout {
 		<form class="form-horizontal">
 			<legend style="color: black; letter-spacing: 2px; font-family: 'Gill Sans', 'Lucida Sans Unicode'; font-weight: lighter">WELCOME TO<span style="letter-spacing: 2px; font-family: 'Gill Sans', 'Lucida Sans Unicode'; font-weight: normal"> LOGPRESSO</span></legend>
 			<div class="control-group">
-				<label class="control-label">ID</label>
+				<label class="control-label">{{'$S_str_ID' | i18n}}</label>
 				<div class="controls">
 					<input type="text" id="txtId">
 				</div>
 			</div>
 			<div class="control-group">
-				<label class="control-label">암호</label>
+				<label class="control-label">{{'$S_str_Password' | i18n}}</label>
 				<div class="controls">
 					<input id="txtPassword" type="password" />
 				</div>
 			</div>
 			<div class="control-group">
 				<div class="controls">
-					<button id="btnLogin" type="submit" disabled class="btn btn-primary">로그인</button>
+					<button id="btnLogin" type="submit" disabled class="btn btn-primary">{{'$S_str_Login' | i18n}}</button>
 				</div>
 			</div>
 		</form>
 	</div>
 </div>
+
+
+<script src="/bower_components/angular/angular.js"></script>
+<script src="package/system/system.ko-kr.js"></script>
+
+<script>
+
+angular.element(document).ready(function() {
+	angular.module('myApp', []);
+	angular.bootstrap(document, ['myApp', 'localization']);
+});
+
+</script>
+
+
 </body>
 </html>
