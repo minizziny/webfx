@@ -71,7 +71,16 @@ angular.module('localization')
 	'$S_str_RemoveUser': '사용자 삭제',
 	'$S_msg_RemoveUserConfirmPre': '정말 사용자 ',
 	'$S_msg_RemoveUserConfirmPost': '을 삭제하시겠습니까?',
-	'$S_msg_MoveUserSuccess': '성공적으로 이동했습니다.',
+	'$S_msg_MoveSuccess': '성공적으로 이동했습니다.',
+
+	'$S_msg_RemoveUserAuthError': '사용자 {0}를 삭제할 수 없습니다. 더 높은 권한이 필요합니다.',
+	'$S_msg_RemoveUserSuccessPartially': '사용자 {0}을 성공적으로 삭제했습니다.<br>사용자 {1}는 삭제하지 못했습니다. 더 높은 권한이 필요합니다.',
+	'$S_msg_RemoveUserSuccess': '사용자 {0}을 성공적으로 삭제했습니다.',
+	'$S_msg_MoveUserError': '사용자 {0}를 {1}로 이동할 수 없습니다. 더 높은 권한이 필요합니다.',
+	'$S_msg_MoveUserSuccess': '사용자 {0}을 {1}로 이동했습니다.',
+	'$S_msg_MoveUserSuccessPartially': '사용자 {0}을 {1}로 이동했습니다.<br>사용자 {2}는 이동하지 못했습니다. 더 높은 권한이 필요합니다.',
+	'$S_msg_ChangePasswordSuccess': '사용자 {0}의 비밀번호를 변경했습니다.',
+	'$S_str_AllUsers': '모든 사용자',
 
 	/* Dashboard */
 	'$S_str_NewPreset': '새 프리셋',
@@ -116,6 +125,14 @@ angular.module('localization')
 	'$S_str_Label': '라벨',
 	'$S_str_AxisX': 'X축',
 
+	'$S_str_Autosave': '자동 저장',
+	'$S_msg_SavePresetAs': '저장할 새 프리셋 이름을 입력하세요',
+	'$S_msg_NewPresetName': '새 프리셋 이름을 입력하세요',
+	'$S_str_Number': '숫자',
+	'$S_str_DateTime': '날짜',
+	'$S_str_String': '문자열',
+	'$S_str_Series': '시리즈',
+	'$S_msg_SelectOneMoreNumberType': '하나 이상의 숫자 타입의 컬럼을 선택하십시오.',
 
 	/* Starter */
 	'$S_str_LogTrend': '로그 발생 추이',
