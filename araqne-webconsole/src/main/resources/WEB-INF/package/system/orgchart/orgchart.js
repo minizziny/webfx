@@ -26,9 +26,22 @@ function getOrgUnit(guid, orgunits) {
 	return found;
 }
 
-function Controller($scope, serviceTask, socket, eventSender, serviceDom) {
+function Controller($scope, $filter, serviceTask, socket, eventSender, serviceDom) {
 	serviceTask.init();
 	proc = serviceTask.newProcess('orgchart');
+
+
+	$scope.formUser = {
+		'0': $filter('i18n')('$S_plr_Users'),
+		'one': $filter('i18n')('$S_plr_User'),
+		'other': $filter('i18n')('$S_plr_Users')
+	}
+
+	$scope.formItem = {
+		'0': $filter('i18n')('$S_plr_Items'),
+		'one': $filter('i18n')('$S_plr_Item'),
+		'other': $filter('i18n')('$S_plr_Items')
+	}
 
 	$scope.testAlert = function() {
 		var types = ['info', 'success', 'error'];

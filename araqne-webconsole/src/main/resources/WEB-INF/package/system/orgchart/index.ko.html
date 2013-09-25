@@ -355,13 +355,13 @@ input[type=search].input-search-table:focus {
 
 		<div class="modal mdlRemoveOrgUnit" modal>
 			<a href="#" class="modal-close close" style="margin-bottom: -30px">&times;</a>
-			<legend>부서 삭제</legend>
+			<legend>{{'$S_str_RemoveOrganization' | i18n}}</legend>
 			<div style="margin-bottom: 20px">
-				정말 부서 <code>{{selectedOrgUnitName}}</code>을 삭제하시겠습니까?
+				{{'$S_msg_RemoveOrganizationConfirmPre' | i18n}}<code>{{selectedOrgUnitName}}</code>{{'$S_msg_RemoveOrganizationConfirmPost' | i18n}}
 			</div>
 			<div class="control-group submit-group">
-				<button class="btn btn-danger" ng-click="removeOrgUnit()">삭제</button>
-				<button class="btn" ng-click="cancelRemoveOrgUnit()">취소</button>
+				<button class="btn btn-danger" ng-click="removeOrgUnit()">{{'$S_str_Remove' | i18n}}</button>
+				<button class="btn" ng-click="cancelRemoveOrgUnit()">{{'$S_str_Cancel' | i18n}}</button>
 			</div>
 		</div>
 	</div>
@@ -376,30 +376,32 @@ input[type=search].input-search-table:focus {
 						<button ng-click="closeExtraPane()" class="btnShowTree btn btn-primary pull-left" style="margin-right: 15px; display:none"><i class="icon-white icon-list"></i></button>
 						<a class="brand">{{currentOrgUnit.name}}</a>
 						<div ng-hide="isEditMode">
-							<button class="btn pull-left" ng-click="addUser()" ng-show="canUserEdit">새 사용자</button>
+							<button class="btn pull-left" ng-click="addUser()" ng-show="canUserEdit">{{'$S_str_NewUser' | i18n}}</button>
 							<form class="navbar-search pull-left" style="margin-left: 10px">
-								<input type="search" placeholder="사용자 검색" ng-model="search.$">
+								<input type="search" placeholder="{{'$S_str_SearchUser' | i18n}}" ng-model="search.$">
 							</form>
-							<button class="btn pull-right" ng-show="canUserEdit" ng-click="enterEditMode()">편집</button>
+							<button class="btn pull-right" ng-show="canUserEdit" ng-click="enterEditMode()">{{'$S_str_Edit' | i18n}}</button>
 							<!-- <button class="btn pull-left" ng-click="testAlert()">test alert</button> -->
 						</div>
 						<div ng-show="isEditMode">
 							<div class="btn-group pull-left">
-								<button class="btn" ng-click="addUser()">새 사용자</button>
+								<button class="btn" ng-click="addUser()">{{'$S_str_NewUser' | i18n}}</button>
 								<!-- <button class="btn" ng-disabled="canMoveOrRemove()">이동</button> -->
-								<button class="btn" ng-disabled="canMoveOrRemove()" ng-click="removeUsers()">삭제</button>
+								<button class="btn" ng-disabled="canMoveOrRemove()" ng-click="removeUsers()">{{'$S_str_Remove' | i18n}}</button>
 							</div>
 							<form class="navbar-search pull-left" style="margin-left: 10px">
-								<input type="search" placeholder="사용자 검색" ng-model="search.$">
+								<input type="search" placeholder="{{'$S_str_SearchUser' | i18n}}" ng-model="search.$">
 							</form>
-							<button class="btn btn-primary pull-right" ng-click="endEditMode()">완료</button>
+							<button class="btn btn-primary pull-right" ng-click="endEditMode()">{{'$S_str_Done' | i18n}}</button>
 						</div>
 					</div>
 				</div>
 				<ul class="tab well1 tab-general">
 					<li class="section well1">
 						<div class="pull-right">
-							{{dataUsers.length}}명의 사용자<span ng-hide="(dataUsers | filter:search).length == dataUsers.length"> / {{(dataUsers | filter:search).length}}명 검색됨</span><span ng-hide="canMoveOrRemove()">, {{(dataUsers | isSelected: 'is_checked').length}}명 선택됨</span>
+							{{'$S_msg_TotalUsersPre' | i18n}}{{dataUsers.length}}<ng-pluralize count="dataUsers.length" when="formUser"></ng-pluralize>{{'$S_msg_TotalUsersPost' | i18n}}
+							<span ng-hide="(dataUsers | filter:search).length == dataUsers.length"> / {{'$S_msg_SearchedUsersPre' | i18n}}{{(dataUsers | filter:search).length}}<ng-pluralize count="(dataUsers | filter:search).length" when="formUser"></ng-pluralize>{{'$S_msg_SearchedUsersPost' | i18n}}</span>
+							<span ng-hide="canMoveOrRemove()">, {{'$S_msg_SelectedUsersPre' | i18n}}{{(dataUsers | isSelected: 'is_checked').length}}<ng-pluralize count="(dataUsers | isSelected: 'is_checked').length" when="formUser"></ng-pluralize>{{'$S_msg_SelectedUsersPost' | i18n}}</span>
 						</div>
 						<table class="table table-bordered table-striped listUsers" ng-class="{'isEditMode': isEditMode}">
 							<thead>
@@ -409,9 +411,9 @@ input[type=search].input-search-table:focus {
 											<i class="icon-check"></i>
 										</button>
 									</th>
-									<th>로그인 이름</th>
-									<th>이름</th>
-									<th>부서</th>
+									<th>{{'$S_str_LoginName' | i18n}}</th>
+									<th>{{'$S_str_Name' | i18n}}</th>
+									<th>{{'$S_str_Organization' | i18n}}</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -446,32 +448,32 @@ input[type=search].input-search-table:focus {
 					<form name="frmUser" style="margin:0">
 						<div class="navbar extraPane-navbar">
 							<div class="navbar-inner" style="position:relative">
-								<input type="text" class="txtNewLoginName input-single" name="login_name" placeholder="아이디를 입력하세요" style="float: left; margin: 5px;"
+								<input type="text" class="txtNewLoginName input-single" name="login_name" placeholder="{{'$S_msg_PleaseEnterLoginName' | i18n}}" style="float: left; margin: 5px;"
 									ng-model="selectedUserCopy.login_name"
 									ng-show="selectedUser._isNew && isUserEditMode"
 									ng-unique="{ source: dataAllUsers, property: 'login_name', condition: selectedUser._isNew }"
 									ng-class="{ 'error': frmUser.login_name.$error.unique || frmUser.login_name.$error.required }" required>
 								<div class="popover popover-black fade left in" ng-show="frmUser.login_name.$error.required" style="left: -290px">
 									<div class="arrow"></div>
-									<div class="popover-content" style="color:#b94a48">아이디는 반드시 필요합니다.</div>
+									<div class="popover-content" style="color:#b94a48">{{'$S_msg_LoginNameRequiredError' | i18n}}</div>
 								</div>
 								<div class="popover popover-black fade left in" ng-show="frmUser.login_name.$error.unique" style="left: -290px">
 									<div class="arrow"></div>
-									<div class="popover-content" style="color:#b94a48">이미 존재하는 아이디입니다.</div>
+									<div class="popover-content" style="color:#b94a48">{{'$S_msg_LoginNameUniqueError' | i18n}}</div>
 								</div>
 								<a class="brand">{{selectedUser.login_name}}</a>
 								<div ng-hide="isUserEditMode">
 									<div class="btn-group">
-										<button class="btn" ng-click="closeExtraPane()">닫기</button>
+										<button class="btn" ng-click="closeExtraPane()">{{'$S_str_Close' | i18n}}</button>
 									</div>
 									<div class="pull-right btn-group" ng-show="(canUserEdit && isLowerLevel) || amI">
-										<button class="btn" ng-click="openDialogChangePassword()">암호 변경</button>
-										<button class="btn" ng-click="enterUserEditMode()">편집</button>
+										<button class="btn" ng-click="openDialogChangePassword()">{{'$S_str_ChangePassword' | i18n}}</button>
+										<button class="btn" ng-click="enterUserEditMode()">{{'$S_str_Edit' | i18n}}</button>
 									</div>
 								</div>
 								<div ng-show="isUserEditMode">
-									<button class="btn btn-warning" ng-click="discardUserInfo()">취소</button>
-									<button class="btn btn-primary pull-right" ng-disabled="frmUser.$invalid" ng-click="saveUserInfo()">완료</button>
+									<button class="btn btn-warning" ng-click="discardUserInfo()">{{'$S_str_Cancel' | i18n}}</button>
+									<button class="btn btn-primary pull-right" ng-disabled="frmUser.$invalid" ng-click="saveUserInfo()">{{'$S_str_Done' | i18n}}</button>
 								</div>
 							</div>
 						</div>
@@ -481,22 +483,22 @@ input[type=search].input-search-table:focus {
 									<table class="table table-form">
 										<tbody>
 											<tr>
-												<td>암호</td>
+												<td>{{'$S_str_Password' | i18n}}</td>
 												<td class="control-group" ng-class="{ 'error': frmUser.password.$error.inadequacy }" style="position: relative">
 													<input type="password" name="password" class="input-xlarge" ng-model="selectedUserCopy.password" password-validate="{ condition: selectedUserCopy._isNew }">
 													<div class="popover popover-black fade left in" ng-show="frmUser.password.$error.inadequacy" style="left: -465px; top: -5px">
 														<div class="arrow"></div>
-														<div class="popover-content help-inline">암호는 9자 이상의 영문, 숫자, 특수문자 조합으로 만들어야 합니다.</div>
+														<div class="popover-content help-inline">{{'$S_msg_PasswordInadequacyError' | i18n}}</div>
 													</div>
 												</td>
 											</tr>
 											<tr>
-												<td>재입력</td>
+												<td>{{'$S_str_PasswordRetype' | i18n}}</td>
 												<td class="control-group" ng-class="{ 'error': frmUser.passwordConfirm.$error.mismatch }" style="position: relative">
 													<input type="password" name="passwordConfirm" class="input-xlarge" ng-model="selectedUserCopy.passwordConfirm" match="selectedUserCopy.password">
 													<div class="popover popover-black fade left in" ng-show="frmUser.passwordConfirm.$error.mismatch" style="left: -465px; top: 10px">
 														<div class="arrow"></div>
-														<div class="popover-content help-inline">암호가 서로 일치하지 않습니다.</div>
+														<div class="popover-content help-inline">{{'$S_msg_PasswordMismatchError' | i18n}}</div>
 													</div>
 												</td>
 											</tr>
@@ -507,25 +509,25 @@ input[type=search].input-search-table:focus {
 									<table class="table table-form">
 										<tbody>
 											<tr>
-												<td>이름</td>
+												<td>{{'$S_str_Name' | i18n}}</td>
 												<td class="control-group" ng-class="{ 'error': frmUser.name.$error.required }" style="position: relative">
 													<input type="text" name="name" class="input-xlarge" ng-model="selectedUserCopy.name" required>
 													<div class="popover popover-black fade left in" ng-show="frmUser.name.$error.required" style="left: -465px">
 														<div class="arrow"></div>
-														<div class="popover-content help-inline">이름은 반드시 필요합니다.</div>
+														<div class="popover-content help-inline">{{'$S_msg_NameRequiredError' | i18n}}</div>
 													</div>
 												</td>
 											</tr>
 											<tr>
-												<td>직함</td>
+												<td>{{'$S_str_Title' | i18n}}</td>
 												<td><input type="text" class="input-xlarge" ng-model="selectedUserCopy.title"></td>
 											</tr>
 											<tr>
-												<td>부서</td>
+												<td>{{'$S_str_OrganizationUnit' | i18n}}</td>
 												<td>
 													<div class="btn-group">
 														<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-															<span ng-show="selectedUserCopy.org_unit == null" style="color:#999">미지정</span>
+															<span ng-show="selectedUserCopy.org_unit == null" style="color:#999">{{'$S_str_Unassigned' | i18n}}</span>
 															{{selectedUserCopy.org_unit.name}}
 															<span class="caret"></span>
 														</a>
@@ -544,12 +546,12 @@ input[type=search].input-search-table:focus {
 												</td>
 											</tr>
 											<tr>
-												<td>E-mail</td>
+												<td>{{'$S_str_Email' | i18n}}</td>
 												<td class="control-group" ng-class="{ 'error': frmUser.email.$error.email }" style="position: relative">
 													<input type="email" name="email" class="input-xlarge" placeholder="user@domain.com" ng-model="selectedUserCopy.email">
 													<div class="popover popover-black fade left in" ng-show="frmUser.email.$error.email" style="left: -465px">
 														<div class="arrow"></div>
-														<div class="popover-content help-inline">올바른 E-mail 형식이 아닙니다.</div>
+														<div class="popover-content help-inline">{{'$S_msg_EmailError' | i18n}}</div>
 													</div>
 												</td>
 											</tr>
@@ -560,7 +562,7 @@ input[type=search].input-search-table:focus {
 									<table class="table table-form">
 										<tbody>
 											<tr>
-												<td>설명</td>
+												<td>{{'$S_str_Description' | i18n}}</td>
 												<td><textarea class="input-xlarge" ng-model="selectedUserCopy.description"></textarea></td>
 											</tr>
 										</tbody>
@@ -572,19 +574,19 @@ input[type=search].input-search-table:focus {
 									<table class="table table-form">
 										<tbody>
 											<tr>
-												<td>이름</td>
+												<td>{{'$S_str_Name' | i18n}}</td>
 												<td>{{selectedUser.name}}</td>
 											</tr>
 											<tr>
-												<td>직함</td>
+												<td>{{'$S_str_Title' | i18n}}</td>
 												<td>{{selectedUser.title}}</td>
 											</tr>
 											<tr>
-												<td>부서</td>
+												<td>{{'$S_str_OrganizationUnit' | i18n}}</td>
 												<td>{{selectedUser.org_unit.name}}</td>
 											</tr>
 											<tr>
-												<td>E-mail</td>
+												<td>{{'$S_str_Email' | i18n}}</td>
 												<td>{{selectedUser.email}}</td>
 											</tr>
 										</tbody>
@@ -594,11 +596,11 @@ input[type=search].input-search-table:focus {
 									<table class="table table-form">
 										<tbody>
 											<tr>
-												<td>생성일</td>
+												<td>{{'$S_str_CreatedAt' | i18n}}</td>
 												<td>{{selectedUser.created}}</td>
 											</tr>
 											<tr>
-												<td>수정일</td>
+												<td>{{'$S_str_UpdatedAt' | i18n}}</td>
 												<td>{{selectedUser.updated}}</td>
 											</tr>
 										</tbody>
@@ -608,7 +610,7 @@ input[type=search].input-search-table:focus {
 									<table class="table table-form">
 										<tbody>
 											<tr>
-												<td>설명</td>
+												<td>{{'$S_str_Description' | i18n}}</td>
 												<td>{{selectedUser.description}}</td>
 											</tr>
 										</tbody>
@@ -617,13 +619,13 @@ input[type=search].input-search-table:focus {
 							</ul>
 						</section>
 						<section ng-controller="AdminController">
-							<legend style="text-indent: 40px" ng-hide="isUserEditMode && !canAdminGrant">관리자 설정</legend>
+							<legend style="text-indent: 40px" ng-hide="isUserEditMode && !canAdminGrant">{{'$S_str_AdminSetting' | i18n}}</legend>
 							<ul class="tab area tab-general" ng-show="isUserEditMode && canAdminGrant">
 								<li class="section area">
 									<table class="table table-form">
 										<tbody>
 											<tr>
-												<td>권한</td>
+												<td>{{'$S_str_Privilege' | i18n}}</td>
 												<td>
 													<select ng-model="currentRoleCopy" ng-options="role.name for role in listRoles"></select>
 												</td>
@@ -637,7 +639,7 @@ input[type=search].input-search-table:focus {
 									<table class="table table-form">
 										<tbody>
 											<tr>
-												<td>권한</td>
+												<td>{{'$S_str_Privilege' | i18n}}</td>
 												<td>{{currentRole.name}}</td>
 											</tr>
 										</tbody>
@@ -646,18 +648,18 @@ input[type=search].input-search-table:focus {
 							</ul>
 						</section>
 						<section ng-controller="TablePrivilegeController">
-							<legend style="text-indent: 40px" ng-show="(!isUserEditMode && amI) || canAdminGrant">테이블 권한 설정</legend>
+							<legend style="text-indent: 40px" ng-show="(!isUserEditMode && amI) || canAdminGrant">{{'$S_str_TablePrivilege' | i18n}}</legend>
 							<ul class="tab area tab-general" ng-show="isUserEditMode && canAdminGrant">
 								<li class="section area">
 									<table class="table table-bordered table-striped" style="margin-bottom: 0">
 										<thead>
 											<tr>
 												<th style="padding:0 8px; vertical-align:inherit; width: 70%">
-													<span class="pull-left" style="margin-top: 5px">테이블</span>
+													<span class="pull-left" style="margin-top: 5px">{{'$S_str_Table' | i18n}}</span>
 													<input type="search" class="pull-right input-search-table" ng-model="search.table">
 												</th>
 												<th>
-													<span>읽기 권한</span>
+													<span>{{'$S_str_ReadPrivilege' | i18n}}</span>
 													<button class="btn btn-mini pull-right" ng-click="toggleSelectAll()">
 														<i class="icon-check"></i>
 													</button>
@@ -675,14 +677,14 @@ input[type=search].input-search-table:focus {
 							</ul>
 							<ul class="tab area tab-general" ng-show="!isUserEditMode && (amI || canAdminGrant)">
 								<li class="section" style="margin: 10px 40px">
-									{{dataPrivileges.length}}개의 접근 가능한 테이블
+									{{dataPrivileges.length}}<ng-pluralize count="dataPrivileges.length" when="formItem"></ng-pluralize>{{'$S_msg_AvailableTableCount' | i18n}}
 								</li>
 								<li class="section area" style="border: 0">
 									<table class="table table-bordered table-striped" style="margin-bottom: 0">
 										<thead>
 											<tr>
-												<th>테이블</th>
-												<th>읽기 권한</th>
+												<th>{{'$S_str_Table' | i18n}}</th>
+												<th>{{'$S_str_ReadPrivilege' | i18n}}</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -693,7 +695,7 @@ input[type=search].input-search-table:focus {
 										</tbody>
 									</table>
 									<button class="btn" style="width: 100%" ng-show="(dataPrivileges.length > limitDataPrivilegesDefault) && (limitDataPrivileges != dataPrivileges.length)" ng-click="toggleMorePrivileges()">
-										{{dataPrivileges.length - 10}}개의 접근 가능한 테이블 더 보기
+										{{dataPrivileges.length - 10}}<ng-pluralize count="dataPrivileges.length - 10" when="formItem"></ng-pluralize>{{'$S_msg_AvailableTableCountMore' | i18n}}
 									</button>
 								</li>
 							</ul>
@@ -701,7 +703,7 @@ input[type=search].input-search-table:focus {
 						<section>
 							<ul class="tab area tab-general" ng-show="(isUserEditMode && !amI) && isLowerLevel">
 								<li class="section area" ng-hide="selectedUserCopy._isNew">
-									<button class="btn btn-danger" style="width: 100%" ng-click="removeThisUser()">이 사용자 삭제</button>
+									<button class="btn btn-danger" style="width: 100%" ng-click="removeThisUser()">{{'$S_str_RemoveThisUser' | i18n}}</button>
 								</li>
 							</ul>
 						</section>
@@ -711,26 +713,26 @@ input[type=search].input-search-table:focus {
 		</div>
 		<div class="modal mdlChangePassword" modal ng-controller="ChangePasswordController">
 			<a href="#" class="modal-close close" style="margin-bottom: -30px">×</a>
-			<legend>암호 변경</legend>
+			<legend>{{'$S_str_ChangePassword' | i18n}}</legend>
 			<form name="frmChangePassword">
 				<fieldset class="form-horizontal">
-					<div class="fieldset-description">{{selectedUser.login_name}}님의 암호를 변경합니다.</div>
+					<div class="fieldset-description">{{'$S_msg_RemoveThisUser' | i18n:[selectedUser.login_name]}}</div>
 					<div class="control-group" ng-class="{ 'error': frmChangePassword.password.$error.inadequacy }">
-						<label class="control-label" for="password">암호</label>
+						<label class="control-label" for="password">{{'$S_str_Password' | i18n}}</label>
 						<div class="controls">
 							<input id="password" name="password" type="password" class="input-xlarge" ng-model="valPassword" password-validate>
-							<div class="help-inline" ng-show="frmChangePassword.password.$error.inadequacy">암호는 9자 이상의 영문, 숫자, 특수문자 조합으로<br>만들어야 합니다.</div>
+							<div class="help-inline" ng-show="frmChangePassword.password.$error.inadequacy">{{'$S_msg_PasswordInadequacyError' | i18n}}</div>
 						</div>
 					</div>
 					<div class="control-group" ng-class="{ 'error': frmChangePassword.passwordConfirm.$error.mismatch }">
-						<label class="control-label" for="passwordConfirm">재입력</label>
+						<label class="control-label" for="passwordConfirm">{{'$S_str_PasswordRetype' | i18n}}</label>
 						<div class="controls">
 							<input id="passwordConfirm" name="passwordConfirm" type="password" class="input-xlarge" ng-model="valPasswordConfirm" match="valPassword">
-							<div class="help-inline" ng-show="frmChangePassword.passwordConfirm.$error.mismatch">암호가 서로 일치하지 않습니다.</div>
+							<div class="help-inline" ng-show="frmChangePassword.passwordConfirm.$error.mismatch">{{'$S_msg_PasswordMismatchError' | i18n}}</div>
 						</div>
 					</div>
 					<div class="control-group submit-group">
-						<button class="btn btn-primary" ng-disabled="frmChangePassword.$invalid || (valPassword == '')" ng-click="changePassword()">변경</button>
+						<button class="btn btn-primary" ng-disabled="frmChangePassword.$invalid || (valPassword == '')" ng-click="changePassword()">{{'$S_str_Change' | i18n}}</button>
 					</div>
 				</fieldset>
 			</form>
@@ -746,19 +748,19 @@ input[type=search].input-search-table:focus {
 
 	<div class="modal mdlRemoveUsers" ng-controller="RemoveUsersController" modal>
 		<a href="#" class="modal-close close" style="margin-bottom: -30px">&times;</a>
-		<legend>사용자 삭제</legend>
+		<legend>{{'$S_str_RemoveUser' | i18n}}</legend>
 		<div style="margin-bottom: 20px">
-			정말 사용자 <code>{{selectedUsers | namemap: 'login_name'}}</code>을 삭제하시겠습니까?
+			{{'$S_msg_RemoveUserConfirmPre' | i18n}}<code>{{selectedUsers | namemap: 'login_name'}}</code>{{'$S_msg_RemoveUserConfirmPost' | i18n}}
 		</div>
 		<div class="control-group submit-group">
-			<button class="btn btn-danger" ng-click="removeUsers()">삭제</button>
-			<button class="btn" ng-click="cancelRemoveUsers()">취소</button>
+			<button class="btn btn-danger" ng-click="removeUsers()">{{'$S_str_Remove' | i18n}}</button>
+			<button class="btn" ng-click="cancelRemoveUsers()">{{'$S_str_Cancel' | i18n}}</button>
 		</div>
 	</div>
 
 	<div class="alert alert-success alert-fix-side">
 		<button type="button" class="close">&times;</button>
-		<span class="msg">성공적으로 이동했습니다.</span>
+		<span class="msg">{{'$S_msg_MoveUserSuccess' | i18n}}</span>
 	</div>
 	
 	<script src="orgchart.js"></script>
