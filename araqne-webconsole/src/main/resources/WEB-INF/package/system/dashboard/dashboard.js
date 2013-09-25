@@ -2,6 +2,8 @@ var app = angular.module('dashboard', ['App', 'Widget', 'localization']);
 var proc;
 console.log('dashboard init');
 
+parent.Core.Language.setDocumentLanguage(document, parent.Core.Language.Lang, { appName: 'dashboard', angular: angular });
+
 parent.d3 = d3;
 
 var tooltip = $('<div class="tooltip fade top"><div class="tooltip-arrow"></div><div class="tooltip-inner">...</div></div>').appendTo($('body'));

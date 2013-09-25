@@ -146,7 +146,7 @@ th {
 
 angular.element(document).ready(function() {
 	angular.module('myApp', []);
-	parent.Core.Language.setDocumentLanguage(document, parent.Core.Language.Lang);
+	parent.Core.Language.setDocumentLanguage(document, parent.Core.Language.Lang, { appName: 'myApp'});
 });
 
 </script>

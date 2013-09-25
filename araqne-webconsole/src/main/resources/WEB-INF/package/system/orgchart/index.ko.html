@@ -1,5 +1,5 @@
 <!doctype html>
-<html ng-app="orgchart">
+<html>
 <head>
 	<meta charset="utf-8" />
 
@@ -24,7 +24,7 @@
 	<script src="../../../script/directive/sortable.js"></script>
 	<!-- endbuild -->
 
-	<script src="../system.ko-kr.js"></script>
+	<script src="../system.en-us.js"></script>
 	
 	<link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css"/>
 	<link rel="stylesheet" href="/css/app.css"/>
@@ -677,7 +677,7 @@ input[type=search].input-search-table:focus {
 							</ul>
 							<ul class="tab area tab-general" ng-show="!isUserEditMode && (amI || canAdminGrant)">
 								<li class="section" style="margin: 10px 40px">
-									{{dataPrivileges.length}}<ng-pluralize count="dataPrivileges.length" when="formItem"></ng-pluralize>{{'$S_msg_AvailableTableCount' | i18n}}
+									{{'$S_msg_AvailableTableCount' | i18n:[dataPrivileges.length]}}
 								</li>
 								<li class="section area" style="border: 0">
 									<table class="table table-bordered table-striped" style="margin-bottom: 0">
@@ -695,7 +695,7 @@ input[type=search].input-search-table:focus {
 										</tbody>
 									</table>
 									<button class="btn" style="width: 100%" ng-show="(dataPrivileges.length > limitDataPrivilegesDefault) && (limitDataPrivileges != dataPrivileges.length)" ng-click="toggleMorePrivileges()">
-										{{dataPrivileges.length - 10}}<ng-pluralize count="dataPrivileges.length - 10" when="formItem"></ng-pluralize>{{'$S_msg_AvailableTableCountMore' | i18n}}
+										{{'$S_msg_AvailableTableCountMore' | i18n:[dataPrivileges.length - 10]}}
 									</button>
 								</li>
 							</ul>

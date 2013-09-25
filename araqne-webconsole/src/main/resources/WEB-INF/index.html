@@ -367,13 +367,20 @@ Core.Language = {
 		console.log(lang);
 	},
 	onSetLanguage: function() {
-		Core.Language.setDocumentLanguage(document, Core.Language.Lang);
+		Core.Language.setDocumentLanguage(document, Core.Language.Lang, { appName: 'myApp'});
 	},
-	setDocumentLanguage: function(doc, lang) {
+	setDocumentLanguage: function(doc, lang, config) {
 		if(lang == null) lang = 'en-us';
 		function onScriptLoad() {
 			// angular init
-			angular.bootstrap(doc, ['myApp', 'localization']);	
+			if(!!config) {
+				if(!!config.angular) {
+					config.angular.bootstrap(doc, [config.appName, 'localization']);
+				}
+				else {
+					angular.bootstrap(doc, [config.appName, 'localization']);
+				}
+			}
 		}
 		
 		var scriptTag = doc.createElement('script');

@@ -63,8 +63,8 @@ angular.module('localization')
 	'$S_str_ReadPrivilege': 'Read',
 	'$S_plr_Item': 'item',
 	'$S_plr_Items': 'items',
-	'$S_msg_AvailableTableCount': '의 접근 가능한 테이블',
-	'$S_msg_AvailableTableCountMore': '의 접근 가능한 테이블 더 보기',
+	'$S_msg_AvailableTableCount': '{0}개의 접근 가능한 테이블',
+	'$S_msg_AvailableTableCountMore': '{0}개의 접근 가능한 테이블 더 보기',
 	'$S_str_RemoveThisUser': 'Delete this user',
 	'$S_msg_RemoveThisUser': 'Change password of {0}',
 	'$S_str_Change': 'Apply',
@@ -133,6 +133,12 @@ angular.module('localization')
 	'$S_str_String': 'String',
 	'$S_str_Series': 'Series',
 	'$S_msg_SelectOneMoreNumberType': 'Select one or more number columns.',
+	
+	/* Widget */
+	'$S_msg_QueryRunCount': '쿼리 {0}번 실행함',
+	'$S_msg_QueryRunInterval': '{0}초마다 갱신',
+	'$S_msg_UnknownError': '알 수 없는 에러',
+	'$S_msg_OccurError': '에러가 발생했습니다',
 
 	/* Starter */
 	'$S_str_LogTrend': 'Log Trend',

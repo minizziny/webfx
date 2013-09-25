@@ -1,6 +1,8 @@
 var app = angular.module('orgchart', ['App', 'App.Directive.Tree', 'localization']);
 var proc;
 
+parent.Core.Language.setDocumentLanguage(document, parent.Core.Language.Lang, { appName: 'orgchart', angular: angular });
+
 app.factory('eventSender', function() {
 	var e = {
 		onTreeSelectOrgUnit: null,
