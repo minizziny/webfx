@@ -1,5 +1,5 @@
 angular.module('App.Directive.Tree', [])
-.directive('hierachyView', function($compile) {
+.directive('hierachyView', function($compile, $filter) {
 	return {
 		restrict: 'E',
 		link: function (scope, element, attrs)
@@ -45,10 +45,10 @@ angular.module('App.Directive.Tree', [])
 				if(ddIcon != '') {
 					var dd = angular.element(
 						'<ul ng-mousedown="supressEvent($event)" class="dropdown-menu" style="display:none; left:auto; right: 0px; top: 22px">' +
-							'<li><a ng-click="addChildNode()" tabindex="-1" href="#">새 그룹</a></li>' +
-							'<li><a ng-click="renameNode()" tabindex="-1" href="#">이름 바꾸기</a></li>' +
+							'<li><a ng-click="addChildNode()" tabindex="-1" href="#">{{"$S_str_NewGroup"|i18n}}</a></li>' +
+							'<li><a ng-click="renameNode()" tabindex="-1" href="#">{{"$S_str_Rename"|i18n}}</a></li>' +
 							'<li class="divider"></li>' +
-							'<li><a ng-click="removeNode()" tabindex="-1" href="#">삭제</a></li>' +
+							'<li><a ng-click="removeNode()" tabindex="-1" href="#">{{"$S_str_Remove"|i18n}}</a></li>' +
 						'</ul>');
 
 					template.find('button[el-type="dropdown"]').after(dd);
@@ -111,10 +111,10 @@ angular.module('App.Directive.Tree', [])
 				if(ddIcon != '') {
 					var dd = angular.element(
 						'<ul ng-mousedown="supressEvent($event)" class="dropdown-menu" style="display:none; left:auto; right: 0px; top: 22px">' +
-							'<li><a ng-click="addChildNode()" tabindex="-1" href="#">새 그룹</a></li>' +
-							'<li><a ng-click="renameNode()" tabindex="-1" href="#">이름 바꾸기</a></li>' +
+							'<li><a ng-click="addChildNode()" tabindex="-1" href="#">{{"$S_str_NewGroup"|i18n}}</a></li>' +
+							'<li><a ng-click="renameNode()" tabindex="-1" href="#">{{"$S_str_Rename"|i18n}}</a></li>' +
 							'<li class="divider"></li>' +
-							'<li><a ng-click="removeNode()" tabindex="-1" href="#">삭제</a></li>' +
+							'<li><a ng-click="removeNode()" tabindex="-1" href="#">{{"$S_str_Remove"|i18n}}</a></li>' +
 						'</ul>');
 
 					template.find('button[el-type="dropdown"]').after(dd);

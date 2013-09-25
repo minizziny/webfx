@@ -160,7 +160,21 @@ angular.module('localization')
 	'$S_msg_LoginErrorExpiredPassword': 'Login failed. Password expired.',
 	'$S_msg_LoginErrorNotTrustHost': 'Login failed. The current location does not have access to server.',
 	'$S_msg_LoginErrorLockedAdmin': 'Login failed. Account is locked.',
-	'$S_msg_LoginConfirmMaxSession': 'Exceeds concurrent users. User {1} is logged in from {0}. Do you want to terminate current connection?'
+	'$S_msg_LoginConfirmMaxSession': 'Exceeds concurrent users. User {1} is logged in from {0}. Do you want to terminate current connection?',
 
+	/* Common */
+	'$S_str_First': '처음',
+	'$S_str_Last': '마지막',
+	'$S_str_MovePage': '페이지 이동',
+	'$S_str_Go': '이동',
+	'$S_str_Browser': '찾아보기',
+	'$S_msg_QueryHere': '여기에 쿼리를 입력하세요',
+	'$S_str_Search': '검색',
+	'$S_str_Stop': '정지',
+	'$S_msg_WrongQuery': '쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.',
+	'$S_msg_MoreColumn': '{0}개의 컬럼 더 보기',
+	'$S_str_NewGroup': '새 그룹',
+	'$S_str_Rename': '이름 바꾸기',
+	'$S_str_Remove': '삭제',
 });
 

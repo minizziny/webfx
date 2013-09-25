@@ -160,7 +160,21 @@ angular.module('localization')
 	'$S_msg_LoginErrorExpiredPassword': '로그인에 실패했습니다. 암호가 만료되었습니다.',
 	'$S_msg_LoginErrorNotTrustHost': '로그인에 실패했습니다. 신뢰할 수 없는 호스트입니다.',
 	'$S_msg_LoginErrorLockedAdmin': '로그인에 실패했습니다. 사용자 계정이 잠겨있습니다.',
-	'$S_msg_LoginConfirmMaxSession': '최대 동시 접속자 수를 초과했습니다. 현재 {0}에서 사용자 {1}이 접속중입니다. 강제로 연결을 끊고 접속하시겠습니까?'
+	'$S_msg_LoginConfirmMaxSession': '최대 동시 접속자 수를 초과했습니다. 현재 {0}에서 사용자 {1}이 접속중입니다. 강제로 연결을 끊고 접속하시겠습니까?',
 
+	/* Common */
+	'$S_str_First': '처음',
+	'$S_str_Last': '마지막',
+	'$S_str_MovePage': '페이지 이동',
+	'$S_str_Go': '이동',
+	'$S_str_Browser': '찾아보기',
+	'$S_msg_QueryHere': '여기에 쿼리를 입력하세요',
+	'$S_str_Search': '검색',
+	'$S_str_Stop': '정지',
+	'$S_msg_WrongQuery': '쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.',
+	'$S_msg_MoreColumn': '{0}개의 컬럼 더 보기',
+	'$S_str_NewGroup': '새 그룹',
+	'$S_str_Rename': '이름 바꾸기',
+	'$S_str_Remove': '삭제',
 });
 
