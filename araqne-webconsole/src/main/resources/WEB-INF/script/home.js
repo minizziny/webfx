@@ -200,6 +200,9 @@ function(_$, ko, socket, programManager, Locale, pageManager, logdbManager, List
 				});
 			});
 		});
+
+		var lang = pageManager.urlParam("lang");
+		Core.Language.setLanguage(lang);
 	}
 
 	setTimeout(Hello, 10);

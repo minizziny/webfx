@@ -357,13 +357,41 @@ i.icon-logout {
 
 
 <script src="/bower_components/angular/angular.js"></script>
-<script src="package/system/system.ko-kr.js"></script>
-
 <script>
 
+window.Core = {};
+Core.Language = {
+	setLanguage: function(lang) {
+		Core.Language.Lang = lang;
+		Core.Language.onSetLanguage(lang);
+		console.log(lang);
+	},
+	onSetLanguage: function() {
+		Core.Language.setDocumentLanguage(document, Core.Language.Lang);
+	},
+	setDocumentLanguage: function(doc, lang) {
+		if(lang == null) lang = 'en-us';
+		function onScriptLoad() {
+			// angular init
+			angular.bootstrap(doc, ['myApp', 'localization']);	
+		}
+		
+		var scriptTag = doc.createElement('script');
+		scriptTag.type = 'text/javascript'; 
+		scriptTag.async = true;
+		scriptTag.src = '/package/system/system.' + lang + '.js';
+		scriptTag.onreadystatechange = function () {
+			if (this.readyState == 'complete') onScriptLoad();
+		}
+		scriptTag.onload = onScriptLoad;
+
+		var s = doc.getElementsByTagName('body')[0];
+		s.appendChild(scriptTag);	
+	}
+};
+
 angular.element(document).ready(function() {
-	angular.module('myApp', []);
-	angular.bootstrap(document, ['myApp', 'localization']);
+	var app = angular.module('myApp', []);
 });
 
 </script>

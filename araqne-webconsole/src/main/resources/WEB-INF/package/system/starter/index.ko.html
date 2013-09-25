@@ -141,13 +141,12 @@ th {
 
 
 <script src="/bower_components/angular/angular.js"></script>
-<script src="../system.ko-kr.js"></script>
 
 <script>
 
 angular.element(document).ready(function() {
 	angular.module('myApp', []);
-	angular.bootstrap(document, ['myApp', 'localization']);
+	parent.Core.Language.setDocumentLanguage(document, parent.Core.Language.Lang);
 });
 
 </script>
