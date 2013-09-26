@@ -269,6 +269,10 @@ i.icon-logout {
 	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
 }
 
+ng-string.hidden {
+	visibility: hidden;
+}
+
 	</style>
 
 	<script type="text/javascript" src="global.config.js"></script>
@@ -335,20 +339,20 @@ i.icon-logout {
 		<form class="form-horizontal">
 			<legend style="color: black; letter-spacing: 2px; font-family: 'Gill Sans', 'Lucida Sans Unicode'; font-weight: lighter">WELCOME TO<span style="letter-spacing: 2px; font-family: 'Gill Sans', 'Lucida Sans Unicode'; font-weight: normal"> LOGPRESSO</span></legend>
 			<div class="control-group">
-				<label class="control-label">{{'$S_str_ID' | i18n}}</label>
+				<label class="control-label"><ng-string class="hidden">{{'$S_str_ID' | i18n}}</ng-string></label>
 				<div class="controls">
 					<input type="text" id="txtId">
 				</div>
 			</div>
 			<div class="control-group">
-				<label class="control-label">{{'$S_str_Password' | i18n}}</label>
+				<label class="control-label"><ng-string class="hidden">{{'$S_str_Password' | i18n}}</ng-string></label>
 				<div class="controls">
 					<input id="txtPassword" type="password" />
 				</div>
 			</div>
 			<div class="control-group">
 				<div class="controls">
-					<button id="btnLogin" type="submit" disabled class="btn btn-primary">{{'$S_str_Login' | i18n}}</button>
+					<button id="btnLogin" type="submit" disabled class="btn btn-primary"><ng-string class="hidden">{{'$S_str_Login' | i18n}}</ng-string></button>
 				</div>
 			</div>
 		</form>
@@ -381,6 +385,10 @@ Core.Language = {
 				else {
 					angular.bootstrap(doc, [config.appName, 'localization']);
 				}
+
+				Array.prototype.slice.call(document.querySelectorAll('ng-string'), 0).forEach(function(el) {
+					el.className = el.className.replace(/\bhidden\b/, '');
+				});
 			}
 		}
 		
@@ -410,6 +418,21 @@ Core.Language = {
 angular.element(document).ready(function() {
 	var app = angular.module('myApp', []);
 });
+
+(function() {
+	function getURLParams(name) {
+		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+		if(results == null) {
+			return null;
+		}
+		else {
+			return results[1] || 0;
+		}	
+	}
+	
+	var lang = getURLParams("lang");
+	Core.Language.setLanguage(lang);
+})();
 
 </script>
 

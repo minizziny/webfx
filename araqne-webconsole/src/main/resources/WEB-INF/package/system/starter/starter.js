@@ -3,48 +3,96 @@ require(["/lib/jquery.js", "/lib/knockout.js", "/lib/d3.v3.js", "/core/connectio
 
 var iso8610 = d3.time.format.iso;
 
-moment.lang('ko', {
-    months : "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
-    monthsShort : "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
-    weekdays : "일요일_월요일_화요일_수요일_목요일_금요일_토요일".split("_"),
-    weekdaysShort : "일_월_화_수_목_금_토".split("_"),
-    weekdaysMin : "일_월_화_수_목_금_토".split("_"),
-    longDateFormat : {
-        LT : "A h시 mm분",
-        L : "YYYY.MM.DD",
-        LL : "YYYY년 MMMM D일",
-        LLL : "YYYY년 MMMM D일 LT",
-        LLLL : "YYYY년 MMMM D일 dddd LT"
-    },
-    meridiem : function (hour, minute, isUpper) {
-        return hour < 12 ? '오전' : '오후';
-    },
-    calendar : {
-        sameDay : '오늘 LT',
-        nextDay : '내일 LT',
-        nextWeek : 'dddd LT',
-        lastDay : '어제 LT',
-        lastWeek : '지난주 dddd LT',
-        sameElse : 'L'
-    },
-    relativeTime : {
-        future : "%s 후",
-        past : "%s 전",
-        s : "몇초",
-        ss : "%d초",
-        m : "일분",
-        mm : "%d분",
-        h : "한시간",
-        hh : "%d시간",
-        d : "하루",
-        dd : "%d일",
-        M : "한달",
-        MM : "%d달",
-        y : "일년",
-        yy : "%d년"
-    },
-    ordinal : '%d일'
-});
+if(parent.Core.Language.Lang == 'ko-kr') {
+	moment.lang('ko', {
+	    months : "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
+	    monthsShort : "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
+	    weekdays : "일요일_월요일_화요일_수요일_목요일_금요일_토요일".split("_"),
+	    weekdaysShort : "일_월_화_수_목_금_토".split("_"),
+	    weekdaysMin : "일_월_화_수_목_금_토".split("_"),
+	    longDateFormat : {
+	        LT : "A h시 mm분",
+	        L : "YYYY.MM.DD",
+	        LL : "YYYY년 MMMM D일",
+	        LLL : "YYYY년 MMMM D일 LT",
+	        LLLL : "YYYY년 MMMM D일 dddd LT"
+	    },
+	    meridiem : function (hour, minute, isUpper) {
+	        return hour < 12 ? '오전' : '오후';
+	    },
+	    calendar : {
+	        sameDay : '오늘 LT',
+	        nextDay : '내일 LT',
+	        nextWeek : 'dddd LT',
+	        lastDay : '어제 LT',
+	        lastWeek : '지난주 dddd LT',
+	        sameElse : 'L'
+	    },
+	    relativeTime : {
+	        future : "%s 후",
+	        past : "%s 전",
+	        s : "몇초",
+	        ss : "%d초",
+	        m : "일분",
+	        mm : "%d분",
+	        h : "한시간",
+	        hh : "%d시간",
+	        d : "하루",
+	        dd : "%d일",
+	        M : "한달",
+	        MM : "%d달",
+	        y : "일년",
+	        yy : "%d년"
+	    },
+	    ordinal : '%d일'
+	});
+}
+else if(parent.Core.Language.Lang == 'ja-jp') {
+	moment.lang('ja', {
+        months : "1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月".split("_"),
+        monthsShort : "1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月".split("_"),
+        weekdays : "日曜日_月曜日_火曜日_水曜日_木曜日_金曜日_土曜日".split("_"),
+        weekdaysShort : "日_月_火_水_木_金_土".split("_"),
+        weekdaysMin : "日_月_火_水_木_金_土".split("_"),
+        longDateFormat : {
+            LT : "Ah時m分",
+            L : "YYYY/MM/DD",
+            LL : "YYYY年M月D日",
+            LLL : "YYYY年M月D日LT",
+            LLLL : "YYYY年M月D日LT dddd"
+        },
+        meridiem : function (hour, minute, isLower) {
+            if (hour < 12) {
+                return "午前";
+            } else {
+                return "午後";
+            }
+        },
+        calendar : {
+            sameDay : '[今日] LT',
+            nextDay : '[明日] LT',
+            nextWeek : '[来週]dddd LT',
+            lastDay : '[昨日] LT',
+            lastWeek : '[前週]dddd LT',
+            sameElse : 'L'
+        },
+        relativeTime : {
+            future : "%s後",
+            past : "%s前",
+            s : "数秒",
+            m : "1分",
+            mm : "%d分",
+            h : "1時間",
+            hh : "%d時間",
+            d : "1日",
+            dd : "%d日",
+            M : "1ヶ月",
+            MM : "%dヶ月",
+            y : "1年",
+            yy : "%d年"
+        }
+    });
+}
 
 var timer = {};
 
