@@ -1,5 +1,5 @@
 angular.module('localization', [])
-.filter('i18n', ['en-us', function(localizedText) {
+.filter('i18n', ['en', function(localizedText) {
 	return function(text, args) {
 		if(localizedText.hasOwnProperty(text)) {
 			var str = localizedText[text];
@@ -16,7 +16,7 @@ angular.module('localization', [])
 }]);
 
 angular.module('localization')
-.value('en-us', {
+.value('en', {
 	/* orgchart */
 	'$S_str_RemoveOrganization': 'Delete Department',
 	'$S_msg_RemoveOrganizationConfirmPre': 'Do you really want to delete ',

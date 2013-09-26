@@ -361,7 +361,7 @@ ng-string.hidden {
 
 
 <script src="/bower_components/angular/angular.js"></script>
-<script src="package/system/system.en-us.js"></script>
+<script src="package/system/system.en.js"></script>
 <script>
 
 window.Core = {};
@@ -375,7 +375,7 @@ Core.Language = {
 		Core.Language.setDocumentLanguage(document, Core.Language.Lang, { appName: 'myApp'});
 	},
 	setDocumentLanguage: function(doc, lang, config) {
-		if(lang == null) lang = 'en-us';
+		if(lang == null) lang = 'en';
 		function onScriptLoad() {
 			// angular init
 			if(!!config) {

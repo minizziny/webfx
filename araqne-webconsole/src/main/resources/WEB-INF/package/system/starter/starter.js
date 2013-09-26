@@ -3,7 +3,7 @@ require(["/lib/jquery.js", "/lib/knockout.js", "/lib/d3.v3.js", "/core/connectio
 
 var iso8610 = d3.time.format.iso;
 
-if(parent.Core.Language.Lang == 'ko-kr') {
+if(parent.Core.Language.Lang == 'ko') {
 	moment.lang('ko', {
 	    months : "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
 	    monthsShort : "1월_2월_3월_4월_5월_6월_7월_8월_9월_10월_11월_12월".split("_"),
@@ -47,7 +47,7 @@ if(parent.Core.Language.Lang == 'ko-kr') {
 	    ordinal : '%d일'
 	});
 }
-else if(parent.Core.Language.Lang == 'ja-jp') {
+else if(parent.Core.Language.Lang == 'ja') {
 	moment.lang('ja', {
         months : "1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月".split("_"),
         monthsShort : "1月_2月_3月_4月_5月_6月_7月_8月_9月_10月_11月_12月".split("_"),

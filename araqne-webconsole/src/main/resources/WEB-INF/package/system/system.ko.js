@@ -1,5 +1,5 @@
 angular.module('localization', [])
-.filter('i18n', ['ko-kr', function(localizedText) {
+.filter('i18n', ['ko', function(localizedText) {
 	return function(text, args) {
 		if(localizedText.hasOwnProperty(text)) {
 			var str = localizedText[text];
@@ -16,7 +16,7 @@ angular.module('localization', [])
 }]);
 
 angular.module('localization')
-.value('ko-kr', {
+.value('ko', {
 	/* orgchart */
 	'$S_str_RemoveOrganization': '부서 삭제',
 	'$S_msg_RemoveOrganizationConfirmPre': '정말 부서 ',
