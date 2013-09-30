@@ -431,7 +431,7 @@ angular.element(document).ready(function() {
 	}
 	
 	var lang = getURLParams("lang");
-	if(lang == null) lang = 'en';
+	if(lang == null) lang = navigator.language;
 	Core.Language.setLanguage(lang);
 })();
 
