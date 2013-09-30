@@ -63,8 +63,8 @@ angular.module('localization')
 	'$S_str_ReadPrivilege': 'Read',
 	'$S_plr_Item': 'item',
 	'$S_plr_Items': 'items',
-	'$S_msg_AvailableTableCount': '{0}개의 접근 가능한 테이블',
-	'$S_msg_AvailableTableCountMore': '{0}개의 접근 가능한 테이블 더 보기',
+	'$S_msg_AvailableTableCount': 'Total {0} tables',
+	'$S_msg_AvailableTableCountMore': 'Load more {0} tables..',
 	'$S_str_RemoveThisUser': 'Delete this user',
 	'$S_msg_RemoveThisUser': 'Change password of {0}',
 	'$S_str_Change': 'Apply',
@@ -135,10 +135,10 @@ angular.module('localization')
 	'$S_msg_SelectOneMoreNumberType': 'Select one or more number columns.',
 	
 	/* Widget */
-	'$S_msg_QueryRunCount': '쿼리 {0}번 실행함',
-	'$S_msg_QueryRunInterval': '{0}초마다 갱신',
-	'$S_msg_UnknownError': '알 수 없는 에러',
-	'$S_msg_OccurError': '에러가 발생했습니다',
+	'$S_msg_QueryRunCount': 'Updated {0} times',
+	'$S_msg_QueryRunInterval': 'Run every {0}secs',
+	'$S_msg_UnknownError': 'Unknown Error',
+	'$S_msg_OccurError': 'Error occurred',
 
 	/* Starter */
 	'$S_str_LogTrend': 'Log Trend',
@@ -162,8 +162,8 @@ angular.module('localization')
 	'$S_msg_LoginErrorLockedAdmin': 'Login failed. Account is locked.',
 	'$S_msg_LoginConfirmMaxSession': 'Exceeds concurrent users. User {1} is logged in from {0}. Do you want to terminate current connection?',
 
-	'$S_msg_SessionExpired': '세션이 종료되었습니다. 다시 로그인하십시오.',
-	'$S_msg_NeedLogin': '로그인이 필요합니다.',
+	'$S_msg_SessionExpired': 'Session expired. Login please.',
+	'$S_msg_NeedLogin': 'Login required',
 
 	/* Common */
 	'$S_str_First': 'First',
