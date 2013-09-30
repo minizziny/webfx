@@ -89,8 +89,10 @@ public class LoginPlugin {
 
 		session.unsetProperty("nonce");
 		session.setProperty("admin_login_name", admin.getUser().getLoginName());
-		if (admin.getLang() != null)
+		if (admin.getLang() != null) {
 			session.setProperty("locale", admin.getLang());
+			resp.put("locale", admin.getLang());
+		}
 		session.setProperty("auth", "dom");
 	}
 
