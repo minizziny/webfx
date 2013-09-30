@@ -162,6 +162,9 @@ angular.module('localization')
 	'$S_msg_LoginErrorLockedAdmin': 'Login failed. Account is locked.',
 	'$S_msg_LoginConfirmMaxSession': 'Exceeds concurrent users. User {1} is logged in from {0}. Do you want to terminate current connection?',
 
+	'$S_msg_SessionExpired': '세션이 종료되었습니다. 다시 로그인하십시오.',
+	'$S_msg_NeedLogin': '로그인이 필요합니다.',
+
 	/* Common */
 	'$S_str_First': '처음',
 	'$S_str_Last': '마지막',
