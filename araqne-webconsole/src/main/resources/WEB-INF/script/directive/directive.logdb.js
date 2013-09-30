@@ -1,5 +1,5 @@
 angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
-.directive('queryInput', function($compile, $parse, serviceLogdb) {
+.directive('queryInput', function($compile, $parse, $filter, serviceLogdb) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -13,9 +13,9 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			ngChange: '&',
 			ngQueryString: '='
 		},
-		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" placeholder="여기에 쿼리를 입력하세요" autosize></textarea>\
-			<button class="search btn btn-primary">검색</button>\
-			<button class="stop btn btn-warning">중지</button>',
+		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" placeholder="{{ \'$S_msg_QueryHere\' | i18n }}" autosize></textarea>\
+			<button class="search btn btn-primary">{{ "$S_str_Search" | i18n}}</button>\
+			<button class="stop btn btn-warning">{{ "$S_str_Stop" | i18n}}</button>',
 		link: function(scope, element, attrs) {
 			var autoflush = attrs.isAutoFlush;
 
@@ -73,7 +73,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			}
 
 			function failedFn(m) {
-				alert('쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.');
+				alert($filter('i18n')('$S_msg_WrongQuery'));
 				scope.$apply();
 			}
 
@@ -181,10 +181,10 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 		template: '<div style="display: inline-block; position: relative">'+
 		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: -5px; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\
 			<span ng-show="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
-				{{numLimitColumnInterval}}개의 컬럼 더 보기\
+				{{"$S_msg_MoreColumn" | i18n:[numLimitColumnInterval]}}\
 			</span>\
 			<span ng-hide="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
-				{{numTotalColumn - numLimitColumn}}개의 컬럼 더 보기\
+				{{"$S_msg_MoreColumn" | i18n:[numTotalColumn - numLimitColumn]}}\
 			</span>\
 		</button>\
 		<table ng-class="{ selectable: isSelectable, expandable: (numTotalColumn - numLimitColumn > 0) }" class="cmpqr table table-bordered table-striped table-condensed">\

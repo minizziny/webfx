@@ -1,5 +1,5 @@
 angular.module('Widget', [])
-.directive('widget', function($compile, $timeout, $parse, serviceLogdb, serviceChart) {
+.directive('widget', function($compile, $filter, $timeout, $parse, serviceLogdb, serviceChart) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -36,8 +36,8 @@ angular.module('Widget', [])
 				<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
 					<div class="property-inner" ng-click="stopPropagation($event)">\
 						<code>{{query}}</code><br/>\
-						쿼리 <b>{{count}}</b>번 실행함<br/>\
-						{{interval}}초마다 갱신\
+						{{"$S_msg_QueryRunCount" | i18n:[count]}}<br/>\
+						{{"$S_msg_QueryRunInterval" | i18n:[interval]}}\
 					</div>\
 				</div>\
 				<div class="alert alert-error" ng-show="isShowError">{{errorMessage}}</div>\
@@ -48,7 +48,7 @@ angular.module('Widget', [])
 			scope.isShowProperty = false;
 			scope.isShowError = false;
 			scope.isPaused = false;
-			scope.errorMessage = '알 수 없는 에러';
+			scope.errorMessage = $filter('i18n')('$S_msg_UnknownError');
 			scope.guid;
 
 			var init = true;
@@ -229,7 +229,7 @@ angular.module('Widget', [])
 					console.log('failed');
 					serviceLogdb.remove(queryInst);
 
-					scope.errorMessage = '에러가 발생했습니다. ' + raw[0].errorCode;
+					scope.errorMessage = $filter('i18n')('$S_msg_OccurError') + raw[0].errorCode;
 					scope.isShowError = true;
 
 					scope.$apply();

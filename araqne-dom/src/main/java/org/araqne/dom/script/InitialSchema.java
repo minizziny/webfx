@@ -220,7 +220,7 @@ public class InitialSchema {
 		Admin admin = new Admin();
 		admin.setRole(roleApi.getRole(DEFAULT_DOMAIN, "master"));
 		admin.setProfile(programApi.getProgramProfile(DEFAULT_DOMAIN, "all"));
-		admin.setLang("en");
+		admin.setLang(null);
 		admin.setEnabled(true);
 		user.getExt().put("admin", admin);
 

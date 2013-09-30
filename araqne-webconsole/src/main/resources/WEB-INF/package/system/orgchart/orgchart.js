@@ -1,5 +1,7 @@
-var app = angular.module('orgchart', ['App', 'App.Directive.Tree']);
+var app = angular.module('orgchart', ['App', 'App.Directive.Tree', 'localization']);
 var proc;
+
+parent.Core.Language.setDocumentLanguage(document, parent.Core.Language.Lang, { appName: 'orgchart', angular: angular });
 
 app.factory('eventSender', function() {
 	var e = {
@@ -26,9 +28,22 @@ function getOrgUnit(guid, orgunits) {
 	return found;
 }
 
-function Controller($scope, serviceTask, socket, eventSender, serviceDom) {
+function Controller($scope, $filter, serviceTask, socket, eventSender, serviceDom) {
 	serviceTask.init();
 	proc = serviceTask.newProcess('orgchart');
+
+
+	$scope.formUser = {
+		'0': $filter('i18n')('$S_plr_Users'),
+		'one': $filter('i18n')('$S_plr_User'),
+		'other': $filter('i18n')('$S_plr_Users')
+	}
+
+	$scope.formItem = {
+		'0': $filter('i18n')('$S_plr_Items'),
+		'one': $filter('i18n')('$S_plr_Item'),
+		'other': $filter('i18n')('$S_plr_Items')
+	}
 
 	$scope.testAlert = function() {
 		var types = ['info', 'success', 'error'];
@@ -577,7 +592,7 @@ function TablePrivilegeController($scope, socket, eventSender, serviceLogdbManag
 	});
 }
 
-function UserListController($scope, $compile, socket, eventSender) {
+function UserListController($scope, $filter, $compile, socket, eventSender) {
 	eventSender.onDropUsersToOrgUnit = function(scopeTarget) {
 		var login_names = $scope.dataUsers.filter(function(user) {
 			return user.is_checked;
@@ -622,10 +637,10 @@ function UserListController($scope, $compile, socket, eventSender) {
 		$scope.$apply();
 
 		if(names.length == 0) {
-			notify('danger', '사용자 ' + failed_login_names + '를 삭제할 수 없습니다. 더 높은 권한이 필요합니다.' , false)
+			notify('danger', $filter('i18n')('$S_msg_RemoveUserAuthError', failed_login_names) , false)
 		}
 		else {
-			notify('info', '사용자 ' + names + '을 성공적으로 삭제했습니다.<br>사용자 ' + failed_login_names + '는 삭제하지 못했습니다. 더 높은 권한이 필요합니다.' , false);
+			notify('info',  $filter('i18n')('$S_msg_RemoveUserSuccessPartially', [names, failed_login_names]), false);
 		}
 	}
 
@@ -639,7 +654,7 @@ function UserListController($scope, $compile, socket, eventSender) {
 		});
 		$scope.$apply();
 
-		notify('success', '사용자 ' + names + '을 성공적으로 삭제했습니다.' , true);
+		notify('success', $filter('i18n')('$S_msg_RemoveUserSuccess', [names]) , true);
 	}
 
 	$scope.currentOrgUnit;
@@ -760,10 +775,10 @@ function UserListController($scope, $compile, socket, eventSender) {
 			refresh();
 
 			if(users.length - failed_login_names.length == 0) {
-				notify('danger', '사용자 ' + failed_login_names.join() + '를 ' + target.name + '로 이동할 수 없습니다. 더 높은 권한이 필요합니다.' , false)
+				notify('danger',  $filter('i18n')('$S_msg_MoveUserError', [failed_login_names.join(), target.name]) , false)
 			}
 			else if(failed_login_names.length == 0) {
-				notify('success', '사용자 ' + users.join() + '을 ' + target.name + '로 이동했습니다.' , true);
+				notify('success',  $filter('i18n')('$S_msg_MoveUserSuccess', [users.join(), target.name]) , true);
 			}
 			else {
 
@@ -777,7 +792,7 @@ function UserListController($scope, $compile, socket, eventSender) {
 					return hasFailedList(obj);
 				});
 
-				notify('info', '사용자 ' + names + '을 ' + target.name + '로 이동했습니다.<br>사용자 ' + failed_login_names.join() + '는 이동하지 못했습니다. 더 높은 권한이 필요합니다.' , false);
+				notify('info', $filter('i18n')('$S_msg_MoveUserSuccessPartially', [names, target.name, failed_login_names.join()]), false);
 			}
 			
 		})
@@ -844,14 +859,14 @@ function ChangePasswordController($scope, socket, eventSender) {
 		socket.send('org.araqne.dom.msgbus.UserPlugin.updateUser', currentUser, proc.pid)
 		.success(function(m) {
 			console.log(m.body);
-			notify('success', '사용자 ' + currentUser.login_name + '의 비밀번호를 변경했습니다.' , true);
+			notify('success', $filter('i18n')('$S_msg_ChangePasswordSuccess', [currentUser.login_name]) , true);
 			$('[modal].mdlChangePassword')[0].hideDialog();
 		})
 		.failed(openError);
 	}
 }
 
-function TreeController($scope, $compile, socket, eventSender) {
+function TreeController($scope, $compile, $filter, socket, eventSender) {
 	$scope.toggleLogTrendType = function(type) {
 		$('.treetype').hide();
 		$('.treetype.' + type).show();
@@ -965,7 +980,7 @@ function TreeController($scope, $compile, socket, eventSender) {
 
 		var tree = buildTree(m.body.org_units, null);
 		$scope.$parent.treeDataSourceWithRoot = [{
-			'name': '모든 사용자',
+			'name': $filter('i18n')('$S_str_AllUsers'),
 			'guid': null,
 			'children': tree,
 			'is_visible': true

@@ -1,6 +1,8 @@
-var app = angular.module('dashboard', ['App', 'Widget']);
+var app = angular.module('dashboard', ['App', 'Widget', 'localization']);
 var proc;
 console.log('dashboard init');
+
+parent.Core.Language.setDocumentLanguage(document, parent.Core.Language.Lang, { appName: 'dashboard', angular: angular });
 
 parent.d3 = d3;
 
@@ -13,13 +15,19 @@ app.factory('eventSender', function() {
 	return e;
 });
 
-function Controller($scope, serviceSession, serviceTask, eventSender) {
+function Controller($scope, $filter, serviceSession, serviceTask, eventSender) {
 
 	$scope.logout = serviceSession.logout;
 	proc = serviceTask.newProcess('dashboard');
 
 	$scope.openNewWidget = function() {
 		eventSender.onOpenNewWidget();
+	}
+
+	$scope.formSecond = {
+		'0': $filter('i18n')('$S_str_Seconds'),
+		'one': $filter('i18n')('$S_str_Second'),
+		'other': $filter('i18n')('$S_str_Seconds')
 	}
 
 	$scope.numCurrentPage = 0;
@@ -31,7 +39,7 @@ function Controller($scope, serviceSession, serviceTask, eventSender) {
 
 }
 
-function PresetController($scope, $compile, socket, eventSender, serviceGuid) {
+function PresetController($scope, $compile, $filter, socket, eventSender, serviceGuid) {
 	eventSender.onCurrentPresetChanged = function() {
 		console.log('currentPreset changed')
 
@@ -118,7 +126,7 @@ function PresetController($scope, $compile, socket, eventSender, serviceGuid) {
 
 	function InitAutosave() {
 		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
-			{ "guid": "autosave", "name": "자동 저장", "state": { "widgets": [] } }
+			{ "guid": "autosave", "name": $filter('i18n')('$S_str_Autosave'), "state": { "widgets": [] } }
 		, proc.pid);
 	}
 
@@ -172,7 +180,7 @@ function PresetController($scope, $compile, socket, eventSender, serviceGuid) {
 	}
 
 	$scope.SaveAs = function() {
-		var newname = prompt('저장할 새 프리셋 이름을 입력하세요');
+		var newname = prompt($filter('i18n')('$S_msg_SavePresetAs'));
 		if(newname == undefined) return;
 
 		var newguid = serviceGuid.generateType2();
@@ -182,7 +190,7 @@ function PresetController($scope, $compile, socket, eventSender, serviceGuid) {
 	}
 
 	$scope.New = function() {
-		var newname = prompt('새 프리셋 이름을 입력하세요');
+		var newname = prompt($filter('i18n')('$S_msg_NewPresetName'));
 		if(newname == undefined) return;
 
 		var newguid = serviceGuid.generateType2();
@@ -251,20 +259,20 @@ function PresetController($scope, $compile, socket, eventSender, serviceGuid) {
 	//RemovePresets('autosave')
 }
 
-function SelectColumnController($scope, eventSender) {
+function SelectColumnController($scope, $filter, eventSender) {
 	$scope.dataCustomColumn;
 	$scope.dataCustomColumnTypes = [
 		{
 			name: 'number',
-			displayName: '숫자'
+			displayName: $filter('i18n')('$S_str_Number')
 		},
 		{
 			name: 'datetime',
-			displayName: '날짜'
+			displayName: $filter('i18n')('$S_str_DateTime')
 		},
 		{
 			name: 'string',
-			displayName: '문자열'
+			displayName: $filter('i18n')('$S_str_String')
 		}
 	];
 	$scope.selectedCustomColumnType = $scope.dataCustomColumnTypes[0];
@@ -319,13 +327,13 @@ function SelectColumnController($scope, eventSender) {
 	}
 }
 
-function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) {
+function ChartBindingController($scope, $filter, eventSender, serviceGuid, serviceChart) {
 	var number_of_index = 0;
 
 	function getDefaultSeries() {
 		number_of_index++;
 		return {
-			'name': '시리즈' + number_of_index,
+			'name': $filter('i18n')('$S_str_Series') + number_of_index,
 			'guid': serviceGuid.generateType2(),
 			'value': undefined,
 			'color': color_map[number_of_index-1]
@@ -571,7 +579,7 @@ function ChartBindingController($scope, eventSender, serviceGuid, serviceChart) 
 
 }
 
-function WizardController($scope, eventSender, serviceGuid) {
+function WizardController($scope, $filter, eventSender, serviceGuid) {
 	var dataChart;
 	
 	function getDefaultContext(type) {
@@ -735,17 +743,17 @@ function WizardController($scope, eventSender, serviceGuid) {
 		{
 			'name': 'bar',
 			'required': ['number'],
-			'invalid_msg': '하나 이상의 숫자 타입의 컬럼을 선택하십시오.'
+			'invalid_msg': $filter('i18n')('$S_msg_SelectOneMoreNumberType')
 		},
 		{
 			'name': 'line',
 			'required': ['number'],
-			'invalid_msg': '하나 이상의 숫자 타입의 컬럼을 선택하십시오.'
+			'invalid_msg': $filter('i18n')('$S_msg_SelectOneMoreNumberType')
 		},
 		{
 			'name': 'pie',
 			'required': ['number'],
-			'invalid_msg': '하나 이상의 숫자 타입의 컬럼을 선택하십시오.'
+			'invalid_msg': $filter('i18n')('$S_msg_SelectOneMoreNumberType')
 		}
 	];
 	$scope.chartType = $scope.ctypes[0];
