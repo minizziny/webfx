@@ -64,7 +64,7 @@ angular.module('App.Directive.Tree', [])
 		}
 	};
 })
-.directive('tree', function($compile) {
+.directive('tree', function($compile, $filter) {
 	return {
 		restrict: 'E',
 		link: function (scope, element, attrs) {
@@ -215,7 +215,8 @@ angular.module('App.Directive.Tree', [])
 					});
 
 					setTimeout(function() {
-						$('.li-edit input[type=text].input-now-edit').focus().val('새 그룹').select();
+
+						$('.li-edit input[type=text].input-now-edit').focus().val($filter('i18n')('$S_str_NewGroup')).select();
 					}, 100);
 				}
 
