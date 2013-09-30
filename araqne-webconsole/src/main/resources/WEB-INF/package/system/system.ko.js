@@ -162,6 +162,9 @@ angular.module('localization')
 	'$S_msg_LoginErrorLockedAdmin': '로그인에 실패했습니다. 사용자 계정이 잠겨있습니다.',
 	'$S_msg_LoginConfirmMaxSession': '최대 동시 접속자 수를 초과했습니다. 현재 {0}에서 사용자 {1}이 접속중입니다. 강제로 연결을 끊고 접속하시겠습니까?',
 
+	'$S_msg_SessionExpired': '세션이 종료되었습니다. 다시 로그인하십시오.',
+	'$S_msg_NeedLogin': '로그인이 필요합니다.',
+
 	/* Common */
 	'$S_str_First': '처음',
 	'$S_str_Last': '마지막',

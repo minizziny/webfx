@@ -6,6 +6,8 @@ function ConnectionManager() {
 	var connWs;
 	var msgmap = {};
 
+	var $S_msg_SessionExpired, $S_msg_NeedLogin;
+
 	function msgobj(single) {
 		var response = { 
 			body: single[1]
@@ -58,7 +60,7 @@ function ConnectionManager() {
 				connWs.send(JSON.stringify(request));
 			}
 			else if(connWs.readyState == 2 || connWs.readyState == 3) {
-				alert("세션이 종료되었습니다. 다시 로그인하십시오.");
+				alert($S_msg_SessionExpired);
 				parent.location.href = "/";
 			}
 			else if(connWs.readyState == 0) {
@@ -98,7 +100,7 @@ function ConnectionManager() {
 					self.send("org.araqne.dom.msgbus.LoginPlugin.getPrincipal", {}, function(resp, raw1) {
 
 						if(resp.body.admin_login_name == null && resp.body.org_domain == null) {
-							alert("로그인이 필요합니다.")
+							alert($S_msg_NeedLogin);
 							parent.location.href = "/";
 							//$("#login").show();
 						}
@@ -215,7 +217,7 @@ function ConnectionManager() {
 			console.log(e);
 		}
 		connWs.onclose = function(e) {
-			alert("세션이 종료되었습니다. 다시 로그인하십시오.");
+			alert($S_msg_SessionExpired);
 			parent.location.href = "/";
 		}
 
@@ -226,6 +228,13 @@ function ConnectionManager() {
 		setInterval(ping, 10000);
 		
 	}
+
+	var $injector = angular.injector(['ng', 'localization']);
+
+	$injector.invoke(function($filter){
+		$S_msg_NeedLogin = $filter('i18n')('$S_msg_NeedLogin');
+		$S_msg_SessionExpired = $filter('i18n')('$S_msg_SessionExpired');
+	});
 
 
 }
