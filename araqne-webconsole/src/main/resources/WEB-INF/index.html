@@ -376,6 +376,9 @@ Core.Language = {
 	},
 	setDocumentLanguage: function(doc, lang, config) {
 		if(lang == null) lang = 'en';
+
+		var $injector = angular.injector(['ng']);
+
 		function onScriptLoad() {
 			// angular init
 			if(!!config) {
@@ -391,27 +394,33 @@ Core.Language = {
 				});
 			}
 		}
-		
-		var scriptTag = doc.createElement('script');
-		scriptTag.type = 'text/javascript'; 
-		scriptTag.async = true;
 
-		var tagSource = '/package/system/system.' + lang + '.js'
-		var matches = doc.location.pathname.match(/\/[a-z]*/g);
-		if(matches != null) {
-			if(matches.length > 1) {
-				tagSource = matches[0] + matches[1] + matches[1] + '.' + lang + '.js';
-			}
-		}
+		$injector.invoke(function($http){
+			$http({method:'GET', url:'/package/system/system.' + lang + '.js'})
+			.success(function() {
+				var scriptTag = doc.createElement('script');
+				scriptTag.type = 'text/javascript'; 
+				scriptTag.async = true;
 
-		scriptTag.src = tagSource;
-		scriptTag.onreadystatechange = function () {
-			if (this.readyState == 'complete') onScriptLoad();
-		}
-		scriptTag.onload = onScriptLoad;
+				var tagSource = '/package/system/system.' + lang + '.js'
+				var matches = doc.location.pathname.match(/\/[a-z]*/g);
+				if(matches != null) {
+					if(matches.length > 1) {
+						tagSource = matches[0] + matches[1] + matches[1] + '.' + lang + '.js';
+					}
+				}
 
-		var s = doc.getElementsByTagName('body')[0];
-		s.appendChild(scriptTag);	
+				scriptTag.src = tagSource;
+				scriptTag.onreadystatechange = function () {
+					if (this.readyState == 'complete') onScriptLoad();
+				}
+				scriptTag.onload = onScriptLoad;
+
+				var s = doc.getElementsByTagName('body')[0];
+				s.appendChild(scriptTag);	
+			})
+			.error(onScriptLoad)
+		});
 	}
 };
 
