@@ -838,7 +838,7 @@ angular.module('App.Directive', [])
 		},
 		template: '<input type="text" ng-model="fileName" class="file_input_textbox" readonly="readonly">\
 			<div class="file_input_div">\
-				<input type="button" value="{{"$S_str_Browse"}}" class="file_input_button btn" ng-class="{\'hover\': isHover}" />\
+				<input type="button" value="{{\'$S_str_Browser\' | i18n}}" class="file_input_button btn" ng-class="{\'hover\': isHover}" />\
 				<input type="file" class="file_input_hidden" ng-mouseover="isHover = true" ng-mouseout="isHover = false" />\
 			</div>',
 		link: function(scope, el, attrs) {
