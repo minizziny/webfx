@@ -218,8 +218,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				</tr>\
 			</tbody>\
 		</table>\
-		</div>\
-		{{ngQuery}}',
+		</div>',
 		link: function(scope, element, attrs) {
 
 			scope.stopPropation = function(event) {
