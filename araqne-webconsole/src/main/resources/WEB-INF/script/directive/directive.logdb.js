@@ -176,7 +176,8 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			ngCols: '@',
 			ngModel: '=',
 			isCheckType: '@',
-			isSelectable: '@'
+			isSelectable: '@',
+			ngQuery: '='			
 		},
 		template: '<div style="display: inline-block; position: relative">'+
 		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: -5px; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\
@@ -217,9 +218,10 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				</tr>\
 			</tbody>\
 		</table>\
-		</div>',
+		</div>\
+		{{ngQuery}}',
 		link: function(scope, element, attrs) {
-			
+
 			scope.stopPropation = function(event) {
 				event.stopPropagation();
 			}
@@ -266,6 +268,21 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				if(!angular.isArray(val)) { return; } // 데이터가 배열이 아니면 리턴
 				if(scope.isCheckType == undefined) scope.isCheckType = false;
 
+				// 컬럼 순서 추출
+				var fieldsLine = scope.ngQuery.split("|");
+				var fields = [];
+				fieldsLine.forEach(function(obj) {
+					if(obj.match(/fields/)) {
+						//obj.trim();
+						var replace = obj.replace("fields ", "");						
+						var tmp = replace.split(",");
+						tmp.forEach(function(f) {
+							f = f.replace(" ", "");
+							fields.push(f);					
+						});
+					}
+				});
+
 				// 컬럼 추출
 				var cols = [];
 				for (var i = 0; i < val.length; i++) {
@@ -281,24 +298,40 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 						});
 					}
 				}
-				
-				cols.sort(function(a, b) {
-					if(a.indexOf('_') == 0) { return -1; }
-					else { 
-						if(a > b) {
-							return 1;
-						}
-						if(b > a) {
-							return -1;
-						}
-					}
-					return 0;
-				}).forEach(function(k, i) {
-					if(k == '$$hashKey') {
-						cols.splice(cols.indexOf(k), 1);
-					}
-				});
 
+				if(fields.length <= 0 || fields == null) {
+					cols.sort(function(a, b) {
+						if(a.indexOf('_') == 0) { return -1; }
+						else { 
+							if(a > b) {
+								return 1;
+							}
+							if(b > a) {
+								return -1;
+							}
+						}
+						return 0;
+					}).forEach(function(k, i) {
+						if(k == '$$hashKey') {
+							cols.splice(cols.indexOf(k), 1);
+						}
+					});
+				} else {
+					cols.forEach(function(a) {
+						if(a == "$$hashKey") {
+							fields.push("$$hashKey");
+						}
+					});
+
+					// 정렬된 배열로 치환
+					cols = fields;
+					cols.forEach(function(k, i) {
+						if(k == '$$hashKey') {
+							cols.splice(cols.indexOf(k), 1);
+						}
+					});
+				}
+				
 				//console.log(cols.length)
 				if(cols.length > scope.numLimitColumn) {
 					scope.numTotalColumn = cols.length;
@@ -324,6 +357,21 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 						}
 					}
 				}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			});
 
 			element[0].addColumn = function(name, type) {
