@@ -157,10 +157,11 @@
 						<div class="qr-container" style="width: 880px">
 							<query-result class="qr1"
 								ng-model="qresult"
+								ng-query="ctxWidget.data.query" 
 								ng-page="numCurrentPage"
 								ng-page-size="numPagerPagesize"
 								is-check-type="true"></query-result>
-						</div>
+						</div>						
 					</div>
 					<div class="control-group submit-group">
 						<button class="wiz-prev btn" ng-click="go(0)">{{'$S_str_Previous' | i18n}}</button>
@@ -177,6 +178,7 @@
 						<div class="qr-container" style="width: 780px; float: left">
 							<query-result class="qr2 qr-select-table"
 								ng-model="qresult"
+								ng-query="ctxWidget.data.query" 
 								ng-page="numCurrentPage"
 								ng-page-size="numPagerPagesize"
 								is-check-type="true"></query-result>
@@ -251,6 +253,7 @@
 						<div class="qr-container" style="width: 978px; height: 240px; overflow: scroll; margin-top: 5px">
 							<query-result
 								ng-model="qresult"
+								ng-query="ctxWidget.data.query" 
 								ng-page="numCurrentPage"
 								ng-page-size="numPagerPagesize"
 								is-check-type="true"
@@ -274,6 +277,7 @@
 							<query-result
 								ng-template="qrTmpl"
 								ng-model="qresult"
+								ng-query="ctxWidget.data.query" 
 								ng-page="numCurrentPage"
 								ng-page-size="numPagerPagesize"
 								is-check-type="true"
