@@ -145,14 +145,14 @@ angular.module('App.Directive', [])
 
 				var template = angular.element(
 					'<ul class="nav nav-list" ' + visibility + '>' + 
-						'<li ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
+						'<li ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className" node-parent="{{node.' + attrs.nodeParent + '}}">' +
 							'<a href="#" el-type="item">' +
 								'<input type="checkbox" ng-show="node.is_edit_mode">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +  // src="{{node.' + attrs.nodeIcon + '}}">' +
 								'{{node.' + attrs.nodeName + '}}' +
 							'</a>' +
-							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '"></tree-element>' +
+							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '" node-parent="' + attrs.nodeParent + '"></tree-element>' +
 						'</li>' +
 					'</ul>');
 				
@@ -207,14 +207,14 @@ angular.module('App.Directive', [])
 				
 				var template = angular.element(
 					'<ul id="euTreeBrowser" class="nav nav-list tree-top">' +
-						'<li ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
+						'<li ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className" node-parent="{{node.' + attrs.nodeParent + '}}">' +
 							'<a href="#" el-type="item">' +
 								'<tree-toggle></tree-toggle>' +
 								//'<span ng-show="!!node.template" ng-bind-html-unsafe="node.template"></span>' +
 								//'<span ng-hide="!!node.template">{{node.' + attrs.nodeName + '}}</span>' + 
 								'{{node.' + attrs.nodeName + '}}' +
 							'</a>' +
-							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '"></tree-element>' +
+							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '" node-parent="' + attrs.nodeParent + '"></tree-element>' +
 						'</li>' +
 					'</ul>');
 				
@@ -235,8 +235,10 @@ angular.module('App.Directive', [])
 						if($(e.target).attr('el-type') == 'item') {
 							scope.previousElement = scope.currentElement;
 							scope.currentElement = angular.element(e.target).parent();
+
+							//console.log(scope.currentElement);
 							
-							scope.$broadcast('nodeSelected', { selectedNode: scope.currentElement.attr('node-id'), selectedNodeType: scope.currentElement.attr('node-tree-type'), selectedNodeRaw: scope.currentElement, selectedNodeScope: scope });
+							scope.$broadcast('nodeSelected', { selectedNode: scope.currentElement.attr('node-id'), selectedNodeType: scope.currentElement.attr('node-tree-type'), selectedNodeRaw: scope.currentElement, selectedNodeScope: scope, selectedNodeParent: scope.currentElement.attr('node-parent') });
 							
 							if(scope.previousElement) {
 								scope.previousElement.addClass("eu_deselected").removeClass("active");
@@ -612,7 +614,7 @@ angular.module('App.Directive', [])
 		template: '<div class="pagination" ng-hide="ngTotalCount == 0">\
 					<ul>\
 						<li>\
-							<a href="#" ng-click="firstPage()">처음</a>\
+							<a href="#" ng-click="firstPage()">{{"$S_str_First" | i18n}}</a>\
 						</li>\
 					</ul>\
 					<ul>\
@@ -630,17 +632,17 @@ angular.module('App.Directive', [])
 					</ul>\
 					<ul>\
 						<li>\
-							<a href="#" ng-click="lastPage()">마지막(<span>{{totalIndexCount}}</span>)</a>\
+							<a href="#" ng-click="lastPage()">{{"$S_str_Last" | i18n}}(<span>{{totalIndexCount}}</span>)</a>\
 						</li>\
 					</ul>\
 					<button class="btn btn-mini" style="vertical-align: top; margin: 2px 5px 0px 0px" ng-click="openJumpPopup($event)"><i class="icon-share-alt"></i></button>\
 					<div style="position: relative; float: right">\
 						<div class="popover top" style="display:block; left: -235px; top: -130px" ng-show="isShowJumpPopup" ng-click="stopPropagation($event)">\
 							<div class="arrow" style="left:94%"></div>\
-							<h3 class="popover-title">페이지 이동</h3>\
+							<h3 class="popover-title">{{"$S_str_MovePage" | i18n}}</h3>\
 							<div class="popover-content"><form>\
 								<input type="number" min="1" max="{{totalIndexCount}}" ng-model="targetIndex" style="float:left; width:120px">\
-								<button class="btn btn-primary" ng-click="goPage(targetIndex - 1)" style="margin-left: 10px">이동</button>\
+								<button class="btn btn-primary" ng-click="goPage(targetIndex - 1)" style="margin-left: 10px">{{"$S_str_Go" | i18n}}</button>\
 							</form></div>\
 						</div>\
 					</div>\
@@ -836,7 +838,7 @@ angular.module('App.Directive', [])
 		},
 		template: '<input type="text" ng-model="fileName" class="file_input_textbox" readonly="readonly">\
 			<div class="file_input_div">\
-				<input type="button" value="찾아보기" class="file_input_button btn" ng-class="{\'hover\': isHover}" />\
+				<input type="button" value="{{\'$S_str_Browser\' | i18n}}" class="file_input_button btn" ng-class="{\'hover\': isHover}" />\
 				<input type="file" class="file_input_hidden" ng-mouseover="isHover = true" ng-mouseout="isHover = false" />\
 			</div>',
 		link: function(scope, el, attrs) {

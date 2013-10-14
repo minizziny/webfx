@@ -49,6 +49,8 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 									'en': program.name
 								}
 							}
+
+							program.localized_name = program.display_names[Core.Language.Lang];
 						});
 
 						if(!pack.hasOwnProperty('display_names')) {
@@ -59,7 +61,11 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 						}
 
 						pack.findProgramByPath = findProgramByPath;
+
+						pack.localized_name = pack.display_names[Core.Language.Lang];
 					});
+
+					console.log(Core.Language.Lang)
 
 					callback(packs, programs);
 				});
@@ -161,7 +167,7 @@ define(["/lib/jquery.js", "/core/locale.js", "/core/connection.js", "/component/
 							});
 
 							iframe.get(0).contentWindow.__pid = getPid();
-						}, 300)
+						}, 600)
 					});
 				}
 			})

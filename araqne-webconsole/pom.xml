@@ -9,7 +9,7 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>araqne-webconsole</artifactId>
-	<version>2.9.2</version>
+	<version>2.9.3</version>
 	<packaging>bundle</packaging>
 	<name>Araqne Web Console</name>
 	<build>
@@ -88,7 +88,7 @@
 		<dependency>
 			<groupId>org.araqne</groupId>
 			<artifactId>araqne-dom</artifactId>
-			<version>3.0.2</version>
+			<version>3.0.5</version>
 		</dependency>
 		<dependency>
 			<groupId>org.araqne</groupId>

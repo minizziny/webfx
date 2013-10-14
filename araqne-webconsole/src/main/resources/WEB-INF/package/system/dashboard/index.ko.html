@@ -1,28 +1,11 @@
 <!doctype html>
-<html ng-app="dashboard">
+<html>
 <head>
 	<meta charset="utf-8" />
 
-	<!-- build:js ../../../script/app.dist.min.js -->
-	<script src="../../../bower_components/jquery/jquery.js"></script>
-	<script src="../../../bower_components/jquery-ui/ui/jquery-ui.js"></script>
-	<script src="../../../bower_components/angular/angular.js"></script>
-	<script src="../../../bower_components/d3/d3.js"></script>
-	<script src="../../../bootstrap/js/bootstrap.js"></script>
-	<script src="../../../bower_components/moment/moment.js"></script>
-	<script src="../../../bower_components/moment/min/lang/ko.js"></script>
-	<script src="../../../script/app.js"></script>
-	<script src="../../../script/filter/filter.js"></script>
-	<script src="../../../script/service/service.js"></script>
-	<script src="../../../script/service/service.dom.js"></script>
-	<script src="../../../script/service/service.logdb.js"></script>
-	<script src="../../../script/service/service.logdb.management.js"></script>
-	<script src="../../../script/service/service.chart.js"></script>
-	<script src="../../../script/directive/directive.js"></script>
-	<script src="../../../script/directive/directive.logdb.js"></script>
-	<script src="../../../script/directive/directive.orgunit.js"></script>
-	<script src="../../../script/directive/sortable.js"></script>
-	<!-- endbuild -->
+	<script src="../../../script/app.dist.min.js"></script>
+
+	<script src="../system.en.js"></script>
 
 	<script src="widget.js"></script>
 
@@ -40,17 +23,17 @@
 			-->
 			<div class="btn-group">
 				<button class="btn dropdown-toggle" data-toggle="dropdown">
-					새 프리셋
+					{{'$S_str_NewPreset' | i18n}}
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
-					<li><a tabindex="-1" href="#" ng-click="New()">빈 프리셋</a></li>
-					<li><a tabindex="-1" href="#" ng-click="SaveAs()">현재 프리셋을 다른 이름으로 저장</a></li>
+					<li><a tabindex="-1" href="#" ng-click="New()">{{'$S_str_BlankPreset' | i18n}}</a></li>
+					<li><a tabindex="-1" href="#" ng-click="SaveAs()">{{'$S_str_SavePresetAs' | i18n}}</a></li>
 				</ul>
 			</div>
 			<div class="btn-group">
 				<button class="btn dropdown-toggle" data-toggle="dropdown">
-					불러오기
+					{{'$S_str_LoadPreset' | i18n}}
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
@@ -68,36 +51,36 @@
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
-					<li><a tabindex="-1" href="#" ng-click="AlertRemove()">이 프리셋 삭제</a></li>
+					<li><a tabindex="-1" href="#" ng-click="AlertRemove()">{{'$S_str_RemoveThisPreset' | i18n}}</a></li>
 					<li class="divider"></li>
-					<li><a tabindex="-1" href="#" ng-click="AlertClear()">모든 위젯 지우기</a></li>
+					<li><a tabindex="-1" href="#" ng-click="AlertClear()">{{'$S_str_RemoveAllWidgets' | i18n}}</a></li>
 				</ul>
 			</div>
-			<button class="btn btn-primary pull-right" style="margin-right: 5px" ng-click="openNewWidget()">새 위젯 추가</button>
+			<button class="btn btn-primary pull-right" style="margin-right: 5px" ng-click="openNewWidget()">{{'$S_str_AddWidget' | i18n}}</button>
 			<div class="brandpreset">{{currentPreset.name}}</div>
 		</div>
 
 		<div class="modal clearWidgets" modal>
 			<a href="#" class="modal-close close" style="margin-bottom: -30px">&times;</a>
-			<legend>모든 위젯 지우기</legend>
+			<legend>{{'$S_str_RemoveAllWidgets' | i18n}}</legend>
 			<div style="margin-bottom: 20px">
-				이 프리셋의 모든 위젯이 지워집니다. 계속하시겠습니까?
+				{{'$S_msg_RemoveAllWidgets' | i18n}}
 			</div>
 			<div class="control-group submit-group">
-				<button class="btn btn-danger" ng-click="Clear()">삭제</button>
-				<button class="btn" ng-click="CancelClear()">취소</button>
+				<button class="btn btn-danger" ng-click="Clear()">{{'$S_str_Remove' | i18n}}</button>
+				<button class="btn" ng-click="CancelClear()">{{'$S_str_Cancel' | i18n}}</button>
 			</div>
 		</div>
 
 		<div class="modal removePreset" modal>
 			<a href="#" class="modal-close close" style="margin-bottom: -30px">&times;</a>
-			<legend>프리셋 삭제</legend>
+			<legend>{{'$S_str_RemovePreset' | i18n}}</legend>
 			<div style="margin-bottom: 20px">
-				프리셋 <code>{{currentPreset.name}}</code>을 삭제합니다. 계속하시겠습니까?
+				{{'$S_msg_RemovePresetConfirmPre' | i18n}}<code>{{currentPreset.name}}</code>{{'$S_msg_RemovePresetConfirmPost' | i18n}}
 			</div>
 			<div class="control-group submit-group">
-				<button class="btn btn-danger" ng-click="Remove()">삭제</button>
-				<button class="btn" ng-click="CancelRemove()">취소</button>
+				<button class="btn btn-danger" ng-click="Remove()">{{'$S_str_Remove' | i18n}}</button>
+				<button class="btn" ng-click="CancelRemove()">{{'$S_str_Cancel' | i18n}}</button>
 			</div>
 		</div>
 	</div>
@@ -120,30 +103,30 @@
 		<ol class="wizard">
 			<!-- 0 -->
 			<li class="wiz-step active">
-				<legend>위젯 종류 선택</legend>
+				<legend>{{'$S_str_SelectWidgetType' | i18n}}</legend>
 				<fieldset>
-					<div class="fieldset-description">추가할 위젯의 종류를 선택하십시오.</div>
+					<div class="fieldset-description">{{'$S_msg_SelectWidgetType' | i18n}}</div>
 					<ul class="radio">
 						<li>
 							<input type="radio" ng-model="widgetTypeName" value="table" ng-change="selectType(0)" id="radioTable">
-							<label class="radio" for="radioTable">테이블</label>
+							<label class="radio" for="radioTable">{{'$S_str_Table' | i18n}}</label>
 						</li>
 						<li>
 							<input type="radio" ng-model="widgetTypeName" value="graph" ng-change="selectType(1)" id="radioGraph">
-							<label class="radio" for="radioGraph">그래프</label>
+							<label class="radio" for="radioGraph">{{'$S_str_Chart' | i18n}}</label>
 						</li>
 					</ul>
 					<div style="margin-bottom: 20px" ng-bind="selectedParserFactory.description"></div>
 					<div class="control-group submit-group">
-						<button class="wiz-next btn" ng-click="go(1, widgetType.s0nextCallback())">다음</button>
+						<button class="wiz-next btn" ng-click="go(1, widgetType.s0nextCallback())">{{'$S_str_Next' | i18n}}</button>
 					</div>
 				</fieldset>
 			</li>
 			<!-- 1 -->
 			<li class="wiz-step">
-				<legend>데이터 쿼리</legend>
+				<legend>{{'$S_str_QueryData' | i18n}}</legend>
 				<fieldset>
-					<div class="fieldset-description">쿼리한 데이터를 바탕으로 위젯을 생성합니다. 원하는 데이터를 쿼리하십시오.</div>
+					<div class="fieldset-description">{{'$S_msg_QueryData' | i18n}}</div>
 					<div>
 						<query-input
 							ng-model="qresult"
@@ -161,16 +144,16 @@
 						</div>
 					</div>
 					<div class="control-group submit-group">
-						<button class="wiz-prev btn" ng-click="go(0)">이전</button>
-						<button class="wiz-next btn" ng-click="go(widgetType.s1next)">다음</button>
+						<button class="wiz-prev btn" ng-click="go(0)">{{'$S_str_Previous' | i18n}}</button>
+						<button class="wiz-next btn" ng-click="go(widgetType.s1next)">{{'$S_str_Next' | i18n}}</button>
 					</div>
 				</fieldset>
 			</li>
 			<!-- 2 -->
 			<li class="wiz-step">
-				<legend>컬럼 선택 및 배치</legend>
+				<legend>{{'$S_str_SelectAndReorderColumn' | i18n}}</legend>
 				<fieldset>
-					<div class="fieldset-description">위젯에 표시할 필드를 선택하고, 오른쪽 목록에서 드래그 &amp; 드롭하여 컬럼 순서를 조절하십시오.</div>
+					<div class="fieldset-description">{{'$S_msg_SelectAndReorderColumn' | i18n}}</div>
 					<div>
 						<div class="qr-container" style="width: 780px; float: left">
 							<query-result class="qr2 qr-select-table"
@@ -187,63 +170,63 @@
 						</ul>
 					</div>
 					<div class="control-group submit-group clearboth">
-						<button class="wiz-prev btn" ng-click="go(1)">이전</button>
-						<button class="wiz-next btn" ng-click="go(3)">다음</button>
+						<button class="wiz-prev btn" ng-click="go(1)">{{'$S_str_Previous' | i18n}}</button>
+						<button class="wiz-next btn" ng-click="go(3)">{{'$S_str_Next' | i18n}}</button>
 					</div>
 				</fieldset>
 			</li>
 			<!-- 3 -->
 			<li class="wiz-step">
-				<legend>위젯 공통 설정</legend>
+				<legend>{{'$S_str_WidgetCommonSetting' | i18n}}</legend>
 				<fieldset>
-					<div class="fieldset-description">위젯의 이름과 실행 주기를 입력하십시오.</div>
+					<div class="fieldset-description">{{'$S_msg_WidgetCommonSetting' | i18n}}</div>
 					<div class="form-horizontal">
 						<div class="control-group">
-							<label class="control-label" for="widgetName">위젯 이름</label>
+							<label class="control-label" for="widgetName">{{'$S_str_Name' | i18n}}</label>
 							<div class="controls">
 								<input id="widgetName" type="text" ng-model="ctxWidget.name"/>
 							</div>
 						</div>
 						<div class="control-group">
-							<label class="control-label" for="widgetInterval">실행 주기</label>
+							<label class="control-label" for="widgetInterval">{{'$S_str_Interval' | i18n}}</label>
 							<div class="controls">
-								<input id="widgetInterval" type="number" ng-model="ctxWidget.interval" min="5"/> 초
+								<input id="widgetInterval" type="number" ng-model="ctxWidget.interval" min="5"/> <ng-pluralize count="ctxWidget.interval" when="formSecond"></ng-pluralize>
 							</div>
 						</div>
 					</div>
 					<div class="control-group submit-group clearboth">
-						<button class="wiz-prev btn" ng-click="go(widgetType.s3prev)">이전</button>
-						<button class="wiz-next btn" ng-click="submit()">완료</button>
+						<button class="wiz-prev btn" ng-click="go(widgetType.s3prev)">{{'$S_str_Previous' | i18n}}</button>
+						<button class="wiz-next btn" ng-click="submit()">{{'$S_str_Done' | i18n}}</button>
 					</div>
 				</fieldset>
 			</li>
 
 			<!-- 4 -->
 			<li class="wiz-step" ng-controller="SelectColumnController">
-				<legend>차트 설정 및 데이터 선택</legend>
+				<legend>{{'$S_str_BindingDataToChart' | i18n}}</legend>
 				<fieldset>
 					<div class="alert alert-error check-col-info" style="display:none">
 						<button type="button" class="close" data-dismiss="alert">&times;</button>
 						<span></span>
 					</div>
 					<div class="well clearfix">
-						<span class="pull-left" style="margin-top: 12px;margin-right: 10px">차트 종류를 선택하십시오.</span>
+						<span class="pull-left" style="margin-top: 12px;margin-right: 10px">{{'$S_msg_SelectChartType' | i18n}}</span>
 						<div class="btn-group pull-left" data-toggle="buttons-radio">
-							<button class="btn btn-large active" data-toggle="button" ng-click="selectChartType(0)">바</button>
-							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(1)">라인</button>
-							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(2)">파이</button>
+							<button class="btn btn-large active" data-toggle="button" ng-click="selectChartType(0)">{{'$S_str_BarChart' | i18n}}</button>
+							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(1)">{{'$S_str_LineChart' | i18n}}</button>
+							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(2)">{{'$S_str_PieChart' | i18n}}</button>
 						</div>
 					</div>
 					<div class="clearfix" style="margin-top: 20px">
 						<div class="fieldset-description">
-							<span style="margin-left: 10px">컬럼을 선택하십시오.</span>
-							<a href="#" ng-click="showMoreColOption($event)" ng-hide="moreCol">차트에 표시하려는 컬럼이 없습니까?</a>
+							<span style="margin-left: 10px">{{'$S_msg_SelectColumn' | i18n}}</span>
+							<a href="#" ng-click="showMoreColOption($event)" ng-hide="moreCol">{{'$S_msg_NoSelectableColumn' | i18n}}</a>
 							<div class="well" style="margin-top: 5px" ng-show="moreCol" ng-class="{ moreCol: moreCol }">
-								<div style="margin-bottom: 5px;line-height: 2;">컬럼을 직접 입력하여 선택할 수 있습니다.</div>
-								<label>컬럼 이름</label> <input type="text" ng-model="dataCustomColumn">
-								<label>컬럼 타입</label>
+								<div style="margin-bottom: 5px;line-height: 2;">{{'$S_msg_SelectableColumn' | i18n}}</div>
+								<label>{{'$S_str_ColumnName' | i18n}}</label> <input type="text" ng-model="dataCustomColumn">
+								<label>{{'$S_str_ColumnType' | i18n}}</label>
 								<select ng-model="selectedCustomColumnType" ng-options="ct.displayName for ct in dataCustomColumnTypes"></select>
-								<button class="btn" style="margin-bottom:-2px" ng-click="addCustomColumn()">컬럼 추가 및 선택</button>
+								<button class="btn" style="margin-bottom:-2px" ng-click="addCustomColumn()">{{'$S_str_AddAndSelectColumn' | i18n}}</button>
 							</div>
 						</div>
 						<div class="qr-container" style="width: 978px; height: 240px; overflow: scroll; margin-top: 5px">
@@ -257,14 +240,14 @@
 						</div>
 					</div>
 					<div class="control-group submit-group">
-						<button class="wiz-prev btn" ng-click="go(1)">이전</button>
-						<button class="wiz-next btn" ng-click="go(5, widgetType.s4nextCallback(), widgetType.s4nextEvent())">다음</button>
+						<button class="wiz-prev btn" ng-click="go(1)">{{'$S_str_Previous' | i18n}}</button>
+						<button class="wiz-next btn" ng-click="go(5, widgetType.s4nextCallback(), widgetType.s4nextEvent())">{{'$S_str_Next' | i18n}}</button>
 					</div>
 				</fieldset>
 			</li>
 			<!-- 5 -->
 			<li class="wiz-step" ng-controller="ChartBindingController">
-				<legend>차트 설정 및 데이터 선택</legend>
+				<legend>{{'$S_str_BindingDataToChart' | i18n}}</legend>
 				<fieldset>
 					<div class="fieldset-description"></div>
 					<div style="width: 60%; float: left">
@@ -288,17 +271,17 @@
 									</a>
 								</li>
 							</ul>
-							<button class="btn" ng-click="addSeries()"><i class="icon-plus"></i>시리즈 추가</button>
+							<button class="btn" ng-click="addSeries()"><i class="icon-plus"></i>{{'$S_str_AddSeries' | i18n}}</button>
 						</div>
 						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; background-color: #f0f0f0">
 							<div class="control-group">
-								<label class="control-label" for="widgetName">이름</label>
+								<label class="control-label" for="widgetName">{{'$S_str_Name' | i18n}}</label>
 								<div class="controls">
 									<input id="widgetName" type="text" ng-model="dataSeries[selectedSeriesIdx].name"/>
 								</div>
 							</div>
 							<div class="control-group">
-								<label class="control-label" for="widgetInterval">값</label>
+								<label class="control-label" for="widgetInterval">{{'$S_str_Value' | i18n}}</label>
 								<div class="controls">
 									<select ng-model="dataSeries[selectedSeriesIdx].value" ng-options="col.name for col in dataNumberTypeCols"></select>
 								</div>
@@ -306,7 +289,7 @@
 						</div>
 						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; margin-bottom: 36px; background-color: #f0f0f0" ng-show="chartType.name == 'bar' || chartType.name == 'pie'">
 							<div class="control-group">
-								<label class="control-label" for="widgetInterval">라벨</label>
+								<label class="control-label" for="widgetInterval">{{'$S_str_Label' | i18n}}</label>
 								<div class="controls">
 									<select ng-model="dataLabel" ng-options="col.name for col in qrCols"></select>
 								</div>
@@ -314,7 +297,7 @@
 						</div>
 						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; margin-bottom: 36px; background-color: #f0f0f0" ng-show="chartType.name == 'line'">
 							<div class="control-group">
-								<label class="control-label">X축</label>
+								<label class="control-label">{{'$S_str_AxisX' | i18n}}</label>
 								<div class="controls">
 									<select ng-model="dataLabel" ng-options="col.name for col in dataNumberDatetimeTypeCols"></select>
 								</div>
@@ -327,8 +310,8 @@
 						</figure>
 					</div>
 					<div class="control-group submit-group clearboth" style="bottom: 15px; left: 20px; right: 27px; position: absolute">
-						<button class="wiz-prev btn" ng-click="go(4)">이전</button>
-						<button class="wiz-next btn" ng-click="go(3, widgetType.s5nextCallback())">다음</button>
+						<button class="wiz-prev btn" ng-click="go(4)">{{'$S_str_Previous' | i18n}}</button>
+						<button class="wiz-next btn" ng-click="go(3, widgetType.s5nextCallback())">{{'$S_str_Next' | i18n}}</button>
 					</div>
 				</fieldset>
 			</li>

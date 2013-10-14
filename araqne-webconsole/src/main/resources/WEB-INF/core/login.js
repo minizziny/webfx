@@ -1,6 +1,11 @@
 define(['/core/connection.js','/lib/sha1-amd.js'], function(socket, CryptoJS) {
 
+var $injector = angular.injector(['ng', 'localization']);
+var filter;
 
+$injector.invoke(function($filter){
+	filter = $filter;
+});
 
 function doLogin(login_name, password, nonce, loginCallback) {
 	var hashedpwd = CryptoJS.SHA1(password).toString(CryptoJS.enc.Hex);
@@ -21,35 +26,35 @@ function sendLogin(login_name, plain_password, hash, loginCallback, isForce) {
 		if(m.isError) {
 			var ec = raw[0].errorCode;
 			if(ec == 'admin-not-found') {
-				alert('로그인에 실패했습니다. 사용자를 찾을 수 없습니다.');
+				alert(filter('i18n')('$S_msg_LoginErrorAdminNotFound'));
 			}
 			else if(ec == 'invalid-password') {
-				alert('로그인에 실패했습니다. 암호가 틀립니다.');
+				alert(filter('i18n')('$S_msg_LoginErrorInvalidPassword'));
 			}
 			else if(ec == 'invalid-otp-password'){
-				alert('로그인에 실패했습니다. OTP 암호가 틀립니다.');
+				alert(filter('i18n')('$S_msg_LoginErrorInvalidOtpPassword'));
 			}
 			else if(ec == 'expired-password') {
-				alert('로그인에 실패했습니다. 암호가 만료되었습니다.');
+				alert(filter('i18n')('$S_msg_LoginErrorExpiredPassword'));
 			}
 			else if(ec == 'not-trust-host') {
-				alert('로그인에 실패했습니다. 신뢰할 수 없는 호스트입니다.');
+				alert(filter('i18n')('$S_msg_LoginErrorNotTrustHost'));
 			}
 			else if(ec == 'locked-admin') {
-				alert('로그인에 실패했습니다. 사용자 계정이 잠겨있습니다.');
+				alert(filter('i18n')('$S_msg_LoginErrorLockedAdmin'));
 			}
 			else if(ec == 'max_session') {
 				console.log(m)
 
 				var loginName = m.body.login_name;
 				var ip = m.body.ip;
-				var decision = confirm('최대 동시 접속자 수를 초과했습니다. 현재 ' + ip + '에서 사용자 ' + loginName + '이 접속중입니다.\n강제로 연결을 끊고 접속하시겠습니까?');
+				var decision = confirm(filter('i18n')('$S_msg_LoginConfirmMaxSession', ip, loginName));
 				if(decision) {
 					sendLogin(login_name, hash, loginCallback, true);
 				}
 			}
 			else {
-				alert('로그인에 실패했습니다.\n코드: ' + ec);	
+				alert('Login Failed.\nCode: ' + ec);	
 			}
 			return;
 		}

@@ -56,12 +56,12 @@ public class LoginPlugin {
 	@MsgbusMethod
 	public void hello(Request req, Response resp) {
 		String nonce = UUID.randomUUID().toString();
-		String lang = req.getString("lang");
-		if (lang == null)
-			lang = "en";
+		String locale = req.getString("locale");
+		if (locale == null)
+			locale = "en";
 
 		req.getSession().setProperty("nonce", nonce);
-		req.getSession().setProperty("lang", lang);
+		req.getSession().setProperty("locale", locale);
 
 		resp.put("nonce", nonce);
 		resp.put("session_id", req.getSession().getGuid());
@@ -89,7 +89,10 @@ public class LoginPlugin {
 
 		session.unsetProperty("nonce");
 		session.setProperty("admin_login_name", admin.getUser().getLoginName());
-		session.setProperty("locale", admin.getLang());
+		if (admin.getLang() != null) {
+			session.setProperty("locale", admin.getLang());
+			resp.put("locale", admin.getLang());
+		}
 		session.setProperty("auth", "dom");
 	}
 

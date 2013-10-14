@@ -269,6 +269,10 @@ i.icon-logout {
 	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
 }
 
+ng-string.hidden {
+	visibility: hidden;
+}
+
 	</style>
 
 	<script type="text/javascript" src="global.config.js"></script>
@@ -278,7 +282,7 @@ i.icon-logout {
 		<ul data-bind="foreach: items" class="nav">
 			<li data-bind="css: { 'active': $data.isSelected }">
 				<a data-bind="attr: { href: 'home.html?program=' + path }, click: $parent.select.callFn($parent, $data)">
-					<span data-bind="text: display_names.ko"></span>
+					<span data-bind="text: localized_name"></span>
 					<span>
 						<i class="icon-remove" data-bind="click: $parent.remove.callFn($parent, $data), clickBubble: false"></i>
 					</span>
@@ -288,12 +292,12 @@ i.icon-logout {
 	</script>
 
 	<script type="text/html" id="launcher">
-		<legend data-bind="text: pack.display_names.ko"></legend>
+		<legend data-bind="text: pack.localized_name"></legend>
 		<ul data-bind="foreach: items">
 			<li data-bind="click: $parent.run.callFn($parent, $data)">
 				<a data-bind="attr: { href: 'home.html?program=' + path }">
 					<img data-bind="attr: { src: icon() }"></img>
-					<span data-bind="text: display_names.ko"></span>
+					<span data-bind="text: localized_name"></span>
 				</a>
 			</li>
 		</ul>
@@ -323,8 +327,8 @@ i.icon-logout {
 		<a id="start" class="brand"><span>Logpresso</span></a>
 		<div id="task" class="pull-left" data-bind="Kuro.List: self, tmpl: tasks"></div>
 
-		<a id="logout" href="#" class="pull-right" title="로그아웃">
-			<i class="icon-logout"></i><span id="lblLoginName"></span> 로그아웃
+		<a id="logout" href="#" class="pull-right">
+			<i class="icon-logout"></i><span id="lblLoginName"></span> {{'$S_str_Logout' | i18n}}
 		</a>
 	</div>
 </div>
@@ -335,24 +339,113 @@ i.icon-logout {
 		<form class="form-horizontal">
 			<legend style="color: black; letter-spacing: 2px; font-family: 'Gill Sans', 'Lucida Sans Unicode'; font-weight: lighter">WELCOME TO<span style="letter-spacing: 2px; font-family: 'Gill Sans', 'Lucida Sans Unicode'; font-weight: normal"> LOGPRESSO</span></legend>
 			<div class="control-group">
-				<label class="control-label">ID</label>
+				<label class="control-label"><ng-string class="hidden">{{'$S_str_ID' | i18n}}</ng-string></label>
 				<div class="controls">
 					<input type="text" id="txtId">
 				</div>
 			</div>
 			<div class="control-group">
-				<label class="control-label">암호</label>
+				<label class="control-label"><ng-string class="hidden">{{'$S_str_Password' | i18n}}</ng-string></label>
 				<div class="controls">
 					<input id="txtPassword" type="password" />
 				</div>
 			</div>
 			<div class="control-group">
 				<div class="controls">
-					<button id="btnLogin" type="submit" disabled class="btn btn-primary">로그인</button>
+					<button id="btnLogin" type="submit" disabled class="btn btn-primary"><ng-string class="hidden">{{'$S_str_Login' | i18n}}</ng-string></button>
 				</div>
 			</div>
 		</form>
 	</div>
 </div>
+
+
+<script src="/lib/angular.js"></script>
+<script src="package/system/system.en.js"></script>
+<script>
+
+window.Core = {};
+Core.Language = {
+	setLanguage: function(lang) {
+		Core.Language.Lang = lang;
+		Core.Language.onSetLanguage(lang);
+		console.log(lang);
+	},
+	onSetLanguage: function() {
+		Core.Language.setDocumentLanguage(document, Core.Language.Lang, { appName: 'myApp'});
+	},
+	setDocumentLanguage: function(doc, lang, config) {
+		if(lang == null) lang = 'en';
+
+		var $injector = angular.injector(['ng']);
+
+		function onScriptLoad() {
+			// angular init
+			if(!!config) {
+				if(!!config.angular) {
+					config.angular.bootstrap(doc, [config.appName, 'localization']);
+				}
+				else {
+					angular.bootstrap(doc, [config.appName, 'localization']);
+				}
+
+				Array.prototype.slice.call(document.querySelectorAll('ng-string'), 0).forEach(function(el) {
+					el.className = el.className.replace(/\bhidden\b/, '');
+				});
+			}
+		}
+
+		$injector.invoke(function($http){
+			$http({method:'GET', url:'/package/system/system.' + lang + '.js'})
+			.success(function() {
+				var scriptTag = doc.createElement('script');
+				scriptTag.type = 'text/javascript'; 
+				scriptTag.async = true;
+
+				var tagSource = '/package/system/system.' + lang + '.js'
+				var matches = doc.location.pathname.match(/\/[a-z]*/g);
+				if(matches != null) {
+					if(matches.length > 1) {
+						tagSource = matches[0] + matches[1] + matches[1] + '.' + lang + '.js';
+					}
+				}
+
+				scriptTag.src = tagSource;
+				scriptTag.onreadystatechange = function () {
+					if (this.readyState == 'complete') onScriptLoad();
+				}
+				scriptTag.onload = onScriptLoad;
+
+				var s = doc.getElementsByTagName('body')[0];
+				s.appendChild(scriptTag);	
+			})
+			.error(onScriptLoad)
+		});
+	}
+};
+
+angular.element(document).ready(function() {
+	var app = angular.module('myApp', []);
+});
+
+(function() {
+	function getURLParams(name) {
+		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+		if(results == null) {
+			return null;
+		}
+		else {
+			return results[1] || 0;
+		}	
+	}
+	
+	var lang = getURLParams("lang");
+	if(lang == null) lang = navigator.language.substring(0,2);
+	Core.Language.setLanguage(lang);
+})();
+
+</script>
+
+
 </body>
 </html>
