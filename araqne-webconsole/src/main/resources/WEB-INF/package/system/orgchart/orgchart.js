@@ -823,7 +823,7 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 	
 }
 
-function ChangePasswordController($scope, socket, eventSender) {
+function ChangePasswordController($scope, socket, eventSender, $filter) {
 	var currentUser;
 	eventSender.onOpenDialogChangePassword = function(user) {
 		currentUser = angular.copy(user);
@@ -860,7 +860,9 @@ function ChangePasswordController($scope, socket, eventSender) {
 		.success(function(m) {
 			console.log(m.body);
 			notify('success', $filter('i18n')('$S_msg_ChangePasswordSuccess', [currentUser.login_name]) , true);
+			console.log("1");
 			$('[modal].mdlChangePassword')[0].hideDialog();
+			console.log("2");
 		})
 		.failed(openError);
 	}
