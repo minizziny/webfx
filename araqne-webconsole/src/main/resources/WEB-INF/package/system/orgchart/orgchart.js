@@ -823,7 +823,7 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 	
 }
 
-function ChangePasswordController($scope, socket, eventSender) {
+function ChangePasswordController($scope, socket, eventSender, $filter) {
 	var currentUser;
 	eventSender.onOpenDialogChangePassword = function(user) {
 		currentUser = angular.copy(user);
