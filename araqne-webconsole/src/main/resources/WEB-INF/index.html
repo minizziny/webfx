@@ -1,453 +1,61 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html ng-app="app">
 <head>
-	<meta charset="utf-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
 	<title>Logpresso</title>
-	<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-	<link rel="icon" href="/favicon.ico" type="image/x-icon">
-	<style>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="lib/bootstrap2/css/bootstrap.min.css" rel="stylesheet" media="screen">
 
-.ajax-loader {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	margin-left: -20px;
-	margin-top: -20px;
-}
+	<link href="css/app.css" rel="stylesheet" media="screen">
+	<link rel="stylesheet" href="css/toggle-switch.css" />
 
-.v-stretch {
-	height: 100%;
-}
+	<script src="lib/jquery/jquery-2.0.3.js"></script>
+	<script src="lib/jquery/jquery.ui.core.js"></script>
+	<script src="lib/jquery/jquery.ui.widget.js"></script>
+	<script src="lib/jquery/jquery.ui.mouse.js"></script>
+	<script src="lib/jquery/jquery.ui.draggable.js"></script>
+	<script src="lib/jquery/jquery.ui.droppable.js"></script>
+	<script src="lib/angular/angular.js"></script>
+	<script src="lib/angular/angular-translate.js"></script>
+	<script src="lib/angular/angular-translate-loader-static-files.js"></script>
+	<script src="lib/cryptojs/sha1.js"></script>
+	<script src="lib/d3/d3.js"></script>
+	<script src="lib/bootstrap2/js/bootstrap.min.js"></script>
 
-.h-stretch {
-	width: 100%;
-}
+	<script src="script/index.js"></script>
+	<script src="script/service/service.connection.js"></script>
+	<script src="script/service/service.connection.session.js"></script>
+	<script src="script/service/service.program.js"></script>
+	<script src="script/service/service.dom.js"></script>
+	<script src="script/service/service.logdb.js"></script>
+	<script src="script/service/service.logdb.management.js"></script>
+	<script src="script/service/service.utility.js"></script>
+	<script src="script/service/service.chart.js"></script>
+	<script src="script/directive/directive.js"></script>
+	<script src="script/directive/directive.logdb.js"></script>
+	<script src="script/directive/directive.orgunit.js"></script>
+	<script src="script/directive/directive.widget.js"></script>
 
-.main {
-	/* box-sizing: border-box; */
-	position: absolute;
-	top: 0;
-	bottom: 40px;
-}
+	<script src="script/filter/filters.js"></script>
 
-.mainframe iframe, table {
-	border: 0px;
-	padding: 0;
-	margin: 0;
-}
+	<script src="package/system/starter/starter.js"></script>
+	<script src="package/system/orgchart/orgchart.js"></script>
+	<script src="package/system/dashboard/dashboard.js"></script>
 
-legend {
-	color: #ccc;
-}
-
-.opa {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: #fff;
-	opacity: .6;
-}
-
-.mainlauncher {
-	position: absolute;
-	background-color: rgba(10,10,10,.9);
-	left: 0;
-	top: 0;
-	bottom: 0;
-	right: 0;
-	overflow-y: scroll;
-	box-shadow: 1px 0px 30px #000;
-}
-
-
-table, tr, td, tbody {
-	padding: 0;
-	margin: 0;
-}
-
-.box-pack {
-	clear: both;
-}
-
-	.box-pack legend {
-		clear: both;
-		text-transform: uppercase;
-		font-family: 'Gill Sans', 'Lucida Sans Unicode';
-		font-weight: lighter;
-		color: #666;
-		border-bottom: 1px solid #000;
-		/* border-top: 1px solid #333; */
-		width: 100%;
-		margin-bottom: 0;
-		text-indent: 10px;
-	}
-
-	.box-pack ul {
-		margin: 0;
-		padding: 0px 20px;
-		border-top: 1px solid #333;
-		/* border-bottom: 1px solid #000;
-		height: 105px;
-		 */
-	}
-
-	.box-pack li {
-		float: left;
-		list-style: none;
-		width: 100px;
-		height: 105px;
-		position: relative;
-		overflow: hidden;
-		margin: 0 2px;
-	}
-
-	.box-pack a {
-		position: absolute;
-		width: 98px;
-		height: 103px;
-		text-align: center;
-		border: 1px solid transparent;
-		color: white;
-	}
-
-	.box-pack a:hover {
-		
-		background-color: #333;
-		/* border-bottom: 1px solid #666; */
-		text-decoration: none;
-		color: #08c;
-		
-	}
-
-	.box-pack img {
-		width: 48px;
-		height: 48px;
-		margin: 10px auto 5px;
-		display: block;
-	}
-
-	.box-pack span {
-		display: block;
-	}
-
-
-.tbar .brand {
-	font-family: 'Gill Sans', 'Lucida Sans Unicode';
-	font-weight: lighter;
-	text-transform: uppercase;
-	
-	margin-left: 0px;
-	margin-right: 0px;
-	margin-top: 0px;
-	padding: 0px 0px;
-
-	width: 132px;
-	height: 40px;
-
-	display: inline-block;
-    overflow: hidden;
-
-    vertical-align: top;
-
-    -webkit-perspective: 400px;
-       -moz-perspective: 400px;
-
-    -webkit-perspective-origin: 50% 50%;
-       -moz-perspective-origin: 50% 50%;
-}
-
-.brand span {
-    display: block;
-    position: relative;
-    padding: 10px 10px;
-
-    -webkit-transition: all 400ms ease;
-       -moz-transition: all 400ms ease;
-    
-    -webkit-transform-origin: 50% 0%;
-       -moz-transform-origin: 50% 0%;
-    
-    -webkit-transform-style: preserve-3d;
-       -moz-transform-style: preserve-3d;
-}
-
-    .brand:hover span {
-        background: #111;
-
-        -webkit-transform: translate3d( 0px, 0px, -30px ) rotateX( 90deg );
-           -moz-transform: translate3d( 0px, 0px, -30px ) rotateX( 90deg );
-    }
-
-.brand span:after {
-    content: ' Menu';
-
-    display: block;
-    position: absolute;
-    left: 0;
-    top: 0;
-    padding: 10px 19px;
-
-    width: 94px;
-
-    background: #333;
-
-    -webkit-transform-origin: 50% 0%;
-       -moz-transform-origin: 50% 0%;
-
-    -webkit-transform: translate3d( 0px, 105%, 1px ) rotateX( -90deg );
-       -moz-transform: translate3d( 0px, 105%, 1px ) rotateX( -90deg );
-}
-
-
-
-
-i.icon-settings {
-	background-size: 32px 32px;
-	background-position: 16px 0;
-	background-image: url("/images/settings.png");
-	width: 64px;
-	height: 32px;
-}
-
-i.icon-logout {
-	background-size: 32px 32px;
-	background-position: 5px 2px;
-	background-image: url("/images/logout.png");
-	width: 32px;
-	height: 40px;
-	margin-right: 5px;
-
-	vertical-align: -18px;
-}
-
-#logout {
-	height: 40px;
-	padding-right: 10px;
-	text-decoration: none;
-	color: white;
-}
-
-#logout:hover {
-	background-color: #333;
-}
-
-
-#login {
-	position: fixed;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	z-index: 9999;
-}
-
-.bg {
-	background: url('/images/background_logs.jpg') no-repeat;
-	background-size: 100%;
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	left: 0;
-	right: 0;
-}
-
-.cnt {
-	position: absolute;
-	top: 50%;
-	left: 53%;
-	margin-top: -13%;
-	margin-left: -25%;
-	width: 550px;
-
-	background: -webkit-linear-gradient(top, rgba(255,255,255,.85), rgba(255,255,255,1)); 
-	/* background: -webkit-gradient(linear,left top,left bottom,color-stop(0%,#fff),color-stop(100%,#ddd)); */
-	padding: 25px;
-	border-radius: 10px;
-	border: 1px solid #fff;
-	border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-}
-
-ng-string.hidden {
-	visibility: hidden;
-}
-
-	</style>
-
-	<script type="text/javascript" src="global.config.js"></script>
-	<script type="text/javascript" data-main="/script/home" src="/require.js"></script>
-
-	<script type="text/html" id="tasks">
-		<ul data-bind="foreach: items" class="nav">
-			<li data-bind="css: { 'active': $data.isSelected }">
-				<a data-bind="attr: { href: 'home.html?program=' + path }, click: $parent.select.callFn($parent, $data)">
-					<span data-bind="text: localized_name"></span>
-					<span>
-						<i class="icon-remove" data-bind="click: $parent.remove.callFn($parent, $data), clickBubble: false"></i>
-					</span>
-				</a>
-			</li>
-		</ul>
-	</script>
-
-	<script type="text/html" id="launcher">
-		<legend data-bind="text: pack.localized_name"></legend>
-		<ul data-bind="foreach: items">
-			<li data-bind="click: $parent.run.callFn($parent, $data)">
-				<a data-bind="attr: { href: 'home.html?program=' + path }">
-					<img data-bind="attr: { src: icon() }"></img>
-					<span data-bind="text: localized_name"></span>
-				</a>
-			</li>
-		</ul>
-	</script>
-
+	<!-- logpresso -->
+	<script src="package/logpresso/license/license.js"></script>
+	<script src="package/logpresso/regextester/regextester.js"></script>
 </head>
-<body>
+<body ng-controller="Controller">
+	<div id="view-menu" ng-include src="src.menu"></div>
+	<div class="view" id="view-login" ng-include src="src.login"></div>
+	<div class="view" id="view-starter" ng-include src="src.starter"></div>
+	<div class="view" id="view-orgchart" ng-include src="src.orgchart"></div>
+	<div class="view" id="view-dashboard" ng-include src="src.dashboard"></div>
 
-
-<div class="main h-stretch">
-	<div class="mainframe v-stretch">
+	<div id="tooltip" class="tooltip fade top">
+		<div class="tooltip-arrow"></div>
+		<div class="tooltip-inner">...</div>
 	</div>
-</div>
-
-<div class="main h-stretch" id="div-launcher">
-	<div class="opa"></div>
-	<div class="mainlauncher">
-		<div class="pull-left box-pack" id="pack-system" style="width: 100%" data-bind="Kuro.List: self, tmpl: launcher"></div>
-		<div class="pull-left" id="pack-all" style="clear:both; width: 100%"></div>
-		<!--<div style="clear:both; height: 2px; border-top: 1px solid #333"></div> -->
-	</div>
-</div>
-
-<div class="navbar navbar-inverse navbar-fixed-bottom tbar">
-	<div class="navbar-inner">
-		<!-- <button id="start" class="btn btn-inverse pull-left active" href="#" style="margin-left: 30px">Start</button> -->
-		<a id="start" class="brand"><span>Logpresso</span></a>
-		<div id="task" class="pull-left" data-bind="Kuro.List: self, tmpl: tasks"></div>
-
-		<a id="logout" href="#" class="pull-right">
-			<i class="icon-logout"></i><span id="lblLoginName"></span> {{'$S_str_Logout' | i18n}}
-		</a>
-	</div>
-</div>
-
-<div id="login">
-	<div class="bg"></div>
-	<div class="cnt">
-		<form class="form-horizontal">
-			<legend style="color: black; letter-spacing: 2px; font-family: 'Gill Sans', 'Lucida Sans Unicode'; font-weight: lighter">WELCOME TO<span style="letter-spacing: 2px; font-family: 'Gill Sans', 'Lucida Sans Unicode'; font-weight: normal"> LOGPRESSO</span></legend>
-			<div class="control-group">
-				<label class="control-label"><ng-string class="hidden">{{'$S_str_ID' | i18n}}</ng-string></label>
-				<div class="controls">
-					<input type="text" id="txtId">
-				</div>
-			</div>
-			<div class="control-group">
-				<label class="control-label"><ng-string class="hidden">{{'$S_str_Password' | i18n}}</ng-string></label>
-				<div class="controls">
-					<input id="txtPassword" type="password" />
-				</div>
-			</div>
-			<div class="control-group">
-				<div class="controls">
-					<button id="btnLogin" type="submit" disabled class="btn btn-primary"><ng-string class="hidden">{{'$S_str_Login' | i18n}}</ng-string></button>
-				</div>
-			</div>
-		</form>
-	</div>
-</div>
-
-
-<script src="/lib/angular.js"></script>
-<script src="package/system/system.en.js"></script>
-<script>
-
-window.Core = {};
-Core.Language = {
-	setLanguage: function(lang) {
-		Core.Language.Lang = lang;
-		Core.Language.onSetLanguage(lang);
-		console.log(lang);
-	},
-	onSetLanguage: function() {
-		Core.Language.setDocumentLanguage(document, Core.Language.Lang, { appName: 'myApp'});
-	},
-	setDocumentLanguage: function(doc, lang, config) {
-		if(lang == null) lang = 'en';
-
-		var $injector = angular.injector(['ng']);
-
-		function onScriptLoad() {
-			// angular init
-			if(!!config) {
-				if(!!config.angular) {
-					config.angular.bootstrap(doc, [config.appName, 'localization']);
-				}
-				else {
-					angular.bootstrap(doc, [config.appName, 'localization']);
-				}
-
-				Array.prototype.slice.call(document.querySelectorAll('ng-string'), 0).forEach(function(el) {
-					el.className = el.className.replace(/\bhidden\b/, '');
-				});
-			}
-		}
-
-		$injector.invoke(function($http){
-			$http({method:'GET', url:'/package/system/system.' + lang + '.js'})
-			.success(function() {
-				var scriptTag = doc.createElement('script');
-				scriptTag.type = 'text/javascript'; 
-				scriptTag.async = true;
-
-				var tagSource = '/package/system/system.' + lang + '.js'
-				var matches = doc.location.pathname.match(/\/[a-z]*/g);
-				if(matches != null) {
-					if(matches.length > 1) {
-						tagSource = matches[0] + matches[1] + matches[1] + '.' + lang + '.js';
-					}
-				}
-
-				scriptTag.src = tagSource;
-				scriptTag.onreadystatechange = function () {
-					if (this.readyState == 'complete') onScriptLoad();
-				}
-				scriptTag.onload = onScriptLoad;
-
-				var s = doc.getElementsByTagName('body')[0];
-				s.appendChild(scriptTag);	
-			})
-			.error(onScriptLoad)
-		});
-	}
-};
-
-angular.element(document).ready(function() {
-	var app = angular.module('myApp', []);
-});
-
-(function() {
-	function getURLParams(name) {
-		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
-		if(results == null) {
-			return null;
-		}
-		else {
-			return results[1] || 0;
-		}	
-	}
-	
-	var lang = getURLParams("lang");
-	if(lang == null) lang = navigator.language.substring(0,2);
-	Core.Language.setLanguage(lang);
-})();
-
-</script>
-
-
 </body>
 </html>
