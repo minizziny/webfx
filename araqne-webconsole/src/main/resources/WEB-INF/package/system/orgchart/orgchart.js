@@ -1,48 +1,33 @@
-var app = angular.module('orgchart', ['App', 'App.Directive.Tree', 'localization']);
-var proc;
+function OrgChartController($scope, $filter, socket, eventSender, serviceDom) {
+	var proc = {pid: 2}
 
-parent.Core.Language.setDocumentLanguage(document, parent.Core.Language.Lang, { appName: 'orgchart', angular: angular });
 
-app.factory('eventSender', function() {
-	var e = {
-		onTreeSelectOrgUnit: null,
-		onDropUsersToOrgUnit: null,
-		onOpenDialogChangePassword: null
-	}
-	return e;
-});
-
-function getOrgUnit(guid, orgunits) {
-	var found = null;
-	orgunits.forEach(function(obj, i) {
-		if(obj.guid == guid) {
-			found = obj;
-		}
-		else {
-			if(obj.children.length) {
-				found = getOrgUnit(guid, obj.children);
+	eventSender.orgchart.getOrgUnit = function(guid, orgunits) {
+		var found = null;
+		orgunits.forEach(function(obj, i) {
+			if(obj.guid == guid) {
+				found = obj;
 			}
-		}
-	});
+			else {
+				if(obj.children.length) {
+					found = eventSender.orgchart.getOrgUnit(guid, obj.children);
+				}
+			}
+		});
 
-	return found;
-}
-
-function Controller($scope, $filter, serviceTask, socket, eventSender, serviceDom) {
-	serviceTask.init();
-	proc = serviceTask.newProcess('orgchart');
-
+		return found;
+	}
 
 	$scope.formUser = {
-		'0': $filter('i18n')('$S_plr_Users'),
-		'one': $filter('i18n')('$S_plr_User'),
-		'other': $filter('i18n')('$S_plr_Users')
+		'0': $filter('translate')('$S_plr_Users'),
+		'one': $filter('translate')('$S_plr_User'),
+		'other': $filter('translate')('$S_plr_Users')
 	}
 
 	$scope.formItem = {
-		'0': $filter('i18n')('$S_plr_Items'),
-		'one': $filter('i18n')('$S_plr_Item'),
-		'other': $filter('i18n')('$S_plr_Items')
+		'0': $filter('translate')('$S_plr_Items'),
+		'one': $filter('translate')('$S_plr_Item'),
+		'other': $filter('translate')('$S_plr_Items')
 	}
 
 	$scope.testAlert = function() {
@@ -88,6 +73,7 @@ function Controller($scope, $filter, serviceTask, socket, eventSender, serviceDo
 	function checkUserEdit() {
 		serviceDom.hasPermission('dom', 'user_edit')
 		.success(function(m) {
+			console.log(m)
 			console.log(m.body)
 			$scope.canUserEdit = m.body.result;
 			$scope.$apply();
@@ -276,7 +262,7 @@ function UserController($scope, socket, eventSender, serviceDom) {
 
 	$scope.$on('nodeSelected', function(e, obj) {
 		if(obj.delegateElement[0].id == 'treeToChangeOrgUnit') {
-			var found = getOrgUnit(obj.selectedNode, $scope.$parent.treeDataSourceWithRoot);
+			var found = eventSender.orgchart.getOrgUnit(obj.selectedNode, $scope.$parent.treeDataSourceWithRoot);
 			if(found == null) return;
 
 			if($scope.selectedUserCopy != null) {
@@ -637,10 +623,10 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 		$scope.$apply();
 
 		if(names.length == 0) {
-			notify('danger', $filter('i18n')('$S_msg_RemoveUserAuthError', failed_login_names) , false)
+			notify('danger', $filter('translate')('$S_msg_RemoveUserAuthError', failed_login_names) , false)
 		}
 		else {
-			notify('info',  $filter('i18n')('$S_msg_RemoveUserSuccessPartially', [names, failed_login_names]), false);
+			notify('info',  $filter('translate')('$S_msg_RemoveUserSuccessPartially', [names, failed_login_names]), false);
 		}
 	}
 
@@ -654,7 +640,7 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 		});
 		$scope.$apply();
 
-		notify('success', $filter('i18n')('$S_msg_RemoveUserSuccess', [names]) , true);
+		notify('success', $filter('translate')('$S_msg_RemoveUserSuccess', [names]) , true);
 	}
 
 	$scope.currentOrgUnit;
@@ -775,10 +761,10 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 			refresh();
 
 			if(users.length - failed_login_names.length == 0) {
-				notify('danger',  $filter('i18n')('$S_msg_MoveUserError', [failed_login_names.join(), target.name]) , false)
+				notify('danger',  $filter('translate')('$S_msg_MoveUserError', [failed_login_names.join(), target.name]) , false)
 			}
 			else if(failed_login_names.length == 0) {
-				notify('success',  $filter('i18n')('$S_msg_MoveUserSuccess', [users.join(), target.name]) , true);
+				notify('success',  $filter('translate')('$S_msg_MoveUserSuccess', [users.join(), target.name]) , true);
 			}
 			else {
 
@@ -792,7 +778,7 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 					return hasFailedList(obj);
 				});
 
-				notify('info', $filter('i18n')('$S_msg_MoveUserSuccessPartially', [names, target.name, failed_login_names.join()]), false);
+				notify('info', $filter('translate')('$S_msg_MoveUserSuccessPartially', [names, target.name, failed_login_names.join()]), false);
 			}
 			
 		})
@@ -859,16 +845,14 @@ function ChangePasswordController($scope, socket, eventSender, $filter) {
 		socket.send('org.araqne.dom.msgbus.UserPlugin.updateUser', currentUser, proc.pid)
 		.success(function(m) {
 			console.log(m.body);
-			notify('success', $filter('i18n')('$S_msg_ChangePasswordSuccess', [currentUser.login_name]) , true);
-			console.log("1");
+			notify('success', $filter('translate')('$S_msg_ChangePasswordSuccess', [currentUser.login_name]) , true);
 			$('[modal].mdlChangePassword')[0].hideDialog();
-			console.log("2");
 		})
 		.failed(openError);
 	}
 }
 
-function TreeController($scope, $compile, $filter, socket, eventSender) {
+function OrgUnitTreeController($scope, $compile, $filter, socket, eventSender) {
 	$scope.toggleLogTrendType = function(type) {
 		$('.treetype').hide();
 		$('.treetype.' + type).show();
@@ -959,7 +943,7 @@ function TreeController($scope, $compile, $filter, socket, eventSender) {
 
 	function bindTreeEvent() {
 		$scope.$on('nodeSelected', function(e, obj) {
-			var found = getOrgUnit(obj.selectedNode, $scope.$parent.treeDataSourceWithRoot);
+			var found = eventSender.orgchart.getOrgUnit(obj.selectedNode, $scope.$parent.treeDataSourceWithRoot);
 			if(found == null) return;
 
 			if(obj.delegateElement[0].id == 'treeOrgUnit') {
@@ -982,7 +966,7 @@ function TreeController($scope, $compile, $filter, socket, eventSender) {
 
 		var tree = buildTree(m.body.org_units, null);
 		$scope.$parent.treeDataSourceWithRoot = [{
-			'name': $filter('i18n')('$S_str_AllUsers'),
+			'name': $filter('translate')('$S_str_AllUsers'),
 			'guid': null,
 			'children': tree,
 			'is_visible': true
