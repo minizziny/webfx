@@ -1,4 +1,4 @@
-angular.module('App.Service.Dom', [])
+angular.module('app.dom', [])
 .factory('serviceDom', function(socket) {
 	
 	function hasPermission(group, permission) {
@@ -7,7 +7,7 @@ angular.module('App.Service.Dom', [])
 	}
 
 	function whoAmI() {
-		return parent.Core.Dom.login_name;
+		return 'root';
 	}
 
 	return {

@@ -1,5 +1,7 @@
-angular.module('App.Service.Chart', ['App.Service'])
-.factory('serviceChart', function(serviceGuid) {
+angular.module('app.chart', [])
+.factory('serviceChart', function(serviceUtility) {
+	var tooltip = angular.element('#tooltip')
+
 	function multiBarHorizontalChart(selector, data) {
 		$(selector).empty();
 		if(data.length == 0) return;
@@ -502,7 +504,7 @@ angular.module('App.Service.Chart', ['App.Service'])
 		// assign guid
 		if(dataResult != undefined) {
 			for (var i = dataResult.length - 1; i >= 0; i--) {
-				var guid = serviceGuid.generateType3();
+				var guid = serviceUtility.generateType3();
 				for (var j = st.length - 1; j >= 0; j--) {
 					st[j].values[i].guid = guid;
 				};
