@@ -1,5 +1,5 @@
-angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
-.directive('queryInput', function($compile, $parse, $filter, serviceLogdb) {
+angular.module('app.directive.logdb', [])
+.directive('queryInput', function($compile, $parse, $translate, serviceLogdb) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -13,9 +13,9 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			ngChange: '&',
 			ngQueryString: '='
 		},
-		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" placeholder="{{ \'$S_msg_QueryHere\' | i18n }}" autosize></textarea>\
-			<button class="search btn btn-primary">{{ "$S_str_Search" | i18n}}</button>\
-			<button class="stop btn btn-warning">{{ "$S_str_Stop" | i18n}}</button>',
+		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" placeholder="{{ \'$S_msg_QueryHere\' | translate }}" autosize></textarea>\
+			<button class="search btn btn-primary">{{ "$S_str_Search" | translate}}</button>\
+			<button class="stop btn btn-warning">{{ "$S_str_Stop" | translate}}</button>',
 		link: function(scope, element, attrs) {
 			var autoflush = attrs.isAutoFlush;
 
@@ -73,7 +73,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			}
 
 			function failedFn(m) {
-				alert($filter('i18n')('$S_msg_WrongQuery'));
+				alert($translate('$S_msg_WrongQuery'));
 				scope.$apply();
 			}
 
@@ -166,7 +166,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 		}
 	}
 })
-.directive('queryResult', function($compile, serviceGuid) {
+.directive('queryResult', function($compile, serviceUtility) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -182,10 +182,10 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 		template: '<div style="display: inline-block; position: relative">'+
 		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: -5px; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\
 			<span ng-show="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
-				{{"$S_msg_MoreColumn" | i18n:[numLimitColumnInterval]}}\
+				{{"$S_msg_MoreColumn" | translate:[numLimitColumnInterval]}}\
 			</span>\
 			<span ng-hide="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
-				{{"$S_msg_MoreColumn" | i18n:[numTotalColumn - numLimitColumn]}}\
+				{{"$S_msg_MoreColumn" | translate:[numTotalColumn - numLimitColumn]}}\
 			</span>\
 		</button>\
 		<table ng-class="{ selectable: isSelectable, expandable: (numTotalColumn - numLimitColumn > 0) }" class="cmpqr table table-bordered table-striped table-condensed">\
@@ -220,7 +220,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 		</table>\
 		</div>',
 		link: function(scope, element, attrs) {
-
+			
 			scope.stopPropation = function(event) {
 				event.stopPropagation();
 			}
@@ -228,7 +228,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 			// 타입 체크 및 컬럼 정보에 타입 명시
 			function checkArrayMemberType(array) {
 				var types = ['number', 'datetime', 'string'];
-				if(array.some(myApp.isNumber)) return types[0];
+				if(array.some(angular.isNumber)) return types[0];
 				if(array.some(checkDate)) return types[1];
 
 				return types[2];
@@ -297,7 +297,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 						});
 					}
 				}
-
+				
 				if(fields.length <= 0 || fields == null) {
 					cols.sort(function(a, b) {
 						if(a.indexOf('_') == 0) { return -1; }
@@ -338,7 +338,7 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 				
 				scope.ngCols = cols.map(function(k) {
 					return {
-						guid: serviceGuid.generateType2(),
+						guid: serviceUtility.generateType2(),
 						name: k,
 						is_visible: true,
 						is_checked: undefined
@@ -356,26 +356,11 @@ angular.module('App.Directive.Logdb', ['App.Service.Logdb', 'App.Service'])
 						}
 					}
 				}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 			});
 
 			element[0].addColumn = function(name, type) {
 				obj = {
-					guid: serviceGuid.generateType2(),
+					guid: serviceUtility.generateType2(),
 					name: name,
 					is_visible: true,
 					is_checked: true,
