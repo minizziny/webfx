@@ -1,22 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
-	<title>Launcher</title>
-	<link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+<style>
 
-	<script type="text/javascript" data-main="starter" src="/require.js"></script>
-
-	<style>
-
-/*
-[class*="span"] {
-	border: 1px solid #ccc;
-}
-*/
-
-[class*="chart"] {
+#home [class*="chart"] {
 	text-align: center;
 }
 
@@ -24,7 +8,7 @@ body {
 	background-color: #eee;
 }
 
-.area {
+#home .area {
 	/*
 	border: 1px solid #ccc;
 	border-radius: 10px;
@@ -39,68 +23,65 @@ body {
 	background-color: white;
 }
 
-.axis path,
-.axis line {
+#home .axis path,
+#home .axis line {
   fill: none;
   stroke: #000;
   shape-rendering: crispEdges;
 }
 
 
-.line {
+#home .line {
   fill: none;
   stroke: steelblue;
   stroke-width: 1.5px;
 }
 
-text {
+#home text {
 	font-size: 13px;
 }
 
 
-.chart-usage {
+#home .chart-usage {
 	margin-top: 3px;
 	height: 14px;
 	background-color: silver;
 }
 
-.chart-usage.use {
+#home .chart-usage.use {
 	background-color: steelblue;
 }
 
-th {
+#home th {
 	background-color: rgba(232, 241, 247, 1);
 }
 
-.icon-refresh {
+#home .icon-refresh {
 	margin-top: 7px;
 }
 
-	</style>
+</style>
 
-</head>
-<body>
-
-<div class="container">
+<div id="home" class="container" ng-controller="StarterController">
 	<div class="row-fluid">
 		<div class="span12">
-			<div class="muted" style="text-align: right">version: 0.0.9</div>
+			<div class="muted" style="text-align: right">version: 0.1.0</div>
 			<div class="clearfix" style="margin-bottom: 10px">
-				<p class="pull-left">{{'$S_msg_AddLogger' | i18n}}</p>
+				<p class="pull-left">{{'$S_msg_AddLogger' | translate}}</p>
 				<!--<button class="pull-right btn btn-primary">로그 수집 설정 시작</button>-->
 			</div>
 			<div class="area">
 				<legend>
-					{{'$S_str_LogTrend' | i18n}}
+					{{'$S_str_LogTrend' | translate}}
 					<small id="ltLogTrend" class="timeago"></small>
 					<i id="rfLogTrend" class="icon-refresh pull-right"></i>
-					<button class="pull-right btn" style="margin-right: 10px" id="btnManageLogSource">{{'$S_str_ManageLogger' | i18n}}</button>
+					<a class="pull-right btn" style="margin-right: 10px" ui-sref="logsource">{{'$S_str_ManageLogger' | translate}}</a>
 				</legend>
 				<div class="chart1"></div>
 			</div>
 			<div class="area">
 				<legend>
-					{{'$S_str_AlertTrend' | i18n}}
+					{{'$S_str_AlertTrend' | translate}}
 					<small id="ltAlertTrend" class="timeago"></small>
 					<i id="rfAlertTrend" class="icon-refresh pull-right"></i>
 				</legend>
@@ -108,28 +89,28 @@ th {
 			</div>
 			<div class="area">
 				<legend>
-					{{'$S_str_DiskPartition' | i18n}}
+					{{'$S_str_DiskPartition' | translate}}
 					<small id="ltPartition" class="timeago"></small>
 					<i id="rfPartition" class="icon-refresh pull-right"></i>
 				</legend>
 				<table id="tbPartition" class="table table-bordered table-condensed">
 					<thead>
 						<tr>
-							<th>{{'$S_str_Partition' | i18n}}</th>
-							<th colspan="2">{{'$S_str_Usage' | i18n}}</th>
+							<th>{{'$S_str_Partition' | translate}}</th>
+							<th colspan="2">{{'$S_str_Usage' | translate}}</th>
 						</tr>
 					</thead>
-					<tbody data-bind="foreach: usages">
-						<tr>
-							<td data-bind="text: name"></td>
+					<tbody>
+						<tr ng-repeat="partition in partitions">
+							<td>{{partition.name}}</td>
 							<td>
-								<span data-bind="text: usedSi"></span>
+								<span>{{partition.usedSi}}</span>
 								/
-								<span data-bind="text: totalSi"></span>
+								<span>{{partition.totalSi}}</span>
 							</td>
 							<td width="40%">
-								<span class="pull-left chart-usage use" data-bind="style: {width: usedPercent}"></span>
-								<span class="pull-left chart-usage" data-bind="style: {width: freePercent}"></span>
+								<span class="pull-left chart-usage use" ng-style="partition.usedPercent"></span>
+								<span class="pull-left chart-usage" ng-style="partition.freePercent"></span>
 							</td>
 						</tr>
 					</tbody>
@@ -138,19 +119,3 @@ th {
 		</div>
 	</div>
 </div>
-
-
-<script src="/lib/angular.js"></script>
-<script src="/package/system/system.en.js"></script>
-
-<script>
-
-angular.element(document).ready(function() {
-	angular.module('myApp', []);
-	parent.Core.Language.setDocumentLanguage(document, parent.Core.Language.Lang, { appName: 'myApp'});
-});
-
-</script>
-
-</body>
-</html>
