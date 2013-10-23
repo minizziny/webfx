@@ -87,7 +87,7 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession) {
 		angular.element('.view').hide();
 		angular.element('.view#view-' + path).show();
 
-		$scope.src[path] = 'partials/' + path + '.html';
+		$scope.src[path] = 'package/system/' + path + '/index.html';
 	}
 
 	eventSender.root.loggedIn = function() {
