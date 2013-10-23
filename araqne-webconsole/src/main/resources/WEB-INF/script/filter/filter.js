@@ -1,4 +1,4 @@
-angular.module('App.Filter', [])
+angular.module('app.filter', ['pascalprecht.translate'])
 .filter('isSelected', function() {
 	return function(arr, prop) {
 		return arr.filter(function(obj) {
@@ -61,4 +61,15 @@ angular.module('App.Filter', [])
 			return String(text).substring(0, length-end.length) + end;
 		}
 	};
+})
+.filter('translateMsgbus', function($translate) {
+	return function(value) {
+		var locale = $translate.uses();
+		if(value.hasOwnProperty(locale)) {
+			return value[locale];
+		}
+		else {
+			return value.en;
+		}
+	}
 });
