@@ -368,15 +368,16 @@ li.area:last-child {
 
 .alert.alert-fix-side {
 	position: fixed;
-	right: 20px;
-	bottom: -40px;
+	right: 38px;
+	top: 60px;
+	/*bottom: -40px;*/
 	opacity: 0;
 	-webkit-transition: bottom .5s ease, opacity .5s ease;
 }
 
 .alert.alert-fix-side.show {
 	
-	bottom: 0px;
+	top: 60px;
 	opacity: 1;
 }
 
