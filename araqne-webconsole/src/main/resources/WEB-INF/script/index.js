@@ -27,11 +27,13 @@ logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $comp
 
 	$rootScope.$on('$locationChangeSuccess', function() {
 		function route() {
-			var path = location.hash.replace('#/', '');
-			eventSender.root.go(path);
+			var hash = location.hash.split('/');
+			var pack = hash[1];
+			var program = hash[2];
+			eventSender.root.go(pack, program);
 
 			if(!!eventSender.menu.onOpen) {
-				eventSender.menu.onOpen(path);	
+				eventSender.menu.onOpen(program);
 			}
 		}
 
@@ -72,22 +74,22 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession) {
 	console.log('Controller init');
 	$scope.src = {};
 
-	eventSender.root.go = function(path) {
-		if(path == '') {
+	eventSender.root.go = function(pack, program) {
+		if(program == '') {
 			return;
 		}
 
 		for(key in $scope.src) {
-			if(key == 'menu' || key == path) {
+			if(key == 'menu' || key == program) {
 				continue;
 			}
 			//$scope.src[key] = '';
 		}
 
 		angular.element('.view').hide();
-		angular.element('.view#view-' + path).show();
+		angular.element('.view#view-' + program).show();
 
-		$scope.src[path] = 'package/system/' + path + '/index.html';
+		$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';
 	}
 
 	eventSender.root.loggedIn = function() {
@@ -182,7 +184,7 @@ function LoginController($scope, socket, serviceSession, eventSender) {
 		.success(function(m) {
 
 			serviceSession.login($scope.txtLoginName, $scope.txtPassword, m.body.nonce, function(m) {
-				location.href='/#/starter';
+				location.href='/#/system/starter';
 				eventSender.root.loggedIn();
 
 			});

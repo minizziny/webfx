@@ -35,7 +35,7 @@
 					<span>{{pack.display_names | translateMsgbus}}</span>
 					<ul>
 						<li ng-repeat="program in pack.programs" ng-class="{active: program.isActive}">
-							<a href="/#/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
+							<a href="/#/{{pack.dll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
 						</li>
 					</ul>
 				</li>
