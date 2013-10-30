@@ -1,30 +1,46 @@
-<div id="divMenu" ng-controller="MenuController">
-	<label style="position: absolute; z-index: 9999">
-		<input type="checkbox" ng-model="isOpenMenu" style="display:none"/>
-		<button class="btn btn-primary">{{'$S_msg_Start' | translate}}</button>
-	</label>
-	<div ng-show="isOpenMenu" style="position:absolute; top: 30px; left:0; border:1px solid #333; background-color: rgba(222,222,222,.9); z-index:9999; padding: 20px;">
-		<ul>
-			<li ng-repeat="pack in packs">
-				<legend>{{pack.display_names | translateMsgbus}}</legend>
-				<ul>
-					<li ng-repeat="program in pack.programs">
-						<a href="/#/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
-					</li>
-				</ul>
-			</li>
-			<li>
-				<legend>
-					<a ng-click="logout()">{{'$S_str_Logout' | translate}}</a>
-				</legend>
-			</li>
-		</ul>
-	</div>
-	<div>
-		<ul>
-			<li ng-repeat="task in tasks">
-				{{task}}
-			</li>
-		</ul>
+<style>
+
+	.tm {
+		position: fixed;
+		right: 0;
+		left: 0;
+		z-index: 9999;
+	}
+	.tm ul {
+		display: inline;
+	}
+	.tm li {
+		list-style: none;
+		display: inline;
+	}
+
+	.tm .navbar-inner {
+		min-height: 20px;
+	}
+
+	.tm .navbar-inner .brand {
+		padding: 0;
+	}
+
+	.tm li.active a {
+		font-weight: bold;
+	}
+</style>
+<div class="tm navbar navbar-static-top" ng-controller="MenuController">
+	<div class="navbar-inner">
+		<div class="tm">
+			<div class="brand">Logpresso</div>
+			<ul>
+				<li ng-repeat="pack in packs">
+					<span>{{pack.display_names | translateMsgbus}}</span>
+					<ul>
+						<li ng-repeat="program in pack.programs" ng-class="{active: program.isActive}">
+							<a href="/#/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
+			<a class="pull-right" ng-click="logout()">{{'$S_str_Logout' | translate}}</a>
+		</div>
 	</div>
 </div>

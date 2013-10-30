@@ -121,7 +121,6 @@ function checkDate(member, i) {
 function MenuController($scope, socket, serviceSession, serviceProgram, eventSender) {
 	console.log('MenuController');
 	$scope.packs = [];
-	$scope.tasks = [];
 	$scope.isOpenMenu = false;
 
 	$(document).on('click.for-hide-menu', function(e) {
@@ -134,8 +133,18 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 		}
 	});
 
+	function getProgram(path) {
+		$scope.packs.forEach(function(pack) {
+			pack.programs.forEach(function(program) {
+				if(program.path == path) {
+					program.isActive = true;
+				}
+			})
+		})
+	}
+
 	eventSender.menu.onOpen = function(path) {
-		$scope.tasks.push(path);
+		getProgram(path);
 
 		console.log($scope.$parent)
 		$scope.isOpenMenu = false;
