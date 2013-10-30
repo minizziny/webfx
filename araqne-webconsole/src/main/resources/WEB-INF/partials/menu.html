@@ -2,45 +2,50 @@
 
 	.tm {
 		position: fixed;
+		top: 0px;
 		right: 0;
 		left: 0;
+		height: 20px;
 		z-index: 9999;
+		-webkit-transition: height 0.3s;
+		transition: height 0.3s;
 	}
+
+	.tm:hover {
+		height: 20px;
+		/*box-shadow: 0 1px 10px rgba(0,0,0,1)*/
+	}
+
 	.tm ul {
 		display: inline;
+		margin: 0;
 	}
 	.tm li {
 		list-style: none;
 		display: inline;
 	}
 
-	.tm .navbar-inner {
-		min-height: 20px;
-	}
-
-	.tm .navbar-inner .brand {
-		padding: 0;
-	}
-
 	.tm li.active a {
-		font-weight: bold;
+		background-color: #ccc;
+	}
+
+	.tm-inner {
+		height: 20px;
+		background-color: #0b2f47;
 	}
 </style>
-<div class="tm navbar navbar-inverse navbar-static-top" ng-controller="MenuController">
-	<div class="navbar-inner">
-		<div class="tm">
-			<div class="brand">Logpresso</div>
-			<ul>
-				<li ng-repeat="pack in packs">
-					<span>{{pack.display_names | translateMsgbus}}</span>
-					<ul>
-						<li ng-repeat="program in pack.programs" ng-class="{active: program.isActive}">
-							<a href="/#/{{pack.dll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
-						</li>
-					</ul>
-				</li>
-			</ul>
-			<a class="pull-right" ng-click="logout()">{{'$S_str_Logout' | translate}}</a>
-		</div>
+<div class="tm" ng-controller="MenuController">
+	<div class="tm-inner">
+		<ul class="pull-left">
+			<li ng-repeat="pack in packs">
+				<span>{{pack.display_names | translateMsgbus}}</span>
+				<ul>
+					<li ng-repeat="program in pack.programs" ng-class="{active: program.isActive}">
+						<a href="/#/{{pack.dll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
+					</li>
+				</ul>
+			</li>
+		</ul>
+		<a class="pull-right" ng-click="logout()">{{'$S_str_Logout' | translate}}</a>
 	</div>
 </div>

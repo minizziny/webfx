@@ -167,6 +167,9 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 			m.body.packs.forEach(function(pack) {
 				$scope.packs.push(pack);
 			});
+
+			getProgram('starter');
+
 			$scope.$apply();
 		});
 	}

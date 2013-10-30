@@ -125,7 +125,7 @@ function CustomEvent(obj) {
 
 
 angular.module('app.connection', ['app.utility'])
-.factory('socket', function($q, serviceUtility) {
+.factory('socket', function($q, $filter, serviceUtility) {
 	var ws = initialize();
 	var wse = new CustomEvent(ws);
 	var msgmap = {}
@@ -139,7 +139,7 @@ angular.module('app.connection', ['app.utility'])
 			console.log(e);
 		}
 		ws.onclose = function(e) {
-			alert('$S_msg_SessionExpired');
+			alert($filter('translate')('$S_msg_SessionExpired'));
 		}
 
 		function ping() {
@@ -170,7 +170,7 @@ angular.module('app.connection', ['app.utility'])
 			ws.send(JSON.stringify(request));
 		}
 		else if(ws.readyState == 2 || ws.readyState == 3) {
-			alert($S_msg_SessionExpired);
+			alert($filter('translate')('$S_msg_SessionExpired'))
 		}
 		else if(ws.readyState == 0) {
 			console.log('websocket connection delayed', request[0].method);

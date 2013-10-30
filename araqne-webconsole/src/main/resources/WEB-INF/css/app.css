@@ -255,7 +255,7 @@ thead th {
 .modal-backdrop.in, .modal-backdrop.fade.in, .modal-backdrop {
 	opacity: 1.0;
 	filter: alpha(opacity=100);
-	background: rgba(0, 0, 0, 0.8);
+	background: rgba(0, 0, 0, 0.6);
 }
 
 
