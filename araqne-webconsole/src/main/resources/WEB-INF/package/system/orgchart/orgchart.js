@@ -632,10 +632,10 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 		$scope.$apply();
 
 		if(names.length == 0) {
-			notify('danger', $filter('translate')('$S_msg_RemoveUserAuthError', failed_login_names) , false)
+			notify('danger', $filter('translate')('$S_msg_RemoveUserAuthError', {'p0': failed_login_names.join(',')}) , false)
 		}
 		else {
-			notify('info',  $filter('translate')('$S_msg_RemoveUserSuccessPartially', [names, failed_login_names]), false);
+			notify('info',  $filter('translate')('$S_msg_RemoveUserSuccessPartially', {'p0': names.join(','), 'p1': failed_login_names.join(',')}), false);
 		}
 	}
 
@@ -649,7 +649,7 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 		});
 		$scope.$apply();
 
-		notify('success', $filter('translate')('$S_msg_RemoveUserSuccess', [names]) , true);
+		notify('success', $filter('translate')('$S_msg_RemoveUserSuccess', {'p0': names}) , true);
 	}
 
 	$scope.currentOrgUnit;
@@ -770,10 +770,10 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 			refresh();
 
 			if(users.length - failed_login_names.length == 0) {
-				notify('danger',  $filter('translate')('$S_msg_MoveUserError', [failed_login_names.join(), target.name]) , false)
+				notify('danger',  $filter('translate')('$S_msg_MoveUserError', { 'p0': failed_login_names.join(), 'p1': target.name}) , false)
 			}
 			else if(failed_login_names.length == 0) {
-				notify('success',  $filter('translate')('$S_msg_MoveUserSuccess', [users.join(), target.name]) , true);
+				notify('success',  $filter('translate')('$S_msg_MoveUserSuccess', { 'p0': users.join(), 'p1': target.name}) , true);
 			}
 			else {
 
@@ -787,7 +787,7 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 					return hasFailedList(obj);
 				});
 
-				notify('info', $filter('translate')('$S_msg_MoveUserSuccessPartially', [names, target.name, failed_login_names.join()]), false);
+				notify('info', $filter('translate')('$S_msg_MoveUserSuccessPartially', { 'p0': names, 'p1': target.name, 'p2': failed_login_names.join()}), false);
 			}
 			
 		})
@@ -854,7 +854,7 @@ function ChangePasswordController($scope, socket, eventSender, $filter) {
 		socket.send('org.araqne.dom.msgbus.UserPlugin.updateUser', currentUser, proc.pid)
 		.success(function(m) {
 			console.log(m.body);
-			notify('success', $filter('translate')('$S_msg_ChangePasswordSuccess', [currentUser.login_name]) , true);
+			notify('success', $filter('translate')('$S_msg_ChangePasswordSuccess', { 'p0': currentUser.login_name }) , true);
 			$('[modal].mdlChangePassword')[0].hideDialog();
 		})
 		.failed(openError);
