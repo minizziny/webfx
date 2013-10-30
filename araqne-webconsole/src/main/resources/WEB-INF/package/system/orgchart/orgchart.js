@@ -146,6 +146,11 @@ function RemoveUsersController($scope, socket, eventSender) {
 
 function UserController($scope, socket, eventSender, serviceDom) {
 	$scope.selectedUser = null;
+	$scope.paramChangePassword = function() { 
+		return {
+			'p0': ($scope.selectedUser != null) ? $scope.selectedUser.login_name : ''
+		}
+	}
 	$scope.selectedUserCopy = null;
 
 	$scope.isLowerLevel = false;
@@ -529,6 +534,10 @@ function TablePrivilegeController($scope, socket, eventSender, serviceLogdbManag
 
 	$scope.dataTables = [];
 	$scope.dataPrivileges = [];
+
+	$scope.paramAvailableTableCount = function() { return { 'p0': $scope.dataPrivileges.length } }
+	$scope.paramAvailableTableCountMore = function() { return { 'p0': $scope.dataPrivileges.length - 10 } }
+
 	$scope.limitDataPrivilegesDefault = 10;
 	$scope.limitDataPrivileges = $scope.limitDataPrivilegesDefault;
 

@@ -647,7 +647,7 @@ input[type=search].input-search-table:focus {
 							</ul>
 							<ul class="tab area tab-general" ng-show="!isUserEditMode && (amI || canAdminGrant)">
 								<li class="section" style="margin: 10px 40px">
-									{{'$S_msg_AvailableTableCount' | translate:[dataPrivileges.length]}}
+									{{'$S_msg_AvailableTableCount' | translate:paramAvailableTableCount()}}
 								</li>
 								<li class="section area" style="border: 0">
 									<table class="table table-bordered table-striped" style="margin-bottom: 0">
@@ -665,7 +665,7 @@ input[type=search].input-search-table:focus {
 										</tbody>
 									</table>
 									<button class="btn" style="width: 100%" ng-show="(dataPrivileges.length > limitDataPrivilegesDefault) && (limitDataPrivileges != dataPrivileges.length)" ng-click="toggleMorePrivileges()">
-										{{'$S_msg_AvailableTableCountMore' | translate:[dataPrivileges.length - 10]}}
+										{{'$S_msg_AvailableTableCountMore' | translate:paramAvailableTableCountMore()}}
 									</button>
 								</li>
 							</ul>
@@ -686,7 +686,7 @@ input[type=search].input-search-table:focus {
 			<legend>{{'$S_str_ChangePassword' | translate}}</legend>
 			<form name="frmChangePassword">
 				<fieldset class="form-horizontal">
-					<div class="fieldset-description">{{'$S_msg_RemoveThisUser' | translate:[selectedUser.login_name]}}</div>
+					<div class="fieldset-description">{{'$S_msg_ChangePassword' | translate:paramChangePassword()}}</div>
 					<div class="control-group" ng-class="{ 'error': frmChangePassword.password.$error.inadequacy }">
 						<label class="control-label" for="password">{{'$S_str_Password' | translate}}</label>
 						<div class="controls">
