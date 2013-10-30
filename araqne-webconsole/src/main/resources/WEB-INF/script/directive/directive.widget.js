@@ -36,8 +36,8 @@ angular.module('app.directive.widget', [])
 				<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
 					<div class="property-inner" ng-click="stopPropagation($event)">\
 						<code>{{query}}</code><br/>\
-						{{"$S_msg_QueryRunCount" | translate:[count]}}<br/>\
-						{{"$S_msg_QueryRunInterval" | translate:[interval]}}\
+						{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
+						{{"$S_msg_QueryRunInterval" | translate:paramQueryRunInterval()}}\
 					</div>\
 				</div>\
 				<div class="alert alert-error" ng-show="isShowError">{{errorMessage}}</div>\
@@ -88,6 +88,7 @@ angular.module('app.directive.widget', [])
 			var options;
 			scope.dataQueryResult = [];
 			scope.count = 0;
+			scope.paramQueryRunCount = function() { return {'p0': scope.count} };
 			scope.isLoaded = false;
 
 			scope.progress = { 'width': '0%' };
@@ -104,6 +105,7 @@ angular.module('app.directive.widget', [])
 				scope.type = ctx.type;
 				scope.query = ctx.data.query;
 				scope.interval = ctx.interval;
+				scope.paramQueryRunInterval = function() { return {'p0': scope.interval} };
 				
 				options = $.extend({
 					pageLoaded: null,

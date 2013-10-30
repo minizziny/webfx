@@ -117,8 +117,8 @@
 	"$S_msg_SelectOneMoreNumberType": "Select one or more number columns.",
 	
 	"--------widget--------": "",
-	"$S_msg_QueryRunCount": "Updated {0} times",
-	"$S_msg_QueryRunInterval": "Run every {0}secs",
+	"$S_msg_QueryRunCount": "Updated {{p0}} times",
+	"$S_msg_QueryRunInterval": "Run every {{p0}}secs",
 	"$S_msg_UnknownError": "Unknown Error",
 	"$S_msg_OccurError": "Error occurred",
 

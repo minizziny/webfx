@@ -117,8 +117,8 @@
 	"$S_msg_SelectOneMoreNumberType": "하나 이상의 숫자 타입의 컬럼을 선택하십시오.",
 
 	"--------widget--------": "",
-	"$S_msg_QueryRunCount": "쿼리 {0}번 실행함",
-	"$S_msg_QueryRunInterval": "{0}초마다 갱신",
+	"$S_msg_QueryRunCount": "쿼리 {{p0}}번 실행함",
+	"$S_msg_QueryRunInterval": "{{p0}}초마다 갱신",
 	"$S_msg_UnknownError": "알 수 없는 에러",
 	"$S_msg_OccurError": "에러가 발생했습니다",
 
