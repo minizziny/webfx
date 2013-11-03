@@ -136,19 +136,28 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 	});
 
 	function getProgram(path) {
+		var found = null;
 		$scope.packs.forEach(function(pack) {
 			pack.programs.forEach(function(program) {
+				program.isCurrent = false;
 				if(program.path == path) {
-					program.isActive = true;
+					found = program;
 				}
-			})
-		})
+			});
+		});
+		return found;
+	}
+
+	function activeProgram(program) {
+		if(program != null) {
+			program.isActive = true;
+			program.isCurrent = true;
+		}
 	}
 
 	eventSender.menu.onOpen = function(path) {
-		getProgram(path);
-
-		console.log($scope.$parent)
+		activeProgram(getProgram(path));
+		
 		$scope.isOpenMenu = false;
 	}
 
@@ -168,7 +177,7 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 				$scope.packs.push(pack);
 			});
 
-			getProgram('starter');
+			activeProgram(getProgram('starter'));
 
 			$scope.$apply();
 		});

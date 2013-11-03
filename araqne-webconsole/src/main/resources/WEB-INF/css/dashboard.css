@@ -1,6 +1,8 @@
 
-	body {
+	#view-dashboard {
 		background-color: #eee;
+		bottom: 0;
+		position: absolute;
 	}
 
 	.board {
