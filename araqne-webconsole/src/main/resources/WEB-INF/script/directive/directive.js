@@ -146,7 +146,7 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				var template = angular.element(
 					'<ul class="nav nav-list" ' + visibility + '>' + 
 						'<li ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className" node-parent="{{node.' + attrs.nodeParent + '}}">' +
-							'<a href="#" el-type="item">' +
+							'<a  el-type="item">' +
 								'<input type="checkbox" ng-show="node.is_edit_mode">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +  // src="{{node.' + attrs.nodeIcon + '}}">' +
@@ -208,7 +208,7 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				var template = angular.element(
 					'<ul id="euTreeBrowser" class="nav nav-list tree-top">' +
 						'<li ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className" node-parent="{{node.' + attrs.nodeParent + '}}">' +
-							'<a href="#" el-type="item">' +
+							'<a  el-type="item">' +
 								'<tree-toggle></tree-toggle>' +
 								//'<span ng-show="!!node.template" ng-bind-html-unsafe="node.template"></span>' +
 								//'<span ng-hide="!!node.template">{{node.' + attrs.nodeName + '}}</span>' + 
@@ -265,7 +265,7 @@ angular.module('app.directive', ['pascalprecht.translate'])
 	return {
 		restrict: 'E',
 		link: function(scope, element, attrs) {
-			var a = $('<a href="#">');
+			var a = $('<a >');
 			var textarea = angular.element('<textarea>');
 			var placeholder = angular.element('<span style="color: silver; font-style:italic">');
 
@@ -614,25 +614,25 @@ angular.module('app.directive', ['pascalprecht.translate'])
 		template: '<div class="pagination" ng-hide="ngTotalCount == 0">\
 					<ul>\
 						<li>\
-							<a href="#" ng-click="firstPage()">{{"$S_str_First" | translate}}</a>\
+							<a  ng-click="firstPage()">{{"$S_str_First" | translate}}</a>\
 						</li>\
 					</ul>\
 					<ul>\
 						<li>\
-							<a href="#" ng-click="prevPage()">&laquo;</a>\
+							<a  ng-click="prevPage()">&laquo;</a>\
 						</li>\
 						<li ng-class="{\'active\': currentIndex % ngPageSize == i}" ng-repeat="(i,z) in arrPageSize">\
-							<a href="#" ng-click="changePage($index + (currentPage * ngPageSize), $event)">\
+							<a  ng-click="changePage($index + (currentPage * ngPageSize), $event)">\
 								{{ 1 + i + (currentPage * ngPageSize) }}\
 							</a>\
 						</li>\
 						<li>\
-							<a href="#" ng-click="nextPage()">&raquo;</a>\
+							<a  ng-click="nextPage()">&raquo;</a>\
 						</li>\
 					</ul>\
 					<ul>\
 						<li>\
-							<a href="#" ng-click="lastPage()">{{"$S_str_Last" | translate}}(<span>{{totalIndexCount}}</span>)</a>\
+							<a  ng-click="lastPage()">{{"$S_str_Last" | translate}}(<span>{{totalIndexCount}}</span>)</a>\
 						</li>\
 					</ul>\
 					<button class="btn btn-mini" style="vertical-align: top; margin: 2px 5px 0px 0px" ng-click="openJumpPopup($event)"><i class="icon-share-alt"></i></button>\

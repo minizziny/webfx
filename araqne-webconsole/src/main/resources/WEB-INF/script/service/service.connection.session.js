@@ -42,7 +42,11 @@ angular.module('app.connection.session', [])
 
 				var loginName = m.body.login_name;
 				var ip = m.body.ip;
-				var decision = confirm($translate('$S_msg_LoginConfirmMaxSession', ip, loginName));
+				var paramLoginConfirmMaxSession = {
+					'p0': ip,
+					'p1': loginName
+				}
+				var decision = confirm($translate('$S_msg_LoginConfirmMaxSession', paramLoginConfirmMaxSession));
 				if(decision) {
 					sendLogin(login_name, hash, loginCallback, true);
 				}

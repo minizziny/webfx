@@ -182,10 +182,10 @@ angular.module('app.directive.logdb', [])
 		template: '<div style="display: inline-block; position: relative">'+
 		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: -5px; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\
 			<span ng-show="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
-				{{"$S_msg_MoreColumn" | translate:[numLimitColumnInterval]}}\
+				{{"$S_msg_MoreColumn" | translate:paramMoreColumn1()}}\
 			</span>\
 			<span ng-hide="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
-				{{"$S_msg_MoreColumn" | translate:[numTotalColumn - numLimitColumn]}}\
+				{{"$S_msg_MoreColumn" | translate:paramMoreColumn2()}}\
 			</span>\
 		</button>\
 		<table ng-class="{ selectable: isSelectable, expandable: (numTotalColumn - numLimitColumn > 0) }" class="cmpqr table table-bordered table-striped table-condensed">\
@@ -254,6 +254,12 @@ angular.module('app.directive.logdb', [])
 			scope.numLimitColumnInterval = 50;
 			scope.numLimitColumn = 50;
 			scope.numTotalColumn;
+			scope.paramMoreColumn1 = function() {
+				return {'p0': scope.numLimitColumnInterval}
+			}
+			scope.paramMoreColumn2 = function() {
+				return {'p0': scope.numTotalColumn - scope.numLimitColumn}
+			}
 
 			function newSearch() {
 				scope.numLimitColumnInterval = 50;
