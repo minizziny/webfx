@@ -15,6 +15,7 @@
 	<script src="lib/jquery/jquery.ui.mouse.js"></script>
 	<script src="lib/jquery/jquery.ui.draggable.js"></script>
 	<script src="lib/jquery/jquery.ui.droppable.js"></script>
+	<script src="lib/jquery/jquery.ui.datepicker.js"></script>
 	<script src="lib/angular/angular.js"></script>
 	<script src="lib/angular/angular-translate.js"></script>
 	<script src="lib/angular/angular-translate-loader-static-files.js"></script>
@@ -43,10 +44,12 @@
 	<script src="package/system/dashboard/dashboard.js"></script>
 
 	<!-- logpresso -->
-	<!--
 	<script src="package/logpresso/license/license.js"></script>
 	<script src="package/logpresso/regextester/regextester.js"></script>
-	-->
+	<script src="package/logpresso/logquery/logquery.js"></script>
+	<script src="package/logpresso/table/table.js"></script>
+	<script src="package/logpresso/logsource/logsource.js"></script>
+	
 	<style>
 	.view {
 		top: 30px;
@@ -86,6 +89,11 @@
 	<div class="view" id="view-starter" ng-include src="src.starter"></div>
 	<div class="view" id="view-orgchart" ng-include src="src.orgchart"></div>
 	<div class="view" id="view-dashboard" ng-include src="src.dashboard"></div>
+	<div class="view" id="view-license" ng-include src="src.license"></div>
+	<div class="view" id="view-regextester" ng-include src="src.regextester"></div>
+	<div class="view" id="view-logquery" ng-include src="src.logquery"></div>
+	<div class="view" id="view-table" ng-include src="src.table"></div>
+	<div class="view" id="view-logsource" ng-include src="src.logsource"></div>
 
 	<div id="tooltip" class="tooltip fade top">
 		<div class="tooltip-arrow"></div>

@@ -207,3 +207,42 @@ function LoginController($scope, socket, serviceSession, eventSender) {
 		});
 	}
 }
+
+
+function throttle(fn, threshhold, scope) {
+	threshhold || (threshhold = 250);
+	var last, deferTimer;
+	return function () {
+		var context = scope || this;
+
+		var now = +new Date,
+		args = arguments;
+		if (last && now < last + threshhold) {
+			// hold on to it
+			clearTimeout(deferTimer);
+			deferTimer = setTimeout(function () {
+				last = now;
+				fn.apply(context, args);
+			}, threshhold);
+		} else {
+			last = now;
+			fn.apply(context, args);
+		}
+	};
+}
+
+function computerFormatPrefix(val) {
+	var computerFormatPrefixes = [ "", "K", "M", "G", "T", "P", "E", "Z", "Y" ];
+	function log1024(val) { return Math.log(val) / Math.log(1024); }
+
+	var pow = Math.floor( log1024(val) );
+	if(pow == -Infinity) {
+		return { symbol: '', value: 0 };
+	}
+	else {
+		return {
+			symbol: computerFormatPrefixes[pow],
+			value: val/Math.pow(1024, pow)
+		};
+	}
+}
