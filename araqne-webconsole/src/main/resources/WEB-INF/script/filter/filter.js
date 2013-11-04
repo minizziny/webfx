@@ -36,7 +36,7 @@ angular.module('app.filter', ['pascalprecht.translate'])
 		if(val === null) return val;
 		
 		if(toString.call(val) == '[object String]') {
-			return val.replace(/\n/gi, '<br>').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			return val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>');
 		}
 		else return val;
 	}
