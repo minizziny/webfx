@@ -1,4 +1,4 @@
-angular.module('App.Filter', [])
+angular.module('app.filter', ['pascalprecht.translate'])
 .filter('isSelected', function() {
 	return function(arr, prop) {
 		return arr.filter(function(obj) {
@@ -36,7 +36,7 @@ angular.module('App.Filter', [])
 		if(val === null) return val;
 		
 		if(toString.call(val) == '[object String]') {
-			return val.replace(/\n/gi, '<br>').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			return val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>');
 		}
 		else return val;
 	}
@@ -61,4 +61,15 @@ angular.module('App.Filter', [])
 			return String(text).substring(0, length-end.length) + end;
 		}
 	};
+})
+.filter('translateMsgbus', function($translate) {
+	return function(value) {
+		var locale = $translate.uses();
+		if(value.hasOwnProperty(locale)) {
+			return value[locale];
+		}
+		else {
+			return value.en;
+		}
+	}
 });

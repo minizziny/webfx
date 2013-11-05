@@ -1,4 +1,4 @@
-angular.module('App.Service.Logdb.Management', [])
+angular.module('app.logdb.management', [])
 .factory('serviceLogdbManagement', function(socket) {
 	function listTable() {
 		return socket.send('org.araqne.logdb.msgbus.ManagementPlugin.listTables', {}, proc.pid).failed(openError);

@@ -1,9 +1,6 @@
 
 var logdb;
-if(parent._logdb != null) {
-	logdb = parent._logdb;
-}
-else {
+if(logdb == null) {
 	logdb = {
 		disposeAll: function disposeAll() {
 			for (var i = logdb.queries.length - 1; i >= 0; i--) {
@@ -19,12 +16,11 @@ else {
 			};
 		}
 	};
-	parent._logdb = logdb;
 }
 
 
-angular.module('App.Service.Logdb', [])
-.factory('serviceLogdb', function(servicePush, socket) {
+angular.module('app.logdb', [])
+.factory('serviceLogdb', function(socket) {
 
 	function QueryClass(pid, applyFn, options) {
 		var clazz = this;
@@ -159,9 +155,9 @@ angular.module('App.Service.Logdb', [])
 			var name = 'logstorage-query-' + clazz.id;
 			var tname = 'logstorage-query-timeline-' + clazz.id;
 
-			servicePush.register(name, pid, onTrap, function(resp) {
+			socket.register(name, pid, onTrap, function(resp) {
 
-				servicePush.register(tname, pid, onTimeline, function(resp) {
+				socket.register(tname, pid, onTimeline, function(resp) {
 					if(callback != undefined) {
 						callback();	
 					}
@@ -174,9 +170,9 @@ angular.module('App.Service.Logdb', [])
 			var name = 'logstorage-query-' + clazz.id;
 			var tname = 'logstorage-query-timeline-' + clazz.id;
 
-			servicePush.unregister(name, pid, function(resp) {
+			socket.unregister(name, pid, function(resp) {
 
-				servicePush.unregister(tname, pid, function(resp) {
+				socket.unregister(tname, pid, function(resp) {
 					if(callback != undefined) {
 						callback();	
 					}

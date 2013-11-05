@@ -1,33 +1,15 @@
-var app = angular.module('dashboard', ['App', 'Widget', 'localization']);
-var proc;
-console.log('dashboard init');
+var proc = {pid: 3}
 
-parent.Core.Language.setDocumentLanguage(document, parent.Core.Language.Lang, { appName: 'dashboard', angular: angular });
-
-parent.d3 = d3;
-
-var tooltip = $('<div class="tooltip fade top"><div class="tooltip-arrow"></div><div class="tooltip-inner">...</div></div>').appendTo($('body'));
-var color_map = ["#AFD8F8","#F6BD0F","#8BBA00","#FF8E46","#008E8E","#D64646","#8E468E","#588526","#B3AA00","#008ED6","#9D080D","#A186BE","#CC6600","#FDC689","#ABA000","#F26D7D","#FFF200","#0054A6","#F7941C","#CC3300","#006600","#663300","#6DCFF6"];
-
-app.factory('eventSender', function() {
-	var e = {
-	}
-	return e;
-});
-
-function Controller($scope, $filter, serviceSession, serviceTask, eventSender) {
-
-	$scope.logout = serviceSession.logout;
-	proc = serviceTask.newProcess('dashboard');
+function DashboardController($scope, $filter, $translate, eventSender) {
 
 	$scope.openNewWidget = function() {
 		eventSender.onOpenNewWidget();
 	}
 
 	$scope.formSecond = {
-		'0': $filter('i18n')('$S_str_Seconds'),
-		'one': $filter('i18n')('$S_str_Second'),
-		'other': $filter('i18n')('$S_str_Seconds')
+		'0': $translate('$S_str_Seconds'),
+		'one': $translate('$S_str_Second'),
+		'other': $translate('$S_str_Seconds')
 	}
 
 	$scope.numCurrentPage = 0;
@@ -39,7 +21,7 @@ function Controller($scope, $filter, serviceSession, serviceTask, eventSender) {
 
 }
 
-function PresetController($scope, $compile, $filter, socket, eventSender, serviceGuid) {
+function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
 	eventSender.onCurrentPresetChanged = function() {
 		console.log('currentPreset changed')
 
@@ -126,7 +108,7 @@ function PresetController($scope, $compile, $filter, socket, eventSender, servic
 
 	function InitAutosave() {
 		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
-			{ "guid": "autosave", "name": $filter('i18n')('$S_str_Autosave'), "state": { "widgets": [] } }
+			{ "guid": "autosave", "name": $translate('$S_str_Autosave'), "state": { "widgets": [] } }
 		, proc.pid);
 	}
 
@@ -180,20 +162,20 @@ function PresetController($scope, $compile, $filter, socket, eventSender, servic
 	}
 
 	$scope.SaveAs = function() {
-		var newname = prompt($filter('i18n')('$S_msg_SavePresetAs'));
+		var newname = prompt($translate('$S_msg_SavePresetAs'));
 		if(newname == undefined) return;
 
-		var newguid = serviceGuid.generateType2();
+		var newguid = serviceUtility.generateType2();
 		SavePreset(newguid, newname, $scope.currentPreset.state).success(function() {
 			LoadPreset(newguid);
 		})
 	}
 
 	$scope.New = function() {
-		var newname = prompt($filter('i18n')('$S_msg_NewPresetName'));
+		var newname = prompt($translate('$S_msg_NewPresetName'));
 		if(newname == undefined) return;
 
-		var newguid = serviceGuid.generateType2();
+		var newguid = serviceUtility.generateType2();
 		SavePreset(newguid, newname, { "widgets": [] }).success(function() {
 			LoadPreset(newguid);
 		})
@@ -259,20 +241,20 @@ function PresetController($scope, $compile, $filter, socket, eventSender, servic
 	//RemovePresets('autosave')
 }
 
-function SelectColumnController($scope, $filter, eventSender) {
+function SelectColumnController($scope, $filter, $translate, eventSender) {
 	$scope.dataCustomColumn;
 	$scope.dataCustomColumnTypes = [
 		{
 			name: 'number',
-			displayName: $filter('i18n')('$S_str_Number')
+			displayName: $translate('$S_str_Number')
 		},
 		{
 			name: 'datetime',
-			displayName: $filter('i18n')('$S_str_DateTime')
+			displayName: $translate('$S_str_DateTime')
 		},
 		{
 			name: 'string',
-			displayName: $filter('i18n')('$S_str_String')
+			displayName: $translate('$S_str_String')
 		}
 	];
 	$scope.selectedCustomColumnType = $scope.dataCustomColumnTypes[0];
@@ -327,14 +309,14 @@ function SelectColumnController($scope, $filter, eventSender) {
 	}
 }
 
-function ChartBindingController($scope, $filter, eventSender, serviceGuid, serviceChart) {
+function ChartBindingController($scope, $filter, $translate, eventSender, serviceUtility, serviceChart) {
 	var number_of_index = 0;
 
 	function getDefaultSeries() {
 		number_of_index++;
 		return {
-			'name': $filter('i18n')('$S_str_Series') + number_of_index,
-			'guid': serviceGuid.generateType2(),
+			'name': $translate('$S_str_Series') + number_of_index,
+			'guid': serviceUtility.generateType2(),
 			'value': undefined,
 			'color': color_map[number_of_index-1]
 		}
@@ -561,7 +543,7 @@ function ChartBindingController($scope, $filter, eventSender, serviceGuid, servi
 
 	function checkArrayMemberType(array) {
 		var types = ['number', 'datetime', 'string'];
-		if(array.every(myApp.isNumber)) return types[0];
+		if(array.every(angular.isNumber)) return types[0];
 		if(array.every(checkDate)) return types[1];
 
 		return types[2];
@@ -579,14 +561,14 @@ function ChartBindingController($scope, $filter, eventSender, serviceGuid, servi
 
 }
 
-function WizardController($scope, $filter, eventSender, serviceGuid) {
+function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility) {
 	var dataChart;
 	
 	function getDefaultContext(type) {
 		if(type == "grid") {
 			return {
 				'name': '',
-				'guid': serviceGuid.generateType2(),
+				'guid': serviceUtility.generateType2(),
 				'interval': 15,
 				'type': 'grid',
 				'data': {
@@ -598,7 +580,7 @@ function WizardController($scope, $filter, eventSender, serviceGuid) {
 		else if(type == "chart") {
 			return {
 				'name': '',
-				'guid': serviceGuid.generateType2(),
+				'guid': serviceUtility.generateType2(),
 				'interval': 15,
 				'type': 'chart',
 				'data': {
@@ -743,17 +725,17 @@ function WizardController($scope, $filter, eventSender, serviceGuid) {
 		{
 			'name': 'bar',
 			'required': ['number'],
-			'invalid_msg': $filter('i18n')('$S_msg_SelectOneMoreNumberType')
+			'invalid_msg': $translate('$S_msg_SelectOneMoreNumberType')
 		},
 		{
 			'name': 'line',
 			'required': ['number'],
-			'invalid_msg': $filter('i18n')('$S_msg_SelectOneMoreNumberType')
+			'invalid_msg': $translate('$S_msg_SelectOneMoreNumberType')
 		},
 		{
 			'name': 'pie',
 			'required': ['number'],
-			'invalid_msg': $filter('i18n')('$S_msg_SelectOneMoreNumberType')
+			'invalid_msg': $translate('$S_msg_SelectOneMoreNumberType')
 		}
 	];
 	$scope.chartType = $scope.ctypes[0];
