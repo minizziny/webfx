@@ -188,8 +188,8 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 
 function LoginController($scope, socket, serviceSession, eventSender) {
 	console.log('LoginController init');
-	$scope.txtLoginName = 'root'
-	$scope.txtPassword = 'araqne'
+	$scope.txtLoginName = '';
+	$scope.txtPassword = '';
 
 	$scope.login = function() {
 		socket.send('org.araqne.dom.msgbus.LoginPlugin.hello', {}, 0)
