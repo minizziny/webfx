@@ -619,7 +619,10 @@ angular.module('app.directive', ['pascalprecht.translate'])
 					</ul>\
 					<ul>\
 						<li>\
-							<a  ng-click="prevPage()">&laquo;</a>\
+							<a ng-click="prevPage()">&lt;&lt;</a>\
+						</li>\
+						<li>\
+							<a ng-click="prevOnePage()">&lt;</a>\
 						</li>\
 						<li ng-class="{\'active\': currentIndex % ngPageSize == i}" ng-repeat="(i,z) in arrPageSize">\
 							<a  ng-click="changePage($index + (currentPage * ngPageSize), $event)">\
@@ -627,7 +630,10 @@ angular.module('app.directive', ['pascalprecht.translate'])
 							</a>\
 						</li>\
 						<li>\
-							<a  ng-click="nextPage()">&raquo;</a>\
+							<a ng-click="nextOnePage()">&gt;</a>\
+						</li>\
+						<li>\
+							<a ng-click="nextPage()">&gt;&gt;</a>\
 						</li>\
 					</ul>\
 					<ul>\
@@ -686,12 +692,39 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				
 				changePage(scope.currentIndex);
 			}
+
+			scope.nextOnePage = function () {
+				if(scope.currentIndex == getTotalPageCount() - 1) return;	
+
+				if(scope.currentIndex % scope.ngPageSize == 9)
+					scope.currentPage = scope.currentPage + 1;
+
+				render();
+
+				if(scope.currentIndex + scope.ngPageSize > getTotalPageCount() - 1) {
+					scope.currentIndex = getTotalPageCount() - 1;
+				} else {
+					scope.currentIndex = scope.currentIndex + 1;	
+				}
+				changePage(scope.currentIndex);
+			}
 			
 			scope.prevPage = function() {
 				if(scope.currentPage == 0) return;
 				scope.currentPage = scope.currentPage - 1;
 				render();
 				scope.currentIndex = scope.currentIndex - scope.ngPageSize;
+				changePage(scope.currentIndex);
+			}
+
+			scope.prevOnePage = function() {
+				if(scope.currentIndex == 0) return;
+
+				if(scope.currentIndex % scope.ngPageSize == 0)
+					scope.currentPage = scope.currentPage - 1;
+
+				render();
+				scope.currentIndex = scope.currentIndex - 1;
 				changePage(scope.currentIndex);
 			}
 
