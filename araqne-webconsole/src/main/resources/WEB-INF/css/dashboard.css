@@ -1,12 +1,6 @@
 
-	#view-dashboard {
-		background-color: #eee;
-		bottom: 0;
-		position: absolute;
-	}
-
-	.board {
-		/* margin-top: 42px; */
+	.dashboard-container {
+		background-color: #f0f0f0;
 	}
 
 	.brandpreset {

@@ -124,7 +124,7 @@ angular.module('app.directive.widget', [])
 
 					var table = angular.element('<table class="table table-bordered table-condensed">\
 						<thead>\
-							<tr><td ng-repeat="field in order">{{field}}</td></tr>\
+							<tr><th ng-repeat="field in order">{{field}}</th></tr>\
 						</thead>\
 						<tbody>\
 							<tr ng-repeat="row in dataQueryResult">\
@@ -136,8 +136,14 @@ angular.module('app.directive.widget', [])
 					</table>');
 
 					$compile(table)(scope);
-
 					elContent.append(table);
+					setTimeout(function() {
+						$(table).fixheadertable({
+							width: 400,
+							height: 267
+						});	
+					}, 100);
+					
 
 				},
 				'chart': function(ctx) {
