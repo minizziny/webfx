@@ -175,6 +175,12 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 
 			m.body.packs.forEach(function(pack) {
 				$scope.packs.push(pack);
+
+				pack.programs.forEach(function(program) {
+					program.halt = function() {
+						console.log(program);
+					}
+				})
 			});
 
 			activeProgram(getProgram('starter'));

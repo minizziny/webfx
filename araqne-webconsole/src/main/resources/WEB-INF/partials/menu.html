@@ -24,12 +24,36 @@
 	.tm li {
 		list-style: none;
 		display: inline;
-		padding: 2px 15px;
+		padding: 2px 18px;
 		position: relative;
 	}
 
 	.tm li a {
 		color: #999;
+	}
+
+	.tm li a.close {
+		float: none;
+		line-height: 12px;
+		margin: 0 -16px 0 0px;
+		opacity: 0;
+		-webkit-transition: opacity 0.2s, margin 0.2s;
+		transition: opacity 0.2s, margin 0.2s;
+	}
+
+	.tm li a.link {
+		-webkit-transition: margin 0.2s;
+		transition: margin 0.2s;
+	}
+
+	.tm li.active:hover a.close {
+		display: inline;
+		opacity: 1;
+		margin-right: -12px;
+	}
+
+	.tm li.active:hover a.link {
+		margin-left: -4px;
 	}
 
 	.tm li.active a {
@@ -47,7 +71,7 @@
 		border-width: 0 8px 5px 8px;
 		position: absolute;
 		bottom: -6px;
-		margin: 0 calc(-50% + 5px);
+		margin: 0 calc(-50% + 8px);
 		border-color: transparent transparent #08c transparent;
 		border-style: solid;
 	}
@@ -78,7 +102,8 @@
 				<span class="tm-pack-title">{{pack.display_names | translateMsgbus}}</span>
 				<ul>
 					<li class="tm-program" ng-repeat="program in pack.programs" ng-class="{active: program.isActive, current: program.isCurrent}">
-						<a href="/#/{{pack.dll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
+						<a class="link" href="/#/{{pack.dll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
+						<a class="close" ng-show="program.isActive" ng-click="program.halt()">&times;</a>
 					</li>
 				</ul>
 			</li>

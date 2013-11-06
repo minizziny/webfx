@@ -165,6 +165,7 @@
 	"--------logquery--------": "",
 	"$S_str_Item": "",
 	"$S_str_Items": "",
+	"$S_str_Back": "Back",
 	"$S_str_CloseThisQuery": "Close this query",
 	"$S_str_NewQuery": "New Query",
 	"$S_str_QueryTab": "Query Tab",
