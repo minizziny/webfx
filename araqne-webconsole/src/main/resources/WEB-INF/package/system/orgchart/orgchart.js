@@ -54,20 +54,20 @@ function OrgChartController($scope, $filter, socket, eventSender, serviceDom) {
 	}
 
 	$scope.closeExtraPane = function() {
-		$('.extraPane').removeClass('in');
-		$('.leftPane').removeClass('out');
-		$('.rightPane').removeClass('out');
+		$('.orgchart-container .extraPane').removeClass('in');
+		$('.orgchart-container .leftPane').removeClass('out');
+		$('.orgchart-container .rightPane').removeClass('out');
 		$('.btnShowTree').hide();
 	}
 
 	$scope.glimpseLeftPane = function() {
-		if(!$('.leftPane').hasClass('glimpse')) {
-			$('.leftPane').addClass('glimpse');
+		if(!$('.orgchart-container .leftPane').hasClass('glimpse')) {
+			$('.orgchart-container .leftPane').addClass('glimpse');
 		}
 	}
 
 	$scope.outLeftPane = function() {
-		$('.leftPane').removeClass('glimpse');
+		$('.orgchart-container .leftPane').removeClass('glimpse');
 	}
 
 	function checkUserEdit() {
@@ -732,9 +732,9 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 	}
 
 	function openExtraPane() {
-		$('.extraPane').addClass('in');
-		$('.leftPane').addClass('out');
-		$('.rightPane').addClass('out');
+		$('.orgchart-container .extraPane').addClass('in');
+		$('.orgchart-container .leftPane').addClass('out');
+		$('.orgchart-container .rightPane').addClass('out');
 		$('.btnShowTree').fadeIn();
 	}
 
