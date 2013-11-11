@@ -151,6 +151,11 @@ angular.module('app.directive.logdb', [])
 				}
 			}
 
+			element[0].setQueryString = function(string) {
+				$scope.ngQueryString = string;	
+				//textarea.data('$ngModelController').$modelValue = $scope.ngQueryString;
+			}
+
 		}
 	}
 })

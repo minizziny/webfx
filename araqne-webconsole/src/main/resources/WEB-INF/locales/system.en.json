@@ -192,6 +192,16 @@
 	"$S_str_Download": "Download",
 	"$S_str_Close": "Close",
 
+	"$S_str_SaveThisQuery": "Save this query",
+	"$S_str_QueryName": "Save query name",
+
+	"$S_str_SaveThisQueryResult": "Save this query result",
+	"$S_str_QueryName": "Save query result name",
+
+	"$S_str_SavedQuery": "Saved query list",
+
+	"$S_str_SavedQueryResult": "Saved query result list",
+
 	"$S_msg_LoadingQuery": "Query loding...",
 	"$S_msg_Searched": "{{p0}}count searched",
 	"$S_str_Day": "Day",

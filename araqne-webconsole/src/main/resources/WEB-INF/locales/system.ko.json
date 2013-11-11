@@ -192,6 +192,16 @@
 	"$S_str_Download": "다운로드",
 	"$S_str_Close": "닫기",
 
+	"$S_str_SaveThisQuery": "쿼리 저장",
+	"$S_str_QueryName": "저장 할 쿼리 이름",
+
+	"$S_str_SaveThisQueryResult": "쿼리 결과 저장",
+	"$S_str_QueryResultName": "저장 할 쿼리 결과 이름",
+
+	"$S_str_SavedQuery": "저장된 쿼리 목록",
+
+	"$S_str_SavedQueryResult": "저장된 쿼리 결과 목록",
+
 	"$S_msg_LoadingQuery": "쿼리 로딩 중...",
 	"$S_msg_Searched": "{{p0}}건 검색됨",
 	"$S_str_Day": "하루",
