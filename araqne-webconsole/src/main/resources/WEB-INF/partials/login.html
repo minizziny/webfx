@@ -2,13 +2,13 @@
 	<div class="logpresso-brand"></div>
 	<div>
 		<label for="inputId">{{'$S_str_ID' | translate}}</label>
-		<input id="inputId" class="form-control" name="inputId" type="text" ng-model="txtLoginName" required>
+		<input id="inputId" class="form-control" name="inputId" type="text" ng-model="txtLoginName">
 	</div>
 	<div>
 		<label for="inputPassword" translate>$S_str_Password</label>
-		<input id="inputPassword" class="form-control" type="password" ng-model="txtPassword">
+		<input id="inputPassword" class="form-control" name="inputPassword" type="password" ng-model="txtPassword" required>
 	</div>
 
-	<button class="btn btn-primary" ng-click="login()" ng-disabled="frmLogin.inputId.$error.required">{{'$S_str_Login' | translate}}</button>
+	<button class="btn btn-primary" ng-click="login()" ng-disabled="frmLogin.inputPassword.$error.required">{{'$S_str_Login' | translate}}</button>
 	<div class="login-footer">EEDIOM 2013</div>
 </form>

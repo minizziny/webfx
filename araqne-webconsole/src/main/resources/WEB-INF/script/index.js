@@ -213,6 +213,8 @@ function LoginController($scope, socket, serviceSession, eventSender) {
 			console.log(m, raw, 'error')
 		});
 	}
+
+	angular.element('#inputId').focus();
 }
 
 
