@@ -19,9 +19,6 @@ angular.module('app.directive.logdb', [])
 		link: function(scope, element, attrs) {
 			var autoflush = attrs.isAutoFlush;
 
-			$scope = scope;
-			scope = scope.$parent;
-
 			var textarea = element.find('textarea');
 
 			var pid = proc.pid;
@@ -44,32 +41,42 @@ angular.module('app.directive.logdb', [])
 			}
 
 			function startedFn(m) {
-				evalEvent(attrs.onLoading, m);
+				scope.onLoading({
+					'$msg': m
+				});
 			}
 
 			function pageLoadedFn(m) {
-				scope[attrs.ngModel] = m.body.result;
-				scope.$apply();
+				scope.$parent[attrs.ngModel] = m.body.result;
 
 				if(autoflush != 'false') {
 					serviceLogdb.remove(z);	
 					element.removeClass('loading').addClass('loaded');
 				}
 
-				evalEvent(attrs.onPageLoaded, m);
+				scope.onPageLoaded({
+					'$msg': m
+				});
+				scope.$parent.$apply();
 			}
 
 			function loadedFn(m) {
 				element.removeClass('loading').addClass('loaded');
-				evalEvent(attrs.onLoaded, m);
+				scope.onLoaded({
+					'$msg': m
+				});
 			}
 
 			function onTimelineFn(m) {
-				evalEvent(attrs.onTimeline, m);
+				scope.onTimeline({
+					'$msg': m
+				});
 			}
 
 			function onStatusChangeFn(m) {
-				evalEvent(attrs.onStatusChange, m);
+				scope.onStatusChange({
+					'$msg': m
+				});
 			}
 
 			function failedFn(m) {
@@ -79,6 +86,7 @@ angular.module('app.directive.logdb', [])
 
 			var z;
 			function search() {
+
 				var limit = scope.$eval(attrs.ngPageSize);
 				textarea.blur();
 				if(z != undefined) {
@@ -110,13 +118,9 @@ angular.module('app.directive.logdb', [])
 					console.log('stopped')
 				})
 
-				evalEvent(attrs.onLoaded, null);
-			}
-
-			function evalEvent(expr, arg1) {
-				if(!angular.isString(expr)) return;
-				expr = expr.replace('()', '');
-				scope[expr].call(scope, arg1);
+				scope.onLoaded({
+					'$msg': null
+				});
 			}
 
 			element[0].offset = function(offset, limit) {
@@ -125,7 +129,10 @@ angular.module('app.directive.logdb', [])
 			}
 
 			element[0].run = function() {
-				search();
+				var runner = scope.$watch('ngQueryString', function() {
+					search();
+					runner();
+				});
 			}
 
 			element[0].getInstance = function() {
@@ -149,11 +156,6 @@ angular.module('app.directive.logdb', [])
 				if(status == 'Running') {
 					element.removeClass('loaded').addClass('loading');	
 				}
-			}
-
-			element[0].setQueryString = function(string) {
-				$scope.ngQueryString = string;	
-				//textarea.data('$ngModelController').$modelValue = $scope.ngQueryString;
 			}
 
 		}

@@ -115,8 +115,8 @@
 							ng-model="qresult"
 							ng-page-size="numPagerPagesize"
 							ng-query-string="ctxWidget.data.query"
-							on-loading="inputOnloading()"
-							on-loaded="inputOnloaded()"
+							on-loading="inputOnloading($msg)"
+							on-loaded="inputOnloaded($msg)"
 							on-page-loaded="inputOnpageloaded()"></query-input>
 						<div class="qr-container" style="width: 880px">
 							<query-result class="qr1"
