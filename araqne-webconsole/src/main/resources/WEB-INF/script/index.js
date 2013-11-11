@@ -15,10 +15,11 @@ var logpresso = angular.module('app', [
 	'app.logdb.management',
 	'pascalprecht.translate'
 ], function($routeProvider) {
-
 });
 
-logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $compile, eventSender, serviceSession) {
+logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $compile, eventSender, serviceSession, $templateCache) {
+
+	console.log($templateCache)
 
 	$rootScope.$on('$routeChangeStart', function() {
 		console.log('routeChangeStart')

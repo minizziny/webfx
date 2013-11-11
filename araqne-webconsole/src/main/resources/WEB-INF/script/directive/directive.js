@@ -4,7 +4,7 @@ angular.module('app.directive', ['pascalprecht.translate'])
 		restrict: 'A',
 		link: function(scope, $self, attrs) {
 			var shadow, minHeight, noFlickerPad;
-			$self.on('keydown', update).on('keyup', update).on('focus', update).on('click', update);
+			$self.on('keydown', throttle(update, 300)).on('keyup', throttle(update, 300)).on('focus', update).on('click', update);
 
 			function update(e) {
 
