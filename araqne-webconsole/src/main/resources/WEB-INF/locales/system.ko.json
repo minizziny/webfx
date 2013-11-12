@@ -201,6 +201,9 @@
 	"$S_str_SavedQuery": "저장된 쿼리 목록",
 
 	"$S_str_SavedQueryResult": "저장된 쿼리 결과 목록",
+	"$S_str_QueryTitle": "제목",
+	"$S_str_FileSize": "파일크기",
+	
 
 	"$S_msg_LoadingQuery": "쿼리 로딩 중...",
 	"$S_msg_Searched": "{{p0}}건 검색됨",

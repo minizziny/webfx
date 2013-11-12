@@ -201,6 +201,8 @@
 	"$S_str_SavedQuery": "Saved query list",
 
 	"$S_str_SavedQueryResult": "Saved query result list",
+	"$S_str_QueryTitle": "Title",
+	"$S_str_FileSize": "File Size",
 
 	"$S_msg_LoadingQuery": "Query loding...",
 	"$S_msg_Searched": "{{p0}}count searched",
