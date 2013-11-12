@@ -91,8 +91,8 @@ div.t_fixed_header_main_wrapper.ui {
 	border-width 	: 1px 1px 1px 1px;
 	border-style 	: solid;
 	border-color: #ccc;
-	/*font-weight		: normal;
-	font-size		: 1.1em;*/
+	font-weight		: normal;
+	font-size		: 0.85em;
 }
 
 div.t_fixed_header_main_wrapper.ui  div.t_fixed_header_caption {
@@ -113,6 +113,10 @@ div.t_fixed_header div.headtable {
 	border			: 0;	
 	overflow-x		: hidden;
     overflow-y		: auto;
+}
+
+div.t_fixed_header.ui {
+	background-color: rgb(234,234,234);
 }
 
 div.t_fixed_header.ui .body {
@@ -152,6 +156,10 @@ div.t_fixed_header.ui div.ui-resize-ghost {
 	top 			: 0; 
 	width 			: 2px; 
 	border			: none;
+}
+
+div.t_fixed_header.ui .body {
+	background-color: white;
 }
 
 div.t_fixed_header.ui .body tr {

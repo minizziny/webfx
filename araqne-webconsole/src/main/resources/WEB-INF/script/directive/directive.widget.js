@@ -31,7 +31,8 @@ angular.module('app.directive.widget', [])
 				</div>\
 				<span ng-show="isPaused" style="font-size:.8em; color: silver; float: left">일시 정지됨</span>\
 				<span class="clearfix" style="font-size:.8em; color: silver; float: right">{{lastUpdate}}</span>\
-				<div class="content" style="max-width: 1024px" ng-hide="isShowError">\
+				<br>\
+				<div class="content" style="max-width: 400px; min-width: 400px; overflow:hidden" ng-hide="isShowError">\
 				</div>\
 				<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
 					<div class="property-inner" ng-click="stopPropagation($event)">\
@@ -124,11 +125,11 @@ angular.module('app.directive.widget', [])
 
 					var table = angular.element('<table class="table table-bordered table-condensed">\
 						<thead>\
-							<tr><th ng-repeat="field in order">{{field}}</th></tr>\
+							<tr><th ng-repeat="field in order" title="{{field}}">{{field}}</th></tr>\
 						</thead>\
 						<tbody>\
 							<tr ng-repeat="row in dataQueryResult">\
-								<td ng-repeat="field in order">\
+								<td ng-repeat="field in order" title="{{row[field]}}">\
 									{{row[field]}}\
 								</td>\
 							</tr>\
@@ -137,12 +138,16 @@ angular.module('app.directive.widget', [])
 
 					$compile(table)(scope);
 					elContent.append(table);
+					console.log('table init')
+					elContent.css('opacity', '0');
 					setTimeout(function() {
 						$(table).fixheadertable({
+							minWidth: scope.order.length * 210,
 							width: 400,
 							height: 267
-						});	
-					}, 100);
+						});
+						elContent.css('opacity','');
+					}, 300);
 					
 
 				},
