@@ -149,7 +149,7 @@ angular.module('app.directive.widget', [])
 				'chart': function(ctx) {
 
 					run();
-					var svg = angular.element('<svg class="widget">');
+					var svg = angular.element('<div class="widget" style="clear:both; height:300px; width: 400px">');
 
 					var dataLabel = {name: ctx.data.label, type: ctx.data.labelType};
 

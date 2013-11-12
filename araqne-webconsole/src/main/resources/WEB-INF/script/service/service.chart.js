@@ -1,8 +1,102 @@
 angular.module('app.chart', [])
 .factory('serviceChart', function(serviceUtility) {
 	var tooltip = angular.element('#tooltip')
+	Highcharts.setOptions({
+		global: {
+			useUTC: false
+		}
+	});
+
+	function getDataMetadata(data) {
+		var noData = data.length == 0 || data.some(function(s) {
+			return s.values[0] == undefined
+		});
+		if(noData) return null;
+
+		var isDateTime = data[0].labelType == 'datetime';
+		var isString = data[0].labelType == 'string';
+		var isNumber = data[0].labelType == 'number'
+		var type = (function() {
+			if(isDateTime) return 'datetime';
+			if(isString) return 'category';
+			if(isNumber) return 'linear';
+		})();
+		return {
+			isDateTime: isDateTime,
+			isString: isString,
+			isNumber: isNumber,
+			type: type
+		};
+	}
 
 	function multiBarHorizontalChart(selector, data) {
+		var z = true;
+
+		if(z) {
+			var m = getDataMetadata(data);
+			if(m == null) return;
+
+			$(selector).empty();
+
+			var series = [];
+			var categories = [];
+
+			data.forEach(function(s) {
+				var dataMap = s.values.filter(function(o) {
+					return o.value != undefined;
+				})
+				.map(function(o) {
+					if(m.isDateTime) {
+						return [ Date.parse(o.label), o.value ];	
+					}
+					
+					if(m.isString || m.isNumber) {
+						return [ o.label, o.value ];
+					}
+				});
+				
+				var objSeries = {
+					name: s.name,
+					data: dataMap
+				}
+
+				series.push(objSeries);
+			});
+
+			console.log(data, series)
+
+			$(selector).highcharts({
+				chart: {
+					type: 'column',
+					animation: false
+				},
+				colors: color_map,
+				title: {
+					text: null
+				},
+				credits: {
+					enabled: false
+				},
+				xAxis: {
+					type: m.type
+				},
+				yAxis: {
+					title: {
+						text: null
+					}
+				},
+				series: series,
+				plotOptions: {
+					column: {
+						animation: false
+					}
+				}
+			});
+
+		}
+		if(z) return;
+
+
 		$(selector).empty();
 		if(data.length == 0) return;
 
@@ -175,6 +269,74 @@ angular.module('app.chart', [])
 	}
 
 	function lineChart(selector, data, options) {
+		var z = true;
+
+		if(z) {
+			var m = getDataMetadata(data);
+			if(m == null) return;
+
+			$(selector).empty();
+
+			var series = [];
+			var categories = [];
+
+			data.forEach(function(s) {
+				var dataMap = s.values.filter(function(o) {
+					return o.value != undefined;
+				})
+				.map(function(o) {
+					if(m.isDateTime) {
+						return [ Date.parse(o.label), o.value ];	
+					}
+					
+					if(m.isString || m.isNumber) {
+						return [ o.label, o.value ];
+					}
+				});
+				
+				var objSeries = {
+					name: s.name,
+					data: dataMap
+				}
+
+				series.push(objSeries);
+			});
+
+			console.log(data, series)
+
+			$(selector).highcharts({
+				chart: {
+					type: 'line',
+					animation: false
+				},
+				colors: color_map,
+				title: {
+					text: null
+				},
+				credits: {
+					enabled: false
+				},
+				xAxis: {
+					type: m.type
+				},
+				yAxis: {
+					title: {
+						text: null
+					}
+				},
+				series: series,
+				plotOptions: {
+					line: {
+						animation: false
+					}
+				}
+			});
+
+		}
+
+		if(z) return;
+
+
 		$(selector).empty();
 		if(data[0].values.length == 0) return;
 
@@ -400,6 +562,73 @@ angular.module('app.chart', [])
 	}
 
 	function pie(selector, data) {
+		var z = true;
+
+		if(z) {
+			var m = getDataMetadata(data);
+			if(m == null) return;
+
+			$(selector).empty();
+
+			var series = [];
+			var categories = [];
+
+			data.forEach(function(s) {
+				var dataMap = s.values.filter(function(o) {
+					return o.value != undefined;
+				})
+				.map(function(o) {
+					if(m.isDateTime) {
+						return [ Date.parse(o.label), o.value ];	
+					}
+					
+					if(m.isString || m.isNumber) {
+						return [ o.label, o.value ];
+					}
+				});
+				
+				var objSeries = {
+					name: s.name,
+					data: dataMap
+				}
+
+				series.push(objSeries);
+			});
+
+			console.log(data, series)
+
+			$(selector).highcharts({
+				chart: {
+					type: 'pie',
+					animation: false
+				},
+				colors: color_map,
+				title: {
+					text: null
+				},
+				credits: {
+					enabled: false
+				},
+				xAxis: {
+					type: m.type
+				},
+				yAxis: {
+					title: {
+						text: null
+					}
+				},
+				series: series,
+				plotOptions: {
+					pie: {
+						animation: false
+					}
+				}
+			});
+
+		}
+
+		if(z) return;
+
 		$(selector).empty();
 		if(data.length == 0) return;
 		data = data[0];
