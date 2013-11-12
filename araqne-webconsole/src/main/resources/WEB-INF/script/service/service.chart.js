@@ -565,7 +565,7 @@ angular.module('app.chart', [])
 
 	function pie(selector, data) {
 
-		if(z) {
+		if(false) {
 			var m = getDataMetadata(data);
 			if(m == null) return;
 
@@ -628,7 +628,7 @@ angular.module('app.chart', [])
 
 		}
 
-		if(z) return;
+		if(false) return;
 
 		$(selector).empty();
 		if(data.length == 0) return;

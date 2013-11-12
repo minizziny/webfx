@@ -140,6 +140,7 @@ angular.module('app.connection', ['app.utility'])
 		}
 		ws.onclose = function(e) {
 			alert($filter('translate')('$S_msg_SessionExpired'));
+			location.reload();
 		}
 
 		function ping() {

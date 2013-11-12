@@ -20,6 +20,7 @@
 		display: inline;
 		margin: 0;
 		padding: 5px 10px;
+		width: 1030px;
 	}
 	.tm li {
 		list-style: none;
@@ -92,7 +93,11 @@
 	}
 
 	.tm-logout {
-		margin: 5px 30px 0px 10px;
+		position: fixed;
+		top: 0;
+		right: 0;
+		padding: 5px 30px 0px 30px;
+		background-color: #f1f1f1;
 	}
 </style>
 <div class="tm" ng-controller="MenuController">
@@ -108,6 +113,6 @@
 				</ul>
 			</li>
 		</ul>
-		<a class="tm-logout pull-right" ng-click="logout()">{{'$S_str_Logout' | translate}}</a>
+		<a class="tm-logout" ng-click="logout()">{{'$S_str_Logout' | translate}}</a>
 	</div>
 </div>
