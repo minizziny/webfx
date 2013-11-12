@@ -392,13 +392,13 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 		//console.log($scope.chartType)
 
 		if($scope.chartType.name == 'bar') {
-			serviceChart.multiBarHorizontalChart('.charthere svg', st);	
+			serviceChart.multiBarHorizontalChart('.charthere div', st);	
 		}
 		else if($scope.chartType.name == 'line') {
-			serviceChart.lineChart('.charthere svg', st);
+			serviceChart.lineChart('.charthere div', st);
 		}
 		else if($scope.chartType.name == 'pie') {
-			serviceChart.pie('.charthere svg', st);
+			serviceChart.pie('.charthere div', st);
 		}
 		
 	}

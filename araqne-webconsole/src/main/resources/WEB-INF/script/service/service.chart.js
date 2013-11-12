@@ -1,6 +1,9 @@
 angular.module('app.chart', [])
 .factory('serviceChart', function(serviceUtility) {
 	var tooltip = angular.element('#tooltip')
+
+	var z = true;
+
 	Highcharts.setOptions({
 		global: {
 			useUTC: false
@@ -30,7 +33,7 @@ angular.module('app.chart', [])
 	}
 
 	function multiBarHorizontalChart(selector, data) {
-		var z = true;
+		
 
 		if(z) {
 			var m = getDataMetadata(data);
@@ -269,7 +272,6 @@ angular.module('app.chart', [])
 	}
 
 	function lineChart(selector, data, options) {
-		var z = true;
 
 		if(z) {
 			var m = getDataMetadata(data);
@@ -562,7 +564,6 @@ angular.module('app.chart', [])
 	}
 
 	function pie(selector, data) {
-		var z = true;
 
 		if(z) {
 			var m = getDataMetadata(data);
