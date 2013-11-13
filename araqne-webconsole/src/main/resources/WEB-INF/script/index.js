@@ -176,6 +176,7 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 
 			m.body.packs.forEach(function(pack) {
 				$scope.packs.push(pack);
+				pack.isOpen = false;
 
 				pack.programs.forEach(function(program) {
 					program.halt = function() {
@@ -188,6 +189,29 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 
 			$scope.$apply();
 		});
+	}
+
+	$scope.toggleDropdown = function(pack) {
+		// pack.isOpen = true;
+		// return;
+		$scope.packs.forEach(function(p) {
+			if(pack == p) {
+				pack.isOpen = !pack.isOpen;
+			}
+			else {
+				p.isOpen = false;	
+			}
+		});
+
+		$(document).on('click.for-hide-top-menu', function(e) {
+			// if($(e.target) == 1) {
+			// 	return;
+			// }
+			pack.isOpen = false;
+
+			$(document).off('click.for-hide-top-menu')
+		});
+		
 	}
 
 	initialize();
