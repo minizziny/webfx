@@ -300,12 +300,14 @@ function SelectColumnController($scope, $filter, $translate, eventSender) {
 		return satisfy_requirement && satisfy_one;
 	}
 
-	eventSender.onSelectColumnFinished = function() {
+	eventSender.onSelectColumnFinished = function(fn) {
 		// 바인딩 화면에 컬럼 정보를 넘겨줍니다.
-		return {
-			'cols': $('.qr2.qr-selectable')[0].getColumns(),
-			'result': $scope.qresult
-		}
+		$('.qr2.qr-selectable')[0].getColumns(function(cols) {
+			fn.call($scope, {
+				'cols': cols,
+				'result': $scope.qresult
+			});
+		});
 	}
 }
 
@@ -405,36 +407,44 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 
 	$scope.qrCols;
 	eventSender.onChartBindingStarting = function() {
+		console.log('onChartBindingStarting')
 		// 이전 단계에서 선택된 항목의 정보를 전달해준다
-		var sender = eventSender.onSelectColumnFinished();
-		$scope.qresult = null;
-		$scope.qresult = sender.result;
+		eventSender.onSelectColumnFinished(function(sender) {
 
-		var qrOrder = sender.cols;
-		$scope.qrCols = $(".qr2.qr-selected")[0].getColumns();
+			$scope.qresult = null;
+			$scope.qresult = sender.result;
 
-		console.log(qrOrder.length, $scope.qrCols.length)
+			var qrOrder = sender.cols;
+			$(".qr2.qr-selected")[0].getColumns(function(cols) {
+				$scope.qrCols = cols;
 
-		// qrOrder가 더 많을 경우 $scope.qrCols 에 추가한다 (사용자 정의 컬럼)
-		if(qrOrder.length > $scope.qrCols.length) {
-			var qrOrderTargetName = $scope.qrCols.map(function(o) { return o.name; });
+				console.log('zzz', qrOrder, $scope.qrCols, sender)
 
-			var newOrders = qrOrder.filter(function(o) {
-				return !(qrOrderTargetName.indexOf(o.name) > -1);
+				// qrOrder가 더 많을 경우 $scope.qrCols 에 추가한다 (사용자 정의 컬럼)
+				if(qrOrder.length > $scope.qrCols.length) {
+					var qrOrderTargetName = $scope.qrCols.map(function(o) { return o.name; });
+
+					var newOrders = qrOrder.filter(function(o) {
+						return !(qrOrderTargetName.indexOf(o.name) > -1);
+					});
+
+					for (var i = 0; i < newOrders.length; i++) {
+						$scope.qrCols.push(newOrders[i]);
+					};
+				}
+
+				// $scope.qrCols 똑같이 체크 표시
+				for (var i = qrOrder.length - 1; i >= 0; i--) {
+					if(qrOrder[i].is_checked) {
+						$scope.qrCols[i].is_checked = true;
+					}
+				};
+				init();
+
 			});
 
-			for (var i = 0; i < newOrders.length; i++) {
-				$scope.qrCols.push(newOrders[i]);
-			};
-		}
-
-		// $scope.qrCols 똑같이 체크 표시
-		for (var i = qrOrder.length - 1; i >= 0; i--) {
-			if(qrOrder[i].is_checked) {
-				$scope.qrCols[i].is_checked = true;
-			}
-		};
-		init();
+		});
+		
 	}
 
 	function init() {
@@ -617,8 +627,11 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	}
 
 	$scope.inputOnpageloaded = function(m) {
-		$scope.qrCols = $('.qr2.qr-select-table')[0].getColumns();
-		$('.qr1')[0].showTable();
+		$('.qr2.qr-select-table')[0].getColumns(function(cols) {
+			$scope.qrCols = cols;
+			$('.qr1')[0].showTable();
+		});
+		
 	}
 
 	$scope.inputOnloaded = function() {

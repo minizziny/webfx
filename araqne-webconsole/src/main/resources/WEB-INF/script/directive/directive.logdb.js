@@ -357,6 +357,7 @@ angular.module('app.directive.logdb', [])
 						is_checked: undefined
 					}
 				});
+				console.log('ngCols assigned')
 
 				if(scope.isCheckType.toString() == 'true') {
 					for (var i = 0; i < scope.ngCols.length; i++) {
@@ -389,8 +390,11 @@ angular.module('app.directive.logdb', [])
 				});
 			}
 
-			element[0].getColumns = function() {
-				return scope.ngCols;
+			element[0].getColumns = function(fn) {
+				var async = scope.$watch('ngCols', function() {
+					fn.call(scope, scope.ngCols);
+					async();
+				});
 			}
 
 			// 로딩 인디케이터
