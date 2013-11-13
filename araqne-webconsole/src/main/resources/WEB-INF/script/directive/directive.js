@@ -120,8 +120,7 @@ angular.module('app.directive', ['pascalprecht.translate'])
 		}
 	}
 })
-.directive('treeElement', function($compile)
-{
+.directive('treeElement', function($compile) {
 	return {
 		restrict: 'E', //Element
 		link: function (scope, element, attrs)
@@ -185,8 +184,7 @@ angular.module('app.directive', ['pascalprecht.translate'])
 		}
 	}
 })
-.directive('euTree', function($compile)
-{
+.directive('euTree', function($compile) {
 	return {
 		restrict: 'E', //Element
 		link: function (scope, element, attrs) {
@@ -208,7 +206,7 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				var template = angular.element(
 					'<ul id="euTreeBrowser" class="nav nav-list tree-top">' +
 						'<li ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className" node-parent="{{node.' + attrs.nodeParent + '}}">' +
-							'<a  el-type="item">' +
+							'<a el-type="item">' +
 								'<tree-toggle></tree-toggle>' +
 								//'<span ng-show="!!node.template" ng-bind-html-unsafe="node.template"></span>' +
 								//'<span ng-hide="!!node.template">{{node.' + attrs.nodeName + '}}</span>' + 
@@ -224,10 +222,10 @@ angular.module('app.directive', ['pascalprecht.translate'])
 
 				setTimeout(function() {
 					scope.currentElement = template.find('li.active');
-				}, 250)
+				}, 250);
 				
-				// Click Event
-				angular.element(document.getElementById('euTreeBrowser')).unbind().bind('click', function(e) {
+				// Click Event				
+				template.unbind().bind('click', function(e) {
 					e.preventDefault();
 					e.stopPropagation();
 
