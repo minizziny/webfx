@@ -305,12 +305,18 @@ angular.module('app.chart', [])
 			});
 
 			console.log(data, series)
+			var chartOption = {
+				type: 'line',
+				animation: false
+			}
+
+			if(!!options) {
+				chartOption.width = options.width;
+				chartOption.height = options.height;
+			}
 
 			$(selector).highcharts({
-				chart: {
-					type: 'line',
-					animation: false
-				},
+				chart: chartOption,
 				colors: color_map,
 				title: {
 					text: null
