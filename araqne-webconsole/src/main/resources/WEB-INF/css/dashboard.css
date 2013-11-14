@@ -380,7 +380,7 @@
 		white-space: normal;
 		max-width: 380px;
 		overflow-x: auto;
-		display: inline-block;
+		/*display: inline-block;*/
 	}
 
 	div.property {
