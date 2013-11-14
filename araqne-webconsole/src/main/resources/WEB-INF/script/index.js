@@ -73,6 +73,10 @@ logpresso.factory('eventSender', function() {
 
 function Controller($scope, $rootScope, socket, eventSender, serviceSession) {
 	console.log('Controller init');
+
+	$scope.isShowStarter = false;
+	$scope.isShowDashboard = false;
+
 	$scope.src = {};
 
 	eventSender.root.go = function(pack, program) {
@@ -91,6 +95,18 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession) {
 		angular.element('.view#view-' + program).show();
 
 		$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';
+
+		if($('#view-starter').css('display') == "block") {
+			$scope.isShowStarter = true;
+		} else {
+			$scope.isShowStarter = false;
+		}
+
+		if($('#view-dashboard').css('display') == "block") {
+			$scope.isShowDashboard = true;
+		} else {
+			$scope.isShowDashboard = false;
+		}
 	}
 
 	eventSender.root.loggedIn = function() {
