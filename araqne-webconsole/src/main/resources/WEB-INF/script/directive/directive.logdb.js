@@ -13,7 +13,7 @@ angular.module('app.directive.logdb', [])
 			ngChange: '&',
 			ngQueryString: '='
 		},
-		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" placeholder="{{ \'$S_msg_QueryHere\' | translate }}" autosize></textarea>\
+		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" placeholder="{{ \'$S_msg_QueryHere\' | translate }}" spellcheck="false" autosize></textarea>\
 			<button class="search btn btn-primary">{{ "$S_str_Search" | translate}}</button>\
 			<button class="stop btn btn-warning">{{ "$S_str_Stop" | translate}}</button>',
 		link: function(scope, element, attrs) {
