@@ -13,7 +13,8 @@ var logpresso = angular.module('app', [
 	'app.program',
 	'app.logdb',
 	'app.logdb.management',
-	'pascalprecht.translate'
+	'pascalprecht.translate',
+	'ui.sortable'
 ], function($routeProvider) {
 });
 
