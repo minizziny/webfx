@@ -8,7 +8,7 @@ angular.module('app.directive.tree', [])
 
 			var ddIcon = '';
 			if(attrs.nodeEditable === 'true') {
-				ddIcon = '<button ng-click="showMenu($event)" el-type="dropdown" href="#" class="menu pull-right" style="display:none"><span class="caret"></span></button>'
+				ddIcon = '<button ng-click="showMenu($event)" el-type="dropdown" class="menu pull-right" style="display:none"><span class="caret"></span></button>'
 			}
 			
 			if(!!scope.tree.children) {
@@ -27,7 +27,7 @@ angular.module('app.directive.tree', [])
 				var template = angular.element(
 					'<ul class="nav nav-list">' + 
 						'<li ng-show="node.is_visible" ng-class="{ \'active\': node.is_selected }" ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
-							'<a ng-hide="node.is_edit_mode" style="position:relative" href="#" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" ng-click="eventClickListAnchor($event)" el-type="group" draggable="true" droppable droppable-accept="[el-type=group],[el-type=user]" droppable-active-class="ui-state-active" droppable-hover-class="ui-state-hover" droppable-drop="onDrop">' +
+							'<a ng-hide="node.is_edit_mode" style="position:relative" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" ng-click="eventClickListAnchor($event)" el-type="group" draggable="true" droppable droppable-accept="[el-type=group],[el-type=user]" droppable-active-class="ui-state-active" droppable-hover-class="ui-state-hover" droppable-drop="onDrop">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
 								'{{node.' + attrs.nodeName + '}}' +
@@ -45,10 +45,10 @@ angular.module('app.directive.tree', [])
 				if(ddIcon != '') {
 					var dd = angular.element(
 						'<ul ng-mousedown="supressEvent($event)" class="dropdown-menu" style="display:none; left:auto; right: 0px; top: 22px">' +
-							'<li><a ng-click="addChildNode()" tabindex="-1" href="#">{{"$S_str_NewGroup"|translate}}</a></li>' +
-							'<li><a ng-click="renameNode()" tabindex="-1" href="#">{{"$S_str_Rename"|translate}}</a></li>' +
+							'<li><a ng-click="addChildNode()" tabindex="-1">{{"$S_str_NewGroup"|translate}}</a></li>' +
+							'<li><a ng-click="renameNode()" tabindex="-1">{{"$S_str_Rename"|translate}}</a></li>' +
 							'<li class="divider"></li>' +
-							'<li><a ng-click="removeNode()" tabindex="-1" href="#">{{"$S_str_Remove"|translate}}</a></li>' +
+							'<li><a ng-click="removeNode()" tabindex="-1">{{"$S_str_Remove"|translate}}</a></li>' +
 						'</ul>');
 
 					template.find('button[el-type="dropdown"]').after(dd);
@@ -73,7 +73,7 @@ angular.module('app.directive.tree', [])
 
 			var ddIcon = '';
 			if(attrs.nodeEditable === 'true') {
-				ddIcon = '<button ng-click="showMenu($event)" el-type="dropdown" href="#" class="menu pull-right" style="display:none"><span class="caret"></span></button>'
+				ddIcon = '<button ng-click="showMenu($event)" el-type="dropdown" class="menu pull-right" style="display:none"><span class="caret"></span></button>'
 			}
 
 			scope.$watch(attrs.treeData, function(val) {
@@ -93,7 +93,7 @@ angular.module('app.directive.tree', [])
 				var template = angular.element(
 					'<ul class="nav nav-list tree-root">' + 
 						'<li ng-show="node.is_visible" ng-class="{ \'active\': node.is_selected }" ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className">' +
-							'<a ng-hide="node.is_edit_mode" style="position:relative" href="#" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" ng-click="eventClickListAnchor($event)" el-type="group" draggable="true" droppable droppable-accept="[el-type=group],[el-type=user]" droppable-active-class="ui-state-active" droppable-hover-class="ui-state-hover" droppable-drop="onDrop">' +
+							'<a ng-hide="node.is_edit_mode" style="position:relative"  ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" ng-click="eventClickListAnchor($event)" el-type="group" draggable="true" droppable droppable-accept="[el-type=group],[el-type=user]" droppable-active-class="ui-state-active" droppable-hover-class="ui-state-hover" droppable-drop="onDrop">' +
 								'<tree-toggle></tree-toggle>' +
 								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
 								'{{node.' + attrs.nodeName + '}}' +
@@ -111,10 +111,10 @@ angular.module('app.directive.tree', [])
 				if(ddIcon != '') {
 					var dd = angular.element(
 						'<ul ng-mousedown="supressEvent($event)" class="dropdown-menu" style="display:none; left:auto; right: 0px; top: 22px">' +
-							'<li><a ng-click="addChildNode()" tabindex="-1" href="#">{{"$S_str_NewGroup"|translate}}</a></li>' +
-							'<li><a ng-click="renameNode()" tabindex="-1" href="#">{{"$S_str_Rename"|translate}}</a></li>' +
+							'<li><a ng-click="addChildNode()" tabindex="-1" >{{"$S_str_NewGroup"|translate}}</a></li>' +
+							'<li><a ng-click="renameNode()" tabindex="-1" >{{"$S_str_Rename"|translate}}</a></li>' +
 							'<li class="divider"></li>' +
-							'<li><a ng-click="removeNode()" tabindex="-1" href="#">{{"$S_str_Remove"|translate}}</a></li>' +
+							'<li><a ng-click="removeNode()" tabindex="-1" >{{"$S_str_Remove"|translate}}</a></li>' +
 						'</ul>');
 
 					template.find('button[el-type="dropdown"]').after(dd);

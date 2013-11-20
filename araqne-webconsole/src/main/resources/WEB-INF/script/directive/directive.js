@@ -140,24 +140,42 @@ angular.module('app.directive', ['pascalprecht.translate'])
 					else {
 						scope.tree.children[i].className = "eu_child" + " eu_deselected";
 					}
+
+					if(scope.tree.children[i][attrs.nodeId] == attrs.nodeSelected) {
+						scope.tree.children[i].className = "eu_" + attrs.nodeState + " active";	
+					}
 				}
 
 				var template = angular.element(
-					'<ul class="nav nav-list" ' + visibility + '>' + 
-						'<li ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className" node-parent="{{node.' + attrs.nodeParent + '}}">' +
-							'<a  el-type="item">' +
-								'<input type="checkbox" ng-show="node.is_edit_mode">' +
-								'<tree-toggle></tree-toggle>' +
-								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +  // src="{{node.' + attrs.nodeIcon + '}}">' +
-								'{{node.' + attrs.nodeName + '}}' +
-							'</a>' +
-							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '" node-parent="' + attrs.nodeParent + '"></tree-element>' +
-						'</li>' +
-					'</ul>');
+					'<ul class="nav nav-list" ' + visibility + '>\
+						<li ng-repeat="node in tree.children"\
+							ng-class="node.className"\
+							node-tree-type="{{node.' + attrs.nodeTreeType + '}}"\
+							node-id="{{node.' + attrs.nodeId + '}}"\
+							node-parent="{{node.' + attrs.nodeParent + '}}">\
+							<a el-type="item">\
+								<input type="checkbox" ng-show="node.is_edit_mode">\
+								<tree-toggle></tree-toggle>\
+								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>\
+								{{node.' + attrs.nodeName + '}}\
+							</a>\
+							<tree-element tree="node"\
+								node-selected="' + attrs.nodeSelected + '"\
+								node-tree-type="' + attrs.nodeTreeType + '"\
+								node-id="' + attrs.nodeId + '"\
+								node-icon="' + attrs.nodeIcon + '"\
+								node-icon-class="' + attrs.nodeIconClass + '"\
+								node-name="' + attrs.nodeName + '"\
+								node-state="' + attrs.nodeState + '"\
+								node-parent="' + attrs.nodeParent + '">\
+							</tree-element>\
+						</li>\
+					</ul>');
 				
 				var linkFunction = $compile(template);
 				linkFunction(scope);
-				element.replaceWith( template );
+				// element.replaceWith( template );
+				element.append(template);
 			}
 			else {
 				element.remove();
@@ -170,17 +188,17 @@ angular.module('app.directive', ['pascalprecht.translate'])
 		restrict: 'E',
 		link: function(scope, element, attrs) {
 			scope.tree = scope.node;
-			
+
 			if(!!scope.tree.children) {
-				var template = angular.element('<i class="icon-chevron-down tree-node-icon" el-type="toggle"></i>');
-				
-				var linkFunction = $compile(template);
-				linkFunction(scope);
-				element.replaceWith(template);
+				var template = angular.element('<i class="icon-minus tree-node-icon" el-type="toggle"></i>');
 			}
 			else {
-				element.remove();
+				var template = angular.element('<i class="icon-null tree-node-icon" el-type="toggle"></i>');	
 			}
+				
+			var linkFunction = $compile(template);
+			linkFunction(scope);
+			element.replaceWith(template);
 		}
 	}
 })
@@ -190,6 +208,10 @@ angular.module('app.directive', ['pascalprecht.translate'])
 		link: function (scope, element, attrs) {
 			scope.selectedNode = null;
 			scope.$watch(attrs.treeData, function(val) {
+				if(!!scope.currentElement) {
+					attrs.nodeSelected = scope.currentElement.attr('node-id');
+				}
+				
 				for(var i in scope[attrs.treeData]) {
 					if(!!scope[attrs.treeData][i].children) {
 						scope[attrs.treeData][i].className = "eu_" + attrs.nodeState + " eu_deselected";
@@ -204,17 +226,28 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				}
 				
 				var template = angular.element(
-					'<ul id="euTreeBrowser" class="nav nav-list tree-top">' +
-						'<li ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className" node-parent="{{node.' + attrs.nodeParent + '}}">' +
-							'<a el-type="item">' +
-								'<tree-toggle></tree-toggle>' +
-								//'<span ng-show="!!node.template" ng-bind-html-unsafe="node.template"></span>' +
-								//'<span ng-hide="!!node.template">{{node.' + attrs.nodeName + '}}</span>' + 
-								'{{node.' + attrs.nodeName + '}}' +
-							'</a>' +
-							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '" node-parent="' + attrs.nodeParent + '"></tree-element>' +
-						'</li>' +
-					'</ul>');
+					'<ul id="euTreeBrowser" class="nav nav-list tree-top">\
+						<li ng-repeat="node in ' + attrs.treeData + '"\
+							ng-class="node.className"\
+							node-tree-type="{{node.' + attrs.nodeTreeType + '}}"\
+							node-id="{{node.' + attrs.nodeId + '}}"\
+							node-parent="{{node.' + attrs.nodeParent + '}}">\
+							<a el-type="item">\
+								<tree-toggle></tree-toggle>\
+								{{node.' + attrs.nodeName + '}}\
+							</a>\
+							<tree-element tree="node"\
+								node-selected="' + attrs.nodeSelected + '"\
+								node-tree-type="' + attrs.nodeTreeType + '"\
+								node-id="' + attrs.nodeId + '"\
+								node-icon="' + attrs.nodeIcon + '"\
+								node-icon-class="' + attrs.nodeIconClass + '"\
+								node-name="' + attrs.nodeName + '"\
+								node-state="' + attrs.nodeState + '"\
+								node-parent="' + attrs.nodeParent + '">\
+							</tree-element>\
+						</li>\
+					</ul>');
 				
 				var linkFunction = $compile(template);
 				linkFunction(scope);
@@ -245,17 +278,21 @@ angular.module('app.directive', ['pascalprecht.translate'])
 						}
 						
 						if($(e.target).attr('el-type') == 'toggle') {
-							var currentElement = angular.element(e.target).parent().parent();
-							if(currentElement.children().length) {
-								currentElement.children().toggleClass("hide");
+							var parentElement = angular.element(e.target).parent().parent();
+
+							if(parentElement.children().length) {
+								var isHidden = parentElement.children().hasClass('hide');
+								parentElement.children().toggleClass("hide");
 								
-								currentElement.toggleClass("eu_collapse");
-								currentElement.toggleClass("eu_expand");
+								parentElement.toggleClass("eu_collapse");
+								parentElement.toggleClass("eu_expand");
+
+								scope.$broadcast('nodeToggled', { isHidden: isHidden, selectedNode: parentElement.attr('node-id'), selectedNodeType: parentElement.attr('node-tree-type'), selectedNodeRaw: parentElement, selectedNodeScope: scope, selectedNodeParent: parentElement.attr('node-parent') });
 							}
 						}
 					}
 				});
-			}, true);
+			}, false);
 		}
 	}
 })

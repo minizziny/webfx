@@ -4,6 +4,10 @@ topbar {
 	display: none;
 }
 
+.icon-null {
+	background-position: 3000px 3000px;
+}
+
 .ngViewport:focus {
 	outline: none;
 }
@@ -184,8 +188,9 @@ input[type=number] {
 	margin-top: 20px;
 }
 
-.hide > .icon-chevron-down {
-	background-position: -456px -72px;
+.hide > .icon-minus {
+	/*background-position: -456px -72px;*/
+	background-position: -408px -96px;
 	/* background-position: -313px -119px; */
 }
 
