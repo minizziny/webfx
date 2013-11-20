@@ -127,6 +127,11 @@ angular.module('app.directive', ['pascalprecht.translate'])
 		{
 			scope.tree = scope.node;
 			
+			var iconRefresh = '<button ng-click="childRefresh($event)" el-type="refresh" class="icon pull-right" style="display:none">\
+				<i class="icon-refresh" style="margin-top:0"></i>\
+			</button>';
+
+			var indiRefresh = '<span class="pull-right indi" style="display: none; color: silver; font-style: italic; font-size: 8pt; letter-spacing: -1px">새로고침 중...</span>';
 			var visibility = ( attrs.nodeState != "collapse" ) || 'style="display: none;"';
 			
 			if(!!scope.tree.children) {
@@ -153,12 +158,14 @@ angular.module('app.directive', ['pascalprecht.translate'])
 							node-tree-type="{{node.' + attrs.nodeTreeType + '}}"\
 							node-id="{{node.' + attrs.nodeId + '}}"\
 							node-parent="{{node.' + attrs.nodeParent + '}}">\
-							<a el-type="item">\
+							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" >\
 								<input type="checkbox" ng-show="node.is_edit_mode">\
 								<tree-toggle></tree-toggle>\
 								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>\
-								{{node.' + attrs.nodeName + '}}\
-							</a>\
+								<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' +
+								indiRefresh +
+								iconRefresh +
+							'</a>\
 							<tree-element tree="node"\
 								node-selected="' + attrs.nodeSelected + '"\
 								node-tree-type="' + attrs.nodeTreeType + '"\
@@ -202,11 +209,18 @@ angular.module('app.directive', ['pascalprecht.translate'])
 		}
 	}
 })
-.directive('euTree', function($compile) {
+.directive('euTree', function($compile, $parse) {
 	return {
-		restrict: 'E', //Element
+		restrict: 'E', //Element,
 		link: function (scope, element, attrs) {
 			scope.selectedNode = null;
+
+			var iconRefresh = '<button ng-click="childRefresh($event)" el-type="refresh" class="icon pull-right" style="display:none">\
+				<i class="icon-refresh" style="margin-top:0"></i>\
+			</button>';
+
+			var indiRefresh = '<span class="pull-right indi" style="display: none; color: silver; font-style: italic; font-size: 8pt; letter-spacing: -1px">새로고침 중...</span>';
+
 			scope.$watch(attrs.treeData, function(val) {
 				if(!!scope.currentElement) {
 					attrs.nodeSelected = scope.currentElement.attr('node-id');
@@ -226,16 +240,18 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				}
 				
 				var template = angular.element(
-					'<ul id="euTreeBrowser" class="nav nav-list tree-top">\
+					'<ul id="euTreeBrowser" class="nav nav-list tree-root">\
 						<li ng-repeat="node in ' + attrs.treeData + '"\
 							ng-class="node.className"\
 							node-tree-type="{{node.' + attrs.nodeTreeType + '}}"\
 							node-id="{{node.' + attrs.nodeId + '}}"\
 							node-parent="{{node.' + attrs.nodeParent + '}}">\
-							<a el-type="item">\
+							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" >\
 								<tree-toggle></tree-toggle>\
-								{{node.' + attrs.nodeName + '}}\
-							</a>\
+								<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' +
+								indiRefresh +
+								iconRefresh +
+							'</a>\
 							<tree-element tree="node"\
 								node-selected="' + attrs.nodeSelected + '"\
 								node-tree-type="' + attrs.nodeTreeType + '"\
@@ -256,6 +272,44 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				setTimeout(function() {
 					scope.currentElement = template.find('li.active');
 				}, 250);
+
+				scope.showIcon = function(e) {
+					var id = angular.element(e.currentTarget).parent().attr('node-id');
+					if( $parse(attrs.nodeMouseover)(scope, {$event:e, $id: id}) ) {
+						angular.element(e.currentTarget).find('button.icon').show();
+					}
+				}
+
+				scope.hideIcon = function(e) {
+					$(e.currentTarget).find('button.icon').hide();
+				}
+
+				scope.childRefresh = function(e) {
+					var elA = angular.element(e.currentTarget).parent();
+					var id = elA.parent().attr('node-id'),
+						elIcon = $(e.currentTarget).find('i'),
+						elLoading = $(e.currentTarget).prev();
+
+					elIcon.hide();
+					elLoading.show();
+
+					var isHidden = elA.hasClass('hide');
+					if(isHidden) {
+						elA.find('i[el-type=toggle]').click();
+					}
+
+					var promise = $parse(attrs.nodeClickRefresh)(scope, {$event:e, $id: id});
+					promise.success(function() {
+						console.log('refreshed!');
+						elIcon.show();
+						elLoading.hide();
+					})
+					.failed(function(error) {
+						console.log('failed', error)
+					})
+
+					
+				}
 				
 				// Click Event				
 				template.unbind().bind('click', function(e) {
@@ -264,8 +318,16 @@ angular.module('app.directive', ['pascalprecht.translate'])
 
 					if(angular.element(e.target).length) {
 						if($(e.target).attr('el-type') == 'item') {
+							
+							if(e.target.tagName == 'SPAN') {
+								var target = e.target.parentNode;
+							}
+							else if(e.target.tagName == 'A') {
+								var target = e.target;
+							}
+
 							scope.previousElement = scope.currentElement;
-							scope.currentElement = angular.element(e.target).parent();
+							scope.currentElement = angular.element(target).parent();
 
 							//console.log(scope.currentElement);
 							
@@ -287,7 +349,14 @@ angular.module('app.directive', ['pascalprecht.translate'])
 								parentElement.toggleClass("eu_collapse");
 								parentElement.toggleClass("eu_expand");
 
-								scope.$broadcast('nodeToggled', { isHidden: isHidden, selectedNode: parentElement.attr('node-id'), selectedNodeType: parentElement.attr('node-tree-type'), selectedNodeRaw: parentElement, selectedNodeScope: scope, selectedNodeParent: parentElement.attr('node-parent') });
+								scope.$broadcast('nodeToggled', { 
+									isHidden: isHidden,
+									selectedNode: parentElement.attr('node-id'),
+									selectedNodeType: parentElement.attr('node-tree-type'),
+									selectedNodeRaw: parentElement,
+									selectedNodeScope: scope,
+									selectedNodeParent: parentElement.attr('node-parent')
+								});
 							}
 						}
 					}
