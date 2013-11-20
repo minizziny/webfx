@@ -66,7 +66,8 @@ logpresso.factory('eventSender', function() {
 	var e = {
 		'root': {},
 		'menu': {},
-		'orgchart': {}
+		'orgchart': {},
+		'table': {}
 	}
 	return e;
 });
