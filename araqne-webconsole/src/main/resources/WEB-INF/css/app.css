@@ -4,6 +4,10 @@ topbar {
 	display: none;
 }
 
+code {
+	white-space: normal;
+}
+
 .icon-null {
 	background-position: 3000px 3000px;
 }
