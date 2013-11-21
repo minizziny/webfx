@@ -1,0 +1,75 @@
+<link rel="stylesheet" href="package/system/auditlog/auditlog.css"/>
+<div class="auditlog-container" ng-controller="AuditLogController">
+	<div class="container">
+		<section class="pane" style="padding-bottom: 5px;">
+			<legend class="audit-legend">감사 로그</legend>
+			<div>
+				기간 :
+				&nbsp;
+				<input type="text" ng-model="from"> 부터
+				&nbsp;
+				<input type="text" ng-model="to"> 까지
+				<button class="btn btn-primary pull-right" ng-click="getAuditLogs()">
+					<i class="icon-search icon-white" /> 조회하기
+				</button>
+			</div>			
+		</section>
+		<section class="pane">			
+			<table class="table table-striped table-bordered table-condensed">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>
+							<span class="qr-th-type">
+								<i class="icon-white icon-time"></i>
+							</span>
+							시각
+						</th>
+						<th>
+							<span class="qr-th-type">A</span>
+							분류
+						</th>
+						<th>
+							<span class="qr-th-type">A</span>
+							계정
+						</th>
+						<th>
+							<span class="qr-th-type">A</span>
+							행위
+						</th>
+						<th>
+							<span class="qr-th-type">A</span>
+							내용
+						</th>
+					</tr>
+				</thead>
+				<tbody ng-repeat="(i, log) in dataAuditlogs | limitTo: numPageSize">
+					<tr>
+						<td>{{numCurrentPage * numPageSize + (i+1)}}</td>
+						<td>{{log.time}}</td>
+						<td>{{log.category}}</td>
+						<td>{{log.user}}</td>
+						<td>{{log.action}}</td>
+						<td>{{log.msg}}</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+		<section class="pane">
+			<div class="pull-left" style="margin:5px">
+				<input type="range" min="1" max="10" class="pull-left"
+					ng-model="numPageSizeRough"
+					ng-change="changePagesizeRough()"
+					ng-mouseup="changePagesizeRoughMouseup()">
+				{{numPageSize}} <ng-pluralize count="numTotalCount" when="formItemsCount"></ng-pluralize>
+			</div>
+			<pager class="pull-right"
+				ng-model="dataAuditlogs"
+				ng-total-count="numTotalCount"
+				ng-items-per-page="numPageSize"
+				ng-page-size="numPagerPageSize"
+				on-page-change="changePage()"
+				on-items-per-page-change="changeItemsPerPage()"></pager>
+		</section>	
+	</div>
+</div>
