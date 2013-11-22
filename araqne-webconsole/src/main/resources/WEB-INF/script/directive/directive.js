@@ -805,12 +805,7 @@ angular.module('app.directive', ['pascalprecht.translate'])
 					scope.currentPage = scope.currentPage + 1;
 
 				render();
-
-				if(scope.currentIndex + scope.ngPageSize > getTotalPageCount() - 1) {
-					scope.currentIndex = getTotalPageCount() - 1;
-				} else {
-					scope.currentIndex = scope.currentIndex + 1;	
-				}
+				scope.currentIndex = scope.currentIndex + 1;	
 				changePage(scope.currentIndex);
 			}
 			
@@ -1021,7 +1016,7 @@ angular.module('app.directive', ['pascalprecht.translate'])
 							</form></div>\
 						</div>\
 					</div>\
-					<div style="display:block"><br>\
+					<div style="display:none"><br>\
 					ngTotalCount: {{ngTotalCount}}<br>\
 					ngItemsPerPage: {{ngItemsPerPage}}<br>\
 					ngPageSize: {{ngPageSize}}<br>\
@@ -1065,16 +1060,13 @@ angular.module('app.directive', ['pascalprecht.translate'])
 			scope.nextOnePage = function () {
 				if(scope.currentIndex == getTotalPageCount() - 1) return;	
 
-				if(scope.currentIndex % scope.ngPageSize == 9)
+				if(scope.currentIndex % scope.ngPageSize == 9) {
 					scope.currentPage = scope.currentPage + 1;
+				}
 
 				render();
 
-				if(scope.currentIndex + scope.ngPageSize > getTotalPageCount() - 1) {
-					scope.currentIndex = getTotalPageCount() - 1;
-				} else {
-					scope.currentIndex = scope.currentIndex + 1;	
-				}
+				scope.currentIndex = scope.currentIndex + 1;
 				changePage(scope.currentIndex);
 			}
 			
@@ -1179,28 +1171,29 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				}
 				if(scope.currentPage == undefined) {
 					scope.currentPage = 0;	
-				}
+				}				
+				render();
+			});
+
+			// scope.$watch('ngItemsPerPage', function(val) {
+
+			// 	var totalPageCount = getTotalPageCount();
+			// 	if((scope.currentIndex > totalPageCount - 1)) {
+			// 		scope.currentIndex = totalPageCount - 1;
+			// 		changePage(scope.currentIndex);
+			// 	}
+
+			// 	// console.log(getTotalPageCount(), scope.ngPageSize, scope.currentPage, getLastPage())
+
+			// 	if(getLastPage() < scope.currentPage) {
+			// 		scope.currentPage = getLastPage();
+			// 	}
+
+			// 	render();
+			// 	scope.$parent.$eval(attr.onItemsPerPageChange);
+
 				
-				render();
-			});
-
-			scope.$watch('ngItemsPerPage', function(val) {
-
-				var totalPageCount = getTotalPageCount();
-				if(scope.currentIndex > totalPageCount - 1) {
-					scope.currentIndex = totalPageCount - 1;
-					changePage(scope.currentIndex);
-				}
-
-				// console.log(getTotalPageCount(), scope.ngPageSize, scope.currentPage, getLastPage())
-
-				if(getLastPage() < scope.currentPage) {
-					scope.currentPage = getLastPage();
-				}
-
-				render();
-				scope.$parent.$eval(attr.onItemsPerPageChange);
-			});
+			// });
 
 			scope.isShowJumpPopup = false;
 
