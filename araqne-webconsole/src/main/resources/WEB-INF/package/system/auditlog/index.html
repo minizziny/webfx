@@ -14,7 +14,7 @@
 				</button>
 			</div>			
 		</section>
-		<section class="pane">			
+		<section class="pane" style="padding-bottom: 0;">			
 			<table class="table table-striped table-bordered table-condensed">
 				<thead>
 					<tr>
@@ -55,21 +55,15 @@
 				</tbody>
 			</table>
 		</section>
-		<section class="pane">
-			<div class="pull-left" style="margin:5px">
-				<input type="range" min="1" max="10" class="page-range pull-left"
-					ng-model="numPageSizeRough"
-					ng-change="changePagesizeRough()"
-					ng-mouseup="changePagesizeRoughMouseup()">
-				{{numPageSize}} <ng-pluralize count="numTotalCount" when="formItemsCount"></ng-pluralize>
-			</div>
+		<section class="pane" style="padding-top: 0;">
 			<pager-audit class="pull-right"
 				ng-model="dataAuditlogs"
 				ng-total-count="numTotalCount"
 				ng-items-per-page="numPageSize"
 				ng-page-size="numPagerPageSize"
 				on-page-change="changePage()"
-				on-items-per-page-change="changeItemsPerPage()"></pager>
+				on-items-per-page-change="changeItemsPerPage()">
+			</pager>
 		</section>	
 	</div>
 </div>

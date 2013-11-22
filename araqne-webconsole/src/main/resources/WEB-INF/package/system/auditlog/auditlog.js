@@ -26,7 +26,7 @@ function AuditLogController($scope, $filter, $translate, socket, eventSender, se
 	$scope.limit = null;
 
 	$scope.getAuditLogs = function(offset, limit) {
-		console.log("offset: " + offset + ", limit: " + limit);
+		//console.log("offset: " + offset + ", limit: " + limit);
 		/*
 		method : org.logpresso.core.msgbus.AuditLogPlugin.getAuditLogs
 		argument : from, to, offset(nullable), limit(nullable)
@@ -39,7 +39,7 @@ function AuditLogController($scope, $filter, $translate, socket, eventSender, se
 			'locale': $translate.uses() 
 		}, proc.pid)
 		.success(function(m) {
-			console.log(m.body);
+			//console.log(m.body);
 			$scope.dataAuditlogs = m.body.result;
 			$scope.numTotalCount = m.body.total;
 			$scope.$apply();
