@@ -859,6 +859,13 @@ function ChangePasswordController($scope, socket, eventSender, $filter) {
 		})
 		.failed(openError);
 	}
+
+	$scope.closePasswordChangeModal = function() {
+		console.log("close");		
+		$scope.valPassword = '';
+		$scope.valPasswordConfirm = '';
+		$('[modal].mdlChangePassword')[0].hideDialog();
+	}
 }
 
 function OrgUnitTreeController($scope, $compile, $filter, socket, eventSender) {

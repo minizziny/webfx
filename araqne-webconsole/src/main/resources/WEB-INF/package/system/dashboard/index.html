@@ -234,11 +234,12 @@
 			<!-- 5 -->
 			<li class="wiz-step" ng-controller="ChartBindingController">
 				<legend>{{'$S_str_BindingDataToChart' | translate}}</legend>
-				<fieldset>
+				<fieldset style="position: relative">
 					<div class="fieldset-description"></div>
-					<div style="width: 60%; float: left">
-						<div class="qr-container" style="height: 240px; overflow: scroll">
+					<div fx-dashboard-id="binding-left">
+						<div fx-dashboard-id="binding-query-result">
 							<query-result
+								style="position: absolute; width: calc(100% - 2px); height: 234px; overflow: auto"
 								ng-template="qrTmpl"
 								ng-model="qresult"
 								ng-query="ctxWidget.data.query" 
@@ -247,60 +248,68 @@
 								is-check-type="true"
 								class="qr2 qr-selected"></query-result>
 						</div>
-						<div style="width: 22%; float: left">
-							<ul class="nav nav-pills nav-stacked" style="max-height: 100px; overflow: auto; margin-left: 0; padding: 5px; border: 1px solid #ccc">
-								<li ng-repeat="(i, s) in dataSeries" class="clearboth" ng-class="{active: selectedSeriesIdx == i}">
-									<a ng-click="selectSeries(i)">
-										<span>{{s.name}}</span>
-										<button class="close widget-refresh pull-right" ng-click="removeSeries(i)">
-											<i class="icon-minus pull-right" ng-style="{backgroundColor: s.color}"></i>
-										</button>
-									</a>
-								</li>
-							</ul>
-							<button class="btn" ng-click="addSeries()"><i class="icon-plus"></i>{{'$S_str_AddSeries' | translate}}</button>
-						</div>
-						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; background-color: #f0f0f0">
-							<div class="control-group">
-								<label class="control-label" for="widgetName">{{'$S_str_Name' | translate}}</label>
-								<div class="controls">
-									<input id="widgetName" type="text" ng-model="dataSeries[selectedSeriesIdx].name"/>
+						<div fx-dashboard-id="config-container">
+							<div fx-dashboard-id="series">
+								<div fx-dashboard-id="series-list">
+									<ul class="nav nav-pills nav-stacked">
+										<li ng-repeat="(i, s) in dataSeries" class="clearboth" ng-class="{active: selectedSeriesIdx == i}">
+											<a ng-click="selectSeries(i)">
+												<span>{{s.name}}</span>
+												<button class="close widget-refresh pull-right" ng-click="removeSeries(i)">
+													<i class="icon-minus pull-right" ng-style="{backgroundColor: s.color}"></i>
+												</button>
+											</a>
+										</li>
+									</ul>
+								</div>
+								<div fx-dashboard-id="series-toolbar">
+									<button class="btn" ng-click="addSeries()"><i class="icon-plus"></i>{{'$S_str_AddSeries' | translate}}</button>
 								</div>
 							</div>
-							<div class="control-group">
-								<label class="control-label" for="widgetInterval">{{'$S_str_Value' | translate}}</label>
-								<div class="controls">
-									<select ng-model="dataSeries[selectedSeriesIdx].value" ng-options="col.name for col in dataNumberTypeCols"></select>
+							<div fx-dashboard-id="config">
+								<div class="form-horizontal">
+									<div class="control-group">
+										<label class="control-label" for="widgetName">{{'$S_str_Name' | translate}}</label>
+										<div class="controls">
+											<input id="widgetName" type="text" ng-model="dataSeries[selectedSeriesIdx].name"/>
+										</div>
+									</div>
+									<div class="control-group">
+										<label class="control-label" for="widgetInterval">{{'$S_str_Value' | translate}}</label>
+										<div class="controls">
+											<select ng-model="dataSeries[selectedSeriesIdx].value" ng-options="col.name for col in dataNumberTypeCols"></select>
+										</div>
+									</div>
 								</div>
-							</div>
-						</div>
-						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; margin-bottom: 36px; background-color: #f0f0f0" ng-show="chartType.name == 'bar' || chartType.name == 'pie'">
-							<div class="control-group">
-								<label class="control-label" for="widgetInterval">{{'$S_str_Label' | translate}}</label>
-								<div class="controls">
-									<select ng-model="dataLabel" ng-options="col.name for col in qrCols"></select>
+								<div class="form-horizontal" ng-show="chartType.name == 'bar' || chartType.name == 'pie'">
+									<div class="control-group">
+										<label class="control-label" for="widgetInterval">{{'$S_str_Label' | translate}}</label>
+										<div class="controls">
+											<select ng-model="dataLabel" ng-options="col.name for col in qrCols"></select>
+										</div>
+									</div>
 								</div>
-							</div>
-						</div>
-						<div class="form-horizontal" style="width: 75%; float: right; border-top: 1px solid #ccc; padding-top: 15px; margin-left: 15px; margin-bottom: 36px; background-color: #f0f0f0" ng-show="chartType.name == 'line'">
-							<div class="control-group">
-								<label class="control-label">{{'$S_str_AxisX' | translate}}</label>
-								<div class="controls">
-									<select ng-model="dataLabel" ng-options="col.name for col in dataNumberDatetimeTypeCols"></select>
+								<div class="form-horizontal" ng-show="chartType.name == 'line'">
+									<div class="control-group">
+										<label class="control-label">{{'$S_str_AxisX' | translate}}</label>
+										<div class="controls">
+											<select ng-model="dataLabel" ng-options="col.name for col in dataNumberDatetimeTypeCols"></select>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>
 					</div>
-					<div class="charthere">
+					<div fx-dashboard-id="binding-right" class="charthere">
 						<figure>
 							<div></div>
 						</figure>
 					</div>
-					<div class="control-group submit-group clearboth" style="bottom: 15px; left: 20px; right: 27px; position: absolute">
-						<button class="wiz-prev btn" ng-click="go(4)">{{'$S_str_Previous' | translate}}</button>
-						<button class="wiz-next btn" ng-click="go(3, widgetType.s5nextCallback())">{{'$S_str_Next' | translate}}</button>
-					</div>
 				</fieldset>
+				<div class="control-group submit-group clearboth">
+					<button class="wiz-prev btn" ng-click="go(4)">{{'$S_str_Previous' | translate}}</button>
+					<button class="wiz-next btn" ng-click="go(3, widgetType.s5nextCallback())">{{'$S_str_Next' | translate}}</button>
+				</div>
 			</li>
 		</ol>
 	</div>

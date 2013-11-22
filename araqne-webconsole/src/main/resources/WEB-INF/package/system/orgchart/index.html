@@ -4,50 +4,6 @@
 	padding: 0;
 }
 
-/** tree **/
-
-tree .hide {
-	display: none;
-}
-
-.tree-root {
-	margin-right: 15px;
-}
-
-.nav-list {
-	padding-right: 0;
-}
-
-.nav-list a {
-	/*border: 1px solid transparent;*/
-}
-
-.nav-list > li.check:not(.active) > a:first-child {
-	background-color: rgba(0, 153, 255, .1);
-}
-
-.nav-list > li.check:not(.active) > a:first-child:hover {
-	background-color: rgba(0, 153, 255, .2);
-}
-
-.nav-list i.tree-node-icon {
-	margin-right: 5px;
-}
-
-.ui-state-hover {
-	background-color: #ffff66 !important;
-	color: #08c !important;
-}
-
-.ui-state-active {
-	/*background-color: yellow !important;*/
-}
-
-.ui-draggable-dragging {
-	z-index: 9999;
-}
-
-
 /*  */
 .treetype {
 	position: relative;
@@ -208,7 +164,7 @@ table.listUsers {
 
 .mdlChangePassword, .mdlRemoveUsers, .mdlRemoveOrgUnit {
 	position: absolute;
-	width: 570px;
+	width: 520px;
 	margin-left: -285px;
 	padding: 10px 20px;
 }
@@ -681,8 +637,8 @@ input[type=search].input-search-table:focus {
 				</li>
 			</ul>
 		</div>
-		<div class="modal mdlChangePassword" modal ng-controller="ChangePasswordController">
-			<a class="modal-close close" style="margin-bottom: -30px">×</a>
+		<div class="modal mdlChangePassword" modal ng-controller="ChangePasswordController" style="z-index:99";>
+			<a class="modal-close close" ng-click="closePasswordChangeModal()" style="margin-bottom: -30px">×</a>
 			<legend>{{'$S_str_ChangePassword' | translate}}</legend>
 			<form name="frmChangePassword">
 				<fieldset class="form-horizontal">

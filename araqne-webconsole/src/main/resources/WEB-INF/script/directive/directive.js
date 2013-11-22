@@ -127,6 +127,11 @@ angular.module('app.directive', ['pascalprecht.translate'])
 		{
 			scope.tree = scope.node;
 			
+			var iconRefresh = '<button ng-click="childRefresh($event)" el-type="refresh" class="icon pull-right" style="display:none">\
+				<i class="icon-refresh" style="margin-top:0"></i>\
+			</button>';
+
+			var indiRefresh = '<span class="pull-right indi" style="display: none; color: silver; font-style: italic; font-size: 8pt; letter-spacing: -1px">새로고침 중...</span>';
 			var visibility = ( attrs.nodeState != "collapse" ) || 'style="display: none;"';
 			
 			if(!!scope.tree.children) {
@@ -140,24 +145,44 @@ angular.module('app.directive', ['pascalprecht.translate'])
 					else {
 						scope.tree.children[i].className = "eu_child" + " eu_deselected";
 					}
+
+					if(scope.tree.children[i][attrs.nodeId] == attrs.nodeSelected) {
+						scope.tree.children[i].className = "eu_" + attrs.nodeState + " active";	
+					}
 				}
 
 				var template = angular.element(
-					'<ul class="nav nav-list" ' + visibility + '>' + 
-						'<li ng-repeat="node in tree.children" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className" node-parent="{{node.' + attrs.nodeParent + '}}">' +
-							'<a  el-type="item">' +
-								'<input type="checkbox" ng-show="node.is_edit_mode">' +
-								'<tree-toggle></tree-toggle>' +
-								'<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +  // src="{{node.' + attrs.nodeIcon + '}}">' +
-								'{{node.' + attrs.nodeName + '}}' +
-							'</a>' +
-							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '" node-parent="' + attrs.nodeParent + '"></tree-element>' +
-						'</li>' +
-					'</ul>');
+					'<ul class="nav nav-list" ' + visibility + '>\
+						<li ng-repeat="node in tree.children"\
+							ng-class="node.className"\
+							node-tree-type="{{node.' + attrs.nodeTreeType + '}}"\
+							node-id="{{node.' + attrs.nodeId + '}}"\
+							node-parent="{{node.' + attrs.nodeParent + '}}">\
+							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" >\
+								<input type="checkbox" ng-show="node.is_edit_mode">\
+								<tree-toggle></tree-toggle>\
+								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>\
+								<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' +
+								indiRefresh +
+								iconRefresh +
+							'</a>\
+							<tree-element tree="node"\
+								node-selected="' + attrs.nodeSelected + '"\
+								node-tree-type="' + attrs.nodeTreeType + '"\
+								node-id="' + attrs.nodeId + '"\
+								node-icon="' + attrs.nodeIcon + '"\
+								node-icon-class="' + attrs.nodeIconClass + '"\
+								node-name="' + attrs.nodeName + '"\
+								node-state="' + attrs.nodeState + '"\
+								node-parent="' + attrs.nodeParent + '">\
+							</tree-element>\
+						</li>\
+					</ul>');
 				
 				var linkFunction = $compile(template);
 				linkFunction(scope);
-				element.replaceWith( template );
+				// element.replaceWith( template );
+				element.append(template);
 			}
 			else {
 				element.remove();
@@ -170,26 +195,37 @@ angular.module('app.directive', ['pascalprecht.translate'])
 		restrict: 'E',
 		link: function(scope, element, attrs) {
 			scope.tree = scope.node;
-			
+
 			if(!!scope.tree.children) {
-				var template = angular.element('<i class="icon-chevron-down tree-node-icon" el-type="toggle"></i>');
-				
-				var linkFunction = $compile(template);
-				linkFunction(scope);
-				element.replaceWith(template);
+				var template = angular.element('<i class="icon-minus tree-node-icon" el-type="toggle"></i>');
 			}
 			else {
-				element.remove();
+				var template = angular.element('<i class="icon-null tree-node-icon" el-type="toggle"></i>');	
 			}
+				
+			var linkFunction = $compile(template);
+			linkFunction(scope);
+			element.replaceWith(template);
 		}
 	}
 })
-.directive('euTree', function($compile) {
+.directive('euTree', function($compile, $parse) {
 	return {
-		restrict: 'E', //Element
+		restrict: 'E', //Element,
 		link: function (scope, element, attrs) {
 			scope.selectedNode = null;
+
+			var iconRefresh = '<button ng-click="childRefresh($event)" el-type="refresh" class="icon pull-right" style="display:none">\
+				<i class="icon-refresh" style="margin-top:0"></i>\
+			</button>';
+
+			var indiRefresh = '<span class="pull-right indi" style="display: none; color: silver; font-style: italic; font-size: 8pt; letter-spacing: -1px">새로고침 중...</span>';
+
 			scope.$watch(attrs.treeData, function(val) {
+				if(!!scope.currentElement) {
+					attrs.nodeSelected = scope.currentElement.attr('node-id');
+				}
+				
 				for(var i in scope[attrs.treeData]) {
 					if(!!scope[attrs.treeData][i].children) {
 						scope[attrs.treeData][i].className = "eu_" + attrs.nodeState + " eu_deselected";
@@ -204,17 +240,30 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				}
 				
 				var template = angular.element(
-					'<ul id="euTreeBrowser" class="nav nav-list tree-top">' +
-						'<li ng-repeat="node in ' + attrs.treeData + '" node-tree-type="{{node.' + attrs.nodeTreeType + '}}" node-id="{{node.' + attrs.nodeId + '}}" ng-class="node.className" node-parent="{{node.' + attrs.nodeParent + '}}">' +
-							'<a el-type="item">' +
-								'<tree-toggle></tree-toggle>' +
-								//'<span ng-show="!!node.template" ng-bind-html-unsafe="node.template"></span>' +
-								//'<span ng-hide="!!node.template">{{node.' + attrs.nodeName + '}}</span>' + 
-								'{{node.' + attrs.nodeName + '}}' +
-							'</a>' +
-							'<tree-element tree="node" node-tree-type="' + attrs.nodeTreeType + '" node-id="' + attrs.nodeId + '" node-icon="' + attrs.nodeIcon + '" node-icon-class="' + attrs.nodeIconClass + '" node-name="' + attrs.nodeName + '" node-state="' + attrs.nodeState + '" node-parent="' + attrs.nodeParent + '"></tree-element>' +
-						'</li>' +
-					'</ul>');
+					'<ul id="euTreeBrowser" class="nav nav-list tree-root">\
+						<li ng-repeat="node in ' + attrs.treeData + '"\
+							ng-class="node.className"\
+							node-tree-type="{{node.' + attrs.nodeTreeType + '}}"\
+							node-id="{{node.' + attrs.nodeId + '}}"\
+							node-parent="{{node.' + attrs.nodeParent + '}}">\
+							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" >\
+								<tree-toggle></tree-toggle>\
+								<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' +
+								indiRefresh +
+								iconRefresh +
+							'</a>\
+							<tree-element tree="node"\
+								node-selected="' + attrs.nodeSelected + '"\
+								node-tree-type="' + attrs.nodeTreeType + '"\
+								node-id="' + attrs.nodeId + '"\
+								node-icon="' + attrs.nodeIcon + '"\
+								node-icon-class="' + attrs.nodeIconClass + '"\
+								node-name="' + attrs.nodeName + '"\
+								node-state="' + attrs.nodeState + '"\
+								node-parent="' + attrs.nodeParent + '">\
+							</tree-element>\
+						</li>\
+					</ul>');
 				
 				var linkFunction = $compile(template);
 				linkFunction(scope);
@@ -223,6 +272,44 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				setTimeout(function() {
 					scope.currentElement = template.find('li.active');
 				}, 250);
+
+				scope.showIcon = function(e) {
+					var id = angular.element(e.currentTarget).parent().attr('node-id');
+					if( $parse(attrs.nodeMouseover)(scope, {$event:e, $id: id}) ) {
+						angular.element(e.currentTarget).find('button.icon').show();
+					}
+				}
+
+				scope.hideIcon = function(e) {
+					$(e.currentTarget).find('button.icon').hide();
+				}
+
+				scope.childRefresh = function(e) {
+					var elA = angular.element(e.currentTarget).parent();
+					var id = elA.parent().attr('node-id'),
+						elIcon = $(e.currentTarget).find('i'),
+						elLoading = $(e.currentTarget).prev();
+
+					elIcon.hide();
+					elLoading.show();
+
+					var isHidden = elA.hasClass('hide');
+					if(isHidden) {
+						elA.find('i[el-type=toggle]').click();
+					}
+
+					var promise = $parse(attrs.nodeClickRefresh)(scope, {$event:e, $id: id});
+					promise.success(function() {
+						console.log('refreshed!');
+						elIcon.show();
+						elLoading.hide();
+					})
+					.failed(function(error) {
+						console.log('failed', error)
+					})
+
+					
+				}
 				
 				// Click Event				
 				template.unbind().bind('click', function(e) {
@@ -231,8 +318,16 @@ angular.module('app.directive', ['pascalprecht.translate'])
 
 					if(angular.element(e.target).length) {
 						if($(e.target).attr('el-type') == 'item') {
+							
+							if(e.target.tagName == 'SPAN') {
+								var target = e.target.parentNode;
+							}
+							else if(e.target.tagName == 'A') {
+								var target = e.target;
+							}
+
 							scope.previousElement = scope.currentElement;
-							scope.currentElement = angular.element(e.target).parent();
+							scope.currentElement = angular.element(target).parent();
 
 							//console.log(scope.currentElement);
 							
@@ -245,17 +340,28 @@ angular.module('app.directive', ['pascalprecht.translate'])
 						}
 						
 						if($(e.target).attr('el-type') == 'toggle') {
-							var currentElement = angular.element(e.target).parent().parent();
-							if(currentElement.children().length) {
-								currentElement.children().toggleClass("hide");
+							var parentElement = angular.element(e.target).parent().parent();
+
+							if(parentElement.children().length) {
+								var isHidden = parentElement.children().hasClass('hide');
+								parentElement.children().toggleClass("hide");
 								
-								currentElement.toggleClass("eu_collapse");
-								currentElement.toggleClass("eu_expand");
+								parentElement.toggleClass("eu_collapse");
+								parentElement.toggleClass("eu_expand");
+
+								scope.$broadcast('nodeToggled', { 
+									isHidden: isHidden,
+									selectedNode: parentElement.attr('node-id'),
+									selectedNodeType: parentElement.attr('node-tree-type'),
+									selectedNodeRaw: parentElement,
+									selectedNodeScope: scope,
+									selectedNodeParent: parentElement.attr('node-parent')
+								});
 							}
 						}
 					}
 				});
-			}, true);
+			}, false);
 		}
 	}
 })
@@ -508,7 +614,8 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				activeClass: attrs.droppableActiveClass,
 				hoverClass: attrs.droppableHoverClass,
 				drop: function(e, ui) {
-					scope[attrs.droppableDrop].call(scope, ui.draggable[0].dragContext.scope, scope, ui.draggable[0], this, ui.draggable[0].dragContext, e);
+					scope[attrs.droppableDrop].call(scope, ui.draggable[0].dragContext.scope, scope, ui.draggable[0]
+						, this, ui.draggable[0].dragContext, e);
 				}
 			});
 		}
@@ -698,12 +805,7 @@ angular.module('app.directive', ['pascalprecht.translate'])
 					scope.currentPage = scope.currentPage + 1;
 
 				render();
-
-				if(scope.currentIndex + scope.ngPageSize > getTotalPageCount() - 1) {
-					scope.currentIndex = getTotalPageCount() - 1;
-				} else {
-					scope.currentIndex = scope.currentIndex + 1;	
-				}
+				scope.currentIndex = scope.currentIndex + 1;	
 				changePage(scope.currentIndex);
 			}
 			
@@ -831,6 +933,267 @@ angular.module('app.directive', ['pascalprecht.translate'])
 				render();
 				scope.$parent.$eval(attr.onItemsPerPageChange);
 			});
+
+			scope.isShowJumpPopup = false;
+
+			scope.openJumpPopup = function(e) {
+				e.stopPropagation();
+				if(scope.isShowJumpPopup) {
+					scope.isShowJumpPopup = false;
+					return;
+				}
+
+				scope.isShowJumpPopup = true;
+				$(document).on('click.pagerJumpPop', function(ee) {
+					scope.isShowJumpPopup = false;
+					$(document).off('click.pagerJumpPop');
+					scope.$apply();
+				});
+				//scope.$apply();
+
+				setTimeout(function() {
+					$('.popover input[type=number]').focus();
+				},250);
+			}
+
+			scope.stopPropagation = function(e) {
+				e.stopPropagation();
+			}
+		}
+	}
+})
+.directive('pagerAudit', function() {
+	return {
+		restrict: 'E',
+		scope: {
+			onPageChange: '&',
+			onItemsPerPageChange: '&',
+			ngTotalCount: '=',
+			ngItemsPerPage: '=',
+			ngPageSize: '=',
+			currentPage: '@',
+			currentIndex: '@'
+		},
+		require: 'ngModel',
+		template: '<div class="pagination" ng-hide="ngTotalCount == 0">\
+					<ul>\
+						<li>\
+							<a  ng-click="firstPage()">{{"$S_str_First" | translate}}</a>\
+						</li>\
+					</ul>\
+					<ul>\
+						<li>\
+							<a ng-click="prevPage()">&lt;&lt;</a>\
+						</li>\
+						<li>\
+							<a ng-click="prevOnePage()">&lt;</a>\
+						</li>\
+						<li ng-class="{\'active\': currentIndex % ngPageSize == i}" ng-repeat="(i,z) in arrPageSize">\
+							<a  ng-click="changePage($index + (currentPage * ngPageSize), $event)">\
+								{{ 1 + i + (currentPage * ngPageSize) }}\
+							</a>\
+						</li>\
+						<li>\
+							<a ng-click="nextOnePage()">&gt;</a>\
+						</li>\
+						<li>\
+							<a ng-click="nextPage()">&gt;&gt;</a>\
+						</li>\
+					</ul>\
+					<ul>\
+						<li>\
+							<a  ng-click="lastPage()">{{"$S_str_Last" | translate}}(<span>{{totalIndexCount}}</span>)</a>\
+						</li>\
+					</ul>\
+					<button class="btn btn-mini" style="vertical-align: top; margin: 2px 5px 0px 0px" ng-click="openJumpPopup($event)"><i class="icon-share-alt"></i></button>\
+					<div style="position: relative; float: right">\
+						<div class="popover top" style="display:block; left: -235px; top: -130px" ng-show="isShowJumpPopup" ng-click="stopPropagation($event)">\
+							<div class="arrow" style="left:94%"></div>\
+							<h3 class="popover-title">{{"$S_str_MovePage" | translate}}</h3>\
+							<div class="popover-content"><form>\
+								<input type="number" min="1" max="{{totalIndexCount}}" ng-model="targetIndex" style="float:left; width:120px">\
+								<button class="btn btn-primary" ng-click="goPage(targetIndex - 1)" style="margin-left: 10px">{{"$S_str_Go" | translate}}</button>\
+							</form></div>\
+						</div>\
+					</div>\
+					<div style="display:none"><br>\
+					ngTotalCount: {{ngTotalCount}}<br>\
+					ngItemsPerPage: {{ngItemsPerPage}}<br>\
+					ngPageSize: {{ngPageSize}}<br>\
+					currentPage: {{currentPage}}<br>\
+					currentIndex: {{currentIndex}}<br></div>\
+				</div>',
+		link: function(scope, elem, attr, ctrl) {
+			scope.currentIndex = 0;
+			scope.currentPage = 0;
+			scope.arrPageSize = [];
+			scope.totalIndexCount;
+			scope.targetIndex = 1;
+
+			elem[0].getCurrentIndex = function() {
+				return scope.currentIndex;
+			}
+
+			function getTotalPageCount() {
+				return Math.ceil(scope.ngTotalCount / scope.ngItemsPerPage);
+			}
+
+			function getLastPage() {
+				var totalPageCount = getTotalPageCount();
+				return Math.ceil(totalPageCount / scope.ngPageSize) - 1;
+			}
+
+			scope.nextPage = function() {
+				if(scope.currentPage == getLastPage()) return;
+				scope.currentPage = scope.currentPage + 1;
+				render();
+				if(scope.currentIndex + scope.ngPageSize > getTotalPageCount() - 1) {
+					scope.currentIndex = getTotalPageCount() - 1;
+				}
+				else {
+					scope.currentIndex = scope.currentIndex + scope.ngPageSize;	
+				}
+				
+				changePage(scope.currentIndex);
+			}
+
+			scope.nextOnePage = function () {
+				if(scope.currentIndex == getTotalPageCount() - 1) return;	
+
+				if(scope.currentIndex % scope.ngPageSize == 9) {
+					scope.currentPage = scope.currentPage + 1;
+				}
+
+				render();
+
+				scope.currentIndex = scope.currentIndex + 1;
+				changePage(scope.currentIndex);
+			}
+			
+			scope.prevPage = function() {
+				if(scope.currentPage == 0) return;
+				scope.currentPage = scope.currentPage - 1;
+				render();
+				scope.currentIndex = scope.currentIndex - scope.ngPageSize;
+				changePage(scope.currentIndex);
+			}
+
+			scope.prevOnePage = function() {
+				if(scope.currentIndex == 0) return;
+
+				if(scope.currentIndex % scope.ngPageSize == 0)
+					scope.currentPage = scope.currentPage - 1;
+
+				render();
+				scope.currentIndex = scope.currentIndex - 1;
+				changePage(scope.currentIndex);
+			}
+
+			scope.firstPage = function() {
+				scope.currentPage = 0;
+				scope.currentIndex = 0;
+				render();
+				changePage(scope.currentIndex);
+			}
+
+			scope.lastPage = function() {
+				scope.currentPage = getLastPage();
+				scope.currentIndex = getTotalPageCount() - 1;
+				render();
+				changePage(scope.currentIndex);
+			}
+
+			scope.changePage = function(idx, e) {
+				if(e != null) {
+					e.preventDefault();
+				}
+				scope.currentIndex = idx;
+				changePage(idx);
+			}
+
+			scope.goPage = function(idx) {
+				var totalPageCount = getTotalPageCount();
+				if(idx < 0 || idx > totalPageCount-1) return;
+				if(idx == -1) return;
+				scope.currentIndex = idx;
+				scope.currentPage = Math.floor(scope.currentIndex / scope.ngPageSize);
+				render();
+				changePage(idx);
+				scope.isShowJumpPopup = false;
+			}
+
+			elem[0].changePage = scope.goPage;
+
+			function changePage(idx) {
+				if(idx < 0) idx = 0;
+				var expr = attr.onPageChange.replace('()', '(' + idx + ')')
+				scope.$parent.$eval(expr);
+			}
+
+			function render() {
+				// console.warn('render');
+				var totalPageCount = getTotalPageCount();
+				scope.totalIndexCount = totalPageCount;
+
+				if(getLastPage() == scope.currentPage) {
+					if(totalPageCount % scope.ngPageSize == 0) {
+						scope.arrPageSize = new Array(scope.ngPageSize);
+					}
+					else if(totalPageCount % scope.ngPageSize < scope.ngPageSize) {
+						scope.arrPageSize = new Array(totalPageCount % scope.ngPageSize);
+					}
+				}
+				else {
+					if(totalPageCount > scope.ngPageSize) {
+						scope.arrPageSize = new Array(scope.ngPageSize);
+					}
+					else {
+						scope.arrPageSize = new Array(totalPageCount);
+					}
+				}
+				
+			}
+
+			function setTotalCount(count) {
+				scope.ngTotalCount = count;
+			}
+
+			elem[0].setTotalCount = setTotalCount;
+
+			elem[0].reset = function() {
+				scope.currentPage = 0;
+				scope.currentIndex = 0;
+			}
+
+			scope.$watch('ngTotalCount', function() {
+				if(scope.currentIndex == undefined) {
+					scope.currentIndex = 0;	
+				}
+				if(scope.currentPage == undefined) {
+					scope.currentPage = 0;	
+				}				
+				render();
+			});
+
+			// scope.$watch('ngItemsPerPage', function(val) {
+
+			// 	var totalPageCount = getTotalPageCount();
+			// 	if((scope.currentIndex > totalPageCount - 1)) {
+			// 		scope.currentIndex = totalPageCount - 1;
+			// 		changePage(scope.currentIndex);
+			// 	}
+
+			// 	// console.log(getTotalPageCount(), scope.ngPageSize, scope.currentPage, getLastPage())
+
+			// 	if(getLastPage() < scope.currentPage) {
+			// 		scope.currentPage = getLastPage();
+			// 	}
+
+			// 	render();
+			// 	scope.$parent.$eval(attr.onItemsPerPageChange);
+
+				
+			// });
 
 			scope.isShowJumpPopup = false;
 

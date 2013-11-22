@@ -24,7 +24,7 @@
 	}
 
 	.newWidget {
-		-webkit-transition: .1s ease-in;
+		/*-webkit-transition: .1s ease-in;*/
 		overflow: hidden;
 	}
 
@@ -58,9 +58,64 @@
 
 	.newWidget.step5 {
 		width: 96.5%;
+		min-width: 1000px;
 		margin-left: -49%;
 		min-height: 90%;
 		top: 10px;
+	}
+
+	[fx-dashboard-id=binding-left] {
+		position: relative;
+		width: 58%;
+		left: 0;
+		border: 0;
+	}
+
+	[fx-dashboard-id=binding-right] {
+		position: absolute;
+		width: 39%;
+		right: 0;
+		height: 440px;
+		border: 1px solid silver;
+		top: 0;
+	}
+
+	[fx-dashboard-id=binding-query-result] {
+		height: 235px;
+		border: 1px solid silver;
+		margin-bottom: 5px;
+	}
+
+	[fx-dashboard-id=config-container] {
+		height: 200px;
+		position: relative;
+	}
+
+	[fx-dashboard-id=series] {
+		position: absolute;
+		left:0;
+		width: 22%;
+		height: 200px;
+		border: 0;	
+	}
+	
+	[fx-dashboard-id=series-list] {
+		border: 1px solid silver;
+		height: 160px;
+	}
+
+	[fx-dashboard-id=series-toolbar] {
+		margin-top: 5px;
+	}
+
+	[fx-dashboard-id=config] {
+		background-color: #f0f0f0;
+		padding-top: 10px;
+		position: absolute;
+		right: 0;
+		width: 76%;
+		height: 190px;
+		border: 0;
 	}
 
 	.qr-container {
@@ -252,12 +307,13 @@
 
 	.charthere {
 		/* -webkit-transition: .1s ease-in; */
-		position: absolute;
+		/*position: absolute;
 		border: 1px solid #ccc;
 		top: 71px;
 		right: 27px;
 		bottom: 56px;
 		width: 37.5%;
+		background-color: white;*/
 	}
 
 	.charthere:hover {

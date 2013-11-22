@@ -119,9 +119,10 @@ public class InitialSchema {
 		programs.add(createProgram(context, programApi, "Home", "Home", "홈", "starter", 1));
 		programs.add(createProgram(context, programApi, "Dashboard", "Dashboard", "대시보드", "dashboard", 2));
 		programs.add(createProgram(context, programApi, "Account", "Account", "계정관리", "orgchart", 3));
-		// programs.add(createProgram(context, programApi, "Task Manager", "Task Manager", "작업관리자", "taskmanager", 4));
-		// programs.add(createProgram(context, programApi, "Run", "Run", "실행", "run", 5));
-		// programs.add(createProgram(context, programApi, "Developer Console", "Developer Console", "개발자콘솔", "devconsole", 6));
+		programs.add(createProgram(context, programApi, "Auditlog", "Auditlog", "감사로그", "auditlog", 4));
+		// programs.add(createProgram(context, programApi, "Task Manager", "Task Manager", "작업관리자", "taskmanager", 5));
+		// programs.add(createProgram(context, programApi, "Run", "Run", "실행", "run", 6));
+		// programs.add(createProgram(context, programApi, "Developer Console", "Developer Console", "개발자콘솔", "devconsole", 7));
 
 		if (programApi.findProgramProfile(DEFAULT_DOMAIN, "all") == null) {
 			ProgramProfile profile = new ProgramProfile();
