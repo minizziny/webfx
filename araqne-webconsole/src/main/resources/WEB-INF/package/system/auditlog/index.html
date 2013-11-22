@@ -57,13 +57,13 @@
 		</section>
 		<section class="pane">
 			<div class="pull-left" style="margin:5px">
-				<input type="range" min="1" max="10" class="pull-left"
+				<input type="range" min="1" max="10" class="page-range pull-left"
 					ng-model="numPageSizeRough"
 					ng-change="changePagesizeRough()"
 					ng-mouseup="changePagesizeRoughMouseup()">
 				{{numPageSize}} <ng-pluralize count="numTotalCount" when="formItemsCount"></ng-pluralize>
 			</div>
-			<pager class="pull-right"
+			<pager-audit class="pull-right"
 				ng-model="dataAuditlogs"
 				ng-total-count="numTotalCount"
 				ng-items-per-page="numPageSize"
