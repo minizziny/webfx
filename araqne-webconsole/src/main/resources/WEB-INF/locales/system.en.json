@@ -502,5 +502,13 @@
 	"$S_str_Wednesday": "Wed",
 	"$S_str_Thursday": "Thu",
 	"$S_str_Friday": "Fri",
-	"$S_str_Saturday": "Sat"
+	"$S_str_Saturday": "Sat",
+
+	"--------audit log--------": "",
+	"$S_str_AuditLog": "Audit Log",
+	"$S_str_Duration": "Duration",
+	"$S_str_To": "To",
+	"$S_str_Action": "Action",
+	"$S_str_Success": "Success"	
+
 }

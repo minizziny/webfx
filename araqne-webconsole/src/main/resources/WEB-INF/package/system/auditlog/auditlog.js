@@ -39,9 +39,18 @@ function AuditLogController($scope, $filter, $translate, socket, eventSender, se
 			'locale': $translate.uses() 
 		}, proc.pid)
 		.success(function(m) {
-			//console.log(m.body);
 			$scope.dataAuditlogs = m.body.result;
 			$scope.numTotalCount = m.body.total;
+			$scope.dataAuditlogs.forEach(function(obj) {
+				if(obj.error == null){
+					obj.result = $filter('translate')('$S_str_Success');
+				} else {
+					obj.result = null;
+				}
+			});
+
+			//console.table($scope.dataAuditlogs);
+
 			$scope.$apply();
 		})
 		.failed(msgbusFailed);

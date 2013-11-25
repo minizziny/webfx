@@ -2,15 +2,15 @@
 <div class="auditlog-container" ng-controller="AuditLogController">
 	<div class="container">
 		<section class="pane" style="padding-bottom: 5px;">
-			<legend class="audit-legend">감사 로그</legend>
+			<legend class="audit-legend">{{'$S_str_AuditLog' | translate}}</legend>
 			<div>
-				기간 :
+				{{'$S_str_Duration' | translate}} :
 				&nbsp;
-				<input type="text" ng-model="from"> 부터
+				<input type="text" ng-model="from"> {{'$S_str_From' | translate}}
 				&nbsp;
-				<input type="text" ng-model="to"> 까지
+				<input type="text" ng-model="to"> {{'$S_str_To' | translate}}
 				<button class="btn btn-primary pull-right" ng-click="getAuditLogs()">
-					<i class="icon-search icon-white" /> 조회하기
+					<i class="icon-search icon-white" /> {{'$S_str_Search' | translate}}
 				</button>
 			</div>			
 		</section>
@@ -23,23 +23,31 @@
 							<span class="qr-th-type">
 								<i class="icon-white icon-time"></i>
 							</span>
-							시각
+							{{'$S_str_DateTime' | translate}}
 						</th>
 						<th>
 							<span class="qr-th-type">A</span>
-							분류
+							{{'$S_str_Category' | translate}}
 						</th>
 						<th>
 							<span class="qr-th-type">A</span>
-							계정
+							{{'$S_str_Account' | translate}}
 						</th>
 						<th>
 							<span class="qr-th-type">A</span>
-							행위
+							{{'$S_str_Action' | translate}}
 						</th>
 						<th>
 							<span class="qr-th-type">A</span>
-							내용
+							{{'$S_str_Contents' | translate}}
+						</th>
+						<th>
+							<span class="qr-th-type">A</span>
+							{{'$S_str_Result' | translate}}
+						</th>
+						<th>
+							<span class="qr-th-type">A</span>
+							{{'$S_str_Error' | translate}}
 						</th>
 					</tr>
 				</thead>
@@ -51,6 +59,8 @@
 						<td>{{log.user}}</td>
 						<td>{{log.action}}</td>
 						<td>{{log.msg}}</td>
+						<td>{{log.result}}</td>
+						<td>{{log.error}}</td>
 					</tr>
 				</tbody>
 			</table>
