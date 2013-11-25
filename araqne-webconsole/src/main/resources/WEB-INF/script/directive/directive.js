@@ -1005,17 +1005,6 @@ angular.module('app.directive', ['pascalprecht.translate'])
 							<a  ng-click="lastPage()">{{"$S_str_Last" | translate}}(<span>{{totalIndexCount}}</span>)</a>\
 						</li>\
 					</ul>\
-					<button class="btn btn-mini" style="vertical-align: top; margin: 2px 5px 0px 0px" ng-click="openJumpPopup($event)"><i class="icon-share-alt"></i></button>\
-					<div style="position: relative; float: right">\
-						<div class="popover top" style="display:block; left: -235px; top: -130px" ng-show="isShowJumpPopup" ng-click="stopPropagation($event)">\
-							<div class="arrow" style="left:94%"></div>\
-							<h3 class="popover-title">{{"$S_str_MovePage" | translate}}</h3>\
-							<div class="popover-content"><form>\
-								<input type="number" min="1" max="{{totalIndexCount}}" ng-model="targetIndex" style="float:left; width:120px">\
-								<button class="btn btn-primary" ng-click="goPage(targetIndex - 1)" style="margin-left: 10px">{{"$S_str_Go" | translate}}</button>\
-							</form></div>\
-						</div>\
-					</div>\
 					<div style="display:none"><br>\
 					ngTotalCount: {{ngTotalCount}}<br>\
 					ngItemsPerPage: {{ngItemsPerPage}}<br>\
