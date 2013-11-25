@@ -9,3 +9,7 @@ button.m3 {
 input.page-range {
 	width: 100px;
 }
+
+.auditlog-date-invalid { 
+	border: 1px solid red !!important;
+}

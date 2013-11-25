@@ -13,6 +13,8 @@ function AuditLogController($scope, $filter, $translate, socket, eventSender, se
 	$scope.numCurrentPage = 0;
 	$scope.numPagerPageSize = 10;
 
+	$scope.dataDatePattern = /^([0-9][0-9]{3})(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[0-1])$/;
+
 	$scope.formItemsCount = {
 		'0': $filter('translate')('$S_str_Items'),
 		'one': $filter('translate')('$S_str_Item'),
@@ -26,6 +28,7 @@ function AuditLogController($scope, $filter, $translate, socket, eventSender, se
 	$scope.limit = null;
 
 	$scope.getAuditLogs = function(offset, limit) {
+		
 		//console.log("offset: " + offset + ", limit: " + limit);
 		/*
 		method : org.logpresso.core.msgbus.AuditLogPlugin.getAuditLogs
