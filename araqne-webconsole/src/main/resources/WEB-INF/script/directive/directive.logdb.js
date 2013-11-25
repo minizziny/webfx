@@ -9,7 +9,7 @@ angular.module('app.directive.logdb', [])
 			onStatusChange: '&',
 			onTimeline: '&',
 			ngTemplate: '=ngTemplate',
-			ngPageSize: '=',
+			ngPageSize: '&',
 			ngChange: '&',
 			ngQueryString: '='
 		},
@@ -87,7 +87,8 @@ angular.module('app.directive.logdb', [])
 			var z;
 			function search() {
 
-				var limit = scope.$eval(attrs.ngPageSize);
+				var limit = scope.$eval(scope.ngPageSize);
+				
 				textarea.blur();
 				if(z != undefined) {
 					serviceLogdb.remove(z);
