@@ -510,5 +510,6 @@
 	"$S_str_Duration": "기간",
 	"$S_str_To": "까지",
 	"$S_str_Action": "행위",
-	"$S_str_Success": "성공"
+	"$S_str_Success": "성공",
+	"$S_str_Failed": "실패"
 }

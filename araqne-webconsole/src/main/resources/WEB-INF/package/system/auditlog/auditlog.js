@@ -45,7 +45,7 @@ function AuditLogController($scope, $filter, $translate, socket, eventSender, se
 				if(obj.error == null){
 					obj.result = $filter('translate')('$S_str_Success');
 				} else {
-					obj.result = null;
+					obj.result = $filter('translate')('$S_str_Failed');
 				}
 			});
 

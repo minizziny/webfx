@@ -509,6 +509,6 @@
 	"$S_str_Duration": "Duration",
 	"$S_str_To": "To",
 	"$S_str_Action": "Action",
-	"$S_str_Success": "Success"	
-
+	"$S_str_Success": "Success",
+	"$S_str_Failed": "Failed"
 }
