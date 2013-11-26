@@ -167,6 +167,8 @@ public class InitialSchema {
 		Role master = createRole(context, roleApi, "master", 4);
 		addPermission(master, "dom", "admin_grant");
 		addPermission(master, "dom", "user_edit");
+		addPermission(master, "dom", "config_edit");
+		addPermission(master, "dom", "config_view");		
 		updateRole(context, roleApi, master);
 
 		Role admin = createRole(context, roleApi, "admin", 3);
