@@ -80,6 +80,28 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession) {
 	$scope.isShowDashboard = false;
 
 	$scope.src = {};
+	$scope.recentPrograms = [];
+
+	eventSender.root.onClose = function(pack, program) {
+		console.log('root.close');
+		$scope.src[program] = '';
+
+		var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
+		$scope.recentPrograms.splice(idxProgram, 1);
+
+		if($scope.recentPrograms.length == 0) {
+			if(location.hash =='#/system/starter') {
+				location.href = '/#/system/starter/';
+			}
+			else {
+				location.href = '/#/system/starter';
+			}
+		}
+		else {
+			var arr = $scope.recentPrograms[$scope.recentPrograms.length - 1].split('@')
+			location.href='/#/' + arr[1] + '/' + arr[0];
+		}
+	}
 
 	eventSender.root.go = function(pack, program) {
 		if(program == '') {
@@ -97,6 +119,13 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession) {
 		angular.element('.view#view-' + program).show();
 
 		$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';
+
+		console.log('root.go');
+		var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
+		if(idxProgram != -1) {
+			$scope.recentPrograms.splice(idxProgram, 1);
+		}
+		$scope.recentPrograms.push(program + '@' + pack);
 
 		if($('#view-starter').css('display') == "block") {
 			$scope.isShowStarter = true;
@@ -197,8 +226,14 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 				pack.isOpen = false;
 
 				pack.programs.forEach(function(program) {
-					program.halt = function() {
-						console.log(program);
+					program.halt = function(e) {
+						console.log('halt');
+						e.stopPropagation();
+						var el = angular.element('#view-' + program.path);
+						program.isActive = false;
+						program.isCurrent = false;
+
+						eventSender.root.onClose(pack.dll, program.path);
 					}
 				})
 			});
