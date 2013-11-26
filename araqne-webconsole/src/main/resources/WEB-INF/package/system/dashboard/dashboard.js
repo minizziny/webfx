@@ -1,9 +1,8 @@
-var proc = {pid: 3}
-
 function DashboardController($scope, $filter, $translate, eventSender) {
+	$scope.getPid = eventSender.dashboard.pid;
 
 	$scope.openNewWidget = function() {
-		eventSender.onOpenNewWidget();
+		eventSender.dashboard.onOpenNewWidget();
 	}
 
 	$scope.formSecond = {
@@ -16,20 +15,20 @@ function DashboardController($scope, $filter, $translate, eventSender) {
 	$scope.numPagerPagesize = 100;
 
 	$scope.onRemoveWidget = function(guid) {
-		eventSender.onRemoveSingleWidget(guid);
+		eventSender.dashboard.onRemoveSingleWidget(guid);
 	}
 
 }
 
 function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
-	eventSender.onCurrentPresetChanged = function() {
+	eventSender.dashboard.onCurrentPresetChanged = function() {
 		console.log('currentPreset changed')
 
 		console.log($scope.currentPreset);
 		return SavePreset($scope.currentPreset.guid, $scope.currentPreset.name, $scope.currentPreset.state);
 	}
 
-	eventSender.onRemoveSingleWidget = function(guid) {
+	eventSender.dashboard.onRemoveSingleWidget = function(guid) {
 		console.log('onRemoveSingleWidget', guid);
 
 		var widgets = $scope.currentPreset.state.widgets;
@@ -40,23 +39,23 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			}
 		};
 
-		eventSender.onCurrentPresetChanged(); // save state
+		eventSender.dashboard.onCurrentPresetChanged(); // save state
 	}
 
-	eventSender.onCreateNewWidgetAndSavePreset = function(ctx) {
+	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
 		// no exist widgets array
 		if(!$scope.currentPreset.state.widgets) {
 			$scope.currentPreset.state["widgets"] = [];
 		}
 
 		$scope.currentPreset.state.widgets.push(ctx);
-		eventSender.onCreateNewWidget(ctx);
+		eventSender.dashboard.onCreateNewWidget(ctx);
 
-		eventSender.onCurrentPresetChanged(); // save state
+		eventSender.dashboard.onCurrentPresetChanged(); // save state
 	}
 
-	eventSender.onCreateNewWidget = function(ctx) {
-		var widget = angular.element('<widget guid="' + ctx.guid + '" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
+	eventSender.dashboard.onCreateNewWidget = function(ctx) {
+		var widget = angular.element('<widget ng-pid="getPid" guid="' + ctx.guid + '" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
 		$compile(widget)($scope);
 		widget[0].setContext(ctx);
 
@@ -67,7 +66,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	$scope.currentPreset;
 
 	function GetPresetList(callback) {
-		socket.send('org.logpresso.core.msgbus.WallPlugin.getPresetNames', {}, proc.pid)
+		socket.send('org.logpresso.core.msgbus.WallPlugin.getPresetNames', {}, eventSender.dashboard.pid)
 		.success(function(m) {
 			console.log(m.body)
 
@@ -103,13 +102,13 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
 			{ 'guid': guid, 'name': name, 'state': state }
-		, proc.pid);
+		, eventSender.dashboard.pid);
 	}
 
 	function InitAutosave() {
 		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
 			{ "guid": "autosave", "name": $translate('$S_str_Autosave'), "state": { "widgets": [] } }
-		, proc.pid);
+		, eventSender.dashboard.pid);
 	}
 
 	function ClearPreset() {
@@ -124,7 +123,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 		socket.send('org.logpresso.core.msgbus.WallPlugin.getPreset',
 			{ 'guid': guid }
-		, proc.pid)
+		, eventSender.dashboard.pid)
 		.success(function(m) {
 			console.log(m.body.preset.state)
 			$scope.currentPreset = m.body.preset;
@@ -135,7 +134,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			var widgets = m.body.preset.state.widgets;
 			for (var i = 0; i < widgets.length; i++) {
 				
-				eventSender.onCreateNewWidget(widgets[i]);
+				eventSender.dashboard.onCreateNewWidget(widgets[i]);
 
 			};
 
@@ -158,7 +157,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 		return socket.send("org.logpresso.core.msgbus.WallPlugin.removePresets", 
 			{ "guids": args }
-		, proc.pid);
+		, eventSender.dashboard.pid);
 	}
 
 	$scope.SaveAs = function() {
@@ -263,7 +262,7 @@ function SelectColumnController($scope, $filter, $translate, eventSender) {
 		$scope.dataCustomColumn = '';
 	}
 
-	eventSender.onSelectColumnFinishing = function() {
+	eventSender.dashboard.onSelectColumnFinishing = function() {
 
 		// 바인딩하기 전, 선택한 컬럼이 차트 타입에 대하여 유효한지 검증합니다.
 
@@ -300,7 +299,7 @@ function SelectColumnController($scope, $filter, $translate, eventSender) {
 		return satisfy_requirement && satisfy_one;
 	}
 
-	eventSender.onSelectColumnFinished = function(fn) {
+	eventSender.dashboard.onSelectColumnFinished = function(fn) {
 		// 바인딩 화면에 컬럼 정보를 넘겨줍니다.
 		$('.qr2.qr-selectable')[0].getColumns(function(cols) {
 			fn.call($scope, {
@@ -406,10 +405,10 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 	}
 
 	$scope.qrCols;
-	eventSender.onChartBindingStarting = function() {
+	eventSender.dashboard.onChartBindingStarting = function() {
 		console.log('onChartBindingStarting')
 		// 이전 단계에서 선택된 항목의 정보를 전달해준다
-		eventSender.onSelectColumnFinished(function(sender) {
+		eventSender.dashboard.onSelectColumnFinished(function(sender) {
 
 			$scope.qresult = null;
 			$scope.qresult = sender.result;
@@ -559,7 +558,7 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 		return types[2];
 	}
 
-	eventSender.onSendChartDataWizard = function() {
+	eventSender.dashboard.onSendChartDataWizard = function() {
 		console.log('onSendChartDataWizard');
 
 		return {
@@ -608,7 +607,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		}
 	}
 
-	eventSender.onOpenNewWidget = function() {
+	eventSender.dashboard.onOpenNewWidget = function() {
 		var newWidgetWin = $('.newWidget').removeClass(makeRemoveClassHandler(/^step/));
 		newWidgetWin[0].showDialog();
 			
@@ -665,13 +664,13 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 			},
 			's1next': 4,
 			's4nextEvent': function() {
-				return eventSender.onSelectColumnFinishing;
+				return eventSender.dashboard.onSelectColumnFinishing;
 			},
 			's4nextCallback': function() {
-				return eventSender.onChartBindingStarting;
+				return eventSender.dashboard.onChartBindingStarting;
 			},
 			's5nextCallback': function() {
-				dataChart = eventSender.onSendChartDataWizard();
+				dataChart = eventSender.dashboard.onSendChartDataWizard();
 				return;
 			},
 			's3prev': 5
@@ -729,7 +728,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 
 		console.log($scope.ctxWidget);
 
-		eventSender.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
+		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
 		$('.newWidget')[0].hideDialog();	
 	}
 
@@ -776,7 +775,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 
 		$scope.ctxWidget.data.type = dataChart.type;
 		console.log($scope.ctxWidget)
-		eventSender.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
+		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
 		$('.newWidget')[0].hideDialog();
 	}
 }

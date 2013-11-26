@@ -66,8 +66,11 @@ logpresso.factory('eventSender', function() {
 	var e = {
 		'root': {},
 		'menu': {},
-		'orgchart': {},
-		'table': {}
+		'starter': { pid: 11 },
+		'orgchart': { pid: 33 },
+		'table': {},
+		'dashboard': { pid: 22 },
+		'logquery': { pid: 44 }
 	}
 	return e;
 });

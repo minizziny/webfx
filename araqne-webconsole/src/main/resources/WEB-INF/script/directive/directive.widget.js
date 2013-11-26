@@ -3,7 +3,8 @@ angular.module('app.directive.widget', [])
 	return {
 		restrict: 'E',
 		scope: {
-			'onRemove': '&'
+			'onRemove': '&',
+			'ngPid': '='
 		},
 		template: '<div class="widget">\
 			<figure class="front">\
@@ -192,7 +193,7 @@ angular.module('app.directive.widget', [])
 				scope.progress = { 'width': '0%' };
 				//scope.$apply();
 
-				var queryInst = serviceLogdb.create(proc.pid);
+				var queryInst = serviceLogdb.create(scope.ngPid);
 
 				function getResult(m) {
 					var result = m.body.result;
