@@ -76,11 +76,12 @@ logpresso.factory('eventSender', function() {
 });
 
 
-function Controller($scope, $rootScope, socket, eventSender, serviceSession) {
+function Controller($scope, $rootScope, socket, eventSender, serviceSession, serviceDom) {
 	console.log('Controller init');
 
 	$scope.isShowStarter = false;
 	$scope.isShowDashboard = false;
+	$scope.timeout = 1000 * 60 * 10;
 
 	$scope.src = {};
 	$scope.recentPrograms = [];
@@ -152,6 +153,54 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession) {
 	eventSender.root.initialize = function() {
 		$scope.src.login = 'partials/login.html';
 		$scope.$apply();
+	}
+
+	eventSender.root.startTimeout = function() {
+		$scope.LogOutTimer().start();
+		$scope.$apply();
+	}
+
+	$scope.LogOutTimer = function(){
+		var S = {
+			timer : null,
+			limit : $scope.timeout,
+			fnc   : function() {
+				serviceSession.logout(function() {
+					console.log('idle time out [' + $scope.timeout + 'sec] log out.');
+					alert('timeout');					
+					location.href = '/';
+				});
+				S.stop();
+				
+			},
+			start : function() {
+				S.timer = window.setTimeout(S.fnc, S.limit);
+			},
+			reset : function() {
+				window.clearTimeout(S.timer);
+				S.start();
+			},
+			stop : function() {
+				window.clearInterval(S.timer);
+			}
+		};
+
+		socket.send('org.araqne.dom.msgbus.OrganizationPlugin.getOrganizationParameter', {'key': 'admin_timeout'}, 0)
+		.success(function(m) {
+			S.limit = m.body.result * 1000;			
+			$scope.$apply();
+		})
+		.failed(function(m, raw) {
+			console.log(m, raw, 'error')
+		});
+
+		console.log(S.limit);
+
+		document.onmousemove = function() {
+			S.reset(); 
+		};
+
+		return S;
 	}
 
 }
@@ -285,9 +334,8 @@ function LoginController($scope, socket, serviceSession, eventSender) {
 			serviceSession.login($scope.txtLoginName, $scope.txtPassword, m.body.nonce, function(m) {
 				location.href='/#/system/starter';
 				eventSender.root.loggedIn();
-
+				eventSender.root.startTimeout();
 			});
-
 		})
 		.failed(function(m, raw) {
 			console.log(m, raw, 'error')
