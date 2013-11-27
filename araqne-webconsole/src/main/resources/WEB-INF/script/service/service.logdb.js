@@ -319,11 +319,22 @@ angular.module('app.logdb', [])
 		return instance;
 	}
 
-	function remove(instance) {
+	function remove(instance, notApply) {
 		instance.dispose();
 		var idx = logdb.queries.indexOf(instance);
 		logdb.queries.splice(idx, 1);
-		logdb.$apply();
+		if(!notApply) {
+			logdb.$apply();	
+		}
+	}
+
+	function dispose(pid) {
+		logdb.queries.filter(function(q) {
+			return q.getPid() == pid && !q.getBg();
+		}).forEach(function(q) {
+			remove(q, true);
+			// logdb.$apply();
+		});
 	}
 
 	function createFromBg(pid, id, str, status) {
@@ -408,6 +419,7 @@ angular.module('app.logdb', [])
 		createFromBg: createFromBg,
 		remove: remove,
 		getQueries: getQueries,
+		dispose: dispose,
 		setForeground: function(id, callback) {
 			return setRunMode(id, false, function(m, qinst) {
 				logdb.queries.splice(logdb.queries.indexOf(qinst), 1);
