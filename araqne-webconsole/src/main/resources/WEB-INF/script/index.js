@@ -67,10 +67,18 @@ logpresso.factory('eventSender', function() {
 		'root': {},
 		'menu': {},
 		'starter': { pid: 11 },
-		'orgchart': { pid: 33 },
-		'table': {},
 		'dashboard': { pid: 22 },
-		'logquery': { pid: 44 }
+		'orgchart': { pid: 33 },
+		'logquery': { pid: 44 },
+		'logsource': {},
+		'table': {},
+		'license': {},
+		'regextester': {},
+		'querymanager': {}
+	};
+
+	for(var program in e) {
+		e[program].events = {};
 	}
 	return e;
 });
@@ -92,6 +100,9 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession, ser
 
 		var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
 		$scope.recentPrograms.splice(idxProgram, 1);
+
+		eventSender[program].events.unload();
+		eventSender[program].events = {};
 
 		if($scope.recentPrograms.length == 0) {
 			if(location.hash =='#/system/starter') {
@@ -124,12 +135,36 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession, ser
 
 		$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';
 
-		console.log('root.go');
 		var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
 		if(idxProgram != -1) {
 			$scope.recentPrograms.splice(idxProgram, 1);
 		}
 		$scope.recentPrograms.push(program + '@' + pack);
+
+		if($scope.recentPrograms.length > 1) {
+			var lastest = $scope.recentPrograms[$scope.recentPrograms.length - 2].split('@')[0];
+			eventSender[lastest].events.suspend();	
+		}
+
+		if(!eventSender[program].events.unload) {
+			console.log('--- load!', program);
+			var pe = eventSender[program].$event = new CustomEvent(eventSender[program].events);
+			pe.on('unload', function() {
+				console.log('--- unload', program);
+			});
+
+			pe.on('suspend', function() {
+				console.log('--- suspend', program);
+			});
+
+			pe.on('resume', function() {
+				console.log('--- resume', program);
+			})
+		}
+		else {
+			eventSender[program].events.resume();
+		}
+		
 
 		if($('#view-starter').css('display') == "block") {
 			$scope.isShowStarter = true;

@@ -1,5 +1,16 @@
-function DashboardController($scope, $filter, $translate, eventSender) {
+function DashboardController($scope, $filter, $element, $translate, eventSender) {
 	$scope.getPid = eventSender.dashboard.pid;
+	eventSender.dashboard.$event.on('unload', function() {
+		console.log('--- unload 2 dashboard!');
+		var widgets = angular.element($element.find('widget'));
+		for(var i = 0; i < widgets.length; i++) {
+			console.log( angular.element( widgets[i] ).scope() );
+
+			angular.element( widgets[i] )[0].$dispose();
+
+		}
+		
+	})
 
 	$scope.openNewWidget = function() {
 		eventSender.dashboard.onOpenNewWidget();
