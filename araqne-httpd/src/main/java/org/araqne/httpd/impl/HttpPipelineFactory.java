@@ -97,8 +97,8 @@ public class HttpPipelineFactory implements ChannelPipelineFactory, HttpConfigur
 			TrustManager[] trustManagers = null;
 			KeyManager[] keyManagers = null;
 
-			TrustManagerFactory tmf = keyStoreManager.getTrustManagerFactory(trustAlias, "SunX509");
-			KeyManagerFactory kmf = keyStoreManager.getKeyManagerFactory(keyAlias, "SunX509");
+			TrustManagerFactory tmf = keyStoreManager.getTrustManagerFactory(trustAlias, TrustManagerFactory.getDefaultAlgorithm());
+			KeyManagerFactory kmf = keyStoreManager.getKeyManagerFactory(keyAlias, KeyManagerFactory.getDefaultAlgorithm());
 
 			if (tmf != null)
 				trustManagers = tmf.getTrustManagers();
