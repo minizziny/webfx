@@ -131,6 +131,7 @@
 	"$S_str_Partition": "파티션",
 	"$S_msg_AddLogger": "로그 수집 설정을 추가하여 로그 수집을 시작하세요.",
 	"$S_str_ManageLogger": "로그 수집 설정 관리",
+	"$S_str_TimeoutAlert": "일정시간 이용하지 않아 자동종료 되었습니다.",
 
 	"--------login--------": "",
 	"$S_str_ID": "아이디",

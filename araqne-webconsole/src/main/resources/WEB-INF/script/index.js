@@ -84,12 +84,12 @@ logpresso.factory('eventSender', function() {
 });
 
 
-function Controller($scope, $rootScope, socket, eventSender, serviceSession, serviceDom) {
+function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSession, serviceDom) {
 	console.log('Controller init');
 
 	$scope.isShowStarter = false;
 	$scope.isShowDashboard = false;
-	$scope.timeout = 1000 * 60 * 10;
+	$scope.timeout = 1000 * 60 * 1;
 
 	$scope.src = {};
 	$scope.recentPrograms = [];
@@ -191,7 +191,23 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession, ser
 	}
 
 	eventSender.root.startTimeout = function() {
-		$scope.LogOutTimer().start();
+		socket.send('org.araqne.dom.msgbus.OrganizationPlugin.getOrganizationParameter', {'key': 'admin_timeout'}, 0)
+		.success(function(m) {
+			var timeout = m.body.result;
+			$scope.timeout = timeout * 1000;
+
+			console.log('loaded: ' + $scope.timeout);
+
+			if(timeout == null || timeout == '') {
+				$scope.LogOutTimer().stop();
+			} else {
+				$scope.LogOutTimer().start();
+			}			
+		})
+		.failed(function(m, raw) {
+			console.log(m, raw, 'error')
+		});
+
 		$scope.$apply();
 	}
 
@@ -201,8 +217,9 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession, ser
 			limit : $scope.timeout,
 			fnc   : function() {
 				serviceSession.logout(function() {
-					console.log('idle time out [' + $scope.timeout + 'sec] log out.');
-					alert('timeout');					
+					var alertMsg = $filter('translate')('$S_str_TimeoutAlert');
+					console.log('idle time out [' + S.limit / 1000 + 'sec] log out.');
+					alert(alertMsg);					
 					location.href = '/';
 				});
 				S.stop();
@@ -210,30 +227,27 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession, ser
 			},
 			start : function() {
 				S.timer = window.setTimeout(S.fnc, S.limit);
+				console.log('start timeout function');
 			},
 			reset : function() {
+				console.log('reset timeout ['+ S.limit +']');
 				window.clearTimeout(S.timer);
 				S.start();
 			},
 			stop : function() {
+				console.log('stop timeout function');
 				window.clearInterval(S.timer);
 			}
 		};
 
-		socket.send('org.araqne.dom.msgbus.OrganizationPlugin.getOrganizationParameter', {'key': 'admin_timeout'}, 0)
-		.success(function(m) {
-			S.limit = m.body.result * 1000;			
-			$scope.$apply();
-		})
-		.failed(function(m, raw) {
-			console.log(m, raw, 'error')
-		});
+		S.limit = $scope.timeout;
+		console.log('saved: '+S.limit);
 
-		console.log(S.limit);
-
-		document.onmousemove = function() {
-			S.reset(); 
-		};
+		if(S.timer != null) {
+			document.onmousemove = function() {
+				S.reset(); 
+			};
+		}
 
 		return S;
 	}

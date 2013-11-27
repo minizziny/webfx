@@ -131,6 +131,8 @@
 	"$S_str_Partition": "Partition",
 	"$S_msg_AddLogger": "Click \"Manage Loggers\" to start archive log.",
 	"$S_str_ManageLogger": "Manage Loggers",
+	"$S_str_TimeoutAlert": "Do not use auto-ended period of time",
+
 
 	"--------login--------": "",
 	"$S_str_ID": "ID",
