@@ -283,13 +283,11 @@ angular.module('app.directive.logdb', [])
 				var fieldsLine = scope.ngQuery.split("|");
 				var fields = [];
 				fieldsLine.forEach(function(obj) {
-
 					if(!obj.match(/fields -/) && obj.match(/fields/)) {
-						//obj.trim();
-						var replace = obj.replace("fields ", "");						
-						var tmp = replace.split(",");
-						tmp.forEach(function(f) {
-							f = f.replace(" ", "");
+						obj = obj.replace(/ /gi, "");
+						obj = obj.replace("fields", "");
+						var tmp = obj.split(",");
+						tmp.forEach(function(f) {							
 							fields.push(f);					
 						});
 					}
