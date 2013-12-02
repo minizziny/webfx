@@ -493,6 +493,7 @@
 	"$S_str_SelectTokenizer": "Select Tokenizer",
 	"$S_str_DefaultValueDescription": "if you don't input, this information is set default value",
 	"$S_str_NameValidationErrorMsg" : "Name can only contain alphabets, numbers, '-' and '_' characters",
+	"$S_str_AlreadyExistsMsg": "table already exists",
 
 	"--------index--------": "",
 	"$S_str_ValidateDateFormat": "Date Format is yyyymmdd",
