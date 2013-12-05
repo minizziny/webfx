@@ -1,8 +1,16 @@
 var proc = {pid: 4}
 function AuditLogController($scope, $filter, $translate, socket, eventSender, serviceDom) {
 	var current = new Date();
-	var currentDate = '' + current.getFullYear() + '' + (current.getMonth()+1) + '' + current.getDate();
-	var monthAgoDate = '' + current.getFullYear() + '' + current.getMonth() + '' + current.getDate();
+	var month = current.getMonth() + 1;
+	var monthAgo = current.getMonth();
+	var day = current.getDate();
+
+	if (("" + month).length == 1) monthAgo = "0" + monthAgo;
+	if (("" + month).length == 1) month = "0" + month;	
+	if (("" + current.getDate()).length == 1) day = "0" + day;
+
+	var currentDate = '' + current.getFullYear() + '' +  month + '' + day;
+	var monthAgoDate = '' + current.getFullYear() + '' + monthAgo + '' + day;
 
 	$scope.dataAuditlogs = [];
 	$scope.numAuditlogsCount;
@@ -23,6 +31,9 @@ function AuditLogController($scope, $filter, $translate, socket, eventSender, se
 	
 	$scope.from = monthAgoDate;
 	$scope.to = currentDate;
+
+	console.log($scope.from);
+	console.log($scope.to);
 
 	$scope.offset = null;
 	$scope.limit = null;

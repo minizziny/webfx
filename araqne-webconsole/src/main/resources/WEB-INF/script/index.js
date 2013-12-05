@@ -69,6 +69,7 @@ logpresso.factory('eventSender', function() {
 		'starter': { pid: 11 },
 		'dashboard': { pid: 22 },
 		'orgchart': { pid: 33 },
+		'auditlog': {},
 		'logquery': { pid: 44 },
 		'logsource': {},
 		'table': {},
