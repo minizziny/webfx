@@ -1,5 +1,5 @@
 angular.module('app.directive.logdb', [])
-.directive('queryInput', function($compile, $parse, $translate, serviceLogdb) {
+.directive('queryInput', function($compile, $parse, $translate, serviceLogdb, serviceDom) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -36,6 +36,9 @@ angular.module('app.directive.logdb', [])
 
 			function createdFn(m) {
 				element.removeClass('loaded').addClass('loading');
+				//사용자 입력 쿼리 기록 넣기
+				var queryValue = textarea.data('$ngModelController').$modelValue;	
+				serviceLogdb.save(queryValue, serviceDom.whoAmI());
 			}
 
 			function startedFn(m) {
@@ -92,8 +95,10 @@ angular.module('app.directive.logdb', [])
 					serviceLogdb.remove(z);
 				}
 				z = serviceLogdb.create(scope.ngPid);
+
+
 				
-				var queryValue = textarea.data('$ngModelController').$modelValue;
+				var queryValue = textarea.data('$ngModelController').$modelValue;				
 
 				z.query(queryValue, limit)
 				.created(createdFn)

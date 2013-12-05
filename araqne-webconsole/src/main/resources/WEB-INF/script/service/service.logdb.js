@@ -310,6 +310,19 @@ angular.module('app.logdb', [])
 		/* End QueryClass */
 	}
 
+	function save(string, owner) {
+		socket.send('org.logpresso.core.msgbus.QueryHistoryPlugin.saveQuery', {
+			'query': string, 'owner': owner
+		}, proc.pid)
+		.success(function(m) {
+			console.log("query: " + string);
+			console.log("owner: " + owner);
+		})
+		.failed(function(m, raw) {
+			console.log(raw, 'cannot save query');
+		})
+	}
+
 	function create(pid) {
 
 		var instance = new QueryClass(pid, function() {
@@ -415,6 +428,7 @@ angular.module('app.logdb', [])
 	
 
 	return {
+		save: save,
 		create: create,
 		createFromBg: createFromBg,
 		remove: remove,
