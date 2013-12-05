@@ -333,24 +333,62 @@ angular.module('app.directive.logdb', [])
 					});
 				} else {
 					cols.forEach(function(a) {
-						if(a == "$$hashKey") {
-							fields.push("$$hashKey");
+						if(a == '$$hashKey') {
+							fields.push('$$hashKey');
 						}
 					});
 
-					// 정렬된 배열로 치환
-					cols = fields;
-					cols.forEach(function(k, i) {
+
+					var tmp = [];
+
+					//순서 정렬 필드 골라 담기
+					cols.forEach(function(c) {
+						for(var i = 0 ; i < fields.length ; i++) {
+							if(c == fields[i]) {
+								tmp[i] = c;							
+							}
+						}					
+					});
+
+					tmp.forEach(function(k, i) {
 						if(k == '$$hashKey') {
-							cols.splice(cols.indexOf(k), 1);
+							tmp.splice(tmp.indexOf(k), 1);
 						}
 					});
+
+					var dupCols = [];
+					cols.forEach(function(c) {
+						dupCols.push(c);
+					});
+
+					//정렬된 필드 비워내기
+					fields.forEach(function(f) {
+						dupCols.forEach(function(c) {
+							if(f == c) {
+								dupCols.splice(dupCols.indexOf(c), 1);
+							}
+						});
+					});
+
+					//결과 필드 합치기
+					tmp = tmp.concat(dupCols);
+
+					var mixedCols = [];
+					tmp.forEach(function(t) {
+						mixedCols.push(t);
+					});
+
+					//// 정렬된 배열로 치환
+					cols = mixedCols;					
 				}
 				
 				//console.log(cols.length)
 				if(cols.length > scope.numLimitColumn) {
 					scope.numTotalColumn = cols.length;
 				}
+
+				console.log("[cols]");
+				console.log(cols);
 				
 				scope.ngCols = cols.map(function(k) {
 					return {
