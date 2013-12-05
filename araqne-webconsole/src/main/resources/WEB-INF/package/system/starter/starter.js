@@ -1,5 +1,5 @@
-function StarterController($scope, socket) {
-	var pid = 1;
+function StarterController($scope, socket, eventSender) {
+	$scope.getPid = eventSender.starter.pid;
 	$scope.partitions = [];
 
 	function makeChart(el, query, elupdate) {
@@ -37,7 +37,7 @@ function StarterController($scope, socket) {
 		  .append("g")
 		    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-		socket.send(query, {}, pid)
+		socket.send(query, {}, eventSender.starter.pid)
 		.success(function(m) {
 			//console.log(m.body.graph);
 			var data = m.body.graph;
@@ -95,7 +95,7 @@ function StarterController($scope, socket) {
 	function getDiskUsages() {
 		$scope.partitions.splice(0, $scope.partitions.length);
 
-		socket.send('org.logpresso.core.msgbus.LauncherPlugin.getDiskUsages', {}, pid)
+		socket.send('org.logpresso.core.msgbus.LauncherPlugin.getDiskUsages', {}, eventSender.starter.pid)
 		.success(function(m) {
 			$.each(m.body.usages, function(i, obj) {
 

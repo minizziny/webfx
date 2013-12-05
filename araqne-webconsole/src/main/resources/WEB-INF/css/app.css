@@ -67,6 +67,13 @@ code {
 	height: 60px;
 }
 
+.errorWin {
+	position: absolute;
+	width: 450px;
+	margin-left: -275px;
+	padding: 10px 20px;
+}
+
 .wizard-contents, .wizard-contents-parser, .wizard-contents-index {
 	float: left;
 	width: 140px;

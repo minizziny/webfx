@@ -1,6 +1,4 @@
 function OrgChartController($scope, $filter, socket, eventSender, serviceDom) {
-	var proc = {pid: 2}
-
 
 	eventSender.orgchart.getOrgUnit = function(guid, orgunits) {
 		var found = null;
@@ -119,7 +117,7 @@ function RemoveUsersController($scope, socket, eventSender) {
 			})
 		}
 		
-		socket.send('org.araqne.dom.msgbus.UserPlugin.removeUsers', login_names, proc.pid)
+		socket.send('org.araqne.dom.msgbus.UserPlugin.removeUsers', login_names, eventSender.orgchart.pid)
 		.success(function(m) {
 
 			if(m.body.failed_login_names.length > 0) {
@@ -213,7 +211,7 @@ function UserController($scope, socket, eventSender, serviceDom) {
 			$scope.selectedUserCopy.org_unit = org_unit_obj;
 		}
 
-		socket.send(method, $scope.selectedUserCopy, proc.pid)
+		socket.send(method, $scope.selectedUserCopy, eventSender.orgchart.pid)
 		.success(function(m) {
 			$scope.exitUserEditMode();
 
@@ -345,7 +343,7 @@ function AdminController($scope, socket, eventSender, serviceDom) {
 	var myRole;
 
 	function getRoles() {
-		socket.send('org.araqne.dom.msgbus.RolePlugin.getRoles', {}, proc.pid)
+		socket.send('org.araqne.dom.msgbus.RolePlugin.getRoles', {}, eventSender.orgchart.pid)
 		.success(function(m) {
 			$scope.listRoles = m.body.roles;
 			console.log(m.body);
@@ -372,7 +370,7 @@ function AdminController($scope, socket, eventSender, serviceDom) {
 	}
 
 	function getAdminMsgbus(login_name) {
-		return socket.send('org.araqne.dom.msgbus.AdminPlugin.getAdmin', { 'login_name': login_name }, proc.pid)
+		return socket.send('org.araqne.dom.msgbus.AdminPlugin.getAdmin', { 'login_name': login_name }, eventSender.orgchart.pid)
 		.failed(openError);
 	}
 
@@ -416,7 +414,7 @@ function AdminController($scope, socket, eventSender, serviceDom) {
 			'is_enabled': true
 		}
 
-		socket.send('org.araqne.dom.msgbus.AdminPlugin.setAdmin', option, proc.pid)
+		socket.send('org.araqne.dom.msgbus.AdminPlugin.setAdmin', option, eventSender.orgchart.pid)
 		.success(function(m) {
 			$scope.currentRole = getRoleByName(rolename);
 			console.log('::: setAdmin:\t', option, rolename);
@@ -744,7 +742,7 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 			option["ou_guid"] = guid;
 		}
 
-		socket.send('org.araqne.dom.msgbus.UserPlugin.getUsers', option, proc.pid)
+		socket.send('org.araqne.dom.msgbus.UserPlugin.getUsers', option, eventSender.orgchart.pid)
 		.success(function(m) {
 			$scope.dataUsers = m.body.users;
 
@@ -762,7 +760,7 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 			'org_unit_guid': target.guid, 
 			'login_names': users
 		}
-		socket.send('org.araqne.dom.msgbus.UserPlugin.moveUsers', option, proc.pid)
+		socket.send('org.araqne.dom.msgbus.UserPlugin.moveUsers', option, eventSender.orgchart.pid)
 		.success(function(m) {
 			console.log(m.body)
 			var failed_login_names = m.body.failed_login_names;
@@ -851,7 +849,7 @@ function ChangePasswordController($scope, socket, eventSender, $filter) {
 		currentUser.password = $scope.valPassword;
 
 		// console.log(currentUser);
-		socket.send('org.araqne.dom.msgbus.UserPlugin.updateUser', currentUser, proc.pid)
+		socket.send('org.araqne.dom.msgbus.UserPlugin.updateUser', currentUser, eventSender.orgchart.pid)
 		.success(function(m) {
 			console.log(m.body);
 			notify('success', $filter('translate')('$S_msg_ChangePasswordSuccess', { 'p0': currentUser.login_name }) , true);
@@ -891,7 +889,7 @@ function OrgUnitTreeController($scope, $compile, $filter, socket, eventSender) {
 			socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.createOrganizationUnit', {
 				'name': this.node.name,
 				'parent': this.node.parent
-			}, proc.pid)
+			}, eventSender.orgchart.pid)
 			.success(function(m) {
 				self.node.guid = m.body.guid;
 			})
@@ -902,7 +900,7 @@ function OrgUnitTreeController($scope, $compile, $filter, socket, eventSender) {
 				'guid': this.node.guid,
 				'name': this.node.name,
 				'parent': this.node.parent
-			}, proc.pid)
+			}, eventSender.orgchart.pid)
 			.success(function(m) {
 				console.log(m.body)
 			})
@@ -917,7 +915,7 @@ function OrgUnitTreeController($scope, $compile, $filter, socket, eventSender) {
 			$scope.removeOrgUnit = function() {
 				socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.removeOrganizationUnit', {
 					'guid': self.node.guid
-				}, proc.pid)
+				}, eventSender.orgchart.pid)
 				.success(function(m) {
 					async.success();
 					$('.mdlRemoveOrgUnit')[0].hideDialog();
@@ -938,7 +936,7 @@ function OrgUnitTreeController($scope, $compile, $filter, socket, eventSender) {
 				'parent': targetScope.node.guid
 			};
 			
-			socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.updateOrganizationUnit', obj, proc.pid)
+			socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.updateOrganizationUnit', obj, eventSender.orgchart.pid)
 			.success(function(m) {
 				async.success();
 			})
@@ -971,7 +969,7 @@ function OrgUnitTreeController($scope, $compile, $filter, socket, eventSender) {
 		$('#treeOrgUnit a:first .dropdown-menu li:not(:first)').remove();
 	}
 
-	socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.getOrganizationUnits', {}, proc.pid)
+	socket.send('org.araqne.dom.msgbus.OrganizationUnitPlugin.getOrganizationUnits', {}, eventSender.orgchart.pid)
 	.success(function(m) {
 		console.log(m.body);
 

@@ -131,6 +131,8 @@
 	"$S_str_Partition": "Partition",
 	"$S_msg_AddLogger": "Click \"Manage Loggers\" to start archive log.",
 	"$S_str_ManageLogger": "Manage Loggers",
+	"$S_str_TimeoutAlert": "Do not use auto-ended period of time",
+
 
 	"--------login--------": "",
 	"$S_str_ID": "ID",
@@ -180,6 +182,7 @@
 	"$S_msg_CannotLoadTableStatus": "Cannot load table trends.",
 	"$S_str_RecentQuery": "Recent Queries",
 	"$S_str_Query": "Query",
+	"$S_str_RunAt": "Running At",
 	"$S_msg_CannotLoadRecentQuery": "Cannot load recent queries.",
 	"$S_str_Status": "Status",
 	"$S_str_DataToNextQuery": " passed",
@@ -288,10 +291,33 @@
 	"$S_str_HostTagName": "Host Tagging",
 	"$S_str_Create": "Create",
 
+	"$S_str_LoggerExistsMsg": "Logger already exists.",
+	"$S_str_TableExistsMsg": "Table already exists.",
+
 	"$S_msg_CreateLoggerSuccess": "Created new logger {{p0}}",
 	"$S_msg_StopLoggerSuccess": "Stopped logger {{p0}}",
 	"$S_msg_StartLoggerSuccess": "Started logger {{p0}}",
 	"$S_msg_RemoveLoggerSuccess": "Deleted logger {{p0}}",
+
+	"$S_msg_LoggerNotFound": "Logger not found.",
+	"$S_msg_ManagedLoggerNotFound" : "logger not found.",
+	"$S_msg_LocalLoggerNotFound" : "Local logger not found.",
+	"$S_msg_SentryLoggerNotFound" : "Sentry logger not found.",
+	"$S_msg_SentryProxyLoggerNotFound" : "Sentry proxy logger not found.",
+	"$S_msg_SentryNotFound" : "Sentry not found.",
+	"$S_msg_SentryNotConnected" : "Sentry not connected.",
+	"$S_msg_LoggerFactoryNotFound" : "Logger factory not found.",
+	"$S_msg_LoggerAlreadyExists" : "Logger already exists.",	
+	"$S_msg_DuplicatedManagedLoggerExists" : "Duplicated managed logger exists.",		
+	"$S_msg_LoggerNameMustNotBeNull" : "Logger name must not be null.",
+	"$S_msg_AlreadyConnectedLoggerRegistry" : "Already connected loggerRegistry.",
+	"$S_msg_RemoteLoggerNotFoundOnLoggerRegistry" : "Remote logger not found on loggerRegistry.",
+	"$S_msg_DuplicatedLoggerConnection" : "Duplicated logger connection.",
+	"$S_msg_LoggerIsStillRunning" : "Logger is still running.",
+	"$S_msg_LoggerIsAlreadyRunning" : "Logger is already running.",
+	"$S_msg_IsClosed" : "Connection is Closed.",
+	"$S_msg_RpcTimeout" : "Rpc timeout.",
+	"$S_msg_IntervalCannotBeZero" : "Interval cannot be zero.",
 	
 	"$S_str_Category": "Category",
 	"$S_str_MacAddress": "MAC Address",
@@ -491,6 +517,7 @@
 	"$S_str_SelectTokenizer": "Select Tokenizer",
 	"$S_str_DefaultValueDescription": "if you don't input, this information is set default value",
 	"$S_str_NameValidationErrorMsg" : "Name can only contain alphabets, numbers, '-' and '_' characters",
+	"$S_str_AlreadyExistsMsg": "table already exists",
 
 	"--------index--------": "",
 	"$S_str_ValidateDateFormat": "Date Format is yyyymmdd",

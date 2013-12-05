@@ -66,20 +66,57 @@ logpresso.factory('eventSender', function() {
 	var e = {
 		'root': {},
 		'menu': {},
-		'orgchart': {},
-		'table': {}
+		'starter': { pid: 11 },
+		'dashboard': { pid: 22 },
+		'orgchart': { pid: 33 },
+		'logquery': { pid: 44 },
+		'logsource': {},
+		'table': {},
+		'license': {},
+		'regextester': {},
+		'querymanager': {}
+	};
+
+	for(var program in e) {
+		e[program].events = {};
 	}
 	return e;
 });
 
 
-function Controller($scope, $rootScope, socket, eventSender, serviceSession) {
+function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSession, serviceDom) {
 	console.log('Controller init');
 
 	$scope.isShowStarter = false;
 	$scope.isShowDashboard = false;
+	$scope.timeout = 1000 * 60 * 1;
 
 	$scope.src = {};
+	$scope.recentPrograms = [];
+
+	eventSender.root.onClose = function(pack, program) {
+		console.log('root.close');
+		$scope.src[program] = '';
+
+		var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
+		$scope.recentPrograms.splice(idxProgram, 1);
+
+		eventSender[program].events.unload();
+		eventSender[program].events = {};
+
+		if($scope.recentPrograms.length == 0) {
+			if(location.hash =='#/system/starter') {
+				location.href = '/#/system/starter/';
+			}
+			else {
+				location.href = '/#/system/starter';
+			}
+		}
+		else {
+			var arr = $scope.recentPrograms[$scope.recentPrograms.length - 1].split('@')
+			location.href='/#/' + arr[1] + '/' + arr[0];
+		}
+	}
 
 	eventSender.root.go = function(pack, program) {
 		if(program == '') {
@@ -97,6 +134,37 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession) {
 		angular.element('.view#view-' + program).show();
 
 		$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';
+
+		var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
+		if(idxProgram != -1) {
+			$scope.recentPrograms.splice(idxProgram, 1);
+		}
+		$scope.recentPrograms.push(program + '@' + pack);
+
+		if($scope.recentPrograms.length > 1) {
+			var lastest = $scope.recentPrograms[$scope.recentPrograms.length - 2].split('@')[0];
+			eventSender[lastest].events.suspend();	
+		}
+
+		if(!eventSender[program].events.unload) {
+			console.log('--- load!', program);
+			var pe = eventSender[program].$event = new CustomEvent(eventSender[program].events);
+			pe.on('unload', function() {
+				console.log('--- unload', program);
+			});
+
+			pe.on('suspend', function() {
+				console.log('--- suspend', program);
+			});
+
+			pe.on('resume', function() {
+				console.log('--- resume', program);
+			})
+		}
+		else {
+			eventSender[program].events.resume();
+		}
+		
 
 		if($('#view-starter').css('display') == "block") {
 			$scope.isShowStarter = true;
@@ -120,6 +188,68 @@ function Controller($scope, $rootScope, socket, eventSender, serviceSession) {
 	eventSender.root.initialize = function() {
 		$scope.src.login = 'partials/login.html';
 		$scope.$apply();
+	}
+
+	eventSender.root.startTimeout = function() {
+		socket.send('org.araqne.dom.msgbus.OrganizationPlugin.getOrganizationParameter', {'key': 'admin_timeout'}, 0)
+		.success(function(m) {
+			var timeout = m.body.result;
+			$scope.timeout = timeout * 1000;
+
+			console.log('loaded: ' + $scope.timeout);
+
+			if(timeout == null || timeout == '') {
+				$scope.LogOutTimer().stop();
+			} else {
+				$scope.LogOutTimer().start();
+			}			
+		})
+		.failed(function(m, raw) {
+			console.log(m, raw, 'error')
+		});
+
+		$scope.$apply();
+	}
+
+	$scope.LogOutTimer = function(){
+		var S = {
+			timer : null,
+			limit : $scope.timeout,
+			fnc   : function() {
+				serviceSession.logout(function() {
+					var alertMsg = $filter('translate')('$S_str_TimeoutAlert');
+					console.log('idle time out [' + S.limit / 1000 + 'sec] log out.');
+					alert(alertMsg);					
+					location.href = '/';
+				});
+				S.stop();
+				
+			},
+			start : function() {
+				S.timer = window.setTimeout(S.fnc, S.limit);
+				console.log('start timeout function');
+			},
+			reset : function() {
+				console.log('reset timeout ['+ S.limit +']');
+				window.clearTimeout(S.timer);
+				S.start();
+			},
+			stop : function() {
+				console.log('stop timeout function');
+				window.clearInterval(S.timer);
+			}
+		};
+
+		S.limit = $scope.timeout;
+		console.log('saved: '+S.limit);
+
+		if(S.timer != null) {
+			document.onmousemove = function() {
+				S.reset(); 
+			};
+		}
+
+		return S;
 	}
 
 }
@@ -197,8 +327,14 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 				pack.isOpen = false;
 
 				pack.programs.forEach(function(program) {
-					program.halt = function() {
-						console.log(program);
+					program.halt = function(e) {
+						console.log('halt');
+						e.stopPropagation();
+						var el = angular.element('#view-' + program.path);
+						program.isActive = false;
+						program.isCurrent = false;
+
+						eventSender.root.onClose(pack.dll, program.path);
 					}
 				})
 			});
@@ -247,9 +383,8 @@ function LoginController($scope, socket, serviceSession, eventSender) {
 			serviceSession.login($scope.txtLoginName, $scope.txtPassword, m.body.nonce, function(m) {
 				location.href='/#/system/starter';
 				eventSender.root.loggedIn();
-
+				eventSender.root.startTimeout();
 			});
-
 		})
 		.failed(function(m, raw) {
 			console.log(m, raw, 'error')

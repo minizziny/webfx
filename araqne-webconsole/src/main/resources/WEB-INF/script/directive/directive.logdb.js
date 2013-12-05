@@ -1,5 +1,5 @@
 angular.module('app.directive.logdb', [])
-.directive('queryInput', function($compile, $parse, $translate, serviceLogdb) {
+.directive('queryInput', function($compile, $parse, $translate, serviceLogdb, serviceDom) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -11,17 +11,15 @@ angular.module('app.directive.logdb', [])
 			ngTemplate: '=ngTemplate',
 			ngPageSize: '&',
 			ngChange: '&',
-			ngQueryString: '='
+			ngQueryString: '=',
+			ngPid: '='
 		},
 		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" placeholder="{{ \'$S_msg_QueryHere\' | translate }}" spellcheck="false" autosize></textarea>\
 			<button class="search btn btn-primary">{{ "$S_str_Search" | translate}}</button>\
 			<button class="stop btn btn-warning">{{ "$S_str_Stop" | translate}}</button>',
 		link: function(scope, element, attrs) {
 			var autoflush = attrs.isAutoFlush;
-
 			var textarea = element.find('textarea');
-
-			var pid = proc.pid;
 			
 			textarea.on('keydown', function(e) {
 				if (e.type === 'keydown' && e.keyCode === 13) {
@@ -38,6 +36,9 @@ angular.module('app.directive.logdb', [])
 
 			function createdFn(m) {
 				element.removeClass('loaded').addClass('loading');
+				//사용자 입력 쿼리 기록 넣기
+				var queryValue = textarea.data('$ngModelController').$modelValue;	
+				serviceLogdb.save(queryValue, serviceDom.whoAmI());
 			}
 
 			function startedFn(m) {
@@ -93,9 +94,11 @@ angular.module('app.directive.logdb', [])
 				if(z != undefined) {
 					serviceLogdb.remove(z);
 				}
-				z = serviceLogdb.create(pid);
+				z = serviceLogdb.create(scope.ngPid);
+
+
 				
-				var queryValue = textarea.data('$ngModelController').$modelValue;
+				var queryValue = textarea.data('$ngModelController').$modelValue;				
 
 				z.query(queryValue, limit)
 				.created(createdFn)
@@ -141,7 +144,7 @@ angular.module('app.directive.logdb', [])
 			}
 
 			element[0].bindBackgroundQuery = function(id, str, status) {
-				z = serviceLogdb.createFromBg(pid, id, str, status);
+				z = serviceLogdb.createFromBg(scope.ngPid, id, str, status);
 				z.registerTrap(function() {
 					console.log('registerTrap')
 				})
@@ -285,13 +288,11 @@ angular.module('app.directive.logdb', [])
 				var fieldsLine = scope.ngQuery.split("|");
 				var fields = [];
 				fieldsLine.forEach(function(obj) {
-
 					if(!obj.match(/fields -/) && obj.match(/fields/)) {
-						//obj.trim();
-						var replace = obj.replace("fields ", "");						
-						var tmp = replace.split(",");
-						tmp.forEach(function(f) {
-							f = f.replace(" ", "");
+						obj = obj.replace(/ /gi, "");
+						obj = obj.replace("fields", "");
+						var tmp = obj.split(",");
+						tmp.forEach(function(f) {							
 							fields.push(f);					
 						});
 					}

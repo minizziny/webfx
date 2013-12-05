@@ -310,6 +310,19 @@ angular.module('app.logdb', [])
 		/* End QueryClass */
 	}
 
+	function save(string, owner) {
+		socket.send('org.logpresso.core.msgbus.QueryHistoryPlugin.saveQuery', {
+			'query': string, 'owner': owner
+		}, proc.pid)
+		.success(function(m) {
+			console.log("query: " + string);
+			console.log("owner: " + owner);
+		})
+		.failed(function(m, raw) {
+			console.log(raw, 'cannot save query');
+		})
+	}
+
 	function create(pid) {
 
 		var instance = new QueryClass(pid, function() {
@@ -319,11 +332,22 @@ angular.module('app.logdb', [])
 		return instance;
 	}
 
-	function remove(instance) {
+	function remove(instance, notApply) {
 		instance.dispose();
 		var idx = logdb.queries.indexOf(instance);
 		logdb.queries.splice(idx, 1);
-		logdb.$apply();
+		if(!notApply) {
+			logdb.$apply();	
+		}
+	}
+
+	function dispose(pid) {
+		logdb.queries.filter(function(q) {
+			return q.getPid() == pid && !q.getBg();
+		}).forEach(function(q) {
+			remove(q, true);
+			// logdb.$apply();
+		});
 	}
 
 	function createFromBg(pid, id, str, status) {
@@ -404,10 +428,12 @@ angular.module('app.logdb', [])
 	
 
 	return {
+		save: save,
 		create: create,
 		createFromBg: createFromBg,
 		remove: remove,
 		getQueries: getQueries,
+		dispose: dispose,
 		setForeground: function(id, callback) {
 			return setRunMode(id, false, function(m, qinst) {
 				logdb.queries.splice(logdb.queries.indexOf(qinst), 1);

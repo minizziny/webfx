@@ -202,7 +202,7 @@
 			<ul ng-class="{open: pack.isOpen}">
 				<li class="tm-program" onclick="location.href='/#/{{pack.dll}}/{{program.path}}'" ng-repeat="program in pack.programs" ng-class="{active: program.isActive, current: program.isCurrent}">
 					<a class="link" href="/#/{{pack.dll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
-					<a class="close" ng-show="program.isActive" ng-click="program.halt()">&times;</a>
+					<a class="close" ng-show="program.isActive" ng-click="program.halt($event)">&times;</a>
 				</li>
 			</ul>
 		</div>
