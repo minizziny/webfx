@@ -1252,4 +1252,23 @@ angular.module('app.directive', ['pascalprecht.translate'])
 			});
 		}
 	}
+})
+.directive('datepicker', function() {
+    return {
+        restrict: 'A',
+        require : 'ngModel',
+        link : function (scope, element, attrs, ngModelCtrl) {
+            $(function(){
+                element.datepicker({
+                    dateFormat:'yymmdd',
+                    inline: true,  
+          			showOtherMonths: true,
+                    onSelect:function (date) {
+                        ngModelCtrl.$setViewValue(date);
+                        scope.$apply();
+                    }
+                });
+            });
+        }
+    }
 });
