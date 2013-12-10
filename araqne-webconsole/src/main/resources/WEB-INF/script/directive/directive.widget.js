@@ -1,4 +1,79 @@
 angular.module('app.directive.widget', [])
+.directive('ngModelOnBlur', function() {
+	return {
+		restrict: 'A',
+		require: 'ngModel',
+		scope: {
+			'onChange': '&ngChange',
+			'onCancel': '&ngCancel',
+			'ngModelOnBlur': '&',
+			'val': '=ngModel'
+		},
+		link: function(scope, element, attrs, ngModelCtrl) {
+			if (attrs.type === 'radio' || attrs.type === 'checkbox') return;
+			var cancel = false;
+
+			element.unbind('input').unbind('keydown').unbind('change');
+			element.bind('blur', function() {
+				if(!cancel) {
+					ngModelCtrl.$setViewValue(element.val());
+					scope.onChange({
+
+					});
+				}
+
+				scope.ngModelOnBlur({
+
+				});
+
+				setTimeout(function() {
+					scope.$apply();
+					cancel = false;
+				}, 100);
+			}).bind('keydown', function(e) {
+				if(e.keyCode == 13) {
+					this.blur();
+				}
+				else if(e.keyCode == 27) {
+					cancel = true;
+					element.val(scope.val)
+
+					scope.onCancel({
+
+					});
+					this.blur();
+				}
+			});
+		}
+	}
+})
+.directive('clickToEdit', function() {
+	return {
+		restrict: 'A',
+		scope: {
+			'val': '=ngModel',
+			'onCancel': '&ngCancel',
+			'onChange': '&ngChange'
+		},
+		template: '<input type="text" ng-model="val" style="display:none" ng-model-on-blur="onBlur()" ng-change="onChange()" ng-cancel="onCancel()"></input><a ng-click="toggle()">{{val}}</a>',
+		link: function(scope, element, attrs) {
+			var elInput = element.find('input');
+			var elA = element.find('a');
+
+			scope.onBlur = function() {
+				scope.toggle();
+			}
+
+			scope.toggle = function() {
+				elInput.toggle();
+				elA.toggle();
+				if(elA.is(':hidden')) {
+					elInput.focus();
+				}
+			}
+		}
+	}
+})
 .directive('widget', function($compile, $timeout, $parse, $translate, serviceLogdb, serviceChart) {
 	return {
 		restrict: 'E',
@@ -8,7 +83,8 @@ angular.module('app.directive.widget', [])
 		},
 		template: '<div class="widget">\
 			<figure class="front">\
-				<h4 style="font-size:1em; margin: 0px 0px 5px;">{{name}}\
+				<h4 style="font-size:1em; margin: 0px 0px 5px;">\
+					<span click-to-edit ng-model="name" ng-change="onChange()" ng-cancel="onCancel()"></span>\
 					<span class="pull-right">\
 						<button class="btn btn-mini b-pause" ng-hide="isPaused" ng-click="isPaused = true">\
 							<i class="icon-pause"></i>\
@@ -52,6 +128,14 @@ angular.module('app.directive.widget', [])
 			scope.isPaused = false;
 			scope.errorMessage = $translate('$S_msg_UnknownError');
 			scope.guid;
+
+			scope.onCancel = function() {
+				console.log('onCancel');
+			}
+
+			scope.onChange = function() {
+				console.log('onChange')
+			}
 
 			var init = true;
 			scope.$watch('isPaused', function(val) {
