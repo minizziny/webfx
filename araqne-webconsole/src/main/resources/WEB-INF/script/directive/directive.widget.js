@@ -53,12 +53,17 @@ angular.module('app.directive.widget', [])
 		scope: {
 			'val': '=ngModel',
 			'onCancel': '&ngCancel',
-			'onChange': '&ngChange'
+			'onChange': '&ngChange',
+			'type': '='
 		},
 		template: '<input type="text" ng-model="val" style="display:none" ng-model-on-blur="onBlur()" ng-change="onChange()" ng-cancel="onCancel()"></input><a ng-click="toggle()">{{val}}</a>',
 		link: function(scope, element, attrs) {
 			var elInput = element.find('input');
 			var elA = element.find('a');
+
+			if(attrs.type == 'number') {
+				elInput.attr('type', 'number')
+			}
 
 			scope.onBlur = function() {
 				scope.toggle();
@@ -115,7 +120,8 @@ angular.module('app.directive.widget', [])
 					<div class="property-inner" ng-click="stopPropagation($event)">\
 						<code>{{query}}</code><br/>\
 						{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
-						{{"$S_msg_QueryRunInterval" | translate:paramQueryRunInterval()}}\
+						<span click-to-edit type="number" ng-model="interval" ng-change="onChange()" ng-cancel="onCancel()"></span>\
+						{{"$S_msg_QueryRunInterval" | translate}}\
 					</div>\
 				</div>\
 				<div class="alert alert-error" ng-show="isShowError">{{errorMessage}}</div>\
@@ -128,6 +134,12 @@ angular.module('app.directive.widget', [])
 			scope.isPaused = false;
 			scope.errorMessage = $translate('$S_msg_UnknownError');
 			scope.guid;
+
+			// el.draggable({
+			// 	'handle': 'h4',
+			// 	'revert': 'invalid',
+			// 	'revertDuration': 100
+			// });
 
 			scope.onCancel = function() {
 				console.log('onCancel');
