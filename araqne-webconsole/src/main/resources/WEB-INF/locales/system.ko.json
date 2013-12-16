@@ -402,6 +402,8 @@
 	"$S_str_CannotParseDate": "날짜 해석을 할 수 없습니다",
 	"$S_str_RegexHelp": "정규 표현식 도움말",
 
+	"$S_str_UseLinePatternMatch": "줄 단위 패턴 매칭",
+
 	"--------regex help--------": "",
 	"$S_str_RegexHelp1": "a, b, c 중 하나의 문자",
 	"$S_str_RegexHelp2": "a, b, c 를 제외한 하나의 문자",

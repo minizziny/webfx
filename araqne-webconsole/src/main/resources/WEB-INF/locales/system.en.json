@@ -404,6 +404,9 @@
 	"$S_str_ParseDateResult": "Parsed Date",
 	"$S_str_CannotParseDate": "Cannot parse given date string",
 	"$S_str_RegexHelp": "Regular Expression Help",
+
+	"$S_str_UseLinePatternMatch": "Line Pattern matching",
+
 	
 	"--------regexhelp--------": "",
 	"$S_str_RegexHelp1": "A single character of: a, b, or c",
