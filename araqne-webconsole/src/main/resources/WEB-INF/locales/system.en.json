@@ -509,6 +509,7 @@
 	"$S_str_LogTrend": "Log Trend",
 	"$S_str_LastLogNotFound": "Last Log Not Found.",
 	"$S_str_Wholeperiod": "All",
+	"$S_str_Unlimited": "Unlimited",
 	"$S_str_From": "From",
 	"$S_str_Use": "Yes",
 	"$S_str_Notuse": "No",
