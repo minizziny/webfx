@@ -9,7 +9,7 @@ Array.prototype.removeAt = function(idx) {
 	this.splice(idx, 1);
 }
 
-$("body").on("selectstart", function() { return false; });
+$(document).on("selectstart", function() { return false; });
 
 function hasClassIndexOf(s, klass) {
 	return ("" + s).split(" ").indexOf(klass) >= 0;
@@ -314,10 +314,8 @@ var layoutEngine = (function() {
 		}
 		
 		this.insertAt = function(box, order) {
-			this.box = box;
-			
+
 			if(this.boxes[order] === undefined) {
-				console.trace();
 				this.boxes[order - 1].el.after(box.el);
 				this.boxes.insert(box, order);
 				box.row = this;
@@ -450,11 +448,38 @@ var layoutEngine = (function() {
 			
 			if(box.row.boxes.length === 0) {
 				box.row.close();
+				
 			}
 			else {
 				calculateWidth(box.row, false);
+				if(this.boxes.length === 1) {
+					unwrapBox(this.boxes[0]);
+				}
 				// layoutEngine.ui.layout.box.root.updateLayout(false);
 			}
+		}
+
+		function unwrapBox(box) {
+			console.log('unwrapBox');
+			
+			var prow = box.row;
+			var prowh = box.row.obj.h;
+			var urows = box.rows;
+			var pbox = box.row.box;
+
+			if(box.obj.w === 100) {
+				// row append to parent box
+				// get parent row's index
+				var prowIndex = pbox.rows.indexOf(prow);
+
+				for (var i = urows.length - 1; i >= 0; i--) {
+					urows[i].obj.h = urows[i].obj.h * prowh * 0.01;
+					pbox.insert(urows[i], prowIndex);
+				};
+
+				box.close();
+			}
+
 		}
 
 		draw();
@@ -841,6 +866,7 @@ var layoutEngine = (function() {
 				}
 				else {
 					console.log("right case: basic");
+
 					var original_idx = this.row.boxes.indexOf(this);
 					
 					box.obj.w = this.obj.w / 2;
@@ -848,7 +874,7 @@ var layoutEngine = (function() {
 					
 					this.row.insertAt(boxn, original_idx + 1);
 
-					console.trace();
+					// console.trace();
 					this.row.boxes[original_idx].resize(boxn.obj.w, false);
 					box.close();
 				}
@@ -1296,13 +1322,10 @@ var layoutEngine = (function() {
 				row.box.close();
 			}
 			else {
-				calculateHeight(row.box.rows, false);
+				calculateHeight(row.box.rows, false, row.box.row);
 				
 				if(row.box.rows.length === 1) {
-					if(row.box.rows[0].boxes.length === 1) {
-						
-						unwrapRow(row.box.rows[0]);
-					}
+					unwrapRow(row.box.rows[0]);
 				}
 				
 				// layoutEngine.ui.layout.box.root.updateLayout(false);
@@ -1310,45 +1333,31 @@ var layoutEngine = (function() {
 		}
 
 		function unwrapRow(row) {
-			
-			// ubox.row.boxes == [a-c, c]
-			// row.box == a (사라져야 함)
+			console.log('unwrapRow')
 
-			// unwrap element
-
-			var pel = row.box.el;
+			var pbox = row.box;
 			var pobjw = row.box.obj.w;
-			var ubox = row.boxes[0];
-			
-			// ubox는 알짜 box
-			// row 는 벗겨내야할 대상
-			// row.box 는 rows를 갖고 있는 container
-			
+			var uboxes = row.boxes;
 			var prow = row.box.row;
-			
-			ubox.el.children(".k-rs-r").remove();
-			ubox.row.el.children(".k-rs-b").remove();
-			ubox.el.unwrap();
-			ubox.el.children(".mybox").unwrap();
 
-			// 껍데기(row.box)가 제거되고, 알짜배기(row.boxes[0])로 대체됨
-			
-			var pboxes = prow.boxes;
-			var idx = pboxes.indexOf(row.box);
-			delete pboxes[idx];
+			console.log(prow.el[0]);
+			console.log(row.obj.h);
 
-			var allidx = layoutEngine.ui.layout.box.allboxes.indexOf(row.box);
-			layoutEngine.ui.layout.box.allboxes.removeAt(allidx);
-			
-			ubox.row = prow;
-			ubox.el = pel;
-			ubox.obj.w = pobjw;
-			pboxes[idx] = ubox;
-			
-			//prow.box.guid = ubox.guid;
-			ubox.el[0].obj = ubox;
-			
-			return prow;
+			if(row.obj.h === 100) {
+				// boxes append to parent row 
+				// get parent box's index
+				var pboxIndex = prow.boxes.indexOf(pbox);
+				
+				for (var i = uboxes.length - 1; i >= 0; i--) {
+					uboxes[i].obj.w = uboxes[i].obj.w * pobjw * 0.01;
+					prow.insertAt(uboxes[i], pboxIndex);
+				};
+
+				// row unwrap
+				row.close();
+
+			}
+
 		}
 
 		var _super = layoutEngine.extend(Box, layoutEngine.ui.resizable, {
