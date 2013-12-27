@@ -724,6 +724,8 @@ var layoutEngine = (function() {
 						var newrow = this.addRow();
 						newrow.append(boxn);
 						boxn.row = newrow;
+
+						unmakeDroppable(this);
 					}
 					
 					
@@ -796,6 +798,7 @@ var layoutEngine = (function() {
 						newrow.append(boxn);
 						boxn.row = newrow;
 						
+						unmakeDroppable(this);
 					}
 				}
 			}
