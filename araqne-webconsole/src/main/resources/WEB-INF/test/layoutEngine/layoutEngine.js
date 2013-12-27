@@ -1355,15 +1355,17 @@ var layoutEngine = (function() {
 			if(row.obj.h === 100) {
 				// boxes append to parent row 
 				// get parent box's index
-				var pboxIndex = prow.boxes.indexOf(pbox);
-				
-				for (var i = uboxes.length - 1; i >= 0; i--) {
-					uboxes[i].obj.w = uboxes[i].obj.w * pobjw * 0.01;
-					prow.insertAt(uboxes[i], pboxIndex);
-				};
+				if(prow != undefined) {
+					var pboxIndex = prow.boxes.indexOf(pbox);
+					
+					for (var i = uboxes.length - 1; i >= 0; i--) {
+						uboxes[i].obj.w = uboxes[i].obj.w * pobjw * 0.01;
+						prow.insertAt(uboxes[i], pboxIndex);
+					};
 
-				// row unwrap
-				row.close();
+					// row unwrap
+					row.close();
+				}
 
 			}
 		}
