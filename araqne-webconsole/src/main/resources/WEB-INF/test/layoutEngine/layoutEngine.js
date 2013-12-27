@@ -9,6 +9,10 @@ Array.prototype.removeAt = function(idx) {
 	this.splice(idx, 1);
 }
 
+Array.prototype.last = function() {
+	return this.slice(-1)[0];
+}
+
 $(document).on("selectstart", function() { return false; });
 
 function hasClassIndexOf(s, klass) {
@@ -113,11 +117,13 @@ var layoutEngine = (function() {
 			if(prop.resizer[1]) {
 				var ree = $("<div>").addClass("k-rs-r").appendTo(el);
 				handleResizer(that, ree);
+				that.resizerH = ree;
 			}
 
 			if(prop.resizer[2]) {
 				var ree = $("<div>").addClass("k-rs-b").appendTo(el);
 				handleResizerV(that, ree);
+				that.resizerV = ree;
 			}
 		}
 
@@ -184,6 +190,7 @@ var layoutEngine = (function() {
 			}
 			
 			var rows = parent.children(".k-d-row");
+			console.log('handleResize', rows, sender)
 
 			$.each(rows, function(i, el) {
 				var px = $(el).height();
@@ -507,6 +514,8 @@ var layoutEngine = (function() {
 				}
 			}
 		});
+
+		this.resizerV = el.find('.k-rs-b');
 	}
 
 	function Box(prop) {
@@ -726,6 +735,11 @@ var layoutEngine = (function() {
 						boxn.row = newrow;
 
 						unmakeDroppable(this);
+
+						newrow.resizerV.hide();					
+						this.rows.forEach(function(row) {
+							row.boxes[0].resizerH.hide();
+						})
 					}
 					
 					
@@ -799,6 +813,11 @@ var layoutEngine = (function() {
 						boxn.row = newrow;
 						
 						unmakeDroppable(this);
+
+						child.row.resizerV.hide();
+						this.rows.forEach(function(row) {
+							row.boxes[0].resizerH.hide();
+						})
 					}
 				}
 			}
@@ -904,15 +923,8 @@ var layoutEngine = (function() {
 			delete boxobj.w;
 			var boxel = box.el.children(".mybox").remove();
 			
-			
 			var boxn = _box.create(boxobj);
 			newrow.append(boxn);
-			
-			//console.log(boxn);
-			//console.log(boxn.el[0]);
-			
-			//console.log(box);
-			//console.log(box.el[0]);
 			
 			delete box.guid;
 			delete box.obj.guid;
@@ -964,12 +976,16 @@ var layoutEngine = (function() {
 			else {
 				
 				setTimeout(function() {
-					console.log(that.row, that.guid)
+					// console.log(that.row, that.guid)
 					if(that.row == undefined) {
 						makeDroppable(that, true);
-					}	
-				}, 500)
+					}
+				}, 500);
 				
+				that.rows.forEach(function(row) {
+					row.boxes.last().resizerH.hide();
+				});
+				that.rows.last().resizerV.hide();
 			}
 
 			el.css("width", prop.w + "%");
@@ -1394,6 +1410,8 @@ var layoutEngine = (function() {
 
 		draw();
 
+		// override resizer
+		this.resizerH = el.find('.k-rs-r');
 
 		layoutEngine.ui.layout.box.allboxes.push(this);
 	}

@@ -84,24 +84,26 @@ html, body, .k-d-col, #main {
 
 
 .k-rs-r {
-	background-color: red;
-	width: 5px;
+	background-color: rgba(0,0,0,.4);
+	width: 15px;
 	height: 100%;
-	right: 0px;
+	right: -5px;
 	top: 0;
 	position: absolute;
 	cursor: w-resize;
+	z-index: 9999;
 }
 
 .k-rs-b {
-	background-color: red;
+	background-color: rgba(0,0,0,.4);
 	width: 100%;
-	height: 5px;
-	bottom: 0px;
+	height: 15px;
+	bottom: -5px;
 	left: 0;
 	position: absolute;
 	z-index: 1000;
 	cursor: s-resize;
+	z-index: 9999;
 
 }
 
