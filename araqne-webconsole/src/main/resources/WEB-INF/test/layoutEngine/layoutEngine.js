@@ -402,6 +402,14 @@ var layoutEngine = (function() {
 					box.resize(neww, false);
 
 					totalper = totalper + neww;
+
+
+					if(i + 1 == row.boxes.length) {
+						box.resizerH.hide();
+					}
+					else {
+						box.resizerH.show();
+					}
 				}
 				
 				var lastbox = row.boxes[row.boxes.length - 1];
@@ -514,7 +522,7 @@ var layoutEngine = (function() {
 			}
 		});
 
-		this.resizerV = el.find('.k-rs-b');
+		this.resizerV = $(el.find('.k-rs-b')[0]);
 	}
 
 	function Box(prop) {
@@ -735,7 +743,8 @@ var layoutEngine = (function() {
 
 						unmakeDroppable(this);
 
-						newrow.resizerV.hide();					
+						newrow.resizerV.hide();
+
 						this.rows.forEach(function(row) {
 							row.boxes[0].resizerH.hide();
 						})
@@ -927,7 +936,6 @@ var layoutEngine = (function() {
 			
 			delete box.guid;
 			delete box.obj.guid;
-			
 			//box.row = newrow;
 			
 			return boxn;
@@ -980,7 +988,7 @@ var layoutEngine = (function() {
 						makeDroppable(that, true);
 					}
 				}, 500);
-				
+
 				that.rows.forEach(function(row) {
 					row.boxes.last().resizerH.hide();
 				});
@@ -1046,6 +1054,10 @@ var layoutEngine = (function() {
 					box.resize(neww, false);
 
 					totalper = totalper + neww;
+
+					if(i + 1 == rows.length) {
+						box.resizerV.hide();
+					}
 				}
 
 				var lastbox = rows[rows.length - 1];
@@ -1364,9 +1376,6 @@ var layoutEngine = (function() {
 			var uboxes = row.boxes;
 			var prow = row.box.row;
 
-			console.log(prow);
-			console.log(row.obj.h);
-
 			if(row.obj.h === 100) {
 				// boxes append to parent row 
 				// get parent box's index
@@ -1380,6 +1389,7 @@ var layoutEngine = (function() {
 
 					// row unwrap
 					row.close();
+					pbox.resizerH.show();
 				}
 
 			}
@@ -1410,7 +1420,7 @@ var layoutEngine = (function() {
 		draw();
 
 		// override resizer
-		this.resizerH = el.find('.k-rs-r');
+		this.resizerH = $(el.find('.k-rs-r')[0]);
 
 		layoutEngine.ui.layout.box.allboxes.push(this);
 	}
