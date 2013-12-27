@@ -446,14 +446,20 @@ var layoutEngine = (function() {
 			var allidx = layoutEngine.ui.layout.box.allboxes.indexOf(box);
 			layoutEngine.ui.layout.box.allboxes.removeAt(allidx);
 			
+			console.log('deleteBox',box)
 			if(box.row.boxes.length === 0) {
 				box.row.close();
 				
 			}
 			else {
 				calculateWidth(box.row, false);
-				if(this.boxes.length === 1) {
-					unwrapBox(this.boxes[0]);
+
+				if(box.row.boxes.length === 1) {
+					setTimeout(function() {
+						if(box.row.boxes[0].rows.length != 0) {
+							unwrapBox(box.row.boxes[0]);	
+						}
+					}, 200)
 				}
 				// layoutEngine.ui.layout.box.root.updateLayout(false);
 			}
@@ -1340,7 +1346,7 @@ var layoutEngine = (function() {
 			var uboxes = row.boxes;
 			var prow = row.box.row;
 
-			console.log(prow.el[0]);
+			console.log(prow);
 			console.log(row.obj.h);
 
 			if(row.obj.h === 100) {
@@ -1357,7 +1363,6 @@ var layoutEngine = (function() {
 				row.close();
 
 			}
-
 		}
 
 		var _super = layoutEngine.extend(Box, layoutEngine.ui.resizable, {
