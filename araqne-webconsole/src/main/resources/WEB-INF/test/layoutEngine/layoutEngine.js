@@ -190,14 +190,13 @@ var layoutEngine = (function() {
 			}
 			
 			var rows = parent.children(".k-d-row");
-			console.log('handleResize', rows, sender)
 
 			$.each(rows, function(i, el) {
 				var px = $(el).height();
 
 				$(el).height(px);
 			});
-			var maxheight = sender.el.next().height();
+			var maxheight = sender.el.nextAll('.k-d-row:first').height();
 			// end
 
 			document.onmousemove = function(e) {
@@ -256,7 +255,7 @@ var layoutEngine = (function() {
 					$(el).width(px);
 				}
 			});
-			var maxwidth = sender.el.next().width();
+			var maxwidth = sender.el.nextAll('.k-d-col:first').width();
 			// end
 
 			document.onmousemove = function(e){
@@ -505,7 +504,7 @@ var layoutEngine = (function() {
 				if(!!oldy && !!newy) {
 					var dy = newy - oldy;
 
-					var nextel = $(el).next();
+					var nextel = $(el).nextAll('.k-d-row:first');
 					var originh = nextel.height();
 
 					if(nextel.length > 0) {
@@ -1477,7 +1476,7 @@ function Controller($scope) {
 						"guid": "c"
 					}
 				],
-				"h": 60
+				"h": 80
 			},
 			{
 				"cols": [
@@ -1490,7 +1489,7 @@ function Controller($scope) {
 						"guid": "e"
 					}
 				],
-				"h": 40
+				"h": 20
 			}
 		],
 		"w": 100,
