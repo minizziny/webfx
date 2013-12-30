@@ -876,6 +876,8 @@ var layoutEngine = (function() {
 					box.close();
 					contb.appendTo(p);
 
+					unwrapRow(this.rows.last());
+
 					contb.rows[0].boxes[0].resizerH.show();
 				}
 				else {
@@ -919,6 +921,8 @@ var layoutEngine = (function() {
 
 					box.close();
 					contb.appendTo(p);
+
+					unwrapRow(this.rows[0]);
 
 					contb.rows[0].boxes[0].resizerH.show();
 				}
