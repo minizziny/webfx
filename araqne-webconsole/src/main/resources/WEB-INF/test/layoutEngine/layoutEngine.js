@@ -249,7 +249,7 @@ var layoutEngine = (function() {
 				var px = $(el).width();
 				totalpx = totalpx + px;
 				if(totalpx > parent.width()) {
-					$(el).width(px - 1);
+					$(el).width(px - 2);
 				}
 				else {
 					$(el).width(px);
@@ -272,16 +272,24 @@ var layoutEngine = (function() {
 
 				// dock panel 로 옮겨야 함
 				var parentw = parent.width();
+				var totalwper = 0;
 				$.each(rows, function(i, el) {
 					var px = $(el).width();
-					var perc = Math.round(px / parentw * 100);
+					// var perc = Math.round(px / parentw * 100);
+					var perc = px / parentw * 100;
 
 					$(el).css("width", perc.toString() + "%");
 
 					el.obj.obj.w = perc;
 					//console.log(el.obj);
 					console.log(perc + "%\t" + i + "/" + rows.length)
+					totalwper = totalwper + perc;
+
+					if(totalwper < 100 && i == rows.length - 1) {
+						console.log(totalwper, 'arranged!');
+					}
 				});
+				console.log(totalwper)
 				// end
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
@@ -1402,7 +1410,8 @@ var layoutEngine = (function() {
 		}
 
 		function unwrapRow(row) {
-			console.log('unwrapRow')
+			if(row == undefined) return;
+			console.log('unwrapRow');
 
 			var pbox = row.box;
 			var pobjw = row.box.obj.w;
