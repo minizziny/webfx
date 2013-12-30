@@ -91,7 +91,7 @@ html, body, .k-d-col, #main {
 	top: 0;
 	position: absolute;
 	cursor: w-resize;
-	z-index: 9999;
+	z-index: 2013;
 }
 
 .k-rs-b {
@@ -103,7 +103,7 @@ html, body, .k-d-col, #main {
 	position: absolute;
 	z-index: 1000;
 	cursor: s-resize;
-	z-index: 9999;
+	z-index: 2013;
 
 }
 

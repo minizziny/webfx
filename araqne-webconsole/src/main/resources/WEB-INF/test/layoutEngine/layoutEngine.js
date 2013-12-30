@@ -460,7 +460,7 @@ var layoutEngine = (function() {
 			var allidx = layoutEngine.ui.layout.box.allboxes.indexOf(box);
 			layoutEngine.ui.layout.box.allboxes.removeAt(allidx);
 			
-			console.log('deleteBox',box)
+			// console.log('deleteBox',box)
 			if(box.row.boxes.length === 0) {
 				box.row.close();
 				
@@ -686,6 +686,10 @@ var layoutEngine = (function() {
 					delete box.obj.w;
 					newrow.append(boxn);
 					boxn.row = newrow;
+
+					this.rows[this.rows.length - 2].resizerV.show();
+					boxn.resizerH.hide();
+					newrow.resizerV.hide();
 					
 					delete this.guid;
 					delete this.obj.guid;
@@ -716,6 +720,10 @@ var layoutEngine = (function() {
 								var newrow = this.row.box.addRow(original_idx + 1);
 								newrow.append(boxn);
 								boxn.row = newrow;
+								boxn.resizerH.hide();
+
+								this.row.box.rows[this.row.box.rows.indexOf(newrow) - 1].resizerV.show();
+
 								box.close();
 							}
 							else {
@@ -728,6 +736,12 @@ var layoutEngine = (function() {
 								var newrow = this.row.box.addRow(original_idx + 1);
 								newrow.append(boxn);
 								boxn.row = newrow;
+
+								boxn.resizerH.hide();
+								this.row.box.rows[original_idx].resizerV.show();
+								if(newrow == this.row.box.rows.last()) {
+									newrow.resizerV.hide();
+								}
 							}
 						}
 					}
@@ -766,6 +780,8 @@ var layoutEngine = (function() {
 					delete box.obj.w;
 					newrow.append(boxn);
 					boxn.row = newrow;
+
+					boxn.resizerH.hide();
 					
 					delete this.guid;
 					delete this.obj.guid;
@@ -797,6 +813,8 @@ var layoutEngine = (function() {
 								var newrow = this.row.box.addRow(original_idx);
 								newrow.append(boxn);
 								boxn.row = newrow;
+
+								boxn.resizerH.hide();
 								box.close();
 							}
 							else {
@@ -857,6 +875,8 @@ var layoutEngine = (function() {
 
 					box.close();
 					contb.appendTo(p);
+
+					contb.rows[0].boxes[0].resizerH.show();
 				}
 				else {
 					console.log("left case: basic");
@@ -899,6 +919,8 @@ var layoutEngine = (function() {
 
 					box.close();
 					contb.appendTo(p);
+
+					contb.rows[0].boxes[0].resizerH.show();
 				}
 				else {
 					console.log("right case: basic");
@@ -909,6 +931,11 @@ var layoutEngine = (function() {
 					var boxn = _box.create(box.obj)
 					
 					this.row.insertAt(boxn, original_idx + 1);
+
+					this.row.boxes[original_idx].resizerH.show();
+					if(this.row.boxes.last() == boxn) {
+						boxn.resizerH.hide();
+					}
 
 					// console.trace();
 					this.row.boxes[original_idx].resize(boxn.obj.w, false);
@@ -986,8 +1013,10 @@ var layoutEngine = (function() {
 					// console.log(that.row, that.guid)
 					if(that.row == undefined) {
 						makeDroppable(that, true);
+
+						that.resizerH.hide();
 					}
-				}, 500);
+				}, 250);
 
 				that.rows.forEach(function(row) {
 					row.boxes.last().resizerH.hide();
@@ -1486,7 +1515,7 @@ function Controller($scope) {
 						"guid": "c"
 					}
 				],
-				"h": 80
+				"h": 50
 			},
 			{
 				"cols": [
@@ -1499,7 +1528,7 @@ function Controller($scope) {
 						"guid": "e"
 					}
 				],
-				"h": 20
+				"h": 50
 			}
 		],
 		"w": 100,
