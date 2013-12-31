@@ -201,7 +201,7 @@ var layoutEngine = (function() {
 			var maxheight = sender.el.nextAll('.k-d-row:first').height();
 			// end
 
-			document.onmousemove = function(e) {
+			$(document).on('mousemove.resize', function(e) {
 				var dy = e.clientY - originy;
 
 				if(-dy > originh - 10) {}
@@ -209,9 +209,9 @@ var layoutEngine = (function() {
 				else {
 					sender.resize(undefined, originy + dy - sy);
 				}
-			};
+			});
 
-			document.onmouseup = function() {
+			$(document).on('mouseup.resize', function() {
 
 				// dockpanel
 				var parenth = parent.height();
@@ -229,9 +229,8 @@ var layoutEngine = (function() {
 				// end
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
-				document.onmousemove = null;
-				document.onmouseup = null;
-			};
+				$(document).off('mousemove.resize').off('mouseup.resize')
+			});
 
 			if(e.delegateTarget.setCapture) { e.delegateTarget.setCapture(); }
 		});
@@ -1270,7 +1269,7 @@ var layoutEngine = (function() {
 				box.el.addClass("grabbed").addClass("ani");
 				
 				
-				$("body").on("mousemove", function(e) {
+				$(document).on("mousemove.activeDroppable", function(e) {
 					
 					if( Math.abs(initp.x - e.pageX) < 20 && Math.abs(initp.y - e.pageY) < 20 ) return;
 					
@@ -1308,9 +1307,9 @@ var layoutEngine = (function() {
 						
 					}
 				}).
-				on("mouseup", function() {
+				on("mouseup.activeDroppable", function() {
 					
-					$("body").off("mousemove").off("mouseup");
+					$(document).off("mousemove.activeDroppable").off("mouseup.activeDroppable");
 					dragHandler.off("mousemove");
 
 					box.el.addClass("ani").removeClass("grabbed");
