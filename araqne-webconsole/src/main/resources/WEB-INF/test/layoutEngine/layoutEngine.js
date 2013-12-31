@@ -131,7 +131,7 @@ var layoutEngine = (function() {
 		
 		this.onResize = function(oldval, newval) {
 			if(!!prop.onResize) {
-				prop.onResize.apply(this, arguments);
+				return prop.onResize.apply(this, arguments);
 			}
 		};
 
@@ -151,8 +151,9 @@ var layoutEngine = (function() {
 					el.css("width", w);
 				}
 				else {
-					el.width(w);
-					this.onResize(oldw, w, null, null);
+					if( this.onResize(oldw, w, null, null) ) {
+						el.width(w);
+					}
 				}
 			}
 
@@ -163,8 +164,9 @@ var layoutEngine = (function() {
 					el.css("height", h);
 				}
 				else {
-					el.height(h);
-					this.onResize(null, null, oldh, h);
+					if( this.onResize(null, null, oldh, h) ) {
+						el.height(h);
+					}
 				}
 			}
 		};
@@ -202,8 +204,8 @@ var layoutEngine = (function() {
 			document.onmousemove = function(e) {
 				var dy = e.clientY - originy;
 
-				if(-dy > originh - 100) {}
-				else if(dy > maxheight - 100) {}
+				if(-dy > originh - 10) {}
+				else if(dy > maxheight - 10) {}
 				else {
 					sender.resize(undefined, originy + dy - sy);
 				}
@@ -215,7 +217,8 @@ var layoutEngine = (function() {
 				var parenth = parent.height();
 				$.each(rows, function(i, el) {
 					var px = $(el).height();
-					var perc = Math.round(px / parenth * 100);
+					// var perc = Math.round(px / parenth * 100);
+					var perc = (px / parenth * 100);
 
 					$(el).css("height", perc.toString() + "%");
 
@@ -261,8 +264,8 @@ var layoutEngine = (function() {
 			document.onmousemove = function(e){
 				var dx = e.pageX - originx;
 				
-				if(-dx > originw - 100) {}
-				else if(dx > maxwidth - 100) {}
+				if(-dx > originw - 50) {}
+				else if(dx > maxwidth - 50) {}
 				else {
 					sender.resize(originw + dx);
 				}
@@ -320,6 +323,35 @@ var layoutEngine = (function() {
 
 		el[0].obj = this;
 		this.boxes = [];
+
+		this.getMinHeight = function() {
+			var settingMinh = 20;
+			var checkable = this.boxes.some(function(box) {
+				return box.rows.length > 0;
+			});
+
+			if(!checkable) {
+				return settingMinh;
+			}
+			else {
+				var gminh = settingMinh;
+				this.boxes.forEach(function(box, i) {
+					var minh = 0;
+					box.rows.forEach(function(row, j) {
+						if(settingMinh < row.getMinHeight()) {
+							minh = minh + row.getMinHeight();
+						}
+						else {
+							minh = minh + settingMinh;
+						}
+					});
+					if(gminh < minh) {
+						gminh = minh;
+					}
+				});
+				return gminh;
+			}
+		}
 
 		this.appendTo = function(box) {
 			this.box = box;
@@ -479,7 +511,7 @@ var layoutEngine = (function() {
 				if(box.row.boxes.length === 1) {
 					setTimeout(function() {
 						if(box.row.boxes[0].rows.length != 0) {
-							unwrapBox(box.row.boxes[0]);	
+							unwrapBox(box.row.boxes[0]);
 						}
 					}, 200)
 				}
@@ -516,17 +548,18 @@ var layoutEngine = (function() {
 			"el": el,
 			"resizer": [false, false, true, false],
 			"onResize": function(oldx, newx, oldy, newy) {
-				//console.log(oldx + "," + newx + " | " + oldy + "," + newy)
-				if(!!oldy && !!newy) {
-					var dy = newy - oldy;
-
-					var nextel = $(el).nextAll('.k-d-row:first');
-					var originh = nextel.height();
-
+				var nextel = $(el).nextAll('.k-d-row:first');
+				var nextrow = nextel[0].obj;
+				var originh = nextel.height();
+				var dy = newy - oldy;
+				// console.log(that.getMinHeight(), newy, nextrow.getMinHeight(), originh - dy, originh )
+				var can = (that.getMinHeight() < newy) && (nextrow.getMinHeight() < originh - dy);
+				if(can) {
 					if(nextel.length > 0) {
 						nextel.height(originh - dy);
 					}
 				}
+				return can;
 			}
 		});
 
@@ -541,6 +574,31 @@ var layoutEngine = (function() {
 		this.guid = obj.guid;
 		this.rows = [];
 		el[0].obj = this;
+
+		this.getMinWidth = function() {
+			var settingMinw = 50;
+			if( this.rows.length == 0) {
+				return settingMinw;
+			}
+			else {
+				var gminw = settingMinw;
+				this.rows.forEach(function(row) {
+					var minw = 0;
+					row.boxes.forEach(function(box) {
+						if(minw < box.getMinWidth()) {
+							minw = box.getMinWidth();
+						}
+						else {
+							minw = minw + settingMinw;
+						}
+					});
+					if(gminw < minw) {
+						gminw = minw;
+					}
+				})
+				return gminw;
+			}
+		}
 
 		this.findBox = function(guid) {
 			var found;
@@ -1099,6 +1157,9 @@ var layoutEngine = (function() {
 					if(i + 1 == rows.length) {
 						box.resizerV.hide();
 					}
+					else {
+						box.resizerV.show();
+					}
 				}
 
 				var lastbox = rows[rows.length - 1];
@@ -1441,16 +1502,18 @@ var layoutEngine = (function() {
 			"el": el,
 			"resizer": [false, true, false, false], // top, right, bottom, left
 			"onResize": function(oldx, newx, oldy, newy) {
-				if(!!oldx && !!newx) {
-					var dx = newx - oldx;
-
-					var nextbox, nextel = $(el).next();
-					var originw = nextel.width();
-
+				var nextel = $(el).next();
+				var nextbox = nextel[0].obj;
+				var originw = nextel.width();
+				var dx = newx - oldx;
+				// console.log(that, nextbox, that.getMinWidth(), nextbox.getMinWidth(), oldx, newx, originw - dx, originw )
+				var can = (that.getMinWidth() < newx) && (nextbox.getMinWidth() < originw - dx);
+				if(can) {
 					if(nextel.length > 0) {
 						nextel.width(originw - dx);
 					}
 				}
+				return can;
 			},
 			"afterResize": function(perc) {
 			}
