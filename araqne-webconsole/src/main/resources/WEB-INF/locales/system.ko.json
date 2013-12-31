@@ -537,5 +537,15 @@
 	"$S_str_To": "까지",
 	"$S_str_Action": "행위",
 	"$S_str_Success": "성공",
-	"$S_str_Failed": "실패"
+	"$S_str_Failed": "실패",
+
+	"--------config-----------": "",
+	"$S_str_Parser": "파서",
+	"$S_str_CreateParser": "새 파서 만들기",
+	"$S_str_RemoveParser": "파서 삭제",
+
+	"$S_str_FactoryName": "팩토리 이름",
+
+	"$S_msg_RemoveParserConfirmPre": "정말 파서",
+	"$S_msg_RemoveParserConfirmPost": "을 삭제하시겠습니까?"
 }

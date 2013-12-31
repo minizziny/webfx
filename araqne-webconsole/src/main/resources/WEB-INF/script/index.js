@@ -75,7 +75,8 @@ logpresso.factory('eventSender', function() {
 		'table': {},
 		'license': {},
 		'regextester': {},
-		'querymanager': {}
+		'querymanager': {},
+		'config': {}
 	};
 
 	for(var program in e) {

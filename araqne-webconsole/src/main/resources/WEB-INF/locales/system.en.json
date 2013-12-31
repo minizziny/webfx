@@ -541,5 +541,15 @@
 	"$S_str_To": "To",
 	"$S_str_Action": "Action",
 	"$S_str_Success": "Success",
-	"$S_str_Failed": "Failed"
+	"$S_str_Failed": "Failed",
+
+	"--------config-----------": "",
+	"$S_str_Parser": "Parser",
+	"$S_str_CreateParser": "Create Parser",
+	"$S_str_RemoveParser": "Remove Parser",
+
+	"$S_str_FactoryName": "Factory name",
+
+	"$S_msg_RemoveParserConfirmPre": "Do you really want to drop parser",
+	"$S_msg_RemoveParserConfirmPost": "?"
 }
