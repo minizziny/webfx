@@ -201,7 +201,7 @@ var layoutEngine = (function() {
 			var maxheight = sender.el.nextAll('.k-d-row:first').height();
 			// end
 
-			$(document).on('mousemove.resize', function(e) {
+			$(document).on('mousemove.resizeV', function(e) {
 				var dy = e.clientY - originy;
 
 				if(-dy > originh - 10) {}
@@ -211,7 +211,7 @@ var layoutEngine = (function() {
 				}
 			});
 
-			$(document).on('mouseup.resize', function() {
+			$(document).on('mouseup.resizeV', function() {
 
 				// dockpanel
 				var parenth = parent.height();
@@ -229,7 +229,8 @@ var layoutEngine = (function() {
 				// end
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
-				$(document).off('mousemove.resize').off('mouseup.resize')
+				$(document).off('mousemove.resizeV').off('mouseup.resizeV');
+				sender.afterResize();
 			});
 
 			if(e.delegateTarget.setCapture) { e.delegateTarget.setCapture(); }
@@ -260,7 +261,7 @@ var layoutEngine = (function() {
 			var maxwidth = sender.el.nextAll('.k-d-col:first').width();
 			// end
 
-			document.onmousemove = function(e){
+			$(document).on('mousemove.resizeH', function(e){
 				var dx = e.pageX - originx;
 				
 				if(-dx > originw - 50) {}
@@ -268,9 +269,9 @@ var layoutEngine = (function() {
 				else {
 					sender.resize(originw + dx);
 				}
-			};
+			});
 
-			document.onmouseup = function() {
+			$(document).on('mouseup.resizeH', function() {
 
 				// dock panel 로 옮겨야 함
 				var parentw = parent.width();
@@ -295,9 +296,9 @@ var layoutEngine = (function() {
 				// end
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
-				document.onmousemove = null;
-				document.onmouseup = null;
-			}
+				$(document).off('mousemove.resizeH').off('mouseup.resizeH');
+				sender.afterResize();
+			});
 
 			if(e.delegateTarget.setCapture) { e.delegateTarget.setCapture(); }
 		});
@@ -319,6 +320,10 @@ var layoutEngine = (function() {
 	var _box = layoutEngine.namespace("ui.layout.box");
 
 	_box.allboxes = [];
+	_box.event = {
+		modify: function() {},
+		resize: function() {}
+	};
 
 	function Row(prop) {
 		var that = this;
@@ -326,7 +331,22 @@ var layoutEngine = (function() {
 		var obj = this.obj = $.extend({}, prop); // object copy
 
 		el[0].obj = this;
-		this.boxes = [];
+		this.boxes = new ObservableArray([]);
+
+		this.getObject = function() {
+			return {
+				'cols': (function() {
+					return that.boxes.map(function(box) {
+						return box.getObject();
+					});
+				}()),
+				'h': this.obj.h
+			}
+		}
+
+		this.boxes.onItemAdded = _box.event.modify;
+		// this.boxes.onItemSet = _box.event.modify;
+		this.boxes.onItemRemoved = _box.event.modify;
 
 		this.getMinHeight = function() {
 			var settingMinh = 30;
@@ -564,7 +584,8 @@ var layoutEngine = (function() {
 					}
 				}
 				return can;
-			}
+			},
+			"afterResize": _box.event.resize
 		});
 
 		this.resizerV = $(el.find('.k-rs-b')[0]);
@@ -576,9 +597,34 @@ var layoutEngine = (function() {
 		var obj = this.obj = $.extend({}, prop); // object copy
 
 		this.guid = obj.guid;
-		this.rows = [];
 		el[0].obj = this;
 
+		this.getObject = function() {
+			if(this.rows.length == 0) {
+				return {
+					'guid': this.guid,
+					'w': this.obj.w
+				}
+			}
+			else {
+				return {
+					'guid': this.guid,
+					'rows': (function() {
+						return that.rows.map(function(row) {
+							return row.getObject();
+						});
+					}()),
+					'w': this.obj.w
+				}
+			}
+		}
+
+		this.rows = new ObservableArray([]);
+
+		this.rows.onItemAdded = _box.event.modify;
+		// this.rows.onItemSet = _box.event.modify;
+		this.rows.onItemRemoved = _box.event.modify;
+		
 		this.getMinWidth = function() {
 			var settingMinw = 50;
 			if( this.rows.length == 0) {
@@ -648,14 +694,18 @@ var layoutEngine = (function() {
 			*/
 		}
 
-		this.appendTo = function(row_or_el) {
+		this.appendTo = function(row_or_el, no_root) {
 			
 			if(row_or_el instanceof jQuery || row_or_el.constructor.name === 'String') {
 				var selector = row_or_el;
 				$(selector).empty();
 				el.appendTo(selector);
 				
-				layoutEngine.ui.layout.box.root = that;			
+				if(!no_root) {
+					console.log('set root')
+					layoutEngine.ui.layout.box.root = that;	
+					_box.event.modify();
+				}
 			}
 			else {
 				var row = row_or_el;
@@ -1512,8 +1562,7 @@ var layoutEngine = (function() {
 				}
 				return can;
 			},
-			"afterResize": function(perc) {
-			}
+			"afterResize": _box.event.resize
 		});
 
 
@@ -1627,22 +1676,25 @@ function Controller($scope) {
 		});
 		newbie.resizerH.hide();
 
-		newbie.appendTo(newdiv)
+		newbie.appendTo(newdiv, true)
 	}
 
 	// dummies for prototype chaining
 	layoutEngine.ui.layout.box.create({'w': 100,'guid': 'zz'}); // Box
 	layoutEngine.ui.layout.box.create({'w': 100,'guid': 'yy'}); // Box - Resizable
+	//
 
-	var box = layoutEngine.ui.layout.box.create(layoutdata, true); // Box - Resizable - CustomEvent
-	box.on('modify', function() {
-		console.log('modify');
-	})
-	
+	function getRoot() {
+		if(!!layoutEngine.ui.layout.box.root) {
+			console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
+		}
+	}
+
+	var boxe = new CustomEvent(layoutEngine.ui.layout.box.event);
+	boxe.on('modify', getRoot);
+	boxe.on('resize', getRoot);
+
+	var box = layoutEngine.ui.layout.box.create(layoutdata, true); // Box - Resizable - CustomEvent	
 	box.appendTo("#main");
-	
-
-
-	
 }
 

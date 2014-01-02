@@ -113,8 +113,9 @@ function CustomEvent(obj) {
 	}
 
 	this.dispatchEvent = function(eventName) {
-		if(obj.hasOwnProperty(eventName)) {
-			obj[eventName]();
+		console.log('dispatchEvent', events)
+		if(events.hasOwnProperty(eventName)) {
+			events[eventName].fire();
 		}
 	}
 
