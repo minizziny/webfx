@@ -1,5 +1,16 @@
 var app = angular.module('layoutEngine', []);
 
+function debounce(fn, delay) {
+	var timer = null;
+	return function () {
+		var context = this, args = arguments;
+		clearTimeout(timer);
+		timer = setTimeout(function () {
+			fn.apply(context, args);
+		}, delay);
+	};
+}
+
 
 Array.prototype.insert = function(item, idx) {
 	this.splice(idx, 0, item);
@@ -1691,7 +1702,7 @@ function Controller($scope) {
 	}
 
 	var boxe = new CustomEvent(layoutEngine.ui.layout.box.event);
-	boxe.on('modify', getRoot);
+	boxe.on('modify', debounce(getRoot, 200));
 	boxe.on('resize', getRoot);
 
 	var box = layoutEngine.ui.layout.box.create(layoutdata, true); // Box - Resizable - CustomEvent	
