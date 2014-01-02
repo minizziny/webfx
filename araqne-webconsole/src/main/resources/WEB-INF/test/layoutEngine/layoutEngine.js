@@ -750,33 +750,42 @@ var layoutEngine = (function() {
 							boxn.row = newrow;
 						}
 						else {
-							if(this.row.box === box.row.box) {
-								console.log("bottom case4: reorder");
-								
-								var newrow = this.row.box.addRow(original_idx + 1);
-								newrow.append(boxn);
-								boxn.row = newrow;
-								boxn.resizerH.hide();
-
-								this.row.box.rows[this.row.box.rows.indexOf(newrow) - 1].resizerV.show();
-
-								box.close();
-							}
-							else {
+							function case5bottom() {
 								console.log("bottom case5: insert row");
 								
 //								console.log(box.guid)
 //								console.log(box.row.box.rows)
 								box.close();
 //								console.log(box.row.box.rows)
-								var newrow = this.row.box.addRow(original_idx + 1);
+								var newrow = that.row.box.addRow(original_idx + 1);
 								newrow.append(boxn);
 								boxn.row = newrow;
 
 								boxn.resizerH.hide();
-								this.row.box.rows[original_idx].resizerV.show();
-								if(newrow == this.row.box.rows.last()) {
+								that.row.box.rows[original_idx].resizerV.show();
+								if(newrow == that.row.box.rows.last()) {
 									newrow.resizerV.hide();
+								}
+							}
+
+							if(box.row == undefined) {
+								case5bottom();
+							}
+							else {
+								if(this.row.box === box.row.box) {
+									console.log("bottom case4: reorder");
+									
+									var newrow = this.row.box.addRow(original_idx + 1);
+									newrow.append(boxn);
+									boxn.row = newrow;
+									boxn.resizerH.hide();
+
+									this.row.box.rows[this.row.box.rows.indexOf(newrow) - 1].resizerV.show();
+
+									box.close();
+								}
+								else {
+									case5bottom();
 								}
 							}
 						}
@@ -843,24 +852,34 @@ var layoutEngine = (function() {
 							boxn.row = newrow;
 						}
 						else {
-							if(this.row.box === box.row.box) {
-								console.log("top case4: reorder");
-								
-								var newrow = this.row.box.addRow(original_idx);
-								newrow.append(boxn);
-								boxn.row = newrow;
-
-								boxn.resizerH.hide();
-								box.close();
-							}
-							else {
+							function case5top() {
 								console.log("top case5: insert row");
 								
 								box.close();
-								var newrow = this.row.box.addRow(original_idx);
+								var newrow = that.row.box.addRow(original_idx);
 								newrow.append(boxn);
 								boxn.row = newrow;
 							}
+
+							if(box.row == undefined) {
+								case5top();
+							}
+							else {
+								if(this.row.box === box.row.box) {
+									console.log("top case4: reorder");
+									
+									var newrow = this.row.box.addRow(original_idx);
+									newrow.append(boxn);
+									boxn.row = newrow;
+
+									boxn.resizerH.hide();
+									box.close();
+								}
+								else {
+									case5top();
+								}	
+							}
+							
 						}
 					}
 					else {
