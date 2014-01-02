@@ -1542,7 +1542,7 @@ var layoutEngine = (function() {
 
 function Controller($scope) {
 
-	$scope.layoutdata = {
+	var layoutdata = {
 		"rows": [
 			{
 				"cols": [
@@ -1608,7 +1608,6 @@ function Controller($scope) {
 		"guid": "root"
 	}
 
-	var box = layoutEngine.ui.layout.box.create($scope.layoutdata, true);
 
 	$scope.addWidget = function() {
 		// console.log(box)
@@ -1617,6 +1616,7 @@ function Controller($scope) {
 			'w': 100,
 			'guid': 'newbie'
 		});
+		console.log(newbie)
 
 		var newdiv = $('<div class="newbie"></div>').appendTo('body');
 		
@@ -1625,12 +1625,24 @@ function Controller($scope) {
 			// newbie.off(ev); 
 			// 실제로 할 필요 없음. splitInsert 이후 box 는 삭제되고 새로 생성되는 것이므로, 이전 box 의 이벤트가 따라다니지 않는다.
 		});
+		newbie.resizerH.hide();
 
 		newbie.appendTo(newdiv)
 	}
 
+	// dummies for prototype chaining
+	layoutEngine.ui.layout.box.create({'w': 100,'guid': 'zz'}); // Box
+	layoutEngine.ui.layout.box.create({'w': 100,'guid': 'yy'}); // Box - Resizable
+
+	var box = layoutEngine.ui.layout.box.create(layoutdata, true); // Box - Resizable - CustomEvent
+	box.on('modify', function() {
+		console.log('modify');
+	})
 	
 	box.appendTo("#main");
+	
 
+
+	
 }
 
