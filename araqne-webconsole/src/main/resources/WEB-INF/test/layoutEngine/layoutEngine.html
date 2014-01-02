@@ -4,6 +4,7 @@
 	<meta charset="utf-8" />
 	<script src="../../lib/jquery/jquery-2.0.3.js"></script>
 	<script src="../../lib/angular/angular.js"></script>
+	<script src="../../script/service/service.connection.js"></script>
 
 	<link rel="stylesheet" href="../../lib/bootstrap2/css/bootstrap.css" />
 	<link href="layoutEngine.css" rel="stylesheet"/>
@@ -151,10 +152,24 @@
 	float: right;
 }
 
+.newbie {
+	z-index: 3000;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 400px;
+	height: 300px;
+	margin-left: -200px;
+	margin-top: -150px;
+}
+
 	</style>
 
 </head>
 <body ng-controller="Controller">
+	<div>
+		<button class="btn" ng-click="addWidget()">Add</button>
+	</div>
 	<div id="main">
 	</div>
 

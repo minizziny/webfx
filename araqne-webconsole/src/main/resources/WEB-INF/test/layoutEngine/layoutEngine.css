@@ -67,10 +67,14 @@ body, #main {
 
 
 
-html, body, .k-d-col, #main {
+html, body, .k-d-col {
 	height: 100%;
 }
 
+#main {
+	clear:both;
+	height: 90%;
+}
 
 @media screen and (max-width: 760px){
 

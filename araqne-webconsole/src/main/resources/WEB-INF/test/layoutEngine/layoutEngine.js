@@ -54,8 +54,6 @@ function findElementsByCoordinate(classArr, e, els) {
 }
 
 
-
-
 var layoutEngine = (function() {
 	function namespace(string) {
 		var object = this;
@@ -72,7 +70,7 @@ var layoutEngine = (function() {
 	}
 
 	function extend(inherit, extend, constrction) {
-		var parent = extend.create(constrction)
+		var parent = extend.create(constrction);
 		inherit.prototype = parent;
 		return parent;
 	}
@@ -102,6 +100,7 @@ var layoutEngine = (function() {
 }());
 
 (function() {
+
 	var resizable = layoutEngine.namespace("ui.resizable");
 
 	function Resizable(prop) {
@@ -171,6 +170,7 @@ var layoutEngine = (function() {
 			}
 		};
 
+		var _super = layoutEngine.extend(Resizable, CustomEvent, this);
 	}
 
 	function handleResizerV(sender, el) {
@@ -308,6 +308,11 @@ var layoutEngine = (function() {
 	layoutEngine.ui.resizable.create = function(prop) {
 		return new Resizable(prop);
 	}
+
+	CustomEvent.create = function(obj) {
+		return new CustomEvent(obj);
+	}
+
 })();
 
 (function() {
@@ -324,7 +329,7 @@ var layoutEngine = (function() {
 		this.boxes = [];
 
 		this.getMinHeight = function() {
-			var settingMinh = 20;
+			var settingMinh = 30;
 			var checkable = this.boxes.some(function(box) {
 				return box.rows.length > 0;
 			});
@@ -645,53 +650,18 @@ var layoutEngine = (function() {
 
 		this.appendTo = function(row_or_el) {
 			
-			if(row_or_el.constructor.name === "Resizable" || row_or_el.constructor.name === "Row") {
-				
-				var row = row_or_el;
-				that.row = row;
-				el.appendTo(row.el);
-				row.boxes.push(that);
-			}
-			else {
+			if(row_or_el instanceof jQuery || row_or_el.constructor.name === 'String') {
 				var selector = row_or_el;
 				$(selector).empty();
 				el.appendTo(selector);
 				
-				layoutEngine.ui.layout.box.root = that;
-
-				// afterworks
-				// that.updateLayout = function(isforced) {
-					
-				// 	if(isforced === undefined) {
-				// 		console.log("update layout");
-				// 	}
-
-				// 	var dr_parent = [], dr_elemnt = [];
-
-				// 	$.each($(".k-rs-r"), function(i, el) {
-				// 		var p = $(el).parent();
-				// 		dr_parent.push(p);
-				// 		dr_elemnt.push($(el).detach());
-				// 	});
-
-				// 	$(".k-rs-b").show();
-				// 	$(".k-rs-r").show();
-
-				// 	$(".k-d-row:last-child").children(".k-rs-b").hide();
-
-				// 	for(var i = 0; i < dr_elemnt.length; i++) {
-				// 		dr_elemnt[i].appendTo(dr_parent[i]);
-				// 	}
-
-				// 	setTimeout(function() {
-				// 		$(".k-d-col:last-child").children(".k-rs-r").hide();
-				// 	}, 10);
-					
-				// }
-				
-				// that.updateLayout(false);
-				
-			
+				layoutEngine.ui.layout.box.root = that;			
+			}
+			else {
+				var row = row_or_el;
+				that.row = row;
+				el.appendTo(row.el);
+				row.boxes.push(that);
 			}
 
 			return el;
@@ -737,6 +707,7 @@ var layoutEngine = (function() {
 				//throw new TypeError("unexpected direction");
 				return false;
 			}
+			box.dispatchEvent('splitInsert');
 			
 			if(direction === "bottom") {
 				
@@ -1261,7 +1232,10 @@ var layoutEngine = (function() {
 					y: ee.offsetY
 				};
 				
-				var poffset = box.row.el.offset();
+				var poffset = box.el.offset();
+				if(!!box.row) {
+					var poffset = box.row.el.offset();	
+				}
 				
 				var isDraggable = false;
 				var scaf;
@@ -1279,7 +1253,7 @@ var layoutEngine = (function() {
 						
 						isDraggable = true;
 						
-						scaf = $("<div>").addClass("k-d-col").css("width", box.obj.w + "%").css("background-color", "rgba(0,0,0,.1)");
+						scaf = $("<div>").addClass("k-d-col").css("width", box.obj.w + "%"); //.css("background-color", "rgba(0,0,0,.1)");
 						
 						box.el.css("position", "absolute").css("z-index", "8000");
 						box.el.after(scaf);
@@ -1446,7 +1420,12 @@ var layoutEngine = (function() {
 		}
 		
 		this.close = function() {
-			this.row.deleteBox(this);
+			if(this.row == undefined) {
+				this.el.remove();
+			}
+			else {
+				this.row.deleteBox(this);
+			}
 		}
 
 		this.deleteRow = function(row) {
@@ -1518,6 +1497,7 @@ var layoutEngine = (function() {
 			}
 		});
 
+
 		// drawing row
 		traverse(prop);
 
@@ -1537,7 +1517,6 @@ var layoutEngine = (function() {
 		}
 		return new Box(prop);
 	}
-
 
 }());
 
@@ -1611,6 +1590,27 @@ function Controller($scope) {
 	}
 
 	var box = layoutEngine.ui.layout.box.create($scope.layoutdata, true);
+
+	$scope.addWidget = function() {
+		// console.log(box)
+
+		var newbie = layoutEngine.ui.layout.box.create({
+			'w': 100,
+			'guid': 'newbie'
+		});
+
+		var newdiv = $('<div class="newbie"></div>').appendTo('body');
+		
+		newbie.on('splitInsert', function() {
+			newdiv.remove();
+			// newbie.off(ev); 
+			// 실제로 할 필요 없음. splitInsert 이후 box 는 삭제되고 새로 생성되는 것이므로, 이전 box 의 이벤트가 따라다니지 않는다.
+		});
+
+		newbie.appendTo(newdiv)
+	}
+
+	
 	box.appendTo("#main");
 
 }

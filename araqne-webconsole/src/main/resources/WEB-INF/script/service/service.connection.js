@@ -112,17 +112,16 @@ function CustomEvent(obj) {
 		delete events[eventName];
 	}
 
-	// setTimeout(function() {
-	// 	events.load.fire('myarg', 'ddd', 'dzz');
-	// }, 1000);
-
-	return {
-		on: on,
-		off: off,
-		clear: clear
+	this.dispatchEvent = function(eventName) {
+		if(obj.hasOwnProperty(eventName)) {
+			obj[eventName]();
+		}
 	}
-}
 
+	this.on = on;
+	this.off = off;
+	this.clear = clear;
+}
 
 angular.module('app.connection', ['app.utility'])
 .factory('socket', function($q, $filter, serviceUtility) {
