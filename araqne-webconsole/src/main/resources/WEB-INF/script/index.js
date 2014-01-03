@@ -21,15 +21,11 @@ var logpresso = angular.module('app', [
 logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
 
 	$rootScope.$on('$locationChangeSuccess', function() {
-		console.log('locationChangeSuccess')
-
 		function route() {
 			
 			var hash = $location.path();
 			var hashSplit = hash.split('/');
-			console.log('route', hash, hashSplit)
 			if(hash == '/') {
-				console.log('route ')
 				$location.path('/system/starter');
 			}
 
@@ -40,12 +36,10 @@ logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $comp
 				}
 			}
 			else {
-				console.log($location.path(), $location.search());	
+				console.log($location.path(), $location.search());
 			}
-	
 		}
 
-		console.log(serviceSession.whoAmI())
 		if( serviceSession.whoAmI() != null ) {
 			route();
 		}
@@ -149,6 +143,10 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 				continue;
 			}
 			//$scope.src[key] = '';
+		}
+
+		if(!eventSender[program]) {
+			return;
 		}
 
 		angular.element('.view').hide();
