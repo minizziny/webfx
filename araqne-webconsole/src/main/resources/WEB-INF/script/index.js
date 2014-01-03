@@ -1,4 +1,4 @@
-var $lang = 'ko'// navigator.language;
+var $lang = navigator.language;
 
 var logpresso = angular.module('app', [
 	'app.directive',
@@ -18,27 +18,34 @@ var logpresso = angular.module('app', [
 ], function($routeProvider) {
 });
 
-logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $compile, eventSender, serviceSession, $templateCache) {
-
-	console.log($templateCache)
-
-	$rootScope.$on('$routeChangeStart', function() {
-		console.log('routeChangeStart')
-
-	});
+logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
 
 	$rootScope.$on('$locationChangeSuccess', function() {
-		function route() {
-			var hash = location.hash.split('/');
-			var pack = hash[1];
-			var program = hash[2];
-			eventSender.root.go(pack, program);
+		console.log('locationChangeSuccess')
 
-			if(!!eventSender.menu.onOpen) {
-				eventSender.menu.onOpen(program);
+		function route() {
+			
+			var hash = $location.path();
+			var hashSplit = hash.split('/');
+			console.log('route', hash, hashSplit)
+			if(hash == '/') {
+				console.log('route ')
+				$location.path('/system/starter');
 			}
+
+			if(hashSplit.length > 2) {
+				eventSender.root.go(hashSplit[1], hashSplit[2]);
+				if(!!eventSender.menu.onOpen) {
+					eventSender.menu.onOpen(hashSplit[2]);
+				}
+			}
+			else {
+				console.log($location.path(), $location.search());	
+			}
+	
 		}
 
+		console.log(serviceSession.whoAmI())
 		if( serviceSession.whoAmI() != null ) {
 			route();
 		}
@@ -53,13 +60,23 @@ logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $comp
 });
 
 logpresso.config(['$translateProvider', function ($translateProvider) {
-	$translateProvider.useStaticFilesLoader({
+	var str = location.hash.match( /(\?|\&)locale=\w{2}/g );
+	if(str != null) {
+		$lang = str[0].split('=')[1];
+	}
+
+	var z = $translateProvider.useStaticFilesLoader({
 		prefix: 'locales/system.',
 		suffix: '.json'
 	});
+	setTimeout(function() {
+		console.log(z.translations());
+	}, 1000)
+	
 
 	$translateProvider.preferredLanguage($lang);
 	$translateProvider.fallbackLanguage('en');
+	$translateProvider.uses('en');
 }]);
 
 logpresso.factory('eventSender', function() {
@@ -86,8 +103,10 @@ logpresso.factory('eventSender', function() {
 });
 
 
-function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSession, serviceDom) {
+function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSession, serviceDom, $location, $translate) {
 	console.log('Controller init');
+
+	$location.path('/');
 
 	$scope.isShowStarter = false;
 	$scope.isShowDashboard = false;
@@ -107,16 +126,16 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 		eventSender[program].events = {};
 
 		if($scope.recentPrograms.length == 0) {
-			if(location.hash =='#/system/starter') {
-				location.href = '/#/system/starter/';
+			if( $location.path() == '/system/starter' ) {
+				$location.path('/system/starter/');
 			}
 			else {
-				location.href = '/#/system/starter';
+				$location.path('/system/starter');
 			}
 		}
 		else {
-			var arr = $scope.recentPrograms[$scope.recentPrograms.length - 1].split('@')
-			location.href='/#/' + arr[1] + '/' + arr[0];
+			var arr = $scope.recentPrograms[$scope.recentPrograms.length - 1].split('@');
+			$location.path('/' + arr[1] + '/' + arr[0]);
 		}
 	}
 
@@ -271,7 +290,7 @@ function checkDate(member, i) {
 	return angular.isDate(dateFormat.parse(member.toString().substring(0,19))) && rxTimezone.test(member.substring(19, 24));
 }
 
-function MenuController($scope, socket, serviceSession, serviceProgram, eventSender) {
+function MenuController($scope, socket, serviceSession, serviceProgram, eventSender, $location) {
 	console.log('MenuController');
 	$scope.packs = [];
 	$scope.isOpenMenu = false;
@@ -373,7 +392,7 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 	initialize();
 }
 
-function LoginController($scope, socket, serviceSession, eventSender) {
+function LoginController($scope, socket, serviceSession, eventSender, $location) {
 	console.log('LoginController init');
 	$scope.txtLoginName = '';
 	$scope.txtPassword = '';
@@ -383,7 +402,8 @@ function LoginController($scope, socket, serviceSession, eventSender) {
 		.success(function(m) {
 
 			serviceSession.login($scope.txtLoginName, $scope.txtPassword, m.body.nonce, function(m) {
-				location.href='/#/system/starter';
+				$location.path('/system/starter');
+
 				eventSender.root.loggedIn();
 				eventSender.root.startTimeout();
 			});
