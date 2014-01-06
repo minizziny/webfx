@@ -235,3 +235,12 @@
 .newbie .mybox {
 	box-shadow: 5px 5px 20px rgba(0,0,0,.4);
 }
+
+.contentbox {
+	overflow: auto;
+	position: absolute;
+	top: 30px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}

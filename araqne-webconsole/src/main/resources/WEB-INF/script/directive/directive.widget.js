@@ -114,7 +114,7 @@ angular.module('app.directive.widget', [])
 				<span ng-show="isPaused" style="font-size:.8em; color: silver; float: left">일시 정지됨</span>\
 				<span class="clearfix" style="font-size:.8em; color: silver; float: right">{{lastUpdate}}</span>\
 				<br>\
-				<div class="content" style="max-width: 400px; min-width: 400px; overflow:hidden" ng-hide="isShowError">\
+				<div class="content" ng-hide="isShowError">\
 				</div>\
 				<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
 					<div class="property-inner" ng-click="stopPropagation($event)">\
@@ -239,9 +239,9 @@ angular.module('app.directive.widget', [])
 					elContent.css('opacity', '0');
 					setTimeout(function() {
 						$(table).fixheadertable({
-							minWidth: scope.order.length * 210,
-							width: 400,
-							height: 267
+							// minWidth: scope.order.length * 210,
+							// width: 400,
+							// height: 267
 						});
 						elContent.css('opacity','');
 					}, 300);
@@ -251,7 +251,7 @@ angular.module('app.directive.widget', [])
 				'chart': function(ctx) {
 
 					run();
-					var svg = angular.element('<div class="widget" style="clear:both; height:300px; width: 400px">');
+					var svg = angular.element('<div class="widget">');
 
 					var dataLabel = {name: ctx.data.label, type: ctx.data.labelType};
 
