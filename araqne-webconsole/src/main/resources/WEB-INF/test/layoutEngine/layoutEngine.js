@@ -1071,7 +1071,7 @@ var layoutEngine = (function() {
 
 					var boxn = contb.rows[0].boxes.last();
 					contents.appendTo(boxn.el.find('.mybox'));
-					boxn.resizerH.show();
+					contb.rows[0].boxes[0].resizerH.show();
 				}
 				else {
 					console.log("right case: basic");
@@ -1636,4 +1636,82 @@ var layoutEngine = (function() {
 	layoutEngine.ui.layout.box.create({'w': 100,'guid': 'zz'}); // Box
 	layoutEngine.ui.layout.box.create({'w': 100,'guid': 'yy'}); // Box - Resizable
 
+}());
+
+
+(function() {
+	function AutoLayout(widgets) {
+		var layout = { 'rows':[], 'w':100, 'guid':'root' };
+		var h = 100 / Math.ceil(widgets.length / 4);
+		if(h < 25) h = 25;
+
+		function makeColLayout4(k) {
+			if(k % 4 == 0) {
+				layout.rows.push({ 'cols': [], 'h': h });
+			}
+			
+			layout.rows[Math.floor(k/4)].cols.push({
+				'w': 25,
+				'guid': widgets[k].guid
+			});
+		}
+
+		for (var i = 0; i < widgets.length; i++) {
+			
+			if( widgets.length < 4 ) {
+				// 1, 2, 3, 4
+				if(i == 0) {
+					layout.rows.push({ 'cols': [], 'h': 100 });
+				}
+
+				layout.rows.last().cols.push({
+					'w': 100/widgets.length,
+					'guid': widgets[i].guid
+				});
+			}
+			else if( widgets.length % 4 == 1 && i >= widgets.length - 5) {
+				// [ | | ]
+				// [ | ] 5, 9, 13, 17...
+				var divider = (widgets.length - i) > 2 ? 3 : 2;
+				if((widgets.length - i == 5) || (widgets.length - i == 2)) {
+					layout.rows.push({ 'cols': [], 'h': h });
+				}
+
+				layout.rows.last().cols.push({
+					'w': 100/divider,
+					'guid': widgets[i].guid
+				});
+			}
+			else if( widgets.length % 4 == 3 && i >= widgets.length - 3) {
+				// [ | | ] 7, 11, 15, 19...
+				if(widgets.length - i == 3) {
+					layout.rows.push({ 'cols': [], 'h': h });
+				}
+
+				layout.rows.last().cols.push({
+					'w': 100/3,
+					'guid': widgets[i].guid
+				});
+			}
+			else if( widgets.length % 4 == 2 && i >= widgets.length - 2) {
+				// [ | ] 6, 10, 14, 18...
+				if(widgets.length - i == 2) {
+					layout.rows.push({ 'cols': [], 'h': h });
+				}
+
+				layout.rows.last().cols.push({
+					'w': 100/2,
+					'guid': widgets[i].guid
+				});
+			}
+			else {
+				makeColLayout4(i);
+			}
+		}
+
+		return layout;
+	}
+
+	var layout = layoutEngine.namespace("ui.layout");
+	layout.autoLayout = AutoLayout;
 }());
