@@ -1,17 +1,3 @@
-var app = angular.module('layoutEngine', []);
-
-function debounce(fn, delay) {
-	var timer = null;
-	return function () {
-		var context = this, args = arguments;
-		clearTimeout(timer);
-		timer = setTimeout(function () {
-			fn.apply(context, args);
-		}, delay);
-	};
-}
-
-
 Array.prototype.insert = function(item, idx) {
 	this.splice(idx, 0, item);
 }
@@ -23,8 +9,6 @@ Array.prototype.removeAt = function(idx) {
 Array.prototype.last = function() {
 	return this.slice(-1)[0];
 }
-
-$(document).on("selectstart", function() { return false; });
 
 function hasClassIndexOf(s, klass) {
 	return ("" + s).split(" ").indexOf(klass) >= 0;
@@ -777,6 +761,7 @@ var layoutEngine = (function() {
 					
 					newrow = this.addRow();
 					
+					var contents = box.el.find('.contentbox').detach();
 					box.close();
 					var boxn = _box.create(box.obj);
 					
@@ -787,6 +772,9 @@ var layoutEngine = (function() {
 					this.rows[this.rows.length - 2].resizerV.show();
 					boxn.resizerH.hide();
 					newrow.resizerV.hide();
+
+					boxn.el.find('.contentbox').remove();
+					contents.appendTo(boxn.el.find('.mybox'));
 					
 					delete this.guid;
 					delete this.obj.guid;
@@ -813,9 +801,8 @@ var layoutEngine = (function() {
 						else {
 							function case5bottom() {
 								console.log("bottom case5: insert row");
-								
-//								console.log(box.guid)
-//								console.log(box.row.box.rows)
+
+								var contents = box.el.find('.contentbox').detach();
 								box.close();
 //								console.log(box.row.box.rows)
 								var newrow = that.row.box.addRow(original_idx + 1);
@@ -823,6 +810,8 @@ var layoutEngine = (function() {
 								boxn.row = newrow;
 
 								boxn.resizerH.hide();
+								boxn.el.find('.contentbox').remove();
+								contents.appendTo(boxn.el.find('.mybox'));
 								that.row.box.rows[original_idx].resizerV.show();
 								if(newrow == that.row.box.rows.last()) {
 									newrow.resizerV.hide();
@@ -835,6 +824,8 @@ var layoutEngine = (function() {
 							else {
 								if(this.row.box === box.row.box) {
 									console.log("bottom case4: reorder");
+
+									var contents = box.el.find('.contentbox').detach();
 									
 									var newrow = this.row.box.addRow(original_idx + 1);
 									newrow.append(boxn);
@@ -842,6 +833,8 @@ var layoutEngine = (function() {
 									boxn.resizerH.hide();
 
 									this.row.box.rows[this.row.box.rows.indexOf(newrow) - 1].resizerV.show();
+									boxn.el.find('.contentbox').remove();
+									contents.appendTo(boxn.el.find('.mybox'));
 
 									box.close();
 								}
@@ -854,6 +847,8 @@ var layoutEngine = (function() {
 					else {
 						console.log("bottom case2: add to single box");
 						
+						var contentsTop = box.el.find('.contentbox').detach();
+						var contentsBottom = this.el.find('.contentbox').detach();
 						box.close();
 						var child = wrapRow(this); // <-- it is child
 						// "this" is parent box
@@ -862,6 +857,11 @@ var layoutEngine = (function() {
 						boxn.row = newrow;
 
 						unmakeDroppable(this);
+
+						child.el.find('.contentbox').remove();
+						boxn.el.find('.contentbox').remove();
+						contentsBottom.appendTo(child.el.find('.mybox'));
+						contentsTop.appendTo(boxn.el.find('.mybox'));
 
 						newrow.resizerV.hide();
 
@@ -880,6 +880,7 @@ var layoutEngine = (function() {
 					
 					newrow = this.addRow(0);
 					
+					var contents = box.el.find('.contentbox').detach();
 					box.close();
 					var boxn = _box.create(box.obj);
 					
@@ -888,6 +889,8 @@ var layoutEngine = (function() {
 					boxn.row = newrow;
 
 					boxn.resizerH.hide();
+					boxn.el.find('.contentbox').remove();
+					contents.appendTo(boxn.el.find('.mybox'));
 					
 					delete this.guid;
 					delete this.obj.guid;
@@ -916,10 +919,13 @@ var layoutEngine = (function() {
 							function case5top() {
 								console.log("top case5: insert row");
 								
+								var contents = box.el.find('.contentbox').detach();
 								box.close();
 								var newrow = that.row.box.addRow(original_idx);
 								newrow.append(boxn);
 								boxn.row = newrow;
+								boxn.el.find('.contentbox').remove();
+								contents.appendTo(boxn.el.find('.mybox'));
 							}
 
 							if(box.row == undefined) {
@@ -929,11 +935,14 @@ var layoutEngine = (function() {
 								if(this.row.box === box.row.box) {
 									console.log("top case4: reorder");
 									
+									var contents = box.el.find('.contentbox').detach();
 									var newrow = this.row.box.addRow(original_idx);
 									newrow.append(boxn);
 									boxn.row = newrow;
 
 									boxn.resizerH.hide();
+									boxn.el.find('.contentbox').remove();
+									contents.appendTo(boxn.el.find('.mybox'));
 									box.close();
 								}
 								else {
@@ -946,6 +955,8 @@ var layoutEngine = (function() {
 					else {
 						console.log("top case2: add to single box");
 						
+						var contentsTop = box.el.find('.contentbox').detach();
+						var contentsBottom = this.el.find('.contentbox').detach();
 						box.close();
 						var child = wrapRow(this); // <-- it is child
 						// "this" is parent box
@@ -956,7 +967,13 @@ var layoutEngine = (function() {
 						
 						unmakeDroppable(this);
 
+						child.el.find('.contentbox').remove();
+						boxn.el.find('.contentbox').remove();
+						contentsBottom.appendTo(child.el.find('.mybox'));
+						contentsTop.appendTo(boxn.el.find('.mybox'));
+
 						child.row.resizerV.hide();
+
 						this.rows.forEach(function(row) {
 							row.boxes[0].resizerH.hide();
 						})
@@ -970,6 +987,8 @@ var layoutEngine = (function() {
 					var p = this.el.parent();
 					var boxobj = $.extend({}, box.obj); // object copy
 					boxobj.w = 50;
+
+					var contents = box.el.find('.contentbox').detach();
 
 					var contb = _box.create({
 						"rows": [
@@ -994,17 +1013,25 @@ var layoutEngine = (function() {
 
 					unwrapRow(this.rows.last());
 
-					contb.rows[0].boxes[0].resizerH.show();
+					var boxn = contb.rows[0].boxes[0];
+
+					boxn.el.find('.contentbox').remove();
+					contents.appendTo(boxn.el.find('.mybox'));
+					boxn.resizerH.show();
 				}
 				else {
 					console.log("left case: basic");
 					var original_idx = this.row.boxes.indexOf(this);
 					
+					var contents = box.el.find('.contentbox').detach();
 					box.obj.w = this.obj.w / 2;
 					var boxn = _box.create(box.obj)
 					
 					this.row.insertAt(boxn, original_idx);
 					this.row.boxes[original_idx + 1].resize(boxn.obj.w, false);
+
+					boxn.el.find('.contentbox').remove();
+					contents.appendTo(boxn.el.find('.mybox'));
 					box.close();
 				}
 			}
@@ -1015,6 +1042,8 @@ var layoutEngine = (function() {
 					var p = this.el.parent();
 					var boxobj = $.extend({}, box.obj); // object copy
 					boxobj.w = 50;
+
+					var contents = box.el.find('.contentbox').detach();
 
 					var contb = _box.create({
 						"rows": [
@@ -1040,13 +1069,15 @@ var layoutEngine = (function() {
 
 					unwrapRow(this.rows[0]);
 
-					contb.rows[0].boxes[0].resizerH.show();
+					var boxn = contb.rows[0].boxes.last();
+					contents.appendTo(boxn.el.find('.mybox'));
+					boxn.resizerH.show();
 				}
 				else {
 					console.log("right case: basic");
-
 					var original_idx = this.row.boxes.indexOf(this);
-					
+
+					var contents = box.el.find('.contentbox').detach();
 					box.obj.w = this.obj.w / 2;
 					var boxn = _box.create(box.obj)
 					
@@ -1059,6 +1090,8 @@ var layoutEngine = (function() {
 
 					// console.trace();
 					this.row.boxes[original_idx].resize(boxn.obj.w, false);
+					boxn.el.find('.contentbox').remove();
+					contents.appendTo(boxn.el.find('.mybox'));
 					box.close();
 				}
 			}
@@ -1110,6 +1143,7 @@ var layoutEngine = (function() {
 		function draw() {
 
 			if(prop.rows == undefined) {
+				el.attr('dock-id', that.guid)
 				var closebtn = $("<button>").addClass("btn")
 											.text("x")
 											.on("click",function() {
@@ -1122,6 +1156,8 @@ var layoutEngine = (function() {
 				$("<div>").addClass("handler")
 						 .text(that.guid)
 						 .appendTo(mybox);
+
+				var contentbox = $('<div>').addClass('contentbox').appendTo(mybox);
 				
 				makeDraggable(that);
 				
@@ -1597,115 +1633,7 @@ var layoutEngine = (function() {
 		return new Box(prop);
 	}
 
-}());
-
-
-function Controller($scope) {
-
-	var layoutdata = {
-		"rows": [
-			{
-				"cols": [
-					{
-						"w": 25,
-						"rows": [
-							{
-								"cols": [
-									{
-										"w": 100,
-										"guid": "a-a"
-									}
-								],
-								"h": 50
-							},
-							{
-								"cols": [
-									{
-										"w": 100,
-										"guid": "a-b"
-									}
-								],
-								"h": 30
-							},
-							{
-								"cols": [
-									{
-										"w": 100,
-										"guid": "a-c"
-									}
-								],
-								"h": 20
-							}
-						],
-						"guid": "a"
-					},
-					{
-						"w": 50,
-						"guid": "b"
-					},
-					{
-						"w": 25,
-						"guid": "c"
-					}
-				],
-				"h": 50
-			},
-			{
-				"cols": [
-					{
-						"w": 50,
-						"guid": "d"
-					},
-					{
-						"w": 50,
-						"guid": "e"
-					}
-				],
-				"h": 50
-			}
-		],
-		"w": 100,
-		"guid": "root"
-	}
-
-
-	$scope.addWidget = function() {
-		// console.log(box)
-
-		var newbie = layoutEngine.ui.layout.box.create({
-			'w': 100,
-			'guid': 'newbie'
-		});
-		console.log(newbie)
-
-		var newdiv = $('<div class="newbie"></div>').appendTo('body');
-		
-		newbie.on('splitInsert', function() {
-			newdiv.remove();
-			// newbie.off(ev); 
-			// 실제로 할 필요 없음. splitInsert 이후 box 는 삭제되고 새로 생성되는 것이므로, 이전 box 의 이벤트가 따라다니지 않는다.
-		});
-		newbie.resizerH.hide();
-
-		newbie.appendTo(newdiv, true)
-	}
-
-	// dummies for prototype chaining
 	layoutEngine.ui.layout.box.create({'w': 100,'guid': 'zz'}); // Box
 	layoutEngine.ui.layout.box.create({'w': 100,'guid': 'yy'}); // Box - Resizable
-	//
 
-	function getRoot() {
-		if(!!layoutEngine.ui.layout.box.root) {
-			console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
-		}
-	}
-
-	var boxe = new CustomEvent(layoutEngine.ui.layout.box.event);
-	boxe.on('modify', debounce(getRoot, 200));
-	boxe.on('resize', getRoot);
-
-	var box = layoutEngine.ui.layout.box.create(layoutdata, true); // Box - Resizable - CustomEvent	
-	box.appendTo("#main");
-}
-
+}());

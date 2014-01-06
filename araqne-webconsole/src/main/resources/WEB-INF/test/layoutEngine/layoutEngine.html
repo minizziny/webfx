@@ -12,160 +12,42 @@
 
 	<style>
 
-.k-d-col {
-	background: transparent;
+* {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 }
 
-.mybox {
-	background-color: #fff;
-	border: 1px solid #ccc;
-	/*
-	border-color: rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.15) rgba(0, 0, 0, 0.25);
-	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05); 
-	*/
+body, #main {
+	background: #ddd;
+	-webkit-font-smoothing: antialiased;
+	-moz-font-smoothing: antialiased;
+	font-smoothing: antialiased;
+	margin: 0;
 
-	top: 2px;
-	left: 2px;
-	right: 2px;
-	bottom: 2px;
-	position: absolute;
-	border-radius: 0px;
-
-	padding: 0px;
+	overflow-x: hidden;
+	/* overflow: hidden; */
 }
 
-.mybox .handler {
-	background-image: -webkit-linear-gradient(top,white,#E6E6E6);
-	border-radius: 6px 6px 0px 0px;
-	
-	font-weight: bold;
-	color: gray;
-	font-size: 14px;
-	
-	padding: 5px
-}
-
-.drop-compass {
-	border: 1px solid #0099ff;
-	background-color: white;
-	width: 32px;
-	height: 32px;
-	position: absolute;
-	/* z-index: 9999; */
-}
-
-
-.dock-preview {
-	position: absolute;
-	border: 1px solid rgba(0, 127, 255, .4);
-	background-color: rgba(0, 127, 255, .1);
-	z-index: 9997;
-}
-
-.dock-preview.left {
-	width: 50%;
+html, body, .k-d-col {
 	height: 100%;
 }
 
-.dock-preview.right {
-	right: 0;
-	width: 50%;
-	height: 100%;
+#main {
+	clear:both;
+	height: 90%;
 }
 
-.dock-preview.top {
-	top: 0;
-	width: 100%;
-	height: 50%;
-}
-
-.dock-preview.bottom {
-	bottom: 0;
-	width: 100%;
-	height: 50%;
-}
-
-.over1 {
-	background-color: #ffcc00;
-}
-
-.drp-t {
-	top: 0;
-	left: 50%;
-	margin-left: -16px;
-}
-
-.drp-t.single {
-	top: 50%;
-	margin-top: -47px;
-}
-
-.drp-t:after {
-	content: 't';
-}
-
-.drp-b {
-	bottom: 0;
-	left: 50%;
-	margin-left: -16px;
-}
-
-.drp-b.single {
-	bottom: 50%;
-	margin-bottom: -47px;
-}
-
-.drp-b:after {
-	content: 'b';
-}
-
-.drp-l {
-	left: 0;
-	top: 50%;
-	margin-top: -16px;
-}
-
-.drp-l.single {
-	left: 50%;
-	margin-left: -47px;
-}
-
-.drp-l:after {
-	content: 'l';
-}
-
-.drp-r {
-	right: 0;
-	top: 50%;
-	margin-top: -16px;
-}
-
-.drp-r.single {
-	right: 50%;
-	margin-right: -47px;
-}
-
-.drp-r:after {
-	content: 'r';
-}
 
 .btn {
 	float: right;
 }
 
-.newbie {
-	z-index: 3000;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: 400px;
-	height: 300px;
-	margin-left: -200px;
-	margin-top: -150px;
-}
+@media screen and (max-width: 760px){
 
-.newbie .mybox {
-	box-shadow: 5px 5px 20px rgba(0,0,0,.4);
+}
+@media screen and (max-width: 690px){
+
 }
 
 	</style>
@@ -179,5 +61,6 @@
 	</div>
 
 	<script src="layoutEngine.js"></script>
+	<script src="layoutEngine-main.js"></script>
 </body>
 </html>

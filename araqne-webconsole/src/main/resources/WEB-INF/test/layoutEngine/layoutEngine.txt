@@ -1,0 +1,49 @@
+object Resizable
+	option
+		el: $Element
+		resizer: Array[bool, bool, bool, bool] // top, right, bottom, left
+		onResize: function
+		afterResize: function
+	property
+		$Element el
+		string is
+	function
+		void onResize(int oldval, int newval)
+		void afterResize()
+		void resize(int w, int h)
+
+object Row
+	option
+		el: $Element
+		h: int
+	property
+		$Element el
+		Array[Box] boxes
+		Object obj
+	function
+		void appendTo(Box box)
+		void insertAt(Box box, int Order)
+		void append(Box box)
+		void resize(int h, bool bubble)
+		void close()
+		void deleteBox(Box box)
+
+object Box
+	option
+		el: $Element
+		rows: Array[Row]
+		w: int
+	property
+		int guid
+		Array[Row] row
+	function
+		Box findBox(int guid)
+		$Element appendTo(Row row)
+		$Element appendTo($Element el)
+		void prepend(Row row)
+		void insert(Row row, int idx)
+		Row addRow(int idx)
+		void splitInsert(Box box, Direction direction)
+		void resize(int w, bool bubble)
+		void close()
+		void deleteRow(Row row)
