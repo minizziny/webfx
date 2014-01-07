@@ -10,6 +10,21 @@ angular.module('app.chart', [])
 		}
 	});
 
+	function ParseTimeWithTimezone(timeStr) {
+		// FORMAT
+		// 2014-01-06 14:00:00+0900
+
+		var timezoneStr = timeStr.substring(19,24); // "+0900"
+		timezoneStr = timezoneStr.replace(timezoneStr[0], (timezoneStr[0] == '-' ? '+' : '-')); // "-0900"
+		var timezone = parseInt(timezoneStr) / 100 * 60; // -9000 / 100 * 60 = -540
+		var parsableStr = timeStr.substring(0, 19).replace(' ', 'T');
+
+		var datetimeMil = Date.parse(parsableStr);
+		var spanHour = timezone / 60;
+		return datetimeMil + (spanHour * 3600 * 1000);
+
+	}
+
 	function getDataMetadata(data) {
 		var noData = data.length == 0 || data.some(function(s) {
 			return s.values[0] == undefined
@@ -50,7 +65,7 @@ angular.module('app.chart', [])
 				})
 				.map(function(o) {
 					if(m.isDateTime) {
-						return [ Date.parse(o.label), o.value ];	
+						return [ ParseTimeWithTimezone(o.label), o.value ];	
 					}
 					
 					if(m.isString || m.isNumber) {
@@ -288,7 +303,7 @@ angular.module('app.chart', [])
 				})
 				.map(function(o) {
 					if(m.isDateTime) {
-						return [ Date.parse(o.label), o.value ];	
+						return [ ParseTimeWithTimezone(o.label), o.value ];	
 					}
 					
 					if(m.isString || m.isNumber) {
@@ -586,7 +601,7 @@ angular.module('app.chart', [])
 				})
 				.map(function(o) {
 					if(m.isDateTime) {
-						return [ Date.parse(o.label), o.value ];	
+						return [ ParseTimeWithTimezone(o.label), o.value ];	
 					}
 					
 					if(m.isString || m.isNumber) {
