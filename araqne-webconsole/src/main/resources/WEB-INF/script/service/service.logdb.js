@@ -1,3 +1,6 @@
+console.logdb = function() {
+	// console.log.apply(console, arguments);
+}
 
 var logdb;
 if(logdb == null) {
@@ -255,7 +258,7 @@ angular.module('app.logdb', [])
 
 			isDisposed = true;
 			try {
-				console.log('dispose', clazz.id);
+				console.logdb('dispose', clazz.id);
 			} catch(e) {}
 		}
 

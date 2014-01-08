@@ -225,7 +225,7 @@ var layoutEngine = (function() {
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
 				$(document).off('mousemove.resizeV').off('mouseup.resizeV');
-				sender.afterResize();
+				sender.afterResize(sender);
 			});
 
 			if(e.delegateTarget.setCapture) { e.delegateTarget.setCapture(); }
@@ -292,7 +292,7 @@ var layoutEngine = (function() {
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
 				$(document).off('mousemove.resizeH').off('mouseup.resizeH');
-				sender.afterResize();
+				sender.afterResize(sender);
 			});
 
 			if(e.delegateTarget.setCapture) { e.delegateTarget.setCapture(); }
@@ -339,9 +339,13 @@ var layoutEngine = (function() {
 			}
 		}
 
-		this.boxes.onItemAdded = _box.event.modify;
+		this.boxes.onItemAdded = function() {
+			_box.event.modify(that)
+		} 
 		// this.boxes.onItemSet = _box.event.modify;
-		this.boxes.onItemRemoved = _box.event.modify;
+		this.boxes.onItemRemoved = function() {
+			_box.event.modify(that)
+		} 
 
 		this.getMinHeight = function() {
 			var settingMinh = 30;
@@ -616,9 +620,13 @@ var layoutEngine = (function() {
 
 		this.rows = new ObservableArray([]);
 
-		this.rows.onItemAdded = _box.event.modify;
+		this.rows.onItemAdded = function() {
+			_box.event.modify(that)
+		}
 		// this.rows.onItemSet = _box.event.modify;
-		this.rows.onItemRemoved = _box.event.modify;
+		this.rows.onItemRemoved = function() {
+			_box.event.modify(that)
+		}
 		
 		this.getMinWidth = function() {
 			var settingMinw = 50;
@@ -699,7 +707,7 @@ var layoutEngine = (function() {
 				if(!no_root) {
 					console.log('set root')
 					layoutEngine.ui.layout.box.root = that;	
-					_box.event.modify();
+					_box.event.modify(that);
 				}
 			}
 			else {

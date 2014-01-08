@@ -95,7 +95,7 @@ function CustomEvent(obj) {
 		events[eventName].push(fn);
 
 		obj[eventName] = function() {
-			events[eventName].fire();
+			events[eventName].fire.apply(events[eventName], arguments);
 		}
 	}
 
@@ -132,6 +132,7 @@ angular.module('app.connection', ['app.utility'])
 
 	function initialize() {
 		var ws = new WebSocket('ws://' + location.host + '/websocket');
+		// var ws = new WebSocket('ws://172.20.0.118:8888/websocket');
 		ws.onmessage = function(e) {
 			onMessageReceived(e.data);
 		}
