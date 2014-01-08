@@ -78,7 +78,6 @@ logpresso.factory('eventSender', function() {
 		'root': {},
 		'menu': {},
 		'starter': { pid: 11 },
-		'd': { pid: 222 },
 		'dashboard': { pid: 22 },
 		'orgchart': { pid: 33 },
 		'auditlog': {},
@@ -401,7 +400,7 @@ function LoginController($scope, socket, serviceSession, eventSender, $location)
 		.success(function(m) {
 
 			serviceSession.login($scope.txtLoginName, $scope.txtPassword, m.body.nonce, function(m) {
-				$location.path('/system/d');
+				$location.path('/system/starter');
 
 				eventSender.root.loggedIn();
 				eventSender.root.startTimeout();

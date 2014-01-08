@@ -1,3 +1,17 @@
+
+function debounce(fn, delay) {
+	var timer = null;
+	return function () {
+		var context = this, args = arguments;
+		clearTimeout(timer);
+		timer = setTimeout(function () {
+			fn.apply(context, args);
+		}, delay);
+	};
+}
+
+$(document).on("selectstart", function() { return false; });
+
 function DashboardController($scope, $filter, $element, $translate, eventSender) {
 	$scope.getPid = eventSender.dashboard.pid;
 	eventSender.dashboard.$event.on('unload', function() {
@@ -26,9 +40,8 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 	$scope.numPagerPagesize = 100;
 
 	$scope.onRemoveWidget = function(guid) {
-		eventSender.dashboard.onRemoveSingleWidget(guid);
+		// eventSender.dashboard.onRemoveSingleWidget(guid);
 	}
-
 }
 
 function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
@@ -66,11 +79,16 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	eventSender.dashboard.onCreateNewWidget = function(ctx) {
+		var el = angular.element('.k-d-col[dock-id=' + ctx.guid + '] .contentbox');
+
+		// $('<button class="btn">+_+</button>').on('click', function() {
+		// 	alert('clicke!!!' + ctx.guid);
+		// }).appendTo(el);
 		var widget = angular.element('<widget ng-pid="getPid" guid="' + ctx.guid + '" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
 		$compile(widget)($scope);
 		widget[0].setContext(ctx);
 
-		$('.board').append(widget);
+		widget.appendTo(el)
 	}
 
 	$scope.dataPresetList = [];
@@ -127,7 +145,9 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 			obj.$dispose();
 
-		})
+		});
+
+		$('.dockpanel').empty();
 	}
 
 	function LoadPreset(guid) {
@@ -136,10 +156,63 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			{ 'guid': guid }
 		, eventSender.dashboard.pid)
 		.success(function(m) {
-			console.log(m.body.preset.state)
+			if(!m.body.preset.state.layout) {
+				var widgets = m.body.preset.state.widgets;
+				m.body.preset.state.layout = layoutEngine.ui.layout.autoLayout(widgets);
+			}
+			
 			$scope.currentPreset = m.body.preset;
 
 			ClearPreset();
+
+			var layout = m.body.preset.state.layout;
+			function getRoot(resizable) {
+				console.warn('getRoot')
+				console.log(resizable);
+				console.trace()
+
+				
+				if(!!layoutEngine.ui.layout.box.root) {
+					console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
+				}
+				if(typeof resizable == 'object') {
+
+					var curr = resizable.el;
+					var effsp;
+					if(curr.hasClass('k-d-col')) {
+						effsp = curr.prevAll('.k-d-col:first');
+						effsn = curr.nextAll('.k-d-col:first');
+					}
+					else {
+						effsp = curr.prevAll('.k-d-row:first');
+						effsn = curr.nextAll('.k-d-row:first');
+					}
+					// console.log(curr.hasClass('k-d-col'), curr.hasClass('k-d-row')) //  이거에 따라서 .nextAll('.k-d-row:first') 할거냐 .nextAll('.k-d-col:first') 할거냐 정하면 될듯!!
+					// var effsp = curr.prev();
+					// var effsn = curr.next();
+
+					function resizeCharts(i, widget) {
+						if(!!widget.highchart) {
+							var parent = $(widget).parents('.contentbox');
+							widget.highchart.setSize(parent.width(), parent.height() - 10, false);
+						}
+					}
+
+					curr.find('.widget').each(resizeCharts);
+					effsn.find('.widget').each(resizeCharts);
+					effsp.find('.widget').each(resizeCharts);
+					
+					console.log(effsn[0])
+					// console.log(resizable.el.next()[0])
+				}
+			}
+
+			var boxe = new CustomEvent(layoutEngine.ui.layout.box.event);
+			boxe.on('modify', debounce(getRoot, 200));
+			boxe.on('resize', getRoot);
+
+			var box = layoutEngine.ui.layout.box.create(layout, true);
+			box.appendTo(".dockpanel");
 
 
 			var widgets = m.body.preset.state.widgets;
@@ -250,6 +323,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	Init();
 	//RemovePresets('autosave')
 }
+
 
 function SelectColumnController($scope, $filter, $translate, eventSender) {
 	$scope.dataCustomColumn;
