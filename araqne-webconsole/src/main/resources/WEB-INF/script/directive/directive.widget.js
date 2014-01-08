@@ -86,47 +86,46 @@ angular.module('app.directive.widget', [])
 			'onRemove': '&',
 			'ngPid': '='
 		},
-		template: '<div class="widget">\
-			<figure class="front">\
-				<h4 style="font-size:1em; margin: 0px 0px 5px;">\
-					<span click-to-edit ng-model="name" ng-change="onChange()" ng-cancel="onCancel()"></span>\
-					<span class="pull-right">\
-						<button class="btn btn-mini b-pause" ng-hide="isPaused" ng-click="isPaused = true">\
-							<i class="icon-pause"></i>\
-						</button>\
-						<button class="btn btn-mini b-play" ng-show="isPaused" ng-click="isPaused = false">\
-							<i class="icon-play"></i>\
-						</button>\
-						<button class="btn btn-mini b-refresh" ng-click="refresh();">\
-							<i class="icon-refresh"></i>\
-						</button>\
-						<button class="btn btn-mini b-p" ng-click="isShowProperty = !isShowProperty">\
-							<i class="icon-info-sign"></i>\
-						</button>\
-						<button class="btn btn-mini b-x" ng-click="removeWidget()">\
-							<i class="icon-remove"></i>\
-						</button>\
-					</span>\
-				</h4>\
-				<div class="progress">\
-					<div class="bar" ng-hide="isLoaded" ng-style="progress"></div>\
-				</div>\
-				<span ng-show="isPaused" style="font-size:.8em; color: silver; float: left">일시 정지됨</span>\
-				<span class="clearfix" style="font-size:.8em; color: silver; float: right">{{lastUpdate}}</span>\
-				<br>\
-				<div class="content" ng-hide="isShowError">\
-				</div>\
-				<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
-					<div class="property-inner" ng-click="stopPropagation($event)">\
-						<code>{{query}}</code><br/>\
-						{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
-						<span click-to-edit type="number" ng-model="interval" ng-change="onChange()" ng-cancel="onCancel()"></span>\
-						{{"$S_msg_QueryRunInterval" | translate}}\
-					</div>\
-				</div>\
-				<div class="alert alert-error" ng-show="isShowError">{{errorMessage}}</div>\
-			</figure>\
-		</div>',
+		template: 
+			'<span click-to-edit ng-model="name" ng-change="onChange()" ng-cancel="onCancel()" class="pull-left" style="margin-top: -26px; margin-left: 4px"></span>\
+			<span class="pull-right" style="margin-top: -22px">\
+				<button class="btn btn-mini b-pause" ng-hide="isPaused" ng-click="isPaused = true">\
+					<i class="icon-pause"></i>\
+				</button>\
+				<button class="btn btn-mini b-play" ng-show="isPaused" ng-click="isPaused = false">\
+					<i class="icon-play"></i>\
+				</button>\
+				<button class="btn btn-mini b-refresh" ng-click="refresh();">\
+					<i class="icon-refresh"></i>\
+				</button>\
+				<button class="btn btn-mini b-p" ng-click="isShowProperty = !isShowProperty">\
+					<i class="icon-info-sign"></i>\
+				</button>\
+				<button class="btn btn-mini b-x" ng-click="removeWidget()">\
+					<i class="icon-remove"></i>\
+				</button>\
+			</span>\
+			<div class="progress" style="height: 2px; margin-bottom: 0">\
+				<div class="bar" ng-hide="isLoaded" ng-style="progress"></div>\
+			</div>\
+			<div class="content" ng-hide="isShowError" style="height: calc(100% - 2px); overflow: auto"></div>',
+			
+			// 	<span ng-show="isPaused" style="font-size:.8em; color: silver; float: left">일시 정지됨</span>\
+			// 	<span class="clearfix" style="font-size:.8em; color: silver; float: right">{{lastUpdate}}</span>\
+			// 	<br>\
+
+
+		// 	<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
+		// 			<div class="property-inner" ng-click="stopPropagation($event)">\
+		// 				<code>{{query}}</code><br/>\
+		// 				{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
+		// 				<span click-to-edit type="number" ng-model="interval" ng-change="onChange()" ng-cancel="onCancel()"></span>\
+		// 				{{"$S_msg_QueryRunInterval" | translate}}\
+		// 			</div>\
+		// 		</div>\
+		// 		<div class="alert alert-error" ng-show="isShowError">{{errorMessage}}</div>\
+		// 	</figure>\
+		// </div>'
 		link: function(scope, el, attrs) {
 			var timer;
 			scope.isShowProperty = false;
@@ -274,6 +273,7 @@ angular.module('app.directive.widget', [])
 					options.loaded = function() {
 						render();
 					}
+
 					elContent.append(svg);
 
 					
@@ -285,7 +285,7 @@ angular.module('app.directive.widget', [])
 
 			function run() {
 				scope.isLoaded = false;
-				elProgressBar.removeClass('ani');
+				// elProgressBar.removeClass('ani');
 				scope.progress = { 'width': '0%' };
 				//scope.$apply();
 
@@ -305,7 +305,7 @@ angular.module('app.directive.widget', [])
 						options.pageLoaded(m);
 					}
 
-					console.log('loaded', queryInst.getId(), scope.guid, scope.query);
+					console.logdb('loaded', queryInst.getId(), scope.guid, scope.query);
 					serviceLogdb.remove(queryInst);
 
 					scope.progress = { 'width': '100%' };
@@ -324,7 +324,7 @@ angular.module('app.directive.widget', [])
 				queryInst.query(scope.query, 200)
 				.created(function(m) {
 					//console.log('created')
-					elProgressBar.addClass('ani');
+					// elProgressBar.addClass('ani');
 					scope.progress = { 'width': '20%' };
 					scope.$apply();
 				})

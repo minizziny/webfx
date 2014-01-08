@@ -1161,9 +1161,7 @@ var layoutEngine = (function() {
 						  .append(closebtn)
 						  .appendTo(el);
 				
-				$("<div>").addClass("handler")
-						 .text(that.guid)
-						 .appendTo(mybox);
+				$("<div>&nbsp;</div>").addClass("handler").appendTo(mybox);
 
 				var contentbox = $('<div>').addClass('contentbox').appendTo(mybox);
 				

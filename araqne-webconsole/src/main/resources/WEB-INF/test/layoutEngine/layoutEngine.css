@@ -22,7 +22,7 @@
 	right: -5px;
 	top: 0;
 	position: absolute;
-	cursor: w-resize;
+	cursor: ew-resize;
 	z-index: 2013;
 }
 
@@ -34,7 +34,7 @@
 	left: 0;
 	position: absolute;
 	z-index: 1000;
-	cursor: s-resize;
+	cursor: ns-resize;
 	z-index: 2013;
 
 }
@@ -237,10 +237,5 @@
 }
 
 .contentbox {
-	overflow: auto;
-	position: absolute;
-	top: 30px;
-	left: 0;
-	right: 0;
-	bottom: 0;
+	height: calc(100% - 30px);
 }

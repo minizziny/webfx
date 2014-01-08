@@ -166,9 +166,44 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			ClearPreset();
 
 			var layout = m.body.preset.state.layout;
-			function getRoot() {
+			function getRoot(resizable) {
+				console.warn('getRoot')
+				console.log(resizable);
+				console.trace()
+
+				
 				if(!!layoutEngine.ui.layout.box.root) {
 					console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
+				}
+				if(typeof resizable == 'object') {
+
+					var curr = resizable.el;
+					var effsp;
+					if(curr.hasClass('k-d-col')) {
+						effsp = curr.prevAll('.k-d-col:first');
+						effsn = curr.nextAll('.k-d-col:first');
+					}
+					else {
+						effsp = curr.prevAll('.k-d-row:first');
+						effsn = curr.nextAll('.k-d-row:first');
+					}
+					// console.log(curr.hasClass('k-d-col'), curr.hasClass('k-d-row')) //  이거에 따라서 .nextAll('.k-d-row:first') 할거냐 .nextAll('.k-d-col:first') 할거냐 정하면 될듯!!
+					// var effsp = curr.prev();
+					// var effsn = curr.next();
+
+					function resizeCharts(i, widget) {
+						if(!!widget.highchart) {
+							var parent = $(widget).parents('.contentbox');
+							widget.highchart.setSize(parent.width(), parent.height() - 10, false);
+						}
+					}
+
+					curr.find('.widget').each(resizeCharts);
+					effsn.find('.widget').each(resizeCharts);
+					effsp.find('.widget').each(resizeCharts);
+					
+					console.log(effsn[0])
+					// console.log(resizable.el.next()[0])
 				}
 			}
 

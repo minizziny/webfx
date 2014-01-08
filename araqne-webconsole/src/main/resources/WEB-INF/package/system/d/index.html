@@ -11,15 +11,19 @@
 	height: 100%;
 }
 
-.dashboard-container, .preset-container {
+.dashboard-container {
 	width: 100%;
-	height: 100%;
+	height: 100%
+}
+
+.preset-container {
+	width: 100%;
+	height: calc(100% - 42px);
 }
 
 .dockpanel {
 	width: 100%;
-	height: 90%;
-	border: 1px solid red;
+	height: 100%;
 }
 
 .widget {
@@ -37,9 +41,21 @@
 	-webkit-margin-start: 0;
 	-webkit-margin-end: 0;
 }
+
+.brandpreset {
+	line-height: 39px;
+	font-size: 20px;
+	font-weight: 200;
+	color: #777777;
+	text-shadow: 0 1px 0 #ffffff;
+	margin: auto;
+	width: 400px;
+	text-align: center;
+	margin-top: -35px;
+}
 </style>
 <div class="dashboard-container" ng-controller="DashboardController">
-	<div ng-controller="PresetController" class="toolbar navbar navbar-top" style="margin-bottom: 10px">
+	<div ng-controller="PresetController" class="toolbar navbar navbar-top" style="margin-bottom: 0px">
 		<div class="navbar-inner">
 			<!--<select style="float: left; margin-top: 5px; margin-bottom: 0; margin-left: 5px" ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
 			-->
