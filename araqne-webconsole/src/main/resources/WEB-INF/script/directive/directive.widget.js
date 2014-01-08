@@ -87,7 +87,7 @@ angular.module('app.directive.widget', [])
 			'ngPid': '='
 		},
 		template: 
-			'<span click-to-edit ng-model="name" ng-change="onChange()" ng-cancel="onCancel()" class="pull-left" style="margin-top: -26px; margin-left: 4px"></span>\
+			'<span click-to-edit ng-model="name" ng-change="onChange()" ng-cancel="onCancel()" class="pull-left" style="margin-top: -25px; margin-left: 6px; font-weight: bold"></span>\
 			<span class="pull-right" style="margin-top: -22px">\
 				<button class="btn btn-mini b-pause" ng-hide="isPaused" ng-click="isPaused = true">\
 					<i class="icon-pause"></i>\

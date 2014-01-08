@@ -280,7 +280,13 @@ angular.module('app.chart', [])
 				series: series,
 				plotOptions: {
 					pie: {
-						animation: false
+						animation: false,
+						allowPointSelect: true,
+						cursor: 'pointer',
+						dataLabels: {
+							enabled: false
+						},
+						showInLegend: true
 					}
 				}
 			};
