@@ -108,21 +108,21 @@ angular.module('app.directive.widget', [])
 			<div class="progress" style="height: 2px; margin-bottom: 0">\
 				<div class="bar" ng-hide="isLoaded" ng-style="progress"></div>\
 			</div>\
-			<div class="content" ng-hide="isShowError" style="height: calc(100% - 2px); overflow: auto"></div>',
+			<div class="content" ng-hide="isShowError" style="height: calc(100% - 2px); overflow: auto"></div>' +
 			
 			// 	<span ng-show="isPaused" style="font-size:.8em; color: silver; float: left">일시 정지됨</span>\
 			// 	<span class="clearfix" style="font-size:.8em; color: silver; float: right">{{lastUpdate}}</span>\
 			// 	<br>\
 
 
-		// 	<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
-		// 			<div class="property-inner" ng-click="stopPropagation($event)">\
-		// 				<code>{{query}}</code><br/>\
-		// 				{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
-		// 				<span click-to-edit type="number" ng-model="interval" ng-change="onChange()" ng-cancel="onCancel()"></span>\
-		// 				{{"$S_msg_QueryRunInterval" | translate}}\
-		// 			</div>\
-		// 		</div>\
+			'<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
+					<div class="property-inner" ng-click="stopPropagation($event)">\
+						<code>{{query}}</code><br/>\
+						{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
+						<span click-to-edit type="number" ng-model="interval" ng-change="onChange()" ng-cancel="onCancel()"></span>\
+						{{"$S_msg_QueryRunInterval" | translate}}\
+					</div>\
+				</div>',
 		// 		<div class="alert alert-error" ng-show="isShowError">{{errorMessage}}</div>\
 		// 	</figure>\
 		// </div>'
@@ -256,23 +256,25 @@ angular.module('app.directive.widget', [])
 
 					function render() {
 						var json = serviceChart.buildJSONStructure(angular.copy(ctx.data.series), scope.dataQueryResult, dataLabel);
-						if(ctx.data.type == 'line') {
-							serviceChart.lineChart(svg[0], json);
-						}
-						else if(ctx.data.type == 'bar') {
-							serviceChart.multiBarHorizontalChart(svg[0], json);
-						}
-						else if(ctx.data.type == 'pie') {
-							serviceChart.pie(svg[0], json);
-						}
+						// setTimeout(function() {
+							var renderOptions = {
+								width: $(svg[0]).width(),
+								height: $(svg[0]).parents('.contentbox').height() - 10
+							}
+							if(ctx.data.type == 'line') {
+								serviceChart.lineChart(svg[0], json, renderOptions);
+							}
+							else if(ctx.data.type == 'bar') {
+								serviceChart.multiBarHorizontalChart(svg[0], json, renderOptions);
+							}
+							else if(ctx.data.type == 'pie') {
+								serviceChart.pie(svg[0], json, renderOptions);
+							}	
+						// }, 500);
 					}
 
-					options.pageLoaded = function() {
-						render();
-					}
-					options.loaded = function() {
-						render();
-					}
+					options.pageLoaded = render;
+					// options.loaded = render;
 
 					elContent.append(svg);
 

@@ -78,6 +78,8 @@
 		height: 440px;
 		border: 1px solid silver;
 		top: 0;
+		bottom: 0;
+		left:0;
 	}
 
 	[fx-dashboard-id=binding-query-result] {

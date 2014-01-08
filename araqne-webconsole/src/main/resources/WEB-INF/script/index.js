@@ -400,7 +400,7 @@ function LoginController($scope, socket, serviceSession, eventSender, $location)
 		.success(function(m) {
 
 			serviceSession.login($scope.txtLoginName, $scope.txtPassword, m.body.nonce, function(m) {
-				$location.path('/system/starter');
+				$location.path('/system/dashboard');
 
 				eventSender.root.loggedIn();
 				eventSender.root.startTimeout();
@@ -414,6 +414,16 @@ function LoginController($scope, socket, serviceSession, eventSender, $location)
 	angular.element('#inputId').focus();
 }
 
+function debounce(fn, delay) {
+	var timer = null;
+	return function () {
+		var context = this, args = arguments;
+		clearTimeout(timer);
+		timer = setTimeout(function () {
+			fn.apply(context, args);
+		}, delay);
+	};
+}
 
 function throttle(fn, threshhold, scope) {
 	threshhold || (threshhold = 250);

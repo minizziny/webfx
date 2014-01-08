@@ -59,6 +59,204 @@ span[click-to-edit] input[type=text] {
 	text-align: center;
 	margin-top: -35px;
 }
+
+
+	.wizard {
+		float: left;
+		width: 98%;
+		margin-left: 10px;
+		padding-left: 0px;
+		border-left: 0px;
+	}
+
+	.newWidget {
+		/*-webkit-transition: .1s ease-in;*/
+		overflow: hidden;
+	}
+
+	.newWidget.step0 {
+		width: 700px;
+		margin-left: -350px;
+	}
+
+	.newWidget.step1 {
+		/*
+		width: 800px;
+		margin-left: -400px;
+		*/
+	}
+
+	.newWidget.step2 {
+		width: 1000px;
+		margin-left: -500px;
+		/* height: 500px; */
+	}
+
+	.newWidget.step3, .removePreset, .clearWidgets {
+		width: 540px;
+		margin-left: -270px;
+	}
+
+	.newWidget.step4 {
+		width: 1000px;
+		margin-left: -500px;
+	}
+
+	.newWidget.step5 {
+		width: 96.5%;
+		min-width: 1000px;
+		margin-left: -49%;
+		min-height: 90%;
+		top: 10px;
+	}
+
+	[fx-dashboard-id=binding-left] {
+		position: relative;
+		width: 58%;
+		left: 0;
+		border: 0;
+	}
+
+	[fx-dashboard-id=binding-right] {
+		position: absolute;
+		width: 39%;
+		right: 0;
+		height: 440px;
+		border: 1px solid silver;
+		top: 0;
+	}
+
+	[fx-dashboard-id=binding-query-result] {
+		height: 235px;
+		border: 1px solid silver;
+		margin-bottom: 5px;
+	}
+
+	[fx-dashboard-id=config-container] {
+		height: 200px;
+		position: relative;
+	}
+
+	[fx-dashboard-id=series] {
+		position: absolute;
+		left:0;
+		width: 22%;
+		height: 200px;
+		border: 0;	
+	}
+	
+	[fx-dashboard-id=series-list] {
+		border: 1px solid silver;
+		height: 160px;
+	}
+
+	[fx-dashboard-id=series-toolbar] {
+		margin-top: 5px;
+	}
+
+	[fx-dashboard-id=config] {
+		background-color: #f0f0f0;
+		padding-top: 10px;
+		position: absolute;
+		right: 0;
+		width: 76%;
+		height: 190px;
+		border: 0;
+	}
+
+	.qr-container {
+		overflow-x: scroll;
+		border: 1px solid #ddd;
+		margin-bottom: 10px;
+	}
+
+	.cmpqr td, .cmpqr th {
+		word-wrap: break-word;
+	}
+
+	.cmpqr.selectable td, .cmpqr.selectable th {
+		cursor: pointer;
+	}
+
+	.cmpqr.selectable td.selected, .cmpqr th.selected {
+		background-color: rgba(0, 153, 255, .2);
+	}
+
+	.cmpqr.selectable tr:nth-child(odd) > td.selected {
+		background-color: rgba(0, 153, 255, .3);
+	}
+
+	.cmpqr.selectable th.selected {
+		background-color: rgba(0, 153, 255, .4);
+		border-bottom: 1px solid rgba(0, 153, 255, .6);
+	}
+
+
+	.table-condensed-custom tr:nth-child(odd) {
+		background-color: rgb(243,243,243);
+	}
+
+	.table-condensed-custom tr:first-child {
+		background-color: rgb(234,234,234);
+	}
+
+	/* ListBox */
+
+	.listbox {
+		border: 1px solid #ccc;
+		margin-bottom: 20px;
+	}
+
+	.arrangeCols {
+		float: right;
+		width: 17%;
+	}
+
+	.listbox > li {
+		padding: 3px 11px;
+		margin: 1px;
+		list-style-type: none;
+		clear: both;
+	}
+
+	li > input[type=checkbox] {
+		vertical-align: top;
+	}
+
+	ul.ui-sortable > li {
+		border: 1px solid transparent;
+		background-color: transparent;
+		cursor: pointer;
+	}
+
+	ul.ui-sortable > li:hover {
+		border: 1px solid transparent;
+		background-color: #ebf2fc;
+	}
+
+	ul.ui-sortable > li.ui-sortable-helper, ul.ui-sortable > li.ui-sortable-helper:hover {
+		border: 1px solid rgba(82, 168, 236, 0.8);
+		background-color: #ebf2fc; /* #cceaff */
+		box-shadow: 1px 1px 10px #aaa;
+	}
+
+
+	div.property {
+		position: absolute;
+		top: 0px;
+		left: 10px;
+		right: 10px;
+		bottom: 0;
+		background-color: rgba(0,0,0,.5);
+		border: 0;
+	}
+
+	div.property-inner {
+		margin: 60px 40px 40px;
+		background-color: white;
+		padding: 10px;
+		box-shadow: 0 0 5px #000;
+	}
 </style>
 <div class="dashboard-container" ng-controller="DashboardController">
 	<div ng-controller="PresetController" class="toolbar navbar navbar-top" style="margin-bottom: 0px">
@@ -359,11 +557,7 @@ span[click-to-edit] input[type=text] {
 							</div>
 						</div>
 					</div>
-					<div fx-dashboard-id="binding-right" class="charthere">
-						<figure>
-							<div></div>
-						</figure>
-					</div>
+					<div fx-dashboard-id="binding-right" class="charthere"></div>
 				</fieldset>
 				<div class="control-group submit-group clearboth">
 					<button class="wiz-prev btn" ng-click="go(4)">{{'$S_str_Previous' | translate}}</button>

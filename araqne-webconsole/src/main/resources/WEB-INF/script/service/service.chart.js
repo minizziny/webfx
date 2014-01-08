@@ -47,7 +47,7 @@ angular.module('app.chart', [])
 		};
 	}
 
-	function multiBarHorizontalChart(selector, data) {
+	function multiBarHorizontalChart(selector, data, options) {
 		var m = getDataMetadata(data);
 		if(m == null) return;
 
@@ -62,11 +62,23 @@ angular.module('app.chart', [])
 			})
 			.map(function(o) {
 				if(m.isDateTime) {
-					return [ ParseTimeWithTimezone(o.label), o.value ];	
+					return {x: ParseTimeWithTimezone(o.label), y: o.value };
 				}
 				
-				if(m.isString || m.isNumber) {
-					return [ o.label, o.value ];
+				if(m.isNumber) {
+					return {x: o.label, y: o.value };
+				}
+
+				if(m.isString) {
+					return {name: o.label, y: o.value };
+				}
+			})
+			.sort(function(a,b) {
+				if(m.isNumber || m.isDateTime) {
+					return a.x - b.x;
+				}
+				if(m.isString) {
+					return a.name - b.name;
 				}
 			});
 			
@@ -78,56 +90,46 @@ angular.module('app.chart', [])
 			series.push(objSeries);
 		});
 
-		setTimeout(function() {
-			options = {}
-			options.width = $(selector).width();
-			options.height = $(selector).parents('.contentbox').height() - 10;				
+		var chartOption = {
+			type: 'column',
+			animation: false,
+			reflow: false
+		}
 
-			var chartOption = {
-				type: 'column',
-				animation: false,
-				renderTo: selector,
-				reflow: false
-			}
+		if(!!options) {
+			chartOption.width = options.width;
+			chartOption.height = options.height;
+		}
 
-			if(!!options) {
-				chartOption.width = options.width;
-				chartOption.height = options.height;
-			}
-
-			var op1 = {
-				chart: chartOption,
-				colors: color_map,
+		var op1 = {
+			chart: chartOption,
+			colors: color_map,
+			title: {
+				text: null
+			},
+			credits: {
+				enabled: false
+			},
+			xAxis: {
+				type: m.type
+			},
+			yAxis: {
 				title: {
 					text: null
-				},
-				credits: {
-					enabled: false
-				},
-				xAxis: {
-					type: m.type
-				},
-				yAxis: {
-					title: {
-						text: null
-					}
-				},
-				series: series,
-				plotOptions: {
-					column: {
-						animation: false
-					}
+				}
+			},
+			series: series,
+			plotOptions: {
+				column: {
+					animation: false
 				}
 			}
-
-			$(selector)[0].highchart = new Highcharts.Chart(op1);
-		}, 250);
-
+		}
+		
+		$(selector).highcharts(op1);
 	}
 
 	function lineChart(selector, data, options) {
-
-
 		var m = getDataMetadata(data);
 		if(m == null) return;
 
@@ -142,11 +144,23 @@ angular.module('app.chart', [])
 			})
 			.map(function(o) {
 				if(m.isDateTime) {
-					return [ ParseTimeWithTimezone(o.label), o.value ];
+					return {x: ParseTimeWithTimezone(o.label), y: o.value };
 				}
 				
-				if(m.isString || m.isNumber) {
-					return [ o.label, o.value ];
+				if(m.isNumber) {
+					return {x: o.label, y: o.value };
+				}
+
+				if(m.isString) {
+					return {name: o.label, y: o.value };
+				}
+			})
+			.sort(function(a,b) {
+				if(m.isNumber || m.isDateTime) {
+					return a.x - b.x;
+				}
+				if(m.isString) {
+					return a.name - b.name;
 				}
 			});
 			
@@ -154,63 +168,51 @@ angular.module('app.chart', [])
 				name: s.name,
 				data: dataMap
 			}
-
 			// console.log(objSeries)
 
 			series.push(objSeries);
 		});
 
-		// console.log(data, series)
-		setTimeout(function() {
-			options = {}
-			options.width = $(selector).width();
-			options.height = $(selector).parents('.contentbox').height() - 10;
+		var chartOption = {
+			type: 'line',
+			animation: false,
+			reflow: false
+		}
 
-			var chartOption = {
-				type: 'line',
-				animation: false,
-				renderTo: selector,
-				reflow: false
-			}
+		if(!!options) {
+			chartOption.width = options.width;
+			chartOption.height = options.height;
+		}
 
-			if(!!options) {
-				chartOption.width = options.width;
-				chartOption.height = options.height;
-			}
-
-			var c1 = {
-				chart: chartOption,
-				colors: color_map,
+		var c1 = {
+			chart: chartOption,
+			colors: color_map,
+			title: {
+				text: null
+			},
+			credits: {
+				enabled: false
+			},
+			xAxis: {
+				type: m.type
+			},
+			yAxis: {
 				title: {
 					text: null
-				},
-				credits: {
-					enabled: false
-				},
-				xAxis: {
-					type: m.type
-				},
-				yAxis: {
-					title: {
-						text: null
-					}
-				},
-				series: series,
-				plotOptions: {
-					line: {
-						animation: false
-					}
+				}
+			},
+			series: series,
+			plotOptions: {
+				line: {
+					animation: false
 				}
 			}
+		}
 
-			$(selector)[0].highchart = new Highcharts.Chart(c1);
-
-
-		}, 250)
-
+		$(selector).highcharts(c1);
 	}
 
-	function pie(selector, data) {
+	function pie(selector, data, options) {
 
 		var m = getDataMetadata(data);
 		if(m == null) return;
@@ -226,11 +228,15 @@ angular.module('app.chart', [])
 			})
 			.map(function(o) {
 				if(m.isDateTime) {
-					return [ ParseTimeWithTimezone(o.label), o.value ];	
+					return {x: ParseTimeWithTimezone(o.label), y: o.value };
 				}
 				
-				if(m.isString || m.isNumber) {
-					return [ o.label, o.value ];
+				if(m.isNumber) {
+					return {x: o.label, y: o.value };
+				}
+
+				if(m.isString) {
+					return {name: o.label, y: o.value };
 				}
 			});
 			
@@ -242,57 +248,49 @@ angular.module('app.chart', [])
 			series.push(objSeries);
 		});
 
-		setTimeout(function() {
-			options = {}
-			options.width = $(selector).width();
-			options.height = $(selector).parents('.contentbox').height() - 10;
+		var chartOption = {
+			type: 'pie',
+			animation: false,
+			reflow: false
+		}
 
-			var chartOption = {
-				type: 'pie',
-				animation: false,
-				renderTo: selector,
-				reflow: false
-			}
+		if(!!options) {
+			chartOption.width = options.width;
+			chartOption.height = options.height;
+		}
 
-			if(!!options) {
-				chartOption.width = options.width;
-				chartOption.height = options.height;
-			}
-
-
-			var c1 = {
-				chart: chartOption,
-				colors: color_map,
+		var c1 = {
+			chart: chartOption,
+			colors: color_map,
+			title: {
+				text: null
+			},
+			credits: {
+				enabled: false
+			},
+			xAxis: {
+				type: m.type
+			},
+			yAxis: {
 				title: {
 					text: null
-				},
-				credits: {
-					enabled: false
-				},
-				xAxis: {
-					type: m.type
-				},
-				yAxis: {
-					title: {
-						text: null
-					}
-				},
-				series: series,
-				plotOptions: {
-					pie: {
-						animation: false,
-						allowPointSelect: true,
-						cursor: 'pointer',
-						dataLabels: {
-							enabled: false
-						},
-						showInLegend: true
-					}
 				}
-			};
+			},
+			series: series,
+			plotOptions: {
+				pie: {
+					animation: false,
+					allowPointSelect: true,
+					cursor: 'pointer',
+					dataLabels: {
+						enabled: false
+					},
+					showInLegend: true
+				}
+			}
+		};
 
-			$(selector)[0].highchart = new Highcharts.Chart(c1);
-		}, 250);
+		$(selector).highcharts(c1);
 	}
 
 	function buildJSONStructure(dataSeries, dataResult, dataLabel) {
