@@ -242,15 +242,26 @@ angular.module('app.chart', [])
 			series.push(objSeries);
 		});
 
-		console.log(data, series)
-
 		setTimeout(function() {
+			options = {}
+			options.width = $(selector).width();
+			options.height = $(selector).parents('.contentbox').height() - 10;
 
-			$(selector).highcharts({
-				chart: {
-					type: 'pie',
-					animation: false
-				},
+			var chartOption = {
+				type: 'pie',
+				animation: false,
+				renderTo: selector,
+				reflow: false
+			}
+
+			if(!!options) {
+				chartOption.width = options.width;
+				chartOption.height = options.height;
+			}
+
+
+			var c1 = {
+				chart: chartOption,
 				colors: color_map,
 				title: {
 					text: null
@@ -272,7 +283,9 @@ angular.module('app.chart', [])
 						animation: false
 					}
 				}
-			});
+			};
+
+			$(selector)[0].highchart = new Highcharts.Chart(c1);
 		}, 250);
 	}
 
