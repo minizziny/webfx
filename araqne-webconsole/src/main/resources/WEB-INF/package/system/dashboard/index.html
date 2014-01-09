@@ -1,6 +1,7 @@
+<link href="test/layoutEngine/layoutEngine.css" rel="stylesheet" media="screen">
 <link href="css/dashboard.css" rel="stylesheet" media="screen">
 <div class="dashboard-container" ng-controller="DashboardController">
-	<div ng-controller="PresetController" class="toolbar navbar navbar-top" style="margin-bottom: 10px">
+	<div ng-controller="PresetController" class="toolbar navbar navbar-top" style="margin-bottom: 0px">
 		<div class="navbar-inner">
 			<!--<select style="float: left; margin-top: 5px; margin-bottom: 0; margin-left: 5px" ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
 			-->
@@ -68,14 +69,14 @@
 		</div>
 	</div>
 
-	<div class="board clearfix">
-		<!--
-		<widget guid="testtest" name="멤" type="grid" interval="15" query="table%20limit%3D10%20memlogs" fields="['_id','pfree']"></widget>
-		<widget guid="testchart" name="멤차트" type="chart.bar" interval="15" query="table%20limit%3D10%20memlogs" series="%5B%7B%22color%22%3A%22%23AFD8F8%22%2C%22name%22%3A%22%ED%9B%84%EB%A6%AC%22%2C%22key%22%3A%22pfree%22%7D%5D" label="_time"></widget>
-		<widget guid="testchart" name="멤차트" type="chart.pie" interval="15" query="table%20limit%3D5000%20memlogs%20%7C%20timechart%20span%3D10m%20count" series="%5B%7B%22color%22%3A%22%23AFD8F8%22%2C%22name%22%3A%22%ED%9B%84%EB%A6%AC%22%2C%22key%22%3A%22count%22%7D%5D" label="_time"></widget>
-		-->
+	<div class="preset-container">
+		<div class="dockpanel"></div>
 	</div>
 
+	<div class="modal arrangeWidget" modal>
+		<div>드래그 앤 드롭하여 위젯을 도킹하면 추가가 완료됩니다.</div>
+	</div>
+	
 	<div class="modal errorWin" modal>
 		<a class="modal-close close" ng-click="clearError()">&times;</a>
 		<div class="raw"></div>
@@ -301,11 +302,7 @@
 							</div>
 						</div>
 					</div>
-					<div fx-dashboard-id="binding-right" class="charthere">
-						<figure>
-							<div></div>
-						</figure>
-					</div>
+					<div fx-dashboard-id="binding-right" class="charthere"></div>
 				</fieldset>
 				<div class="control-group submit-group clearboth">
 					<button class="wiz-prev btn" ng-click="go(4)">{{'$S_str_Previous' | translate}}</button>

@@ -172,6 +172,7 @@ var layoutEngine = (function() {
 		var originy, originh;
 
 		el.on("mousedown", function(e) {
+			$(document).on("selectstart", function() { return false; });
 			originy = e.clientY;
 			originh = sender.el.height();
 
@@ -224,8 +225,8 @@ var layoutEngine = (function() {
 				// end
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
-				$(document).off('mousemove.resizeV').off('mouseup.resizeV');
-				sender.afterResize();
+				$(document).off('mousemove.resizeV').off('mouseup.resizeV').off("selectstart");;
+				sender.afterResize(sender);
 			});
 
 			if(e.delegateTarget.setCapture) { e.delegateTarget.setCapture(); }
@@ -236,6 +237,7 @@ var layoutEngine = (function() {
 		var originx, originw;
 
 		el.on("mousedown", function(e) {
+			$(document).on("selectstart", function() { return false; });
 			originx = e.pageX;
 			originw = sender.el.width();
 
@@ -291,8 +293,8 @@ var layoutEngine = (function() {
 				// end
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
-				$(document).off('mousemove.resizeH').off('mouseup.resizeH');
-				sender.afterResize();
+				$(document).off('mousemove.resizeH').off('mouseup.resizeH').off("selectstart");;
+				sender.afterResize(sender);
 			});
 
 			if(e.delegateTarget.setCapture) { e.delegateTarget.setCapture(); }
@@ -339,9 +341,13 @@ var layoutEngine = (function() {
 			}
 		}
 
-		this.boxes.onItemAdded = _box.event.modify;
+		this.boxes.onItemAdded = function() {
+			_box.event.modify(that)
+		} 
 		// this.boxes.onItemSet = _box.event.modify;
-		this.boxes.onItemRemoved = _box.event.modify;
+		this.boxes.onItemRemoved = function() {
+			_box.event.modify(that)
+		} 
 
 		this.getMinHeight = function() {
 			var settingMinh = 30;
@@ -616,12 +622,16 @@ var layoutEngine = (function() {
 
 		this.rows = new ObservableArray([]);
 
-		this.rows.onItemAdded = _box.event.modify;
+		this.rows.onItemAdded = function() {
+			_box.event.modify(that)
+		}
 		// this.rows.onItemSet = _box.event.modify;
-		this.rows.onItemRemoved = _box.event.modify;
+		this.rows.onItemRemoved = function() {
+			_box.event.modify(that)
+		}
 		
 		this.getMinWidth = function() {
-			var settingMinw = 50;
+			var settingMinw = 150;
 			if( this.rows.length == 0) {
 				return settingMinw;
 			}
@@ -691,7 +701,7 @@ var layoutEngine = (function() {
 
 		this.appendTo = function(row_or_el, no_root) {
 			
-			if(row_or_el instanceof jQuery || row_or_el.constructor.name === 'String') {
+			if(row_or_el instanceof jQuery || typeof row_or_el === 'string') {
 				var selector = row_or_el;
 				$(selector).empty();
 				el.appendTo(selector);
@@ -699,7 +709,7 @@ var layoutEngine = (function() {
 				if(!no_root) {
 					console.log('set root')
 					layoutEngine.ui.layout.box.root = that;	
-					_box.event.modify();
+					_box.event.modify(that);
 				}
 			}
 			else {
@@ -1014,7 +1024,6 @@ var layoutEngine = (function() {
 					unwrapRow(this.rows.last());
 
 					var boxn = contb.rows[0].boxes[0];
-
 					boxn.el.find('.contentbox').remove();
 					contents.appendTo(boxn.el.find('.mybox'));
 					boxn.resizerH.show();
@@ -1070,6 +1079,7 @@ var layoutEngine = (function() {
 					unwrapRow(this.rows[0]);
 
 					var boxn = contb.rows[0].boxes.last();
+					boxn.el.find('.contentbox').remove();
 					contents.appendTo(boxn.el.find('.mybox'));
 					contb.rows[0].boxes[0].resizerH.show();
 				}
@@ -1144,7 +1154,7 @@ var layoutEngine = (function() {
 
 			if(prop.rows == undefined) {
 				el.attr('dock-id', that.guid)
-				var closebtn = $("<button>").addClass("btn")
+				var closebtn = $("<button>").addClass("btn").addClass("internal-close")
 											.text("x")
 											.on("click",function() {
 												that.close();
@@ -1153,9 +1163,7 @@ var layoutEngine = (function() {
 						  .append(closebtn)
 						  .appendTo(el);
 				
-				$("<div>").addClass("handler")
-						 .text(that.guid)
-						 .appendTo(mybox);
+				$("<div>&nbsp;</div>").addClass("handler").appendTo(mybox);
 
 				var contentbox = $('<div>').addClass('contentbox').appendTo(mybox);
 				
@@ -1339,6 +1347,7 @@ var layoutEngine = (function() {
 			var dragHandler = box.el.children(".mybox").children(".handler");
 			
 			dragHandler.on("mousedown", function(ee) {
+				$(document).on("selectstart", function() { return false; });
 				var initp = {
 					x: ee.pageX,
 					y: ee.pageY
@@ -1399,7 +1408,7 @@ var layoutEngine = (function() {
 				}).
 				on("mouseup.activeDroppable", function() {
 					
-					$(document).off("mousemove.activeDroppable").off("mouseup.activeDroppable");
+					$(document).off("mousemove.activeDroppable").off("mouseup.activeDroppable").off("selectstart");
 					dragHandler.off("mousemove");
 
 					box.el.addClass("ani").removeClass("grabbed");

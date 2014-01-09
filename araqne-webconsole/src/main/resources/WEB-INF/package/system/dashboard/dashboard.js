@@ -28,7 +28,6 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 	$scope.onRemoveWidget = function(guid) {
 		eventSender.dashboard.onRemoveSingleWidget(guid);
 	}
-
 }
 
 function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
@@ -41,6 +40,8 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 	eventSender.dashboard.onRemoveSingleWidget = function(guid) {
 		console.log('onRemoveSingleWidget', guid);
+		var el = angular.element('.k-d-col[dock-id=' + guid + ']');
+		el[0].obj.close();
 
 		var widgets = $scope.currentPreset.state.widgets;
 		for (var i = widgets.length - 1; i >= 0; i--) {
@@ -60,17 +61,53 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		}
 
 		$scope.currentPreset.state.widgets.push(ctx);
-		eventSender.dashboard.onCreateNewWidget(ctx);
 
-		eventSender.dashboard.onCurrentPresetChanged(); // save state
+		
+		var newbie = layoutEngine.ui.layout.box.create({
+			'w': 100,
+			'guid': ctx.guid
+		});
+
+		var newdiv = $('<div class="newbie"></div>').appendTo('#view-dashboard');
+		var isSplitInsert = false;
+		newbie.on('splitInsert', function() {
+			newbie.el.find('.handler').off('mousedown.help');
+			isSplitInsert = true;
+		});
+
+		newbie.el.find('.handler').on('mousedown.help', function() {
+			$('.arrangeWidget')[0].hideDialog();
+
+			$(document).on('mouseup.help', function() {
+				if(isSplitInsert) {
+					$('.arrangeWidget')[0].hideDialog();
+					newdiv.remove();
+
+					eventSender.dashboard.onCurrentPresetChanged(); // save state
+				}
+				else {
+					$('.arrangeWidget')[0].showDialog();
+				}
+				$(document).off('mouseup.help');
+			})
+		});
+
+		newbie.resizerH.hide();
+		newbie.appendTo(newdiv, true);
+
+		$('.arrangeWidget')[0].showDialog();
+
+		eventSender.dashboard.onCreateNewWidget(ctx);
 	}
 
 	eventSender.dashboard.onCreateNewWidget = function(ctx) {
+		var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
+
 		var widget = angular.element('<widget ng-pid="getPid" guid="' + ctx.guid + '" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
 		$compile(widget)($scope);
 		widget[0].setContext(ctx);
 
-		$('.board').append(widget);
+		widget.appendTo(el.find('.contentbox'));
 	}
 
 	$scope.dataPresetList = [];
@@ -111,6 +148,8 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			});
 		}
 
+		// delete state.layout; // <-----------------
+
 		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
 			{ 'guid': guid, 'name': name, 'state': state }
 		, eventSender.dashboard.pid);
@@ -127,7 +166,9 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 			obj.$dispose();
 
-		})
+		});
+
+		$('.dockpanel').empty();
 	}
 
 	function LoadPreset(guid) {
@@ -136,10 +177,68 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			{ 'guid': guid }
 		, eventSender.dashboard.pid)
 		.success(function(m) {
-			console.log(m.body.preset.state)
+			console.log(m.body.preset.state.layout)
+			if(!m.body.preset.state.layout) {
+				var widgets = m.body.preset.state.widgets;
+				m.body.preset.state.layout = layoutEngine.ui.layout.autoLayout(widgets);
+			}
+			
+			
 			$scope.currentPreset = m.body.preset;
 
 			ClearPreset();
+
+			var layout = m.body.preset.state.layout;
+			function getRoot(resizable) {
+				// console.warn('getRoot')
+				// console.log(resizable);
+				// console.trace()
+
+				
+				if(!!layoutEngine.ui.layout.box.root) {
+					
+				}
+				if(typeof resizable == 'object') {
+
+					var curr = resizable.el;
+					var effsp;
+					if(curr.hasClass('k-d-col')) {
+						effsp = curr.prevAll('.k-d-col:first');
+						effsn = curr.nextAll('.k-d-col:first');
+					}
+					else {
+						effsp = curr.prevAll('.k-d-row:first');
+						effsn = curr.nextAll('.k-d-row:first');
+					}
+					// console.log(curr.hasClass('k-d-col'), curr.hasClass('k-d-row')) //  이거에 따라서 .nextAll('.k-d-row:first') 할거냐 .nextAll('.k-d-col:first') 할거냐 정하면 될듯!!
+					// var effsp = curr.prev();
+					// var effsn = curr.next();
+
+					function resizeCharts(i, widget) {
+						if(!!$(widget).highcharts) {
+							if(!!$(widget).highcharts()) {
+								var parent = $(widget).parents('.contentbox');
+								$(widget).highcharts().setSize(parent.width(), parent.height() - 10, false);
+							}
+						}
+					}
+
+					curr.find('.widget-chart').each(resizeCharts);
+					effsn.find('.widget-chart').each(resizeCharts);
+					effsp.find('.widget-chart').each(resizeCharts);
+				}
+
+				console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
+				$scope.currentPreset.state.layout = layoutEngine.ui.layout.box.root.getObject();
+				eventSender.dashboard.onCurrentPresetChanged(); // save state
+			}
+
+			var boxe = new CustomEvent(layoutEngine.ui.layout.box.event);
+			boxe.on('modify', debounce(getRoot, 200));
+			boxe.on('resize', getRoot);
+
+			var box = layoutEngine.ui.layout.box.create(layout, true);
+			box.appendTo(".dockpanel");
 
 
 			var widgets = m.body.preset.state.widgets;
@@ -250,6 +349,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	Init();
 	//RemovePresets('autosave')
 }
+
 
 function SelectColumnController($scope, $filter, $translate, eventSender) {
 	$scope.dataCustomColumn;
@@ -404,13 +504,13 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 		//console.log($scope.chartType)
 
 		if($scope.chartType.name == 'bar') {
-			serviceChart.multiBarHorizontalChart('.charthere div', st);	
+			serviceChart.multiBarHorizontalChart('div.charthere', st);	
 		}
 		else if($scope.chartType.name == 'line') {
-			serviceChart.lineChart('.charthere div', st);
+			serviceChart.lineChart('div.charthere', st);
 		}
 		else if($scope.chartType.name == 'pie') {
-			serviceChart.pie('.charthere div', st);
+			serviceChart.pie('div.charthere', st);
 		}
 		
 	}
