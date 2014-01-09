@@ -77,7 +77,7 @@
 		overflow: auto;
 	}
 
-	.chart .widget-status, .widget-lastupdate {
+	.widget-status, .widget-lastupdate {
 		font-size: 0.7em;
 		color: silver;
 	}

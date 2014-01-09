@@ -51,7 +51,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			}
 		};
 
-		// eventSender.dashboard.onCurrentPresetChanged(); // save state
+		eventSender.dashboard.onCurrentPresetChanged(); // save state
 	}
 
 	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
@@ -82,6 +82,8 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 				if(isSplitInsert) {
 					$('.arrangeWidget')[0].hideDialog();
 					newdiv.remove();
+
+					eventSender.dashboard.onCurrentPresetChanged(); // save state
 				}
 				else {
 					$('.arrangeWidget')[0].showDialog();
@@ -96,8 +98,6 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		$('.arrangeWidget')[0].showDialog();
 
 		eventSender.dashboard.onCreateNewWidget(ctx);
-
-		// eventSender.dashboard.onCurrentPresetChanged(); // save state
 	}
 
 	eventSender.dashboard.onCreateNewWidget = function(ctx) {
@@ -148,7 +148,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			});
 		}
 
-		delete state.layout; // <-----------------
+		// delete state.layout; // <-----------------
 
 		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
 			{ 'guid': guid, 'name': name, 'state': state }
@@ -177,7 +177,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			{ 'guid': guid }
 		, eventSender.dashboard.pid)
 		.success(function(m) {
-			console.log(m.body.preset)
+			console.log(m.body.preset.state.layout)
 			if(!m.body.preset.state.layout) {
 				var widgets = m.body.preset.state.widgets;
 				m.body.preset.state.layout = layoutEngine.ui.layout.autoLayout(widgets);
@@ -196,7 +196,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 				
 				if(!!layoutEngine.ui.layout.box.root) {
-					console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
+					
 				}
 				if(typeof resizable == 'object') {
 
@@ -227,6 +227,10 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 					effsn.find('.widget-chart').each(resizeCharts);
 					effsp.find('.widget-chart').each(resizeCharts);
 				}
+
+				console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
+				$scope.currentPreset.state.layout = layoutEngine.ui.layout.box.root.getObject();
+				eventSender.dashboard.onCurrentPresetChanged(); // save state
 			}
 
 			var boxe = new CustomEvent(layoutEngine.ui.layout.box.event);
