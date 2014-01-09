@@ -701,7 +701,7 @@ var layoutEngine = (function() {
 
 		this.appendTo = function(row_or_el, no_root) {
 			
-			if(row_or_el instanceof jQuery || row_or_el.constructor.name === 'String') {
+			if(row_or_el instanceof jQuery || typeof row_or_el === 'string') {
 				var selector = row_or_el;
 				$(selector).empty();
 				el.appendTo(selector);
@@ -716,6 +716,7 @@ var layoutEngine = (function() {
 				var row = row_or_el;
 				that.row = row;
 				el.appendTo(row.el);
+				console.log(row_or_el)
 				row.boxes.push(that);
 			}
 
