@@ -68,14 +68,32 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			'guid': ctx.guid
 		});
 
-		var newdiv = $('<div class="newbie"></div>').appendTo('body');
-		
+		var newdiv = $('<div class="newbie"></div>').appendTo('#view-dashboard');
+		var isSplitInsert = false;
 		newbie.on('splitInsert', function() {
-			newdiv.remove();
+			newbie.el.find('.handler').off('mousedown.help');
+			isSplitInsert = true;
 		});
-		newbie.resizerH.hide();
 
+		newbie.el.find('.handler').on('mousedown.help', function() {
+			$('.arrangeWidget')[0].hideDialog();
+
+			$(document).on('mouseup.help', function() {
+				if(isSplitInsert) {
+					$('.arrangeWidget')[0].hideDialog();
+					newdiv.remove();
+				}
+				else {
+					$('.arrangeWidget')[0].showDialog();
+				}
+				$(document).off('mouseup.help');
+			})
+		});
+
+		newbie.resizerH.hide();
 		newbie.appendTo(newdiv, true);
+
+		$('.arrangeWidget')[0].showDialog();
 
 		eventSender.dashboard.onCreateNewWidget(ctx);
 

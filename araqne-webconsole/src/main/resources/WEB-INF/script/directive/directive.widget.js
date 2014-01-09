@@ -230,7 +230,6 @@ angular.module('app.directive.widget', [])
 
 					$compile(table)(scope);
 					elContent.prepend(table);
-					console.log('table init')
 					elContent.css('opacity', '0');
 					setTimeout(function() {
 						$(table).fixheadertable({

@@ -716,7 +716,6 @@ var layoutEngine = (function() {
 				var row = row_or_el;
 				that.row = row;
 				el.appendTo(row.el);
-				console.log(row_or_el)
 				row.boxes.push(that);
 			}
 
