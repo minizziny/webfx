@@ -40,6 +40,8 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 	eventSender.dashboard.onRemoveSingleWidget = function(guid) {
 		console.log('onRemoveSingleWidget', guid);
+		var el = angular.element('.k-d-col[dock-id=' + guid + ']');
+		el[0].obj.close();
 
 		var widgets = $scope.currentPreset.state.widgets;
 		for (var i = widgets.length - 1; i >= 0; i--) {
@@ -81,13 +83,13 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	eventSender.dashboard.onCreateNewWidget = function(ctx) {
-		var el = angular.element('.k-d-col[dock-id=' + ctx.guid + '] .contentbox');
+		var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
 
 		var widget = angular.element('<widget ng-pid="getPid" guid="' + ctx.guid + '" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
 		$compile(widget)($scope);
 		widget[0].setContext(ctx);
 
-		widget.appendTo(el)
+		widget.appendTo(el.find('.contentbox'));
 	}
 
 	$scope.dataPresetList = [];
@@ -206,9 +208,6 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 					curr.find('.widget').each(resizeCharts);
 					effsn.find('.widget').each(resizeCharts);
 					effsp.find('.widget').each(resizeCharts);
-					
-					console.log(effsn[0])
-					// console.log(resizable.el.next()[0])
 				}
 			}
 

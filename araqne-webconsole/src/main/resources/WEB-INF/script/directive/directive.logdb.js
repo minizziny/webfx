@@ -387,8 +387,8 @@ angular.module('app.directive.logdb', [])
 					scope.numTotalColumn = cols.length;
 				}
 
-				console.log("[cols]");
-				console.log(cols);
+				// console.log("[cols]");
+				// console.log(cols);
 				
 				scope.ngCols = cols.map(function(k) {
 					return {

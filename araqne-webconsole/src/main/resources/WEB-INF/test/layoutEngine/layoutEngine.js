@@ -1154,7 +1154,7 @@ var layoutEngine = (function() {
 
 			if(prop.rows == undefined) {
 				el.attr('dock-id', that.guid)
-				var closebtn = $("<button>").addClass("btn")
+				var closebtn = $("<button>").addClass("btn").addClass("internal-close")
 											.text("x")
 											.on("click",function() {
 												that.close();

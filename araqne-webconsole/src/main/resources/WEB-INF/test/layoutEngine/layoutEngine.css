@@ -16,7 +16,7 @@
 }
 
 .k-rs-r {
-	background-color: rgba(0,0,0,.1);
+	background-color: rgba(0,0,0,0);
 	width: 10px;
 	height: 100%;
 	right: -5px;
@@ -27,7 +27,7 @@
 }
 
 .k-rs-b {
-	background-color: rgba(0,0,0,.1);
+	background-color: rgba(0,0,0,0);
 	width: 100%;
 	height: 10px;
 	bottom: -5px;
@@ -98,19 +98,13 @@
 	padding: 0px;
 }
 
-.mybox .btn {
-	float: right;
-}
-
 .mybox .handler {
 	background-image: -webkit-linear-gradient(top,white,#E6E6E6);
 	border-radius: 6px 6px 0px 0px;
 	
 	font-weight: bold;
 	color: gray;
-	font-size: 14px;
-	
-	padding: 5px
+	height: 17px;
 }
 
 .mybox .contentbox {
@@ -237,5 +231,5 @@
 }
 
 .contentbox {
-	height: calc(100% - 30px);
+	height: calc(100% - 14px);
 }

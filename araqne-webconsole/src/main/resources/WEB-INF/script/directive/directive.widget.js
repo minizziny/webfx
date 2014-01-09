@@ -54,6 +54,7 @@ angular.module('app.directive.widget', [])
 			'val': '=ngModel',
 			'onCancel': '&ngCancel',
 			'onChange': '&ngChange',
+			'onToggle': '&ngToggle',
 			'type': '='
 		},
 		template: '<input type="text" ng-model="val" style="display:none" ng-model-on-blur="onBlur()" ng-change="onChange()" ng-cancel="onCancel()"></input><a ng-click="toggle()">{{val}}</a>',
@@ -75,6 +76,8 @@ angular.module('app.directive.widget', [])
 				if(elA.is(':hidden')) {
 					elInput.focus();
 				}
+
+				scope.onToggle({});
 			}
 		}
 	}
@@ -87,25 +90,21 @@ angular.module('app.directive.widget', [])
 			'ngPid': '='
 		},
 		template: 
-			'<span click-to-edit ng-model="name" ng-change="onChange()" ng-cancel="onCancel()" class="pull-left" style="margin-top: -25px; margin-left: 6px; font-weight: bold"></span>\
-			<span class="pull-right" style="margin-top: -22px">\
-				<button class="btn btn-mini b-pause" ng-hide="isPaused" ng-click="isPaused = true">\
+			'<span click-to-edit ng-model="name" ng-change="onChange()" ng-cancel="onCancel()" ng-toggle="onToggle()" class="pull-left widget-title"></span>\
+			<span class="pull-right widget-toolbox">\
+				<button class="btn btn-extra-mini b-pause" ng-hide="isPaused" ng-click="isPaused = true">\
 					<i class="icon-pause"></i>\
-				</button>\
-				<button class="btn btn-mini b-play" ng-show="isPaused" ng-click="isPaused = false">\
+				</button><button class="btn btn-extra-mini b-play" ng-show="isPaused" ng-click="isPaused = false">\
 					<i class="icon-play"></i>\
-				</button>\
-				<button class="btn btn-mini b-refresh" ng-click="refresh();">\
+				</button><button class="btn btn-extra-mini b-refresh" ng-click="refresh();">\
 					<i class="icon-refresh"></i>\
-				</button>\
-				<button class="btn btn-mini b-p" ng-click="isShowProperty = !isShowProperty">\
+				</button><button class="btn btn-extra-mini b-p" ng-click="isShowProperty = !isShowProperty">\
 					<i class="icon-info-sign"></i>\
-				</button>\
-				<button class="btn btn-mini b-x" ng-click="removeWidget()">\
+				</button><button class="btn btn-extra-mini b-x" ng-click="removeWidget()">\
 					<i class="icon-remove"></i>\
 				</button>\
 			</span>\
-			<div class="progress" style="height: 2px; margin-bottom: 0">\
+			<div class="progress">\
 				<div class="bar" ng-hide="isLoaded" ng-style="progress"></div>\
 			</div>\
 			<div class="content" ng-hide="isShowError" style="height: calc(100% - 2px); overflow: auto"></div>' +
@@ -146,6 +145,11 @@ angular.module('app.directive.widget', [])
 
 			scope.onChange = function() {
 				console.log('onChange')
+			}
+
+			scope.onToggle = function() {
+				el.parents('.contentbox').prev().toggleClass('bold');
+				el.toggleClass('bold');
 			}
 
 			var init = true;
@@ -211,7 +215,7 @@ angular.module('app.directive.widget', [])
 				}, _options);
 
 				initFn[ctx.type](ctx);
-				scope.$apply();
+				// scope.$apply();
 			}
 
 			var initFn = {

@@ -8,9 +8,60 @@
 	right: 0;
 }
 
-span[click-to-edit] input[type=text] {
+.btn-extra-mini {
+	padding: 0 6px;
+	font-size: 9px;
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	line-height: 13px;
+	border: 1px solid transparent;
+}
+
+.btn-extra-mini:hover {
+	border: 1px solid #ccc;
+	border-color: #e6e6e6 #e6e6e6 #bfbfbf;
+	border-color: rgba(0,0,0,0.1) rgba(0,0,0,0.1) rgba(0,0,0,0.25);
+	border-bottom-color: #b3b3b3;
+}
+
+.widget-title input[type=text] {
 	margin: -2px;
-	padding: 2px 4px;
+	padding: 0px 4px;
+	font-size: 9pt;
+}
+
+.widget-title {
+	margin-top: -17px;
+	margin-left: 6px;
+	font-weight: bold;
+	font-size: 9pt;
+	margin-bottom: -4px;
+}
+
+.widget-toolbox {
+	margin-top: -18px;
+	margin-bottom: -2px;
+}
+
+.mybox .handler.bold {
+	height: 24px;
+}
+
+widget.bold .widget-title {
+	margin-top: -21px;
+}
+
+widget.bold .widget-toolbox {
+	margin-top: -22px;
+}
+
+
+widget .progress {
+	height: 2px;
+	margin-bottom: 0;
+	margin-top: -2px;
+	clear: both;
 }
 
 .k-d-col {
@@ -25,6 +76,10 @@ span[click-to-edit] input[type=text] {
 .preset-container {
 	width: 100%;
 	height: calc(100% - 42px);
+}
+
+.btn.internal-close {
+	display: none;
 }
 
 .dockpanel {
