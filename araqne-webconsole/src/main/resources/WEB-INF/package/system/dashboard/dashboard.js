@@ -162,7 +162,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	function ClearPreset() {
-		$('div.board > widget').each(function(i, obj) {
+		$('.dockpanel widget').each(function(i, obj) {
 
 			obj.$dispose();
 
@@ -177,11 +177,12 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			{ 'guid': guid }
 		, eventSender.dashboard.pid)
 		.success(function(m) {
-			console.log(m.body.preset.state.layout)
 			if(!m.body.preset.state.layout) {
 				var widgets = m.body.preset.state.widgets;
-				m.body.preset.state.layout = layoutEngine.ui.layout.autoLayout(widgets);
+				m.body.preset.state.layout = [ layoutEngine.ui.layout.autoLayout(widgets) ];
 			}
+
+			console.log(m.body.preset.state)
 			
 			
 			$scope.currentPreset = m.body.preset;
@@ -229,7 +230,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 				}
 
 				console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
-				$scope.currentPreset.state.layout = layoutEngine.ui.layout.box.root.getObject();
+				$scope.currentPreset.state.layout[0] = layoutEngine.ui.layout.box.root.getObject();
 				eventSender.dashboard.onCurrentPresetChanged(); // save state
 			}
 
@@ -237,7 +238,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			boxe.on('modify', debounce(getRoot, 200));
 			boxe.on('resize', getRoot);
 
-			var box = layoutEngine.ui.layout.box.create(layout, true);
+			var box = layoutEngine.ui.layout.box.create(layout[0], true);
 			box.appendTo(".dockpanel");
 
 
