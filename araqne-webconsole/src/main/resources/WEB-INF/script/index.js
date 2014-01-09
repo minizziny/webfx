@@ -400,7 +400,7 @@ function LoginController($scope, socket, serviceSession, eventSender, $location)
 		.success(function(m) {
 
 			serviceSession.login($scope.txtLoginName, $scope.txtPassword, m.body.nonce, function(m) {
-				$location.path('/system/dashboard');
+				$location.path('/system/starter');
 
 				eventSender.root.loggedIn();
 				eventSender.root.startTimeout();
