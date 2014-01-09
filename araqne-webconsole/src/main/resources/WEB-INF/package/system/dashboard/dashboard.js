@@ -205,9 +205,9 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 						}
 					}
 
-					curr.find('.widget').each(resizeCharts);
-					effsn.find('.widget').each(resizeCharts);
-					effsp.find('.widget').each(resizeCharts);
+					curr.find('.widget-chart').each(resizeCharts);
+					effsn.find('.widget-chart').each(resizeCharts);
+					effsp.find('.widget-chart').each(resizeCharts);
 				}
 			}
 

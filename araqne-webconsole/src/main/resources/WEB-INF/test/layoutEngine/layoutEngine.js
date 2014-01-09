@@ -631,7 +631,7 @@ var layoutEngine = (function() {
 		}
 		
 		this.getMinWidth = function() {
-			var settingMinw = 50;
+			var settingMinw = 150;
 			if( this.rows.length == 0) {
 				return settingMinw;
 			}
@@ -1024,7 +1024,6 @@ var layoutEngine = (function() {
 					unwrapRow(this.rows.last());
 
 					var boxn = contb.rows[0].boxes[0];
-
 					boxn.el.find('.contentbox').remove();
 					contents.appendTo(boxn.el.find('.mybox'));
 					boxn.resizerH.show();
@@ -1080,6 +1079,7 @@ var layoutEngine = (function() {
 					unwrapRow(this.rows[0]);
 
 					var boxn = contb.rows[0].boxes.last();
+					boxn.el.find('.contentbox').remove();
 					contents.appendTo(boxn.el.find('.mybox'));
 					contb.rows[0].boxes[0].resizerH.show();
 				}

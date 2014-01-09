@@ -107,24 +107,21 @@ angular.module('app.directive.widget', [])
 			<div class="progress">\
 				<div class="bar" ng-hide="isLoaded" ng-style="progress"></div>\
 			</div>\
-			<div class="content" ng-hide="isShowError" style="height: calc(100% - 2px); overflow: auto"></div>' +
-			
-			// 	<span ng-show="isPaused" style="font-size:.8em; color: silver; float: left">일시 정지됨</span>\
-			// 	<span class="clearfix" style="font-size:.8em; color: silver; float: right">{{lastUpdate}}</span>\
-			// 	<br>\
-
-
-			'<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
-					<div class="property-inner" ng-click="stopPropagation($event)">\
-						<code>{{query}}</code><br/>\
-						{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
-						<span click-to-edit type="number" ng-model="interval" ng-change="onChange()" ng-cancel="onCancel()"></span>\
-						{{"$S_msg_QueryRunInterval" | translate}}\
-					</div>\
-				</div>',
-		// 		<div class="alert alert-error" ng-show="isShowError">{{errorMessage}}</div>\
-		// 	</figure>\
-		// </div>'
+			<div class="widget-content" ng-hide="isShowError">\
+				<span class="widget-status pull-left" ng-show="isPaused">일시 정지됨</span>\
+				<span class="widget-lastupdate pull-right">{{lastUpdate}}</span>\
+			</div>\
+			<div class="widget-error" ng-show="isShowError">\
+				<div class="alert alert-error">{{errorMessage}}</div>\
+			</div>\
+			<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
+				<div class="property-inner" ng-click="stopPropagation($event)">\
+					<code>{{query}}</code><br/>\
+					{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
+					<span click-to-edit type="number" ng-model="interval" ng-change="onChange()" ng-cancel="onCancel()"></span>\
+					{{"$S_msg_QueryRunInterval" | translate}}\
+				</div>\
+			</div>',
 		link: function(scope, el, attrs) {
 			var timer;
 			scope.isShowProperty = false;
@@ -132,12 +129,6 @@ angular.module('app.directive.widget', [])
 			scope.isPaused = false;
 			scope.errorMessage = $translate('$S_msg_UnknownError');
 			scope.guid;
-
-			// el.draggable({
-			// 	'handle': 'h4',
-			// 	'revert': 'invalid',
-			// 	'revertDuration': 100
-			// });
 
 			scope.onCancel = function() {
 				console.log('onCancel');
@@ -194,7 +185,7 @@ angular.module('app.directive.widget', [])
 
 			scope.progress = { 'width': '0%' };
 
-			var elContent = el.find('.content');
+			var elContent = el.find('.widget-content');
 
 			function htmlEscape(str) {
 				return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -222,6 +213,7 @@ angular.module('app.directive.widget', [])
 				'grid': function(ctx) {
 					scope.order = ctx.data.order;
 					run();
+					el.addClass('grid');
 
 					var table = angular.element('<table class="table table-bordered table-condensed">\
 						<thead>\
@@ -237,14 +229,14 @@ angular.module('app.directive.widget', [])
 					</table>');
 
 					$compile(table)(scope);
-					elContent.append(table);
+					elContent.prepend(table);
 					console.log('table init')
 					elContent.css('opacity', '0');
 					setTimeout(function() {
 						$(table).fixheadertable({
-							// minWidth: scope.order.length * 210,
-							// width: 400,
-							// height: 267
+						// 	minWidth: scope.order.length * 210,
+						// 	width: 400,
+						// 	height: 267
 						});
 						elContent.css('opacity','');
 					}, 300);
@@ -254,7 +246,8 @@ angular.module('app.directive.widget', [])
 				'chart': function(ctx) {
 
 					run();
-					var svg = angular.element('<div class="widget">');
+					el.addClass('chart');
+					var svg = angular.element('<div class="widget-chart">');
 
 					var dataLabel = {name: ctx.data.label, type: ctx.data.labelType};
 
@@ -280,14 +273,14 @@ angular.module('app.directive.widget', [])
 					options.pageLoaded = render;
 					// options.loaded = render;
 
-					elContent.append(svg);
+					elContent.prepend(svg);
 
 					
 				}
 			}
 
 			var elProgressBar = el.find('.progress .bar');
-			var timeFormat = d3.time.format('%Y-%m-%d %H:%M:%S.%L');
+			var timeFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
 
 			function run() {
 				scope.isLoaded = false;
