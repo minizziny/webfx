@@ -11,8 +11,6 @@ function debounce(fn, delay) {
 	};
 }
 
-$(document).on("selectstart", function() { return false; });
-
 function Controller($scope) {
 
 	var layoutdata = {

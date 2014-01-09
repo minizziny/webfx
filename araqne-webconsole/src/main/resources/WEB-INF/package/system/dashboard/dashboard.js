@@ -1,7 +1,3 @@
-
-
-// $(document).on("selectstart", function() { return false; });
-
 function DashboardController($scope, $filter, $element, $translate, eventSender) {
 	$scope.getPid = eventSender.dashboard.pid;
 	eventSender.dashboard.$event.on('unload', function() {

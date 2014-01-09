@@ -172,6 +172,7 @@ var layoutEngine = (function() {
 		var originy, originh;
 
 		el.on("mousedown", function(e) {
+			$(document).on("selectstart", function() { return false; });
 			originy = e.clientY;
 			originh = sender.el.height();
 
@@ -224,7 +225,7 @@ var layoutEngine = (function() {
 				// end
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
-				$(document).off('mousemove.resizeV').off('mouseup.resizeV');
+				$(document).off('mousemove.resizeV').off('mouseup.resizeV').off("selectstart");;
 				sender.afterResize(sender);
 			});
 
@@ -236,6 +237,7 @@ var layoutEngine = (function() {
 		var originx, originw;
 
 		el.on("mousedown", function(e) {
+			$(document).on("selectstart", function() { return false; });
 			originx = e.pageX;
 			originw = sender.el.width();
 
@@ -291,7 +293,7 @@ var layoutEngine = (function() {
 				// end
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
-				$(document).off('mousemove.resizeH').off('mouseup.resizeH');
+				$(document).off('mousemove.resizeH').off('mouseup.resizeH').off("selectstart");;
 				sender.afterResize(sender);
 			});
 
@@ -1345,6 +1347,7 @@ var layoutEngine = (function() {
 			var dragHandler = box.el.children(".mybox").children(".handler");
 			
 			dragHandler.on("mousedown", function(ee) {
+				$(document).on("selectstart", function() { return false; });
 				var initp = {
 					x: ee.pageX,
 					y: ee.pageY
@@ -1405,7 +1408,7 @@ var layoutEngine = (function() {
 				}).
 				on("mouseup.activeDroppable", function() {
 					
-					$(document).off("mousemove.activeDroppable").off("mouseup.activeDroppable");
+					$(document).off("mousemove.activeDroppable").off("mouseup.activeDroppable").off("selectstart");
 					dragHandler.off("mousemove");
 
 					box.el.addClass("ani").removeClass("grabbed");
