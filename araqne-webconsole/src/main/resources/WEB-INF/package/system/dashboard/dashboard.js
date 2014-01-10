@@ -28,9 +28,23 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 	$scope.onRemoveWidget = function(guid) {
 		eventSender.dashboard.onRemoveSingleWidget(guid);
 	}
+
+	$scope.onChangeWidgetProperty = function(newval, oldval, guid) {
+		eventSender.dashboard.onChangeWidgetProperty(newval, oldval, guid);
+	}
 }
 
 function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
+	eventSender.dashboard.onChangeWidgetProperty = function(newval, oldval, guid) {
+		var found = $scope.currentPreset.state.widgets.filter(function(widget) {
+			return widget.guid == guid;
+		});
+		if(found.length > 0) {
+			found[0].name = newval;
+			eventSender.dashboard.onCurrentPresetChanged(); // save state
+		}
+	}
+
 	eventSender.dashboard.onCurrentPresetChanged = function() {
 		console.log('currentPreset changed')
 
@@ -103,7 +117,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	eventSender.dashboard.onCreateNewWidget = function(ctx) {
 		var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
 
-		var widget = angular.element('<widget ng-pid="getPid" guid="' + ctx.guid + '" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
+		var widget = angular.element('<widget ng-pid="getPid" guid="' + ctx.guid + '" on-change="onChangeWidgetProperty($new, $old, \'' + ctx.guid + '\')" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
 		$compile(widget)($scope);
 		widget[0].setContext(ctx);
 
