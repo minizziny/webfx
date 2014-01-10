@@ -112,12 +112,17 @@
 }
 
 .drop-compass {
-	border: 1px solid #0099ff;
+	border: 1px solid #0088cc;
+	/*background-color: #edf7fc;*/
 	background-color: white;
-	width: 32px;
-	height: 32px;
+	width: 30px;
+	height: 30px;
 	position: absolute;
+	border-radius: 2px;
 	/* z-index: 9999; */
+
+	background-image: url("../../lib/bootstrap2/img/glyphicons-halflings.png");
+	background-repeat: no-repeat;
 }
 
 
@@ -152,13 +157,15 @@
 }
 
 .over1 {
-	background-color: #ffcc00;
+	background-image: url("../../lib/bootstrap2/img/glyphicons-halflings-white.png");
+	background-color: #0088cc;
 }
 
 .drp-t {
 	top: 0;
 	left: 50%;
 	margin-left: -16px;
+	background-position: -280px -113px;
 }
 
 .drp-t.single {
@@ -167,13 +174,14 @@
 }
 
 .drp-t:after {
-	content: 't';
+	/*content: 't';*/
 }
 
 .drp-b {
 	bottom: 0;
 	left: 50%;
 	margin-left: -16px;
+	background-position: -304px -112px;
 }
 
 .drp-b.single {
@@ -182,13 +190,14 @@
 }
 
 .drp-b:after {
-	content: 'b';
+	/*content: 'b';*/
 }
 
 .drp-l {
 	left: 0;
 	top: 50%;
 	margin-top: -16px;
+	background-position: -424px -65px;
 }
 
 .drp-l.single {
@@ -197,13 +206,14 @@
 }
 
 .drp-l:after {
-	content: 'l';
+	/*content: 'l';*/
 }
 
 .drp-r {
 	right: 0;
 	top: 50%;
 	margin-top: -16px;
+	background-position: -449px -65px;
 }
 
 .drp-r.single {
@@ -212,7 +222,7 @@
 }
 
 .drp-r:after {
-	content: 'r';
+	/*content: 'r';*/
 }
 
 .newbie {
