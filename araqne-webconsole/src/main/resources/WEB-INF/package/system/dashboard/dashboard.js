@@ -251,7 +251,15 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 				eventSender.dashboard.onCurrentPresetChanged(); // save state
 
 				if($scope.currentPreset.state.widgets.length == 0) {
-					$('<div class="blank-info">New Widget Here</div>').appendTo('.dockpanel .k-d-col');
+					var el = angular.element('<div class="blank-info">\
+						<div class="blank-contents">\
+							<div style="font-size: 16px;line-height: 4;">위젯이 하나도 없습니다. 새 위젯을 추가하세요!</div>\
+							<button ng-click="openNewWidget();" class="btn btn-primary btn-large">{{"$S_str_AddWidget" | translate}}</button>\
+						</div>\
+					</div>');
+					$compile(el)($scope);
+					el.appendTo('.dockpanel .k-d-col');
+					$scope.$apply();
 				}
 			}
 
@@ -270,6 +278,9 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 			};
 
+			if(widgets.length == 0) {
+				$('.dockpanel .mybox').remove();
+			}
 
 			$scope.$apply();
 		})
@@ -307,7 +318,13 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		if(newname == undefined) return;
 
 		var newguid = serviceUtility.generateType2();
-		SavePreset(newguid, newname, { "widgets": [] }).success(function() {
+		SavePreset(newguid, newname, { 
+			'layout': [{
+				'guid': undefined,
+				'w': 100
+			}],
+			'widgets': []
+		}).success(function() {
 			LoadPreset(newguid);
 		})
 	}

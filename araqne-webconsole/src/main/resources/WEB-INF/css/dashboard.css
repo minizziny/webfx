@@ -11,6 +11,17 @@
 		z-index: 3040;
 	}
 
+	.blank-info {
+		width: 100%;
+		height: 100%;
+		background-color: white;
+	}
+
+	.blank-contents {
+		text-align: center;
+		padding-top: 10%;
+	}
+
 	.btn-extra-mini {
 		padding: 0 6px;
 		font-size: 9px;
