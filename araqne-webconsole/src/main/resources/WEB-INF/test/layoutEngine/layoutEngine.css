@@ -105,6 +105,8 @@
 	font-weight: bold;
 	color: gray;
 	height: 17px;
+	cursor: move;
+	cursor: -webkit-grab;
 }
 
 .mybox .contentbox {
@@ -123,6 +125,7 @@
 
 	background-image: url("../../lib/bootstrap2/img/glyphicons-halflings.png");
 	background-repeat: no-repeat;
+	cursor: pointer;
 }
 
 
@@ -159,6 +162,11 @@
 .over1 {
 	background-image: url("../../lib/bootstrap2/img/glyphicons-halflings-white.png");
 	background-color: #0088cc;
+}
+
+.droppable {
+	cursor: move;
+	cursor: -webkit-grabbing;
 }
 
 .drp-t {

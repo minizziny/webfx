@@ -1469,7 +1469,6 @@ var layoutEngine = (function() {
 			box.dropCompass.on("mouseover", function(e) {
 				$(this).addClass("over1");
 				
-				
 				if(hasClassIndexOf(this.className, "drp-t")) {
 					pl.addClass("top").show();
 					box.splitTarget = "top";
@@ -1488,6 +1487,8 @@ var layoutEngine = (function() {
 				}
 				
 				layoutEngine.ui.layout.box.target = box;
+
+				$('.droppable').css('cursor', 'pointer');
 			})
 			.on("mouseout", function() {
 				$(this).removeClass("over1");
@@ -1495,6 +1496,8 @@ var layoutEngine = (function() {
 				layoutEngine.ui.layout.box.target = undefined;
 				
 				pl.removeClass("top").removeClass("right").removeClass("bottom").removeClass("left").hide();
+
+				$('.droppable').css('cursor', '');
 			});
 			
 			var isEnter = false;
@@ -1546,7 +1549,7 @@ var layoutEngine = (function() {
 		
 		this.close = function() {
 			if(this.row == undefined) {
-				this.el.remove();
+				// this.el.remove();
 			}
 			else {
 				this.row.deleteBox(this);

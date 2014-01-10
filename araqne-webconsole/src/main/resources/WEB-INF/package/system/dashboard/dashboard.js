@@ -210,6 +210,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 				// console.warn('getRoot')
 				// console.log(resizable);
 				// console.trace()
+				$('.blank-info').remove();
 
 				
 				if(!!layoutEngine.ui.layout.box.root) {
@@ -248,6 +249,10 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 				console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
 				$scope.currentPreset.state.layout[0] = layoutEngine.ui.layout.box.root.getObject();
 				eventSender.dashboard.onCurrentPresetChanged(); // save state
+
+				if($scope.currentPreset.state.widgets.length == 0) {
+					$('<div class="blank-info">New Widget Here</div>').appendTo('.dockpanel .k-d-col');
+				}
 			}
 
 			var boxe = new CustomEvent(layoutEngine.ui.layout.box.event);
