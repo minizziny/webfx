@@ -131,7 +131,7 @@ angular.module('app.directive.widget', [])
 				<div class="property-inner" ng-click="stopPropagation($event)">\
 					<code>{{query}}</code><br/>\
 					{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
-					<span click-to-edit type="number" ng-model="interval" ng-change="onIntervalChange()" ng-cancel="onCancel()"></span>\
+					<span click-to-edit type="number" ng-model="interval" ng-change="onIntervalChange($new, $old)" ng-cancel="onCancel()"></span>\
 					{{"$S_msg_QueryRunInterval" | translate}}\
 				</div>\
 			</div>',
@@ -150,13 +150,17 @@ angular.module('app.directive.widget', [])
 			scope.onTitleChange = function(newval, oldval) {
 				scope.onChange({
 					'$new': newval,
-					'$old': oldval
+					'$old': oldval,
+					'$key': 'name'
 				});
 			}
 
-			scope.onIntervalChange = function() {
-				console.log('onIntervalChange')
-				scope.onChange({});
+			scope.onIntervalChange = function(newval, oldval) {
+				scope.onChange({
+					'$new': newval,
+					'$old': oldval,
+					'$key': 'interval'
+				});
 			}
 
 			scope.onToggle = function() {
@@ -209,6 +213,9 @@ angular.module('app.directive.widget', [])
 			var elContent = el.find('.widget-content');
 
 			function htmlEscape(str) {
+				if(str == undefined){
+					return "unnamed";
+				}
 				return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 			}
 

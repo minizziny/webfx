@@ -29,27 +29,26 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 		eventSender.dashboard.onRemoveSingleWidget(guid);
 	}
 
-	$scope.onChangeWidgetProperty = function(newval, oldval, guid) {
-		eventSender.dashboard.onChangeWidgetProperty(newval, oldval, guid);
+	$scope.onChangeWidgetProperty = function(newval, oldval, guid, key) {
+		eventSender.dashboard.onChangeWidgetProperty(newval, oldval, guid, key);
 	}
 }
 
 function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
-	eventSender.dashboard.onChangeWidgetProperty = function(newval, oldval, guid) {
+	eventSender.dashboard.onChangeWidgetProperty = function(newval, oldval, guid, key) {
 		var found = $scope.currentPreset.state.widgets.filter(function(widget) {
 			return widget.guid == guid;
 		});
 		if(found.length > 0) {
-			found[0].name = newval;
+			found[0][key] = newval;
 			eventSender.dashboard.onCurrentPresetChanged(); // save state
 		}
 	}
 
-	eventSender.dashboard.onCurrentPresetChanged = function() {
+	eventSender.dashboard.onCurrentPresetChanged = function(reset_layout) {
 		console.log('currentPreset changed')
-
 		console.log($scope.currentPreset);
-		return SavePreset($scope.currentPreset.guid, $scope.currentPreset.name, $scope.currentPreset.state);
+		return SavePreset($scope.currentPreset.guid, $scope.currentPreset.name, $scope.currentPreset.state, reset_layout);
 	}
 
 	eventSender.dashboard.onRemoveSingleWidget = function(guid) {
@@ -117,7 +116,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	eventSender.dashboard.onCreateNewWidget = function(ctx) {
 		var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
 
-		var widget = angular.element('<widget ng-pid="getPid" guid="' + ctx.guid + '" on-change="onChangeWidgetProperty($new, $old, \'' + ctx.guid + '\')" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
+		var widget = angular.element('<widget ng-pid="getPid" guid="' + ctx.guid + '" on-change="onChangeWidgetProperty($new, $old, \'' + ctx.guid + '\', $key)" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
 		$compile(widget)($scope);
 		widget[0].setContext(ctx);
 
@@ -146,7 +145,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		.failed(msgbusFailed);
 	}
 
-	function SavePreset(guid, name, state) {
+	function SavePreset(guid, name, state, reset_layout) {
 		var isExist = false;
 		for (var i = $scope.dataPresetList.length - 1; i >= 0; i--) {
 			if($scope.dataPresetList[i].guid == guid) {
@@ -162,7 +161,10 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			});
 		}
 
-		// delete state.layout; // <-----------------
+		if(reset_layout === true) {
+			console.warn('reset layout!');
+			delete state.layout; // <-----------------
+		}
 
 		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
 			{ 'guid': guid, 'name': name, 'state': state }
@@ -434,6 +436,12 @@ function SelectColumnController($scope, $filter, $translate, eventSender) {
 			});
 		});
 	}
+
+	window._recovery = {
+		resetCurrentLayout: function() {
+			eventSender.dashboard.onCurrentPresetChanged(true); // save state
+		}
+	};
 }
 
 function ChartBindingController($scope, $filter, $translate, eventSender, serviceUtility, serviceChart) {
