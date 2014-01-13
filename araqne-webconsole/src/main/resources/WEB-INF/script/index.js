@@ -15,10 +15,10 @@ var logpresso = angular.module('app', [
 	'app.logdb.management',
 	'pascalprecht.translate',
 	'ui.sortable'
-], function($routeProvider) {
+], function() {
 });
 
-logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
+logpresso.run(function($rootScope, $location, $anchorScroll, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
 
 	$rootScope.$on('$locationChangeSuccess', function() {
 		function route() {

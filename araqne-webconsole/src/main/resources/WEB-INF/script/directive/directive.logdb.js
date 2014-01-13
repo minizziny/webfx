@@ -225,7 +225,7 @@ angular.module('app.directive.logdb', [])
 						ng-hide="!col.is_visible"\
 						ng-repeat="col in ngCols | limitTo: numLimitColumn"\
 						ng-click="toggleCheck(col)"\
-						ng-bind-html-unsafe="d[col.name] | crlf"></td>\
+						ng-bind-html="d[col.name] | crlf"></td>\
 				</tr>\
 			</tbody>\
 		</table>\

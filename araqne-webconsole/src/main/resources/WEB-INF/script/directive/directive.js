@@ -729,7 +729,7 @@ angular.module('app.directive', ['pascalprecht.translate'])
 						<li>\
 							<a ng-click="prevOnePage()">&lt;</a>\
 						</li>\
-						<li ng-class="{\'active\': currentIndex % ngPageSize == i}" ng-repeat="(i,z) in arrPageSize">\
+						<li ng-class="{\'active\': currentIndex % ngPageSize == i}" ng-repeat="(i,z) in arrPageSize track by $index">\
 							<a  ng-click="changePage($index + (currentPage * ngPageSize), $event)">\
 								{{ 1 + i + (currentPage * ngPageSize) }}\
 							</a>\

@@ -200,7 +200,7 @@
 			<span class="tm-pack-title">{{pack.display_names | translateMsgbus}}</span>
 			<a class="tm-pack-title tm-program-dd" ng-click="toggleDropdown(pack)">{{pack.display_names | translateMsgbus}}<b class="caret"></b></a>
 			<ul ng-class="{open: pack.isOpen}">
-				<li class="tm-program" onclick="location.href='/#/{{pack.dll}}/{{program.path}}'" ng-repeat="program in pack.programs" ng-class="{active: program.isActive, current: program.isCurrent}">
+				<li class="tm-program" ng-repeat="program in pack.programs" ng-class="{active: program.isActive, current: program.isCurrent}">
 					<a class="link" href="/#/{{pack.dll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
 					<a class="close" ng-show="program.isActive" ng-click="program.halt($event)">&times;</a>
 				</li>

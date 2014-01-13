@@ -29,16 +29,20 @@ angular.module('app.filter', ['pascalprecht.translate'])
 		return prefix + val;
 	}
 })
-.filter('crlf', function() { 
+.filter('crlf', function($sce) { 
 	return function(val) {
 		if(val === 0) {	return '0'; }
 		if(val === false) {	return 'false'; }
 		if(val === null) return val;
 		
 		if(toString.call(val) == '[object String]') {
-			return val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>');
+			// return val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>');
+			return $sce.trustAsHtml(val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>'));
 		}
-		else return val;
+		else if(toString.call(val) == '[object Object]') {
+			return $sce.trustAsHtml('');
+		}
+		else return $sce.trustAsHtml(val.toString());
 	}
 })
 .filter('numformat', function() { 
@@ -72,4 +76,10 @@ angular.module('app.filter', ['pascalprecht.translate'])
 			return value.en;
 		}
 	}
-});
+})
+.filter('unsafe', function($sce) {
+	return function(val) {
+		if(val == null || val == undefined) return $sce.trustAsHtml('');
+		else return $sce.trustAsHtml(val.toString());
+	}
+})
