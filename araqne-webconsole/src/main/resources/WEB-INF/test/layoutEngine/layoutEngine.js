@@ -6,6 +6,10 @@ Array.prototype.removeAt = function(idx) {
 	this.splice(idx, 1);
 }
 
+Array.prototype.first = function() {
+	return this[0];
+}
+
 Array.prototype.last = function() {
 	return this.slice(-1)[0];
 }

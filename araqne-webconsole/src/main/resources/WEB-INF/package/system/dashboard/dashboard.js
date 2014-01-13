@@ -126,6 +126,18 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	$scope.dataPresetList = [];
 	$scope.currentPreset;
 
+	function displayBlankInfo() {
+		var el = angular.element('<div class="blank-info">\
+			<div class="blank-contents">\
+				<div style="font-size: 16px;line-height: 4;">위젯이 하나도 없습니다. 새 위젯을 추가하세요!</div>\
+				<button ng-click="openNewWidget();" class="btn btn-primary btn-large">{{"$S_str_AddWidget" | translate}}</button>\
+			</div>\
+		</div>');
+		$compile(el)($scope);
+		el.appendTo('.dockpanel .k-d-col');
+		$scope.$apply();
+	}
+
 	function GetPresetList(callback) {
 		socket.send('org.logpresso.core.msgbus.WallPlugin.getPresetNames', {}, eventSender.dashboard.pid)
 		.success(function(m) {
@@ -185,6 +197,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		});
 
 		$('.dockpanel').empty();
+
 	}
 
 	function LoadPreset(guid) {
@@ -251,15 +264,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 				eventSender.dashboard.onCurrentPresetChanged(); // save state
 
 				if($scope.currentPreset.state.widgets.length == 0) {
-					var el = angular.element('<div class="blank-info">\
-						<div class="blank-contents">\
-							<div style="font-size: 16px;line-height: 4;">위젯이 하나도 없습니다. 새 위젯을 추가하세요!</div>\
-							<button ng-click="openNewWidget();" class="btn btn-primary btn-large">{{"$S_str_AddWidget" | translate}}</button>\
-						</div>\
-					</div>');
-					$compile(el)($scope);
-					el.appendTo('.dockpanel .k-d-col');
-					$scope.$apply();
+					displayBlankInfo();
 				}
 			}
 
@@ -313,6 +318,15 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		})
 	}
 
+	$scope.RenamePreset = function(newval) {
+		console.log(newval)
+		SavePreset($scope.currentPreset.guid, newval, $scope.currentPreset.state).success(function() {
+			$scope.dataPresetList.filter(function(preset) {
+				return preset.guid == $scope.currentPreset.guid;
+			}).first().name = newval;
+		});
+	}
+
 	$scope.New = function() {
 		var newname = prompt($translate('$S_msg_NewPresetName'));
 		if(newname == undefined) return;
@@ -357,6 +371,8 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		SavePreset($scope.currentPreset.guid, $scope.currentPreset.name, { "widgets": [] }).success(function() {
 			$('.clearWidgets')[0].hideDialog();
 		})
+
+		// $scope.$apply();
 	}
 
 	$scope.Load = function(preset) {

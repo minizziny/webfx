@@ -7,6 +7,10 @@
 		overflow: hidden;
 	}
 
+	#view-dashboard .toolbar .navbar-inner {
+		min-height: 35px;
+	}
+
 	#view-dashboard .modal-backdrop {
 		z-index: 3040;
 	}
@@ -116,7 +120,7 @@
 
 	.preset-container {
 		width: 100%;
-		height: calc(100% - 42px);
+		height: calc(100% - 37px);
 	}
 
 	.btn.internal-close {
@@ -133,7 +137,7 @@
 	}
 
 	.brandpreset {
-		line-height: 39px;
+		line-height: 34px;
 		font-size: 20px;
 		font-weight: 200;
 		color: #777777;
@@ -141,7 +145,15 @@
 		margin: auto;
 		width: 400px;
 		text-align: center;
-		margin-top: -35px;
+		margin-top: -30px;
+	}
+
+	.brandpreset input {
+		display: inline-block;
+		margin-bottom: 3px;
+		text-align: center;
+		padding: 3px;
+		font-size: 18px;
 	}
 
 

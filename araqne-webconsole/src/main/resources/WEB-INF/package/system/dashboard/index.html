@@ -6,7 +6,7 @@
 			<!--<select style="float: left; margin-top: 5px; margin-bottom: 0; margin-left: 5px" ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
 			-->
 			<div class="btn-group">
-				<button class="btn dropdown-toggle" data-toggle="dropdown">
+				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
 					{{'$S_str_NewPreset' | translate}}
 					<span class="caret"></span>
 				</button>
@@ -16,7 +16,7 @@
 				</ul>
 			</div>
 			<div class="btn-group">
-				<button class="btn dropdown-toggle" data-toggle="dropdown">
+				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
 					{{'$S_str_LoadPreset' | translate}}
 					<span class="caret"></span>
 				</button>
@@ -30,18 +30,18 @@
 				</ul>
 			</div>
 			<div class="btn-group">
-				<button class="btn dropdown-toggle" data-toggle="dropdown">
+				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
 					<i class="icon-wrench"></i>
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
 					<li><a tabindex="-1" ng-click="AlertRemove()">{{'$S_str_RemoveThisPreset' | translate}}</a></li>
-					<li class="divider"></li>
-					<li><a tabindex="-1" ng-click="AlertClear()">{{'$S_str_RemoveAllWidgets' | translate}}</a></li>
+					<!-- <li class="divider"></li>
+					<li><a tabindex="-1" ng-click="AlertClear()">{{'$S_str_RemoveAllWidgets' | translate}}</a></li> -->
 				</ul>
 			</div>
-			<button class="btn btn-primary pull-right" style="margin-right: 5px" ng-click="openNewWidget()">{{'$S_str_AddWidget' | translate}}</button>
-			<div class="brandpreset">{{currentPreset.name}}</div>
+			<button class="btn btn-small btn-primary pull-right" style="margin-right: 5px" ng-click="openNewWidget()">{{'$S_str_AddWidget' | translate}}</button>
+			<div class="brandpreset" click-to-edit ng-model="currentPreset.name" ng-change="RenamePreset($new)" ng-cancel="" ng-toggle=""></div>
 		</div>
 
 		<div class="modal clearWidgets" modal>
