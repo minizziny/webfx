@@ -1,4 +1,4 @@
-angular.module('app.directive', ['pascalprecht.translate'])
+﻿angular.module('app.directive', ['pascalprecht.translate'])
 .directive('autosize', function() {
 	return {
 		restrict: 'A',
@@ -1271,4 +1271,19 @@ angular.module('app.directive', ['pascalprecht.translate'])
             });
         }
     }
+})
+.directive('onlyNumber', function() {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attrs, ngModelCtrl) {
+			element.on('keydown', function(e) {
+				if (e.type === 'keydown') {
+					if((e.keyCode < 48) || (e.keyCode > 57)){
+						if(e.keyCode != 8)
+							e.preventDefault();
+					}
+				}
+			});
+		}
+	}
 });
