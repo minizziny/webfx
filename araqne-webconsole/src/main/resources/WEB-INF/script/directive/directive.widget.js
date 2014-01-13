@@ -1,50 +1,140 @@
 angular.module('app.directive.widget', [])
+.directive('ngModelOnBlur', function() {
+	return {
+		restrict: 'A',
+		require: 'ngModel',
+		scope: {
+			'onChange': '&ngChange',
+			'onCancel': '&ngCancel',
+			'ngModelOnBlur': '&',
+			'val': '=ngModel'
+		},
+		link: function(scope, element, attrs, ngModelCtrl) {
+			if (attrs.type === 'radio' || attrs.type === 'checkbox') return;
+			var cancel = false;
+
+			element.unbind('input').unbind('keydown').unbind('change');
+			element.bind('blur', function() {
+				if(!cancel) {
+					var newval = element.val();
+					var oldval = ngModelCtrl.$modelValue;
+					if(newval != oldval) {
+						ngModelCtrl.$setViewValue(newval);
+						scope.onChange({
+							'$new': newval,
+							'$old': oldval
+						});
+					}
+				}
+
+				scope.ngModelOnBlur({
+
+				});
+
+				setTimeout(function() {
+					scope.$apply();
+					cancel = false;
+				}, 100);
+			}).bind('keydown', function(e) {
+				if(e.keyCode == 13) {
+					this.blur();
+				}
+				else if(e.keyCode == 27) {
+					cancel = true;
+					element.val(scope.val)
+
+					scope.onCancel({
+
+					});
+					this.blur();
+				}
+			});
+		}
+	}
+})
+.directive('clickToEdit', function() {
+	return {
+		restrict: 'A',
+		scope: {
+			'val': '=ngModel',
+			'onCancel': '&ngCancel',
+			'onChange': '&ngChange',
+			'onToggle': '&ngToggle',
+			'type': '='
+		},
+		template: '<input type="text" ng-model="val" style="display:none" ng-model-on-blur="onBlur()" ng-change="onValueChange($new, $old)" ng-cancel="onCancel()"></input><a ng-click="toggle()">{{val}}</a>',
+		link: function(scope, element, attrs) {
+			var elInput = element.find('input');
+			var elA = element.find('a');
+
+			if(attrs.type == 'number') {
+				elInput.attr('type', 'number')
+			}
+
+			scope.onBlur = function() {
+				scope.toggle();
+			}
+
+			scope.onValueChange = function(newval, oldval) {
+				scope.onChange({
+					'$new': newval,
+					'$old': oldval
+				});
+			}
+
+			scope.toggle = function() {
+				elInput.toggle();
+				elA.toggle();
+				if(elA.is(':hidden')) {
+					elInput.focus();
+				}
+
+				scope.onToggle({});
+			}
+		}
+	}
+})
 .directive('widget', function($compile, $timeout, $parse, $translate, serviceLogdb, serviceChart) {
 	return {
 		restrict: 'E',
 		scope: {
 			'onRemove': '&',
-			'ngPid': '='
+			'ngPid': '=',
+			'onChange': '&'
 		},
-		template: '<div class="widget">\
-			<figure class="front">\
-				<h4 style="font-size:1em; margin: 0px 0px 5px;">{{name}}\
-					<span class="pull-right">\
-						<button class="btn btn-mini b-pause" ng-hide="isPaused" ng-click="isPaused = true">\
-							<i class="icon-pause"></i>\
-						</button>\
-						<button class="btn btn-mini b-play" ng-show="isPaused" ng-click="isPaused = false">\
-							<i class="icon-play"></i>\
-						</button>\
-						<button class="btn btn-mini b-refresh" ng-click="refresh();">\
-							<i class="icon-refresh"></i>\
-						</button>\
-						<button class="btn btn-mini b-p" ng-click="isShowProperty = !isShowProperty">\
-							<i class="icon-info-sign"></i>\
-						</button>\
-						<button class="btn btn-mini b-x" ng-click="removeWidget()">\
-							<i class="icon-remove"></i>\
-						</button>\
-					</span>\
-				</h4>\
-				<div class="progress">\
-					<div class="bar" ng-hide="isLoaded" ng-style="progress"></div>\
+		template: 
+			'<span click-to-edit ng-model="name" ng-change="onTitleChange($new, $old)" ng-cancel="onCancel()" ng-toggle="onToggle()" class="pull-left widget-title"></span>\
+			<span class="pull-right widget-toolbox">\
+				<button class="btn btn-extra-mini b-pause" ng-hide="isPaused" ng-click="isPaused = true">\
+					<i class="icon-pause"></i>\
+				</button><button class="btn btn-extra-mini b-play" ng-show="isPaused" ng-click="isPaused = false">\
+					<i class="icon-play"></i>\
+				</button><button class="btn btn-extra-mini b-refresh" ng-click="refresh();">\
+					<i class="icon-refresh"></i>\
+				</button><button class="btn btn-extra-mini b-p" ng-click="isShowProperty = !isShowProperty">\
+					<i class="icon-info-sign"></i>\
+				</button><button class="btn btn-extra-mini b-x" ng-click="removeWidget()">\
+					<i class="icon-remove"></i>\
+				</button>\
+			</span>\
+			<div class="progress">\
+				<div class="bar" ng-hide="isLoaded" ng-style="progress"></div>\
+			</div>\
+			<div class="widget-content" ng-hide="isShowError">\
+				<span class="widget-status pull-left" ng-show="isPaused">일시 정지됨</span>\
+				<span class="widget-lastupdate pull-right">{{lastUpdate}}</span>\
+			</div>\
+			<div class="widget-error" ng-show="isShowError">\
+				<div class="alert alert-error">{{errorMessage}}</div>\
+			</div>\
+			<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
+				<div class="property-inner" ng-click="stopPropagation($event)">\
+					<code>{{query}}</code><br/>\
+					{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
+					<span click-to-edit type="number" ng-model="interval" ng-change="onIntervalChange($new, $old)" ng-cancel="onCancel()"></span>\
+					{{"$S_msg_QueryRunInterval" | translate}}\
 				</div>\
-				<span ng-show="isPaused" style="font-size:.8em; color: silver; float: left">일시 정지됨</span>\
-				<span class="clearfix" style="font-size:.8em; color: silver; float: right">{{lastUpdate}}</span>\
-				<br>\
-				<div class="content" style="max-width: 400px; min-width: 400px; overflow:hidden" ng-hide="isShowError">\
-				</div>\
-				<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
-					<div class="property-inner" ng-click="stopPropagation($event)">\
-						<code>{{query}}</code><br/>\
-						{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
-						{{"$S_msg_QueryRunInterval" | translate:paramQueryRunInterval()}}\
-					</div>\
-				</div>\
-				<div class="alert alert-error" ng-show="isShowError">{{errorMessage}}</div>\
-			</figure>\
-		</div>',
+			</div>',
 		link: function(scope, el, attrs) {
 			var timer;
 			scope.isShowProperty = false;
@@ -52,6 +142,31 @@ angular.module('app.directive.widget', [])
 			scope.isPaused = false;
 			scope.errorMessage = $translate('$S_msg_UnknownError');
 			scope.guid;
+
+			scope.onCancel = function() {
+				console.log('onCancel');
+			}
+
+			scope.onTitleChange = function(newval, oldval) {
+				scope.onChange({
+					'$new': newval,
+					'$old': oldval,
+					'$key': 'name'
+				});
+			}
+
+			scope.onIntervalChange = function(newval, oldval) {
+				scope.onChange({
+					'$new': newval,
+					'$old': oldval,
+					'$key': 'interval'
+				});
+			}
+
+			scope.onToggle = function() {
+				el.parents('.contentbox').prev().toggleClass('bold');
+				el.toggleClass('bold');
+			}
 
 			var init = true;
 			scope.$watch('isPaused', function(val) {
@@ -95,9 +210,12 @@ angular.module('app.directive.widget', [])
 
 			scope.progress = { 'width': '0%' };
 
-			var elContent = el.find('.content');
+			var elContent = el.find('.widget-content');
 
 			function htmlEscape(str) {
+				if(str == undefined){
+					return "unnamed";
+				}
 				return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 			}
 
@@ -116,13 +234,14 @@ angular.module('app.directive.widget', [])
 				}, _options);
 
 				initFn[ctx.type](ctx);
-				scope.$apply();
+				// scope.$apply();
 			}
 
 			var initFn = {
 				'grid': function(ctx) {
 					scope.order = ctx.data.order;
 					run();
+					el.addClass('grid');
 
 					var table = angular.element('<table class="table table-bordered table-condensed">\
 						<thead>\
@@ -138,14 +257,13 @@ angular.module('app.directive.widget', [])
 					</table>');
 
 					$compile(table)(scope);
-					elContent.append(table);
-					console.log('table init')
+					elContent.prepend(table);
 					elContent.css('opacity', '0');
 					setTimeout(function() {
 						$(table).fixheadertable({
-							minWidth: scope.order.length * 210,
-							width: 400,
-							height: 267
+						// 	minWidth: scope.order.length * 210,
+						// 	width: 400,
+						// 	height: 267
 						});
 						elContent.css('opacity','');
 					}, 300);
@@ -155,41 +273,45 @@ angular.module('app.directive.widget', [])
 				'chart': function(ctx) {
 
 					run();
-					var svg = angular.element('<div class="widget" style="clear:both; height:300px; width: 400px">');
+					el.addClass('chart');
+					var svg = angular.element('<div class="widget-chart">');
 
 					var dataLabel = {name: ctx.data.label, type: ctx.data.labelType};
 
 					function render() {
 						var json = serviceChart.buildJSONStructure(angular.copy(ctx.data.series), scope.dataQueryResult, dataLabel);
-						if(ctx.data.type == 'line') {
-							serviceChart.lineChart(svg[0], json);
-						}
-						else if(ctx.data.type == 'bar') {
-							serviceChart.multiBarHorizontalChart(svg[0], json);
-						}
-						else if(ctx.data.type == 'pie') {
-							serviceChart.pie(svg[0], json);
-						}
+						// setTimeout(function() {
+							var renderOptions = {
+								width: $(svg[0]).width(),
+								height: $(svg[0]).parents('.contentbox').height() - 10
+							}
+							if(ctx.data.type == 'line') {
+								serviceChart.lineChart(svg[0], json, renderOptions);
+							}
+							else if(ctx.data.type == 'bar') {
+								serviceChart.multiBarHorizontalChart(svg[0], json, renderOptions);
+							}
+							else if(ctx.data.type == 'pie') {
+								serviceChart.pie(svg[0], json, renderOptions);
+							}	
+						// }, 500);
 					}
 
-					options.pageLoaded = function() {
-						render();
-					}
-					options.loaded = function() {
-						render();
-					}
-					elContent.append(svg);
+					options.pageLoaded = render;
+					// options.loaded = render;
+
+					elContent.prepend(svg);
 
 					
 				}
 			}
 
 			var elProgressBar = el.find('.progress .bar');
-			var timeFormat = d3.time.format('%Y-%m-%d %H:%M:%S.%L');
+			var timeFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
 
 			function run() {
 				scope.isLoaded = false;
-				elProgressBar.removeClass('ani');
+				// elProgressBar.removeClass('ani');
 				scope.progress = { 'width': '0%' };
 				//scope.$apply();
 
@@ -209,7 +331,7 @@ angular.module('app.directive.widget', [])
 						options.pageLoaded(m);
 					}
 
-					console.log('loaded', queryInst.getId(), scope.guid, scope.query);
+					console.logdb('loaded', queryInst.getId(), scope.guid, scope.query);
 					serviceLogdb.remove(queryInst);
 
 					scope.progress = { 'width': '100%' };
@@ -228,7 +350,7 @@ angular.module('app.directive.widget', [])
 				queryInst.query(scope.query, 200)
 				.created(function(m) {
 					//console.log('created')
-					elProgressBar.addClass('ani');
+					// elProgressBar.addClass('ani');
 					scope.progress = { 'width': '20%' };
 					scope.$apply();
 				})

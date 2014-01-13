@@ -1,0 +1,66 @@
+<!doctype html>
+<html ng-app="layoutEngine">
+<head>
+	<meta charset="utf-8" />
+	<script src="../../lib/jquery/jquery-2.0.3.js"></script>
+	<script src="../../lib/angular/angular.js"></script>
+	<script src="../../script/service/service.connection.js"></script>
+	<script src="observableArray.js"></script>
+
+	<link rel="stylesheet" href="../../lib/bootstrap2/css/bootstrap.css" />
+	<link href="layoutEngine.css" rel="stylesheet"/>
+
+	<style>
+
+* {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+body, #main {
+	background: #ddd;
+	-webkit-font-smoothing: antialiased;
+	-moz-font-smoothing: antialiased;
+	font-smoothing: antialiased;
+	margin: 0;
+
+	overflow: hidden;
+	/* overflow: hidden; */
+}
+
+html, body, .k-d-col {
+	height: 100%;
+}
+
+#main {
+	clear:both;
+	height: 90%;
+}
+
+
+.btn {
+	float: right;
+}
+
+@media screen and (max-width: 760px){
+
+}
+@media screen and (max-width: 690px){
+
+}
+
+	</style>
+
+</head>
+<body ng-controller="Controller">
+	<div>
+		<button class="btn" ng-click="addWidget()">Add</button>
+	</div>
+	<div id="main">
+	</div>
+
+	<script src="layoutEngine.js"></script>
+	<script src="layoutEngine-main.js"></script>
+</body>
+</html>

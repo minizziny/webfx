@@ -1,5 +1,5 @@
 angular.module('app.connection.session', [])
-.factory('serviceSession', function(socket, $translate, $rootScope) {
+.factory('serviceSession', function(socket, $translate, $rootScope, $location) {
 	function login(id, pw, nonce, successFn) {
 		var hashedPw = CryptoJS.SHA1(pw).toString(CryptoJS.enc.Hex);
 		var hash = CryptoJS.SHA1(hashedPw + nonce).toString(CryptoJS.enc.Hex);
@@ -76,14 +76,8 @@ angular.module('app.connection.session', [])
 		socket.send("org.araqne.dom.msgbus.LoginPlugin.getPrincipal", {}, 0)
 		.success(function(m) {
 			if(m.body.admin_login_name == null && m.body.org_domain == null) {
-				if(location.hash != '#/' && location.hash != '') {
-					location.href = '/';
-					location.hash = '';
-				}
-				else {
-					if(!!options.not_logged_in) {
-						options.not_logged_in();
-					}
+				if(!!options.not_logged_in) {
+					options.not_logged_in();
 				}
 			}
 			else {

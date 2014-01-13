@@ -58,7 +58,7 @@ function Async(fn) {
 		}
 		else {
 			if(fname != 'created' && fname != 'onTimeline' && fname != 'onStatusChange' && fname != 'started') {
-				console.warn(name + '.' + fname + ', but do nothing')
+				console.warn(name + '.' + fname + ', but do nothing.', (args.length > 1) ? (args[1][0].method) : '');
 			}
 			//console.trace();
 		}
@@ -95,7 +95,7 @@ function CustomEvent(obj) {
 		events[eventName].push(fn);
 
 		obj[eventName] = function() {
-			events[eventName].fire();
+			events[eventName].fire.apply(events[eventName], arguments);
 		}
 	}
 
@@ -112,17 +112,17 @@ function CustomEvent(obj) {
 		delete events[eventName];
 	}
 
-	// setTimeout(function() {
-	// 	events.load.fire('myarg', 'ddd', 'dzz');
-	// }, 1000);
-
-	return {
-		on: on,
-		off: off,
-		clear: clear
+	this.dispatchEvent = function(eventName) {
+		// console.log('dispatchEvent', events)
+		if(events.hasOwnProperty(eventName)) {
+			events[eventName].fire();
+		}
 	}
-}
 
+	this.on = on;
+	this.off = off;
+	this.clear = clear;
+}
 
 angular.module('app.connection', ['app.utility'])
 .factory('socket', function($q, $filter, serviceUtility) {
@@ -132,6 +132,7 @@ angular.module('app.connection', ['app.utility'])
 
 	function initialize() {
 		var ws = new WebSocket('ws://' + location.host + '/websocket');
+		// var ws = new WebSocket('ws://172.20.0.118:8888/websocket');
 		ws.onmessage = function(e) {
 			onMessageReceived(e.data);
 		}

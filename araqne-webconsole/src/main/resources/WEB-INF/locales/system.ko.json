@@ -215,7 +215,7 @@
 
 	"--------logsource--------": "",
 	"$S_str_Logger": "로거",
-	"$S_str_LoggerTree": "수집 설정",
+	"$S_str_LoggerTree": "로컬 수집 설정",
 	"$S_str_Sentry": "센트리",
 
 	"$S_str_AllLogger": "모든 로그 수집 설정",
@@ -402,6 +402,8 @@
 	"$S_str_CannotParseDate": "날짜 해석을 할 수 없습니다",
 	"$S_str_RegexHelp": "정규 표현식 도움말",
 
+	"$S_str_UseLinePatternMatch": "줄 단위 패턴 매칭",
+
 	"--------regex help--------": "",
 	"$S_str_RegexHelp1": "a, b, c 중 하나의 문자",
 	"$S_str_RegexHelp2": "a, b, c 를 제외한 하나의 문자",
@@ -480,7 +482,7 @@
 	"$S_str_ReadMore": "더 보기...",
 	"$S_msg_CreateIndexSuccess": "인덱스 {{p0}}을 성공적으로 만들었습니다.",
 	"$S_msg_RemoveIndexSuccess": "인덱스 {{p0}}을 성공적으로 삭제했습니다.",
-	"$S_str_MinimumIndexDay": "인덱스 범위",
+	"$S_str_MinimumIndexDay": "인덱스 대상 기간",
 	"$S_str_BasePath": "데이터 위치",
 	"$S_str_CreateIndex": "새 인덱스 만들기",
 	"$S_msg_CreateIndex": "새로 만들 인덱스의 이름을 입력하세요.",
@@ -495,7 +497,7 @@
 	"$S_str_IndexProperty": "인덱스 상세 정보",
 	"$S_str_Classification": "구분",
 	"$S_str_Contents": "내용",
-	"$S_str_IndexedDay": "인덱스 기간",
+	"$S_str_IndexedDay": "인덱스 된 기간",
 	"$S_str_UseBloomFilter": "불룸필터 사용 여부",
 	"$S_str_Tokenizer": "토크나이저",
 	"$S_str_TokenizerSetting": "토크나이저 설정",
@@ -503,6 +505,7 @@
 	"$S_str_LogTrend": "로그 추이",
 	"$S_str_LastLogNotFound": "최근 로그 없음.",
 	"$S_str_Wholeperiod": "전체",
+	"$S_str_Unlimited": "무제한",
 	"$S_str_From": "부터",
 	"$S_str_Use": "사용",
 	"$S_str_Notuse": "미사용",
@@ -534,5 +537,15 @@
 	"$S_str_To": "까지",
 	"$S_str_Action": "행위",
 	"$S_str_Success": "성공",
-	"$S_str_Failed": "실패"
+	"$S_str_Failed": "실패",
+
+	"--------config-----------": "",
+	"$S_str_Parser": "파서",
+	"$S_str_CreateParser": "새 파서 만들기",
+	"$S_str_RemoveParser": "파서 삭제",
+
+	"$S_str_FactoryName": "팩토리 이름",
+
+	"$S_msg_RemoveParserConfirmPre": "정말 파서",
+	"$S_msg_RemoveParserConfirmPost": "을 삭제하시겠습니까?"
 }

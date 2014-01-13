@@ -404,6 +404,9 @@
 	"$S_str_ParseDateResult": "Parsed Date",
 	"$S_str_CannotParseDate": "Cannot parse given date string",
 	"$S_str_RegexHelp": "Regular Expression Help",
+
+	"$S_str_UseLinePatternMatch": "Line Pattern matching",
+
 	
 	"--------regexhelp--------": "",
 	"$S_str_RegexHelp1": "A single character of: a, b, or c",
@@ -506,6 +509,7 @@
 	"$S_str_LogTrend": "Log Trend",
 	"$S_str_LastLogNotFound": "Last Log Not Found.",
 	"$S_str_Wholeperiod": "All",
+	"$S_str_Unlimited": "Unlimited",
 	"$S_str_From": "From",
 	"$S_str_Use": "Yes",
 	"$S_str_Notuse": "No",
@@ -537,5 +541,15 @@
 	"$S_str_To": "To",
 	"$S_str_Action": "Action",
 	"$S_str_Success": "Success",
-	"$S_str_Failed": "Failed"
+	"$S_str_Failed": "Failed",
+
+	"--------config-----------": "",
+	"$S_str_Parser": "Parser",
+	"$S_str_CreateParser": "Create Parser",
+	"$S_str_RemoveParser": "Remove Parser",
+
+	"$S_str_FactoryName": "Factory name",
+
+	"$S_msg_RemoveParserConfirmPre": "Do you really want to drop parser",
+	"$S_msg_RemoveParserConfirmPost": "?"
 }
