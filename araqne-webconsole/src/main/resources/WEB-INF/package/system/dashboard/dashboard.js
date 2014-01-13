@@ -32,6 +32,11 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 	$scope.onChangeWidgetProperty = function(newval, oldval, guid, key) {
 		eventSender.dashboard.onChangeWidgetProperty(newval, oldval, guid, key);
 	}
+
+	$scope.cancelAddWidget = function() {
+		$('.arrangeWidget')[0].hideDialog();
+		angular.element('.newbie').remove();
+	}
 }
 
 function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
@@ -68,20 +73,13 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
-		// no exist widgets array
-		if(!$scope.currentPreset.state.widgets) {
-			$scope.currentPreset.state["widgets"] = [];
-		}
-
-		$scope.currentPreset.state.widgets.push(ctx);
-
 		
 		var newbie = layoutEngine.ui.layout.box.create({
 			'w': 100,
 			'guid': ctx.guid
 		});
 
-		var newdiv = $('<div class="newbie"></div>').appendTo('#view-dashboard');
+		var newdiv = $('<div class="newbie"></div>').appendTo('.dashboard-container');
 		var isSplitInsert = false;
 		newbie.on('splitInsert', function() {
 			newbie.el.find('.handler').off('mousedown.help');
@@ -96,6 +94,13 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 					$('.arrangeWidget')[0].hideDialog();
 					newdiv.remove();
 
+					// no exist widgets array
+					if(!$scope.currentPreset.state.widgets) {
+						$scope.currentPreset.state["widgets"] = [];
+					}
+
+					$scope.currentPreset.state.widgets.push(ctx);
+					widget.find('.widget-toolbox').show();
 					eventSender.dashboard.onCurrentPresetChanged(); // save state
 				}
 				else {
@@ -110,7 +115,8 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 		$('.arrangeWidget')[0].showDialog();
 
-		eventSender.dashboard.onCreateNewWidget(ctx);
+		var widget = eventSender.dashboard.onCreateNewWidget(ctx);
+		widget.find('.widget-toolbox').hide();
 	}
 
 	eventSender.dashboard.onCreateNewWidget = function(ctx) {
@@ -121,6 +127,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		widget[0].setContext(ctx);
 
 		widget.appendTo(el.find('.contentbox'));
+		return widget;
 	}
 
 	$scope.dataPresetList = [];

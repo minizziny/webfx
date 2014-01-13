@@ -90,6 +90,7 @@
 	.widget-content, .widget-error {
 		height: calc(100% - 3px);
 		overflow: auto;
+		border-top: 1px solid #ccc;
 	}
 
 	.widget-status, .widget-lastupdate {
