@@ -158,7 +158,7 @@
 	}
 
 
-	.wizard {
+	.dashboard-container .wizard {
 		float: left;
 		width: 98%;
 		margin-left: 10px;

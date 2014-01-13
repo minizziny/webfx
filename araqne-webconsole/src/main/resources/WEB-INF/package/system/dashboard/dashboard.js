@@ -874,7 +874,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		}
 
 		//console.log('go' + page);
-		var el = $('.wizard li.wiz-step').removeClass('active')[page];
+		var el = $('.dashboard-container .wizard li.wiz-step').removeClass('active')[page];
 		$(el).addClass('active');
 		$('.newWidget')
 			.removeClass(makeRemoveClassHandler(/^step/))

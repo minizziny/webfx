@@ -58,7 +58,7 @@ function Async(fn) {
 		}
 		else {
 			if(fname != 'created' && fname != 'onTimeline' && fname != 'onStatusChange' && fname != 'started') {
-				console.warn(name + '.' + fname + ', but do nothing')
+				console.warn(name + '.' + fname + ', but do nothing.', (args.length > 1) ? (args[1][0].method) : '');
 			}
 			//console.trace();
 		}
