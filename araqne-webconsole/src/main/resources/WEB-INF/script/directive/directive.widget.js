@@ -243,9 +243,9 @@ angular.module('app.directive.widget', [])
 					run();
 					el.addClass('grid');
 
-					var table = angular.element('<table class="table table-bordered table-condensed">\
+					var table = angular.element('<table class="table table-bordered table-condensed widget-grid">\
 						<thead>\
-							<tr><th ng-repeat="field in order" title="{{field}}">{{field}}</th></tr>\
+							<tr><th data-resizable-column-id="{{field}}" ng-repeat="field in order" title="{{field}}">{{field}}</th></tr>\
 						</thead>\
 						<tbody>\
 							<tr ng-repeat="row in dataQueryResult">\
@@ -260,11 +260,7 @@ angular.module('app.directive.widget', [])
 					elContent.prepend(table);
 					elContent.css('opacity', '0');
 					setTimeout(function() {
-						$(table).fixheadertable({
-						// 	minWidth: scope.order.length * 210,
-						// 	width: 400,
-						// 	height: 267
-						});
+						var recol = $(table).resizableColumns({});
 						elContent.css('opacity','');
 					}, 300);
 					

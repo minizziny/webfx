@@ -264,6 +264,17 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 					curr.find('.widget-chart').each(resizeCharts);
 					effsn.find('.widget-chart').each(resizeCharts);
 					effsp.find('.widget-chart').each(resizeCharts);
+
+					function syncHandle(i, table) {
+						var objResizableColumns = $(table).data('resizableColumns');
+						if(!!objResizableColumns) {
+							objResizableColumns.syncHandleWidths();
+						}
+					}
+
+					curr.find('.widget-grid').each(syncHandle);
+					effsn.find('.widget-grid').each(syncHandle);
+					effsp.find('.widget-grid').each(syncHandle);
 				}
 
 				console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
