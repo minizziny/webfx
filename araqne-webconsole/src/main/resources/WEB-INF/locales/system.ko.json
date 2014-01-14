@@ -116,6 +116,9 @@
 	"$S_str_Series": "시리즈",
 	"$S_msg_SelectOneMoreNumberType": "하나 이상의 숫자 타입의 컬럼을 선택하십시오.",
 
+	"$S_msg_BeforeAddWidgetNotifyDragAndDrop": "드래그 앤 드롭하여 위젯을 도킹하면 추가가 완료됩니다.",
+	"$S_msg_NoWidget": "위젯이 하나도 없습니다. 새 위젯을 추가하세요!",
+
 	"--------widget--------": "",
 	"$S_msg_QueryRunCount": "쿼리 {{p0}}번 실행함",
 	"$S_msg_QueryRunInterval": "{{p0}}초마다 갱신",

@@ -156,7 +156,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	function displayBlankInfo() {
 		var el = angular.element('<div class="blank-info">\
 			<div class="blank-contents">\
-				<div style="font-size: 16px;line-height: 4;">위젯이 하나도 없습니다. 새 위젯을 추가하세요!</div>\
+				<div style="font-size: 16px;line-height: 4;">{{"$S_msg_NoWidget" | translate}}</div>\
 				<button ng-click="openNewWidget();" class="btn btn-primary btn-large">{{"$S_str_AddWidget" | translate}}</button>\
 			</div>\
 		</div>');
