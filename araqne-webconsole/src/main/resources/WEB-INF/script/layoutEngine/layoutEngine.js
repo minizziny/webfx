@@ -1726,10 +1726,7 @@ var layoutEngine = (function() {
 		}
 
 		if(widgets.length == 0) {
-			layout.rows.push({
-				'h': 100,
-				'guid': undefined
-			});
+			delete layout.rows;
 		}
 
 		return layout;
