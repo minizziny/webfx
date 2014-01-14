@@ -40,18 +40,38 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 }
 
 function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
+	function setObjectValue(object, ns, value) {
+		function retObject(object, keys, value) {
+			if(keys.length == 1) {
+				object[keys[0]] = value;
+				return object;
+			}
+			
+			var first = keys.shift();
+			var o = object[first];
+			if(o == undefined) {
+				object[first] = {};
+			}
+			return retObject(object[first], keys, value);
+		}
+		var keys = ns.split('.');
+		retObject(object, keys, value);
+	}
+
 	eventSender.dashboard.onChangeWidgetProperty = function(newval, oldval, guid, key) {
 		var found = $scope.currentPreset.state.widgets.filter(function(widget) {
 			return widget.guid == guid;
 		});
 		if(found.length > 0) {
-			found[0][key] = newval;
+			setObjectValue(found[0], key, newval);
+			// console.log(found[0])
 			eventSender.dashboard.onCurrentPresetChanged(); // save state
 		}
 	}
 
 	eventSender.dashboard.onCurrentPresetChanged = function(reset_layout) {
-		console.log('currentPreset changed')
+		// console.log('currentPreset changed')
+		// console.trace();
 		console.log($scope.currentPreset);
 		return SavePreset($scope.currentPreset.guid, $scope.currentPreset.name, $scope.currentPreset.state, reset_layout);
 	}
