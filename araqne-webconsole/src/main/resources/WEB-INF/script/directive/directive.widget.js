@@ -157,8 +157,8 @@ angular.module('app.directive.widget', [])
 
 			scope.onIntervalChange = function(newval, oldval) {
 				scope.onChange({
-					'$new': newval,
-					'$old': oldval,
+					'$new': parseInt(newval),
+					'$old': parseInt(oldval),
 					'$key': 'interval'
 				});
 			}
@@ -166,6 +166,19 @@ angular.module('app.directive.widget', [])
 			scope.onToggle = function() {
 				el.parents('.contentbox').prev().toggleClass('bold');
 				el.toggleClass('bold');
+			}
+
+			scope.gridWidths = {};
+			scope.getStore = function() {
+				return {
+					get: function(key) {
+						return scope.gridWidths[key.substring(1)];
+					},
+					set: function(key, val) {
+						scope.gridWidths[key.substring(1)] = val;
+						scope.$apply();
+					}
+				}
 			}
 
 			var init = true;
@@ -179,7 +192,7 @@ angular.module('app.directive.widget', [])
 					}
 				}
 				else {
-					console.log(timer);
+					// console.log(timer);
 					$timeout.cancel(timer);
 				}
 			});
@@ -240,12 +253,15 @@ angular.module('app.directive.widget', [])
 			var initFn = {
 				'grid': function(ctx) {
 					scope.order = ctx.data.order;
+					if(angular.isObject(ctx.data.width)) {
+						scope.gridWidths = ctx.data.width;
+					}
 					run();
 					el.addClass('grid');
 
-					var table = angular.element('<table class="table table-bordered table-condensed">\
+					var table = angular.element('<table class="table table-bordered table-condensed widget-grid" data-resizable-columns-id="">\
 						<thead>\
-							<tr><th ng-repeat="field in order" title="{{field}}">{{field}}</th></tr>\
+							<tr><th data-resizable-column-id="{{field}}" ng-repeat="field in order" title="{{field}}">{{field}}</th></tr>\
 						</thead>\
 						<tbody>\
 							<tr ng-repeat="row in dataQueryResult">\
@@ -260,15 +276,25 @@ angular.module('app.directive.widget', [])
 					elContent.prepend(table);
 					elContent.css('opacity', '0');
 					setTimeout(function() {
-						$(table).fixheadertable({
-						// 	minWidth: scope.order.length * 210,
-						// 	width: 400,
-						// 	height: 267
+						var recol = $(table).resizableColumns({
+							store: scope.getStore()
 						});
 						elContent.css('opacity','');
-					}, 300);
-					
 
+						var init = true;
+						scope.$watch('gridWidths', debounce(function(val) {
+							if(!init) {
+								scope.onChange({
+									'$new': val,
+									'$key': 'data.width'
+								});	
+							} else {
+								init = false;
+							}
+							
+						}, 100), true);
+
+					}, 500);
 				},
 				'chart': function(ctx) {
 
