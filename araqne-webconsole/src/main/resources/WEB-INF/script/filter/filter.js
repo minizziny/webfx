@@ -35,11 +35,11 @@ angular.module('app.filter', ['pascalprecht.translate'])
 		if(val === false) {	return 'false'; }
 		if(val === null) return val;
 		
-		if(toString.call(val) == '[object String]') {
+		if(Object.prototype.toString.call(val) == '[object String]') {
 			// return val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>');
 			return $sce.trustAsHtml(val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>'));
 		}
-		else if(toString.call(val) == '[object Object]') {
+		else if(Object.prototype.toString.call(val) == '[object Object]') {
 			return $sce.trustAsHtml('');
 		}
 		else return $sce.trustAsHtml(val.toString());
