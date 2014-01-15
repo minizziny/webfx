@@ -37,6 +37,27 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 		$('.arrangeWidget')[0].hideDialog();
 		angular.element('.newbie').remove();
 	}
+
+	function redraw() {
+		layoutEngine.ui.layout.box.allboxes.forEach(function(box) {
+
+			if(box.rows.length > 0) return;
+
+			function resizeCharts(i, widget) {
+				if(!!$(widget).highcharts) {
+					if(!!$(widget).highcharts()) {
+						var parent = $(widget).parents('.contentbox');
+						$(widget).highcharts().setSize(parent.width(), parent.height() - 10, false);
+					}
+				}
+			}
+
+			box.el.find('.widget-chart').each(resizeCharts);
+		});
+	}
+	eventSender.dashboard.$event.on('resume', redraw);
+
+	$(window).on('resize', debounce(redraw, 200));
 }
 
 function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
