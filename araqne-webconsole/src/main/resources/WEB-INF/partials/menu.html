@@ -16,22 +16,16 @@
 		/*box-shadow: 0 1px 10px rgba(0,0,0,1)*/
 	}
 
-	.tm .tm-pack {
-		margin: 0px 10px;
-	}
-
-	.tm .tm-pack a.tm-program-dd {
-		display: none;
-	}
-
-	.tm ul {
+	.tm ul.tm-programs {
 		display: inline-block;
 		margin: 0;
 		padding: 0px 10px;
 		height: 30px;
+		width: 10000px;
+		margin-left: 120px;
 	}
 
-	.tm li {
+	.tm li.tm-program {
 		list-style: none;
 		display: inline;
 		padding: 7px 18px;
@@ -40,19 +34,19 @@
 		cursor: pointer;
 	}
 
-	.tm li:hover {
+	.tm li.tm-program:hover {
 		background-color: #dfdfdf;
 	}
 
-	.tm li a {
+	.tm li.tm-program a {
 		color: #999;
 	}
 
-	.tm li a:hover {
+	.tm li.tm-program a:hover {
 		text-decoration: none;
 	}
 
-	.tm li a.close {
+	.tm li.tm-program a.close {
 		float: none;
 		line-height: 12px;
 		margin: 0 -16px 0 0px;
@@ -61,30 +55,30 @@
 		transition: opacity 0.2s, margin 0.2s;
 	}
 
-	.tm li a.link {
+	.tm li.tm-program a.link {
 		-webkit-transition: margin 0.2s;
 		transition: margin 0.2s;
 	}
 
-	.tm li.active:hover a.close {
+	.tm li.tm-program.active:hover a.close {
 		display: inline;
 		opacity: 1;
 		margin-right: -12px;
 	}
 
-	.tm li.active:hover a.link {
+	.tm li.tm-program.active:hover a.link {
 		margin-left: -4px;
 	}
 
-	.tm li.active a {
+	.tm li.tm-program.active a {
 		color: #4f4f4f;
 	}
 
-	.tm li.active.current a {
+	.tm li.tm-program.active.current a {
 		color: white;
 	}
 
-	.tm li.active:after {
+	.tm li.tm-program.active:after {
 		content: '';
 		width: 0;
 		height: 0;
@@ -96,16 +90,9 @@
 		border-style: solid;
 	}
 
-	.tm li.current {
+	.tm li.tm-program.current {
 		border-radius: 0px;
 		background-color: gray;
-	}
-
-	.tm-pack-title {
-		color: #1d7eaf;
-		padding: 7px 7px 7px 18px;
-		position: relative;
-		top: 5px;
 	}
 
 	.tm-inner {
@@ -118,7 +105,7 @@
 		position: fixed;
 		top: 0;
 		right: 0;
-		padding: 5px 30px 0px 30px;
+		padding: 5px 20px 0px 20px;
 		background-color: #f1f1f1;
 	}
 
@@ -126,85 +113,70 @@
 		margin: 8px;
 	}
 
-	.tm .tm-pack ul.open {
-		display: block;
-		height: auto;
-		border: 1px solid #ccc;
-		background-color: #fff;
-		margin-top: 10px;
-		width: 160px;
-		position: absolute;
-		box-shadow: 1px 1px 5px rgba(0,0,0,.5)
+	.tm .tm-more {
+		display: none; 
 	}
 
-	.tm .tm-pack ul.open li {
-		display: block;
-		position: initial;
-		height: 20px;
+	.tm-more .dropdown-menu li {
+		display: none;
 	}
 
+	.tm-more .btn-group .btn.dropdown-toggle {
+		background-color: transparent;
+		background-image: none;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		-webkit-box-shadow: none;
+		text-shadow: none;
+		color: #999;
+		padding: 5px 18px;
+	}
 
-	.tm ul.open li.current:hover {
+	.tm-more .btn-group .btn.dropdown-toggle:hover {
+		background-color: #dfdfdf;
+	}
+
+	.tm-more .btn-group.open .btn.dropdown-toggle {
+		box-shadow: none;
+		-webkit-box-shadow: none;
 		background-color: gray;
+		text-shadow: none;
+		color: white;
 	}
 
-	.tm ul.open li:hover {
-		background-color: #eee;
+	.tm-logo {
+		position: fixed;
+		left: 20px;
+		top: 2px;
+		background-image: url(/images/logpresso-logo.svg);
+		width: 98px;
+		height: 27px;
+		background-position: 265px 135px;
+		background-size: 150%;
 	}
 
-	.tm ul.open li.active:after {
-		content: '';
-		width: 0;
-		height: 0;
-		margin-left: 0;
-		border-width: 5px 0 5px 5px;
-		border-color: transparent transparent transparent #007bff;
-		bottom: initial;
-		position: absolute;
-		left: 0;
-		margin-top: 4px;
-	}
-
-	@media screen and (max-width: 1140px) {
-		.tm .tm-pack:last-child ul, .tm .tm-pack:last-child span  {
-			display: none;
-		}
-
-		.tm .tm-pack:last-child ul.open {
-			display: block;
-		}
-
-		.tm .tm-pack:last-child a.tm-program-dd {
-			display: inline;
-		}
-	}
-
-	@media screen and (max-width: 590px) {
-		.tm .tm-pack ul, .tm .tm-pack span {
-			display: none;
-		}
-
-		.tm .tm-pack ul.open {
-			display: block;
-		}
-
-		.tm .tm-pack a.tm-program-dd {
-			display: inline;
-		}
-	}
 </style>
 <div class="tm" ng-controller="MenuController">
 	<div class="tm-inner">
 		<a class="tm-logout" ng-click="logout()">{{'$S_str_Logout' | translate}}</a>
-		<div ng-repeat="pack in packs" class="pull-left tm-pack">
-			<span class="tm-pack-title">{{pack.display_names | translateMsgbus}}</span>
-			<a class="tm-pack-title tm-program-dd" ng-click="toggleDropdown(pack)">{{pack.display_names | translateMsgbus}}<b class="caret"></b></a>
-			<ul ng-class="{open: pack.isOpen}">
-				<li class="tm-program" onclick="location.href='/#/{{pack.dll}}/{{program.path}}'" ng-repeat="program in pack.programs" ng-class="{active: program.isActive, current: program.isCurrent}">
-					<a class="link" href="/#/{{pack.dll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
-					<a class="close" ng-show="program.isActive" ng-click="program.halt($event)">&times;</a>
-				</li>
-			</ul>
-		</div>
+		<span class="tm-logo"></span>
+		<ul class="tm-programs">
+			<li class="tm-program" ng-repeat="program in programs" ng-class="{active: program.isActive, current: program.isCurrent}">
+				<a class="link" href="/#/{{program.packdll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
+				<a class="close" ng-show="program.isActive" ng-click="program.halt($event)">&times;</a>
+			</li>
+			<li class="tm-more">
+				<div class="btn-group" style="margin-bottom: -7px">
+					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+						{{'$S_str_More' | translate}}
+						<span class="caret"></span>
+					</a>
+					<ul class="dropdown-menu">
+						<li ng-repeat="program in programs"><a tabindex="-1" href="/#/{{program.packdll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a></li>
+					</ul>
+				</div>
+			</li>
+		</ul>
 	</div>
 </div>

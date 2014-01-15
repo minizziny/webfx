@@ -1,4 +1,6 @@
 {
+	"$S_str_More": "More",
+
 	"--------orgchart--------": "",
 	"$S_str_RemoveOrganization": "Delete Department",
 	"$S_msg_RemoveOrganizationConfirmPre": "Do you really want to delete ",
