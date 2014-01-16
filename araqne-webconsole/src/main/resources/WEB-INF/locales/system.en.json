@@ -1,4 +1,6 @@
 {
+	"$S_str_More": "More",
+
 	"--------orgchart--------": "",
 	"$S_str_RemoveOrganization": "Delete Department",
 	"$S_msg_RemoveOrganizationConfirmPre": "Do you really want to delete ",
@@ -115,6 +117,9 @@
 	"$S_str_String": "String",
 	"$S_str_Series": "Series",
 	"$S_msg_SelectOneMoreNumberType": "Select one or more number columns.",
+
+	"$S_msg_BeforeAddWidgetNotifyDragAndDrop": "To add a widget, please drag and drop the widget.",
+	"$S_msg_NoWidget": "There is no widget. Add a new widget now!",
 	
 	"--------widget--------": "",
 	"$S_msg_QueryRunCount": "Updated {{p0}} times",
