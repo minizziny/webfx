@@ -4,7 +4,7 @@
 		restrict: 'A',
 		link: function(scope, $self, attrs) {
 			var shadow, minHeight, noFlickerPad;
-			$self.on('keydown', throttle(update, 300)).on('keyup', throttle(update, 300)).on('focus', update).on('click', update);
+			$self.on('keydown.autosize', throttle(update, 300)).on('focus', update).on('click', update);
 
 			function update(e) {
 
@@ -40,7 +40,7 @@
 					.replace(/ {2,}/g, function(space){ return times('&nbsp;', space.length - 1) + ' ' });
 
 				shadow.css('width', $self.width());
-				shadow.html(val + (noFlickerPad === 0 ? '...' : '')); // Append '...' to resize pre-emptively.
+				shadow[0].innerText = (val + (noFlickerPad === 0 ? '...' : '')); // Append '...' to resize pre-emptively.
 				$self.height(Math.max(shadow.height() + noFlickerPad, minHeight));
 
 				return true;
@@ -517,18 +517,23 @@
 			if (attrs.type === 'radio' || attrs.type === 'checkbox') return;
 			var cancel = false;
 
-			element.unbind('input').unbind('keydown').unbind('change');
-			element.bind('blur', function() {
+			element.unbind('input').unbind('keydown.onblur').unbind('change');
+			element.bind('blur.onblur', function() {
 				if(!cancel) {
 					ngModelCtrl.$setViewValue(element.val());
 				}
 
-				scope[attrs.ngModelOnblur].is_edit_mode = false;
+				if(scope[attrs.ngModelOnblur] != undefined) {
+					if(scope[attrs.ngModelOnblur].hasOwnProperty('is_edit_mode')) {
+						scope[attrs.ngModelOnblur].is_edit_mode = false;	
+					}
+				}
+				
 				setTimeout(function() {
 					scope.$apply();
 					cancel = false;
 				}, 100);
-			}).bind('keydown', function(e) {
+			}).bind('keydown.onblur', function(e) {
 				if(e.keyCode == 13) {
 					this.blur();
 				}

@@ -13,8 +13,8 @@ angular.module('app.directive.widget', [])
 			if (attrs.type === 'radio' || attrs.type === 'checkbox') return;
 			var cancel = false;
 
-			element.unbind('input').unbind('keydown').unbind('change');
-			element.bind('blur', function() {
+			element.unbind('input').unbind('keydown.onBlur').unbind('change');
+			element.bind('blur.onBlur', function() {
 				if(!cancel) {
 					var newval = element.val();
 					var oldval = ngModelCtrl.$modelValue;
@@ -35,7 +35,7 @@ angular.module('app.directive.widget', [])
 					scope.$apply();
 					cancel = false;
 				}, 100);
-			}).bind('keydown', function(e) {
+			}).bind('keydown.onBlur', function(e) {
 				if(e.keyCode == 13) {
 					this.blur();
 				}
