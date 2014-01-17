@@ -340,11 +340,11 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 				p.halt = function(e) {
 					console.log('halt');
 					e.stopPropagation();
-					var el = angular.element('#view-' + program.path);
-					program.isActive = false;
-					program.isCurrent = false;
+					var el = angular.element('#view-' + p.path);
+					p.isActive = false;
+					p.isCurrent = false;
 
-					eventSender.root.onClose(pack.dll, program.path);
+					eventSender.root.onClose(p.packdll, p.path);
 				}
 				$scope.programs.push(p);
 			});
