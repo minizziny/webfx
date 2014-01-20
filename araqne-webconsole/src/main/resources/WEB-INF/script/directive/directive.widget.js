@@ -16,14 +16,30 @@ angular.module('app.directive.widget', [])
 			element.unbind('input').unbind('keydown.onBlur').unbind('change');
 			element.bind('blur.onBlur', function() {
 				if(!cancel) {
-					var newval = element.val();
 					var oldval = ngModelCtrl.$modelValue;
-					if(newval != oldval) {
-						ngModelCtrl.$setViewValue(newval);
-						scope.onChange({
-							'$new': newval,
-							'$old': oldval
-						});
+					if(element.attr('type') == 'number') {
+						if((element[0].validity) && (!element[0].validity.valid)) {
+							// not number
+							element.val(oldval)
+						}
+						else {
+							var newval = element.val();
+							ngModelCtrl.$setViewValue(newval);
+							scope.onChange({
+								'$new': newval,
+								'$old': oldval
+							});
+						}
+					}
+					else {
+						var newval = element.val();
+						if(newval != oldval) {
+							ngModelCtrl.$setViewValue(newval);
+							scope.onChange({
+								'$new': newval,
+								'$old': oldval
+							});
+						}	
 					}
 				}
 
