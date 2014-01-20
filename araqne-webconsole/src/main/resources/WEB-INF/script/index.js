@@ -5,6 +5,7 @@ var logpresso = angular.module('app', [
 	'app.directive.logdb',
 	'app.directive.tree',
 	'app.directive.widget',
+	'app.directive.validation',
 	'app.filter',
 	'app.connection',
 	'app.connection.session',
@@ -14,7 +15,8 @@ var logpresso = angular.module('app', [
 	'app.logdb',
 	'app.logdb.management',
 	'pascalprecht.translate',
-	'ui.sortable'
+	'ui.sortable',
+	'resettableForm'
 ], function($routeProvider) {
 });
 
