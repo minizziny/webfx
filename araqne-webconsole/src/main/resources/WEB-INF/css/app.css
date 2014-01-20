@@ -74,7 +74,7 @@ code {
 	padding: 10px 20px;
 }
 
-.wizard-contents, .wizard-contents-parser, .wizard-contents-index, .wizard-contents-transformer, {
+.wizard-contents, .wizard-contents-parser, .wizard-contents-index, .wizard-contents-transformer {
 	float: left !important;
 	width: 140px !important;
 }
