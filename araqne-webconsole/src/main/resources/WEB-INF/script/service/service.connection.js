@@ -132,7 +132,7 @@ angular.module('app.connection', ['app.utility'])
 
 	function initialize() {
 		var ws = new WebSocket('ws://' + location.host + '/websocket');
-		// var ws = new WebSocket('ws://172.20.0.118:8888/websocket');
+		// var ws = new WebSocket('ws://172.20.0.10:8888/websocket');
 		ws.onmessage = function(e) {
 			onMessageReceived(e.data);
 		}

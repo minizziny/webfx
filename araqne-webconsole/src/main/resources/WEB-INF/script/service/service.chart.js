@@ -173,6 +173,13 @@ angular.module('app.chart', [])
 			series.push(objSeries);
 		});
 
+		var underZero = series.some(function(s) {
+			var min = Math.min.apply(null, s.data.map(function (obj) {
+				return obj.y;
+			}));
+			return min < 0;
+		});
+
 		var chartOption = {
 			type: 'line',
 			animation: false,
@@ -207,6 +214,10 @@ angular.module('app.chart', [])
 					animation: false
 				}
 			}
+		}
+
+		if(!underZero) {
+			c1.yAxis.min = 0;
 		}
 
 		$(selector).highcharts(c1);
