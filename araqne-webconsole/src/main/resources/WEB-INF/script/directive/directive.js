@@ -3,8 +3,9 @@
 	return {
 		restrict: 'A',
 		link: function(scope, $self, attrs) {
-			var shadow, minHeight, noFlickerPad;
-			$self.on('keydown.autosize', throttle(update, 300)).on('focus', update).on('click', update);
+			var shadow, minHeight, noFlickerPad, maxHeight;
+			$self.on('keydown.autosize', throttle(update, 300)).on('keyup.autosize', throttle(update, 300)).on('focus', update).on('click', update);
+			maxHeight = parseInt(attrs.autosizeMaxHeight);
 
 			function update(e) {
 
@@ -40,8 +41,8 @@
 					.replace(/ {2,}/g, function(space){ return times('&nbsp;', space.length - 1) + ' ' });
 
 				shadow.css('width', $self.width());
-				shadow[0].innerText = (val + (noFlickerPad === 0 ? '...' : '')); // Append '...' to resize pre-emptively.
-				$self.height(Math.max(shadow.height() + noFlickerPad, minHeight));
+				shadow[0].innerHTML = (val + (noFlickerPad === 0 ? '...' : '')); // Append '...' to resize pre-emptively.
+				$self.height( Math.min( Math.max(shadow.height() + noFlickerPad, minHeight), maxHeight ) );
 
 				return true;
 			}
@@ -534,12 +535,14 @@
 					cancel = false;
 				}, 100);
 			}).bind('keydown.onblur', function(e) {
-				if(e.keyCode == 13) {
+				if(element[0].tagName == 'INPUT' && e.keyCode == 13) {
 					this.blur();
 				}
 				else if(e.keyCode == 27) {
 					cancel = true;
-					scope[attrs.ngCancel].call(scope, this);
+					if(!!attrs.ngCancel) {
+						scope[attrs.ngCancel].call(scope, this);
+					}
 					this.blur();
 				}
 			})
