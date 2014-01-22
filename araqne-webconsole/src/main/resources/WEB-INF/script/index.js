@@ -453,3 +453,10 @@ function computerFormatPrefix(val) {
 		};
 	}
 }
+
+function dashToCamel(str) {
+	str = str.replace(/\W+(.)/g, function (x, chr) {
+		return chr.toUpperCase();
+	})
+	return str.charAt(0).toUpperCase() + str.slice(1);
+}
