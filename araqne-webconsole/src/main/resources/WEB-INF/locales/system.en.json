@@ -557,5 +557,9 @@
 	"$S_str_FactoryName": "Factory name",
 
 	"$S_msg_RemoveParserConfirmPre": "Do you really want to drop parser",
-	"$S_msg_RemoveParserConfirmPost": "?"
+	"$S_msg_RemoveParserConfirmPost": "?",
+
+	"$S_msg_BloomfilterLv0": "Bloomfilter Lv0",
+	"$S_msg_BloomfilterLv1": "Bloomfilter Lv1",
+	"$S_msg_Inverted": "Inverted"
 }

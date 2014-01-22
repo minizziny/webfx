@@ -553,5 +553,9 @@
 	"$S_str_FactoryName": "팩토리 이름",
 
 	"$S_msg_RemoveParserConfirmPre": "정말 파서",
-	"$S_msg_RemoveParserConfirmPost": "을 삭제하시겠습니까?"
+	"$S_msg_RemoveParserConfirmPost": "을 삭제하시겠습니까?",
+
+	"$S_msg_BloomfilterLv0": "블룸필터 Lv0",
+	"$S_msg_BloomfilterLv1": "블룸필터 Lv1",
+	"$S_msg_Inverted": "역인덱스"
 }
