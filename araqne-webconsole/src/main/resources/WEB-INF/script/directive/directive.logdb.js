@@ -10,19 +10,19 @@ angular.module('app.directive.logdb', [])
 			onTimeline: '&',
 			ngTemplate: '=ngTemplate',
 			ngPageSize: '&',
-			ngChange: '&',
 			ngQueryString: '=',
 			ngPid: '='
 		},
-		template: '<textarea ng-model="ngQueryString" ng-change="ngChange()" placeholder="{{ \'$S_msg_QueryHere\' | translate }}" spellcheck="false" autosize></textarea>\
-			<button class="search btn btn-primary">{{ "$S_str_Search" | translate}}</button>\
+		template: '<textarea ng-model="ngQueryString" placeholder="{{ \'$S_msg_QueryHere\' | translate }}" spellcheck="false" autosize autosize-max-height="145" ng-model-onblur></textarea>\
+			<button class="search btn btn-primary">{{ "$S_str_Run" | translate}}</button>\
 			<button class="stop btn btn-warning">{{ "$S_str_Stop" | translate}}</button>',
 		link: function(scope, element, attrs) {
 			var autoflush = attrs.isAutoFlush;
 			var textarea = element.find('textarea');
 			
+			
 			textarea.on('keydown', function(e) {
-				if (e.type === 'keydown' && e.keyCode === 13) {
+				if (e.type === 'keydown' && ((e.ctrlKey || e.shiftKey) && e.keyCode === 13)) {
 					e.preventDefault();
 					search();
 				}
@@ -37,7 +37,7 @@ angular.module('app.directive.logdb', [])
 			function createdFn(m) {
 				element.removeClass('loaded').addClass('loading');
 				//사용자 입력 쿼리 기록 넣기
-				var queryValue = textarea.data('$ngModelController').$modelValue;	
+				var queryValue = scope.ngQueryString.replace(/\n/gi, ' ');
 				serviceLogdb.save(queryValue, serviceDom.whoAmI());
 			}
 
@@ -96,11 +96,9 @@ angular.module('app.directive.logdb', [])
 				}
 				z = serviceLogdb.create(scope.ngPid);
 
+				// console.log( textarea.data('$ngModelController').$modelValue );
 
-				
-				var queryValue = textarea.data('$ngModelController').$modelValue;				
-
-				z.query(queryValue, limit)
+				z.query(scope.ngQueryString.replace(/\n/gi, ' '), limit)
 				.created(createdFn)
 				.started(startedFn)
 				.pageLoaded(pageLoadedFn)

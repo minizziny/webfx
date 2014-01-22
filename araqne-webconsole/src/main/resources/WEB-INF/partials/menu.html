@@ -3,13 +3,13 @@
 		<a class="tm-logout" ng-click="logout()">{{'$S_str_Logout' | translate}}</a>
 		<span class="tm-logo"></span>
 		<ul class="tm-programs">
-			<li class="tm-program" ng-repeat="program in programs" ng-class="{active: program.isActive, current: program.isCurrent}">
+			<li class="tm-program" ng-repeat="program in programs" ng-class="{active: program.isActive, current: program.isCurrent}" ng-click="locate(program)">
 				<a class="link" href="/#/{{program.packdll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a>
 				<a class="close" ng-show="program.isActive" ng-click="program.halt($event)">&times;</a>
 			</li>
-			<li class="tm-more">
+			<li class="tm-more" data-toggle="dropdown">
 				<div class="btn-group" style="margin-bottom: -7px">
-					<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+					<a class="btn dropdown-toggle" data-toggle="dropdown">
 						{{'$S_str_More' | translate}}
 						<span class="caret"></span>
 					</a>

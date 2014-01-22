@@ -319,7 +319,7 @@ angular.module('app.logdb', [])
 		}, proc.pid)
 		.success(function(m) {
 			console.log("query: " + string);
-			console.log("owner: " + owner);
+			// console.log("owner: " + owner);
 		})
 		.failed(function(m, raw) {
 			console.log(raw, 'cannot save query');

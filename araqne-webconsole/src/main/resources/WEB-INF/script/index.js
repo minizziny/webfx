@@ -5,6 +5,7 @@ var logpresso = angular.module('app', [
 	'app.directive.logdb',
 	'app.directive.tree',
 	'app.directive.widget',
+	'app.directive.validation',
 	'app.filter',
 	'app.connection',
 	'app.connection.session',
@@ -14,7 +15,8 @@ var logpresso = angular.module('app', [
 	'app.logdb',
 	'app.logdb.management',
 	'pascalprecht.translate',
-	'ui.sortable'
+	'ui.sortable',
+	'resettableForm'
 ], function($routeProvider) {
 });
 
@@ -80,14 +82,14 @@ logpresso.factory('eventSender', function() {
 		'starter': { pid: 11 },
 		'dashboard': { pid: 22 },
 		'orgchart': { pid: 33 },
-		'auditlog': {},
+		'auditlog': { pid: 88 },
 		'logquery': { pid: 44 },
-		'logsource': {},
-		'table': {},
-		'license': {},
+		'logsource': { pid: 55 },
+		'table': { pid: 66 },
+		'license': { pid: 77 },
 		'regextester': {},
 		'querymanager': {},
-		'config': {}
+		'config': { pid: 99 }
 	};
 
 	for(var program in e) {
@@ -309,6 +311,10 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 		}
 	}
 
+	$scope.locate = function(program) {
+		location.href = '/#/' + program.packdll + '/' + program.path;
+	}
+
 	eventSender.menu.onOpen = function(path) {
 		activeProgram(getProgram(path));
 	}
@@ -340,11 +346,11 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 				p.halt = function(e) {
 					console.log('halt');
 					e.stopPropagation();
-					var el = angular.element('#view-' + program.path);
-					program.isActive = false;
-					program.isCurrent = false;
+					var el = angular.element('#view-' + p.path);
+					p.isActive = false;
+					p.isCurrent = false;
 
-					eventSender.root.onClose(pack.dll, program.path);
+					eventSender.root.onClose(p.packdll, p.path);
 				}
 				$scope.programs.push(p);
 			});
@@ -446,4 +452,11 @@ function computerFormatPrefix(val) {
 			value: val/Math.pow(1024, pow)
 		};
 	}
+}
+
+function dashToCamel(str) {
+	str = str.replace(/\W+(.)/g, function (x, chr) {
+		return chr.toUpperCase();
+	})
+	return str.charAt(0).toUpperCase() + str.slice(1);
 }

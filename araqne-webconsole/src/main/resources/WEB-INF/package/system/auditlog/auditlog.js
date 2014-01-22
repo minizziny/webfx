@@ -1,4 +1,3 @@
-var proc = {pid: 4}
 function AuditLogController($scope, $filter, $translate, socket, eventSender, serviceDom) {
 	var current = new Date();
 	var month = current.getMonth() + 1;
@@ -51,7 +50,7 @@ function AuditLogController($scope, $filter, $translate, socket, eventSender, se
 			'offset': offset, 
 			'limit': limit,
 			'locale': $translate.uses() 
-		}, proc.pid)
+		}, eventSender.auditlog.pid)
 		.success(function(m) {
 			$scope.dataAuditlogs = m.body.result;
 			$scope.numTotalCount = m.body.total;
