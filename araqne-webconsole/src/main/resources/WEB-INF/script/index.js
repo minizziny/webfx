@@ -311,6 +311,10 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 		}
 	}
 
+	$scope.locate = function(program) {
+		location.href = '/#/' + program.packdll + '/' + program.path;
+	}
+
 	eventSender.menu.onOpen = function(path) {
 		activeProgram(getProgram(path));
 	}
