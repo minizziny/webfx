@@ -82,11 +82,11 @@ logpresso.factory('eventSender', function() {
 		'starter': { pid: 11 },
 		'dashboard': { pid: 22 },
 		'orgchart': { pid: 33 },
-		'auditlog': {},
+		'auditlog': { pid: 88 },
 		'logquery': { pid: 44 },
 		'logsource': { pid: 55 },
 		'table': { pid: 66 },
-		'license': {},
+		'license': { pid: 77 },
 		'regextester': {},
 		'querymanager': {},
 		'config': { pid: 99 }
