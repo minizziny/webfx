@@ -37,6 +37,27 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 		$('.arrangeWidget')[0].hideDialog();
 		angular.element('.newbie').remove();
 	}
+
+	function redraw() {
+		layoutEngine.ui.layout.box.allboxes.forEach(function(box) {
+
+			if(box.rows.length > 0) return;
+
+			function resizeCharts(i, widget) {
+				if(!!$(widget).highcharts) {
+					if(!!$(widget).highcharts()) {
+						var parent = $(widget).parents('.contentbox');
+						$(widget).highcharts().setSize(parent.width(), parent.height() - 10, false);
+					}
+				}
+			}
+
+			box.el.find('.widget-chart').each(resizeCharts);
+		});
+	}
+	eventSender.dashboard.$event.on('resume', redraw);
+
+	$(window).on('resize', debounce(redraw, 200));
 }
 
 function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
@@ -156,7 +177,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	function displayBlankInfo() {
 		var el = angular.element('<div class="blank-info">\
 			<div class="blank-contents">\
-				<div style="font-size: 16px;line-height: 4;">위젯이 하나도 없습니다. 새 위젯을 추가하세요!</div>\
+				<div style="font-size: 16px;line-height: 4;">{{"$S_msg_NoWidget" | translate}}</div>\
 				<button ng-click="openNewWidget();" class="btn btn-primary btn-large">{{"$S_str_AddWidget" | translate}}</button>\
 			</div>\
 		</div>');

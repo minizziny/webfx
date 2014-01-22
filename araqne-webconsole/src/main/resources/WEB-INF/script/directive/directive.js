@@ -3,8 +3,9 @@
 	return {
 		restrict: 'A',
 		link: function(scope, $self, attrs) {
-			var shadow, minHeight, noFlickerPad;
-			$self.on('keydown', throttle(update, 300)).on('keyup', throttle(update, 300)).on('focus', update).on('click', update);
+			var shadow, minHeight, noFlickerPad, maxHeight;
+			$self.on('keydown.autosize', throttle(update, 300)).on('keyup.autosize', throttle(update, 300)).on('focus', update).on('click', update);
+			maxHeight = parseInt(attrs.autosizeMaxHeight);
 
 			function update(e) {
 
@@ -40,8 +41,8 @@
 					.replace(/ {2,}/g, function(space){ return times('&nbsp;', space.length - 1) + ' ' });
 
 				shadow.css('width', $self.width());
-				shadow.html(val + (noFlickerPad === 0 ? '...' : '')); // Append '...' to resize pre-emptively.
-				$self.height(Math.max(shadow.height() + noFlickerPad, minHeight));
+				shadow[0].innerHTML = (val + (noFlickerPad === 0 ? '...' : '')); // Append '...' to resize pre-emptively.
+				$self.height( Math.min( Math.max(shadow.height() + noFlickerPad, minHeight), maxHeight ) );
 
 				return true;
 			}
@@ -122,58 +123,38 @@
 })
 .directive('treeElement', function($compile) {
 	return {
-		restrict: 'E', //Element
+		restrict: 'E',
 		link: function (scope, element, attrs)
-		{
-			scope.tree = scope.node;
-			
+		{	
 			var iconRefresh = '<button ng-click="childRefresh($event)" el-type="refresh" class="icon pull-right" style="display:none">\
 				<i class="icon-refresh" style="margin-top:0"></i>\
 			</button>';
 
 			var indiRefresh = '<span class="pull-right indi" style="display: none; color: silver; font-style: italic; font-size: 8pt; letter-spacing: -1px">새로고침 중...</span>';
-			var visibility = ( attrs.nodeState != "collapse" ) || 'style="display: none;"';
-			
-			if(!!scope.tree.children) {
-				for(var i in scope.tree.children) {
-					if(typeof scope.tree.children[i] == 'function') {
-						continue;
-					}
-					if(!!scope.tree.children[i].children) {
-						scope.tree.children[i].className = "eu_" + attrs.nodeState + " eu_deselected";
-					}
-					else {
-						scope.tree.children[i].className = "eu_child" + " eu_deselected";
-					}
 
-					if(scope.tree.children[i][attrs.nodeId] == attrs.nodeSelected) {
-						scope.tree.children[i].className = "eu_" + attrs.nodeState + " active";	
-					}
-				}
-
+			if(!!scope.node.children) {
+				
 				var template = angular.element(
-					'<ul class="nav nav-list" ' + visibility + '>\
-						<li ng-repeat="node in tree.children"\
-							ng-class="node.className"\
+					'<ul class="nav nav-list" ng-show="!node.isCollapsed">\
+						<li ng-repeat="node in node.children | filter: filterItem"\
+							ng-class="{\'active\': node.isSelected}"\
 							node-tree-type="{{node.' + attrs.nodeTreeType + '}}"\
 							node-id="{{node.' + attrs.nodeId + '}}"\
 							node-parent="{{node.' + attrs.nodeParent + '}}">\
-							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" >\
+							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)">\
 								<input type="checkbox" ng-show="node.is_edit_mode">\
-								<tree-toggle></tree-toggle>\
+								<tree-toggle is-collapsed="node.isCollapsed"></tree-toggle>\
 								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>\
 								<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' +
 								indiRefresh +
 								iconRefresh +
 							'</a>\
 							<tree-element tree="node"\
-								node-selected="' + attrs.nodeSelected + '"\
 								node-tree-type="' + attrs.nodeTreeType + '"\
 								node-id="' + attrs.nodeId + '"\
 								node-icon="' + attrs.nodeIcon + '"\
 								node-icon-class="' + attrs.nodeIconClass + '"\
 								node-name="' + attrs.nodeName + '"\
-								node-state="' + attrs.nodeState + '"\
 								node-parent="' + attrs.nodeParent + '">\
 							</tree-element>\
 						</li>\
@@ -190,18 +171,35 @@
 		}
 	};
 })
-.directive('treeToggle', function($compile) {
+.directive('treeToggle', function($compile, $parse) {
 	return {
 		restrict: 'E',
 		link: function(scope, element, attrs) {
-			scope.tree = scope.node;
-
-			if(!!scope.tree.children) {
+			var isCollapsed = $parse(attrs.isCollapsed)(scope);
+			if(!!scope.node.children) {
 				var template = angular.element('<i class="icon-minus tree-node-icon" el-type="toggle"></i>');
 			}
 			else {
 				var template = angular.element('<i class="icon-null tree-node-icon" el-type="toggle"></i>');	
 			}
+
+			if(isCollapsed) {
+				var template = angular.element('<i class="icon-plus tree-node-icon" el-type="toggle"></i>');
+			}
+
+			scope.$watch('node.isCollapsed', function() {
+				if(!scope.node.isCollapsed) {
+					template.removeClass('icon-plus').addClass('icon-minus');
+				}
+				else {
+					template.addClass('icon-plus').removeClass('icon-minus');
+				}
+			})
+
+			template.on('click', function() {
+				scope.node.isCollapsed = !scope.node.isCollapsed;
+				scope.$apply();
+			})
 				
 			var linkFunction = $compile(template);
 			linkFunction(scope);
@@ -209,73 +207,51 @@
 		}
 	}
 })
-.directive('euTree', function($compile, $parse) {
+.directive('treeRoot', function($compile, $parse, $timeout) {
 	return {
-		restrict: 'E', //Element,
+		restrict: 'E',
 		link: function (scope, element, attrs) {
-			scope.selectedNode = null;
-
 			var iconRefresh = '<button ng-click="childRefresh($event)" el-type="refresh" class="icon pull-right" style="display:none">\
 				<i class="icon-refresh" style="margin-top:0"></i>\
 			</button>';
 
 			var indiRefresh = '<span class="pull-right indi" style="display: none; color: silver; font-style: italic; font-size: 8pt; letter-spacing: -1px">새로고침 중...</span>';
 
-			scope.$watch(attrs.treeData, function(val) {
-				if(!!scope.currentElement) {
-					attrs.nodeSelected = scope.currentElement.attr('node-id');
-				}
-				
-				for(var i in scope[attrs.treeData]) {
-					if(!!scope[attrs.treeData][i].children) {
-						scope[attrs.treeData][i].className = "eu_" + attrs.nodeState + " eu_deselected";
-					}
-					else {
-						scope[attrs.treeData][i].className = "eu_child" + " eu_deselected";
-					}
-
-					if(scope[attrs.treeData][i][attrs.nodeId] == attrs.nodeSelected) {
-						scope[attrs.treeData][i].className = "eu_" + attrs.nodeState + " active";	
-					}
-				}
-				
+			scope.$watch(attrs.treeData, function(val) {				
 				var template = angular.element(
-					'<ul id="euTreeBrowser" class="nav nav-list tree-root">\
-						<li ng-repeat="node in ' + attrs.treeData + '"\
-							ng-class="node.className"\
+					'<div class="tree-container"><input type="search" placeholder="' + attrs.treeSearchPlaceholder + '" ng-model="filterValue"/>' + 
+					'<ul class="nav nav-list tree-root">\
+						<li ng-repeat="node in ' + attrs.treeData + ' | filter: filterItem"\
+							ng-class="{\'active\': node.isSelected}"\
 							node-tree-type="{{node.' + attrs.nodeTreeType + '}}"\
 							node-id="{{node.' + attrs.nodeId + '}}"\
 							node-parent="{{node.' + attrs.nodeParent + '}}">\
-							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)" >\
+							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)">\
 								<tree-toggle></tree-toggle>\
 								<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' +
 								indiRefresh +
 								iconRefresh +
 							'</a>\
 							<tree-element tree="node"\
-								node-selected="' + attrs.nodeSelected + '"\
 								node-tree-type="' + attrs.nodeTreeType + '"\
 								node-id="' + attrs.nodeId + '"\
 								node-icon="' + attrs.nodeIcon + '"\
 								node-icon-class="' + attrs.nodeIconClass + '"\
 								node-name="' + attrs.nodeName + '"\
-								node-state="' + attrs.nodeState + '"\
 								node-parent="' + attrs.nodeParent + '">\
 							</tree-element>\
 						</li>\
-					</ul>');
+					</ul></div>');
 				
 				var linkFunction = $compile(template);
 				linkFunction(scope);
 				element.html(null).append( template );
 
-				setTimeout(function() {
-					scope.currentElement = template.find('li.active');
-				}, 250);
-
 				scope.showIcon = function(e) {
-					var id = angular.element(e.currentTarget).parent().attr('node-id');
-					if( $parse(attrs.nodeMouseover)(scope, {$event:e, $id: id}) ) {
+					var el = angular.element(e.currentTarget).parent();
+					var id = el.attr('node-id');
+					var type = el.attr('node-tree-type');
+					if( $parse(attrs.nodeMouseover)(scope, {$event:e, $id: id, $type: type}) ) {
 						angular.element(e.currentTarget).find('button.icon').show();
 					}
 				}
@@ -293,25 +269,56 @@
 					elIcon.hide();
 					elLoading.show();
 
-					var isHidden = elA.hasClass('hide');
-					if(isHidden) {
-						elA.find('i[el-type=toggle]').click();
-					}
+					var currScope = elA.scope();
+					currScope.node.isCollapsed = false;
 
 					var promise = $parse(attrs.nodeClickRefresh)(scope, {$event:e, $id: id});
 					promise.success(function() {
 						console.log('refreshed!');
 						elIcon.show();
 						elLoading.hide();
+						// currScope.$apply();
 					})
 					.failed(function(error) {
 						console.log('failed', error)
-					})
-
-					
+					});
 				}
-				
-				// Click Event				
+
+				scope.$watch('filterValue', function() {
+					scope.$broadcast('nodeOnFiltering', { 
+					});
+				});
+
+				scope.filterItem = function(item) {
+					if (!scope.filterValue) return true;
+
+					var found = item.name.toLowerCase().indexOf(scope.filterValue.toLowerCase()) != -1;
+
+					if (!found) {
+						angular.forEach(item.children, function(item) {
+							var match = scope.filterItem(item);
+							if (match) {
+								found = true;
+							}
+						});
+					}
+
+					return found;
+				}
+
+				$timeout(function() {
+					scope.currentNode = template.find('.active');
+				})
+
+				function UnselectAll(arr) {
+					if(angular.isArray(arr)) {
+						arr.forEach(function(obj) {
+							obj.isSelected = false;
+							UnselectAll(obj.children);
+						});
+					}
+				}
+
 				template.unbind().bind('click', function(e) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -326,28 +333,27 @@
 								var target = e.target;
 							}
 
-							scope.previousElement = scope.currentElement;
-							scope.currentElement = angular.element(target).parent();
+							UnselectAll(scope[attrs.treeData]);
 
-							//console.log(scope.currentElement);
-							
-							scope.$broadcast('nodeSelected', { selectedNode: scope.currentElement.attr('node-id'), selectedNodeType: scope.currentElement.attr('node-tree-type'), selectedNodeRaw: scope.currentElement, selectedNodeScope: scope, selectedNodeParent: scope.currentElement.attr('node-parent') });
-							
-							if(scope.previousElement) {
-								scope.previousElement.addClass("eu_deselected").removeClass("active");
-							}
-							scope.currentElement.addClass("active").removeClass("eu_deselected");
+							scope.currentNode = $(target).parent();
+							scope.currentNode.scope().node.isSelected = true;
+
+							scope.$broadcast('nodeSelected', {
+								selectedNode: scope.currentNode.attr('node-id'),
+								selectedNodeType: scope.currentNode.attr('node-tree-type'),
+								selectedNodeRaw: scope.currentNode,
+								selectedNodeScope: scope,
+								selectedNodeParent: scope.currentNode.attr('node-parent')
+							});
+
+							scope.$apply();
 						}
 						
 						if($(e.target).attr('el-type') == 'toggle') {
 							var parentElement = angular.element(e.target).parent().parent();
-
+							
 							if(parentElement.children().length) {
-								var isHidden = parentElement.children().hasClass('hide');
-								parentElement.children().toggleClass("hide");
-								
-								parentElement.toggleClass("eu_collapse");
-								parentElement.toggleClass("eu_expand");
+								var isHidden = !parentElement.find('ul:first').is(':hidden');
 
 								scope.$broadcast('nodeToggled', { 
 									isHidden: isHidden,
@@ -517,24 +523,31 @@
 			if (attrs.type === 'radio' || attrs.type === 'checkbox') return;
 			var cancel = false;
 
-			element.unbind('input').unbind('keydown').unbind('change');
-			element.bind('blur', function() {
+			element.unbind('input').unbind('keydown.onblur').unbind('change');
+			element.bind('blur.onblur', function() {
 				if(!cancel) {
 					ngModelCtrl.$setViewValue(element.val());
 				}
 
-				scope[attrs.ngModelOnblur].is_edit_mode = false;
+				if(scope[attrs.ngModelOnblur] != undefined) {
+					if(scope[attrs.ngModelOnblur].hasOwnProperty('is_edit_mode')) {
+						scope[attrs.ngModelOnblur].is_edit_mode = false;	
+					}
+				}
+				
 				setTimeout(function() {
 					scope.$apply();
 					cancel = false;
 				}, 100);
-			}).bind('keydown', function(e) {
-				if(e.keyCode == 13) {
+			}).bind('keydown.onblur', function(e) {
+				if(element[0].tagName == 'INPUT' && e.keyCode == 13) {
 					this.blur();
 				}
 				else if(e.keyCode == 27) {
 					cancel = true;
-					scope[attrs.ngCancel].call(scope, this);
+					if(!!attrs.ngCancel) {
+						scope[attrs.ngCancel].call(scope, this);
+					}
 					this.blur();
 				}
 			})

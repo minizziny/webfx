@@ -1,0 +1,11 @@
+
+.tm-logo {
+	position: fixed;
+	left: 20px;
+	top: 2px;
+	background-image: url(/images/logpresso-logo.svg);
+	width: 98px;
+	height: 27px;
+	background-position: 265px 135px;
+	background-size: 150%;
+}

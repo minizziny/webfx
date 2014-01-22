@@ -74,16 +74,16 @@ code {
 	padding: 10px 20px;
 }
 
-.wizard-contents, .wizard-contents-parser, .wizard-contents-index {
-	float: left;
-	width: 140px;
+.wizard-contents, .wizard-contents-parser, .wizard-contents-index, .wizard-contents-transformer {
+	float: left !important;
+	width: 140px !important;
 }
 
-.wizard-contents li.active, .wizard-contents-parse li.active, .wizard-contents-index li.active {
+.wizard-contents li.active, .wizard-contents-parser li.active, .wizard-contents-index li.active, .wizard-contents-transformer li.active {
 	font-weight: bold;
 }
 
-.wizard, .wizard-parser, .wizard-index {
+.wizard, .wizard-parser, .wizard-index, .wizard-transformer {
 	float: left;
 	width: 680px;
 	margin-left: 10px;
@@ -91,23 +91,23 @@ code {
 	border-left: 1px solid #ccc;
 }
 
-.wizard legend, .wizard-parser legend, .wizard-index legend {
+.wizard legend, .wizard-parser legend, .wizard-index legend, .wizard-transformer legend {
 	font-size: 16px;
 }
 
-.wizard > li.active legend, .wizard-parser > li.active legend, .wizard-index > li.active legend {
+.wizard > li.active legend, .wizard-parser > li.active legend, .wizard-index > li.active legend, .wizard-transformer > li.active legend {
 	font-size: 21px;
 }
 
-.wizard > li, .wizard-parser > li, .wizard-index > li{
+.wizard > li, .wizard-parser > li, .wizard-index > li, .wizard-transformer > li {
 	display: none;
 }
 
-.wizard > li.active, .wizard-parser > li.active, .wizard-index > li.active {
+.wizard > li.active, .wizard-parser > li.active, .wizard-index > li.active, .wizard-transformer > li.active {
 	display: block;
 }
 
-eu-tree .hide {
+tree-root .hide {
 	display: none;
 }
 
@@ -595,4 +595,39 @@ button[el-type=refresh] {
 	width: 22px;
 	margin-right: -11px;
 	outline: none;
+}
+
+input[type=search] {
+	border-radius: 15px;
+	padding: 4px 14px;
+
+	background-position: 9px 7px;
+	background-image: url("/images/icon-search.gif");
+	background-repeat: no-repeat;
+
+	text-indent: 14px;
+
+	-webkit-transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	-moz-transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	-o-transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	transition: ease-out .1s, border linear .2s,box-shadow linear .2s;
+	margin-bottom: 0;
+}
+
+input[type=search]:focus {
+	/*background-position: -20px 7px;
+	text-indent: 0;*/
+}
+
+input[type=search].input-search-table {
+	width: 45%;
+}
+
+input[type=search].input-search-table:focus {
+	width: 60%;
+}
+
+.tree-container input[type=search] {
+	width: calc(100% - 30px);
+	margin-bottom: 10px;
 }
