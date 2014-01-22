@@ -84,12 +84,12 @@ logpresso.factory('eventSender', function() {
 		'orgchart': { pid: 33 },
 		'auditlog': {},
 		'logquery': { pid: 44 },
-		'logsource': {},
-		'table': {},
+		'logsource': { pid: 55 },
+		'table': { pid: 66 },
 		'license': {},
 		'regextester': {},
 		'querymanager': {},
-		'config': {}
+		'config': { pid: 99 }
 	};
 
 	for(var program in e) {

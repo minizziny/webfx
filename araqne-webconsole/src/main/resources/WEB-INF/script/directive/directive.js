@@ -248,8 +248,10 @@
 				element.html(null).append( template );
 
 				scope.showIcon = function(e) {
-					var id = angular.element(e.currentTarget).parent().attr('node-id');
-					if( $parse(attrs.nodeMouseover)(scope, {$event:e, $id: id}) ) {
+					var el = angular.element(e.currentTarget).parent();
+					var id = el.attr('node-id');
+					var type = el.attr('node-tree-type');
+					if( $parse(attrs.nodeMouseover)(scope, {$event:e, $id: id, $type: type}) ) {
 						angular.element(e.currentTarget).find('button.icon').show();
 					}
 				}
@@ -275,7 +277,7 @@
 						console.log('refreshed!');
 						elIcon.show();
 						elLoading.hide();
-						currScope.$apply();
+						// currScope.$apply();
 					})
 					.failed(function(error) {
 						console.log('failed', error)
@@ -284,7 +286,6 @@
 
 				scope.$watch('filterValue', function() {
 					scope.$broadcast('nodeOnFiltering', { 
-						'hello': 'world'
 					});
 				});
 
