@@ -160,6 +160,7 @@
 	"$S_str_Go": "이동",
 	"$S_str_Browser": "찾아보기",
 	"$S_msg_QueryHere": "여기에 쿼리를 입력하세요",
+	"$S_str_Run": "검색",
 	"$S_str_Search": "검색",
 	"$S_str_Stop": "정지",
 	"$S_msg_WrongQuery": "쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.",

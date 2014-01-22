@@ -14,7 +14,7 @@ angular.module('app.directive.logdb', [])
 			ngPid: '='
 		},
 		template: '<textarea ng-model="ngQueryString" placeholder="{{ \'$S_msg_QueryHere\' | translate }}" spellcheck="false" autosize autosize-max-height="145" ng-model-onblur></textarea>\
-			<button class="search btn btn-primary">{{ "$S_str_Search" | translate}}</button>\
+			<button class="search btn btn-primary">{{ "$S_str_Run" | translate}}</button>\
 			<button class="stop btn btn-warning">{{ "$S_str_Stop" | translate}}</button>',
 		link: function(scope, element, attrs) {
 			var autoflush = attrs.isAutoFlush;
