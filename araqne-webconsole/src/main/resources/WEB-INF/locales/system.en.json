@@ -1,4 +1,6 @@
 {
+	"$S_str_More": "More",
+
 	"--------orgchart--------": "",
 	"$S_str_RemoveOrganization": "Delete Department",
 	"$S_msg_RemoveOrganizationConfirmPre": "Do you really want to delete ",
@@ -115,6 +117,9 @@
 	"$S_str_String": "String",
 	"$S_str_Series": "Series",
 	"$S_msg_SelectOneMoreNumberType": "Select one or more number columns.",
+
+	"$S_msg_BeforeAddWidgetNotifyDragAndDrop": "To add a widget, please drag and drop the widget.",
+	"$S_msg_NoWidget": "There is no widget. Add a new widget now!",
 	
 	"--------widget--------": "",
 	"$S_msg_QueryRunCount": "Updated {{p0}} times",
@@ -156,7 +161,8 @@
 	"$S_str_Go": "Go",
 	"$S_str_Browser": "Browse",
 	"$S_msg_QueryHere": "Query here",
-	"$S_str_Search": "Run",
+	"$S_str_Run": "Run",
+	"$S_str_Search": "Search",
 	"$S_str_Stop": "Stop",
 	"$S_msg_WrongQuery": "Invalid query. Please check permission and syntax",
 	"$S_msg_MoreColumn": "More {{p0}} columns..",
@@ -551,5 +557,9 @@
 	"$S_str_FactoryName": "Factory name",
 
 	"$S_msg_RemoveParserConfirmPre": "Do you really want to drop parser",
-	"$S_msg_RemoveParserConfirmPost": "?"
+	"$S_msg_RemoveParserConfirmPost": "?",
+
+	"$S_msg_BloomfilterLv0": "Bloomfilter Lv0",
+	"$S_msg_BloomfilterLv1": "Bloomfilter Lv1",
+	"$S_msg_Inverted": "Inverted"
 }

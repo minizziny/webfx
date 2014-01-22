@@ -1,4 +1,6 @@
 {
+	"$S_str_More": "더보기",
+
 	"--------orgchart--------": "",
 	"$S_str_RemoveOrganization": "부서 삭제",
 	"$S_msg_RemoveOrganizationConfirmPre": "정말 부서 ",
@@ -116,6 +118,9 @@
 	"$S_str_Series": "시리즈",
 	"$S_msg_SelectOneMoreNumberType": "하나 이상의 숫자 타입의 컬럼을 선택하십시오.",
 
+	"$S_msg_BeforeAddWidgetNotifyDragAndDrop": "드래그 앤 드롭하여 위젯을 도킹하면 추가가 완료됩니다.",
+	"$S_msg_NoWidget": "위젯이 하나도 없습니다. 새 위젯을 추가하세요!",
+
 	"--------widget--------": "",
 	"$S_msg_QueryRunCount": "쿼리 {{p0}}번 실행함",
 	"$S_msg_QueryRunInterval": "{{p0}}초마다 갱신",
@@ -155,6 +160,7 @@
 	"$S_str_Go": "이동",
 	"$S_str_Browser": "찾아보기",
 	"$S_msg_QueryHere": "여기에 쿼리를 입력하세요",
+	"$S_str_Run": "검색",
 	"$S_str_Search": "검색",
 	"$S_str_Stop": "정지",
 	"$S_msg_WrongQuery": "쿼리를 시작할 수 없습니다. 잘못된 쿼리입니다.",
@@ -547,5 +553,9 @@
 	"$S_str_FactoryName": "팩토리 이름",
 
 	"$S_msg_RemoveParserConfirmPre": "정말 파서",
-	"$S_msg_RemoveParserConfirmPost": "을 삭제하시겠습니까?"
+	"$S_msg_RemoveParserConfirmPost": "을 삭제하시겠습니까?",
+
+	"$S_msg_BloomfilterLv0": "블룸필터 Lv0",
+	"$S_msg_BloomfilterLv1": "블룸필터 Lv1",
+	"$S_msg_Inverted": "역인덱스"
 }

@@ -37,21 +37,62 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 		$('.arrangeWidget')[0].hideDialog();
 		angular.element('.newbie').remove();
 	}
+
+	function redraw() {
+		layoutEngine.ui.layout.box.allboxes.forEach(function(box) {
+
+			if(box.rows.length > 0) return;
+
+			function resizeCharts(i, widget) {
+				if(!!$(widget).highcharts) {
+					if(!!$(widget).highcharts()) {
+						var parent = $(widget).parents('.contentbox');
+						$(widget).highcharts().setSize(parent.width(), parent.height() - 10, false);
+					}
+				}
+			}
+
+			box.el.find('.widget-chart').each(resizeCharts);
+		});
+	}
+	eventSender.dashboard.$event.on('resume', redraw);
+
+	$(window).on('resize', debounce(redraw, 200));
 }
 
 function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
+	function setObjectValue(object, ns, value) {
+		function retObject(object, keys, value) {
+			if(keys.length == 1) {
+				object[keys[0]] = value;
+				return object;
+			}
+			
+			var first = keys.shift();
+			var o = object[first];
+			if(o == undefined) {
+				object[first] = {};
+			}
+			return retObject(object[first], keys, value);
+		}
+		var keys = ns.split('.');
+		retObject(object, keys, value);
+	}
+
 	eventSender.dashboard.onChangeWidgetProperty = function(newval, oldval, guid, key) {
 		var found = $scope.currentPreset.state.widgets.filter(function(widget) {
 			return widget.guid == guid;
 		});
 		if(found.length > 0) {
-			found[0][key] = newval;
+			setObjectValue(found[0], key, newval);
+			// console.log(found[0])
 			eventSender.dashboard.onCurrentPresetChanged(); // save state
 		}
 	}
 
 	eventSender.dashboard.onCurrentPresetChanged = function(reset_layout) {
-		console.log('currentPreset changed')
+		// console.log('currentPreset changed')
+		// console.trace();
 		console.log($scope.currentPreset);
 		return SavePreset($scope.currentPreset.guid, $scope.currentPreset.name, $scope.currentPreset.state, reset_layout);
 	}
@@ -136,7 +177,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	function displayBlankInfo() {
 		var el = angular.element('<div class="blank-info">\
 			<div class="blank-contents">\
-				<div style="font-size: 16px;line-height: 4;">위젯이 하나도 없습니다. 새 위젯을 추가하세요!</div>\
+				<div style="font-size: 16px;line-height: 4;">{{"$S_msg_NoWidget" | translate}}</div>\
 				<button ng-click="openNewWidget();" class="btn btn-primary btn-large">{{"$S_str_AddWidget" | translate}}</button>\
 			</div>\
 		</div>');
@@ -264,6 +305,17 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 					curr.find('.widget-chart').each(resizeCharts);
 					effsn.find('.widget-chart').each(resizeCharts);
 					effsp.find('.widget-chart').each(resizeCharts);
+
+					function syncHandle(i, table) {
+						var objResizableColumns = $(table).data('resizableColumns');
+						if(!!objResizableColumns) {
+							objResizableColumns.syncHandleWidths();
+						}
+					}
+
+					curr.find('.widget-grid').each(syncHandle);
+					effsn.find('.widget-grid').each(syncHandle);
+					effsp.find('.widget-grid').each(syncHandle);
 				}
 
 				console.log( layoutEngine.ui.layout.box.root.getObject() ) ;

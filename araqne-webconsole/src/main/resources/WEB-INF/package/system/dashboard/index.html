@@ -74,8 +74,8 @@
 	</div>
 
 	<div class="modal arrangeWidget" modal>
-		<div class="pull-left" style="margin-top:5px">드래그 앤 드롭하여 위젯을 도킹하면 추가가 완료됩니다.</div>
-		<button class="btn btn-danger pull-right" ng-click="cancelAddWidget()">취소</button>
+		<div class="pull-left" style="margin-top:5px">{{'$S_msg_BeforeAddWidgetNotifyDragAndDrop' | translate}}</div>
+		<button class="btn btn-danger pull-right" ng-click="cancelAddWidget()">{{'$S_str_Cancel' | translate}}</button>
 	</div>
 	
 	<div class="modal errorWin" modal>
@@ -168,11 +168,11 @@
 				<legend>{{'$S_str_WidgetCommonSetting' | translate}}</legend>
 				<fieldset>
 					<div class="fieldset-description">{{'$S_msg_WidgetCommonSetting' | translate}}</div>
-					<div class="form-horizontal">
+					<form name="formWidgetCommon" class="form-horizontal">
 						<div class="control-group">
 							<label class="control-label" for="widgetName">{{'$S_str_Name' | translate}}</label>
 							<div class="controls">
-								<input id="widgetName" type="text" ng-model="ctxWidget.name"/>
+								<input id="widgetName" type="text" ng-model="ctxWidget.name" required/>
 							</div>
 						</div>
 						<div class="control-group">
@@ -181,10 +181,10 @@
 								<input id="widgetInterval" type="number" ng-model="ctxWidget.interval" min="5"/> <ng-pluralize count="ctxWidget.interval" when="formSecond"></ng-pluralize>
 							</div>
 						</div>
-					</div>
+					</form>
 					<div class="control-group submit-group clearboth">
 						<button class="wiz-prev btn" ng-click="go(widgetType.s3prev)">{{'$S_str_Previous' | translate}}</button>
-						<button class="wiz-next btn" ng-click="submit()">{{'$S_str_Done' | translate}}</button>
+						<button class="wiz-next btn" ng-click="submit()" ng-disabled="formWidgetCommon.$invalid || ctxWidget.name == undefined">{{'$S_str_Done' | translate}}</button>
 					</div>
 				</fieldset>
 			</li>

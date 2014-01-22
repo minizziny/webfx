@@ -129,6 +129,7 @@ public class WebSocket {
 			}
 
 			receiver = new Receiver();
+			receiver.setDaemon(true);
 			receiver.start();
 		} catch (IOException e) {
 			socket.close();
@@ -228,6 +229,10 @@ public class WebSocket {
 	private class Receiver extends Thread {
 		private boolean doStop;
 		private ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+		public Receiver() {
+			super("WebSocket Receiver [" + uri + "]");
+		}
 
 		@Override
 		public void run() {

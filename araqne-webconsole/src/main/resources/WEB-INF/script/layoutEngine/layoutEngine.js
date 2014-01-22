@@ -1725,6 +1725,10 @@ var layoutEngine = (function() {
 			}
 		}
 
+		if(widgets.length == 0) {
+			delete layout.rows;
+		}
+
 		return layout;
 	}
 

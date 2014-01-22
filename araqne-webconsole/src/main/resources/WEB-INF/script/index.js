@@ -1,10 +1,12 @@
 var $lang = navigator.language;
+var proc = { pid: 0 };
 
 var logpresso = angular.module('app', [
 	'app.directive',
 	'app.directive.logdb',
 	'app.directive.tree',
 	'app.directive.widget',
+	'app.directive.validation',
 	'app.filter',
 	'app.connection',
 	'app.connection.session',
@@ -80,14 +82,14 @@ logpresso.factory('eventSender', function() {
 		'starter': { pid: 11 },
 		'dashboard': { pid: 22 },
 		'orgchart': { pid: 33 },
-		'auditlog': {},
+		'auditlog': { pid: 88 },
 		'logquery': { pid: 44 },
-		'logsource': {},
-		'table': {},
-		'license': {},
+		'logsource': { pid: 55 },
+		'table': { pid: 66 },
+		'license': { pid: 77 },
 		'regextester': {},
 		'querymanager': {},
-		'config': {}
+		'config': { pid: 99 }
 	};
 
 	for(var program in e) {
@@ -289,29 +291,15 @@ function checkDate(member, i) {
 }
 
 function MenuController($scope, socket, serviceSession, serviceProgram, eventSender, $location) {
-	console.log('MenuController');
-	$scope.packs = [];
-	$scope.isOpenMenu = false;
-
-	$(document).on('click.for-hide-menu', function(e) {
-		if($(e.target).parents('#divMenu').length == 1) {
-			return;
-		}
-		else {
-			$scope.isOpenMenu = false;	
-			$scope.$apply();
-		}
-	});
+	$scope.programs = [];
 
 	function getProgram(path) {
 		var found = null;
-		$scope.packs.forEach(function(pack) {
-			pack.programs.forEach(function(program) {
-				program.isCurrent = false;
-				if(program.path == path) {
-					found = program;
-				}
-			});
+		$scope.programs.forEach(function(program) {
+			program.isCurrent = false;
+			if(program.path == path) {
+				found = program;
+			}
 		});
 		return found;
 	}
@@ -323,10 +311,12 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 		}
 	}
 
+	$scope.locate = function(program) {
+		location.href = '/#/' + program.packdll + '/' + program.path;
+	}
+
 	eventSender.menu.onOpen = function(path) {
 		activeProgram(getProgram(path));
-		
-		$scope.isOpenMenu = false;
 	}
 
 	$scope.logout = function() {
@@ -339,52 +329,53 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 	function initialize() {
 		serviceProgram.getAvailablePrograms()
 		.success(function(m) {
-			$scope.packs.splice(0, $scope.packs.length);
+			$scope.programs.splice(0, $scope.programs.length);
 
-			m.body.packs.forEach(function(pack) {
-				$scope.packs.push(pack);
-				pack.isOpen = false;
-
-				pack.programs.forEach(function(program) {
-					program.halt = function(e) {
-						console.log('halt');
-						e.stopPropagation();
-						var el = angular.element('#view-' + program.path);
-						program.isActive = false;
-						program.isCurrent = false;
-
-						eventSender.root.onClose(pack.dll, program.path);
+			m.body.programs.forEach(function(p) {
+				p.packdll = (function() {
+					var found = m.body.packs.filter(function(pack) {
+						return pack.name == p.pack;
+					});
+					if(found.length > 0) {
+						return found[0].dll;
 					}
-				})
+					return undefined;
+				}());
+				p.isActive = false;
+				p.isCurrent = false;
+				p.halt = function(e) {
+					console.log('halt');
+					e.stopPropagation();
+					var el = angular.element('#view-' + p.path);
+					p.isActive = false;
+					p.isCurrent = false;
+
+					eventSender.root.onClose(p.packdll, p.path);
+				}
+				$scope.programs.push(p);
 			});
 
 			activeProgram(getProgram('starter'));
 
 			$scope.$apply();
-		});
-	}
 
-	$scope.toggleDropdown = function(pack) {
-		// pack.isOpen = true;
-		// return;
-		$scope.packs.forEach(function(p) {
-			if(pack == p) {
-				pack.isOpen = !pack.isOpen;
-			}
-			else {
-				p.isOpen = false;	
-			}
-		});
+			var elProgram = $('.tm-program');
+			var styleTextAll = '';
+			elProgram.each(function(i, obj) {
+				var mw = $(obj).offset().left + $(obj).outerWidth();
+				var styleText = ' @media screen and (max-width: ' + (mw + 200).toString() + 'px) {\
+					.tm .tm-program:nth-child(' + (i + 1).toString() + ') { display: none; }\
+					.tm-more .dropdown-menu li:nth-child(' + (i + 1).toString() + ') { display: block; }\
+				} ';
+				styleTextAll = styleTextAll + styleText;
 
-		$(document).on('click.for-hide-top-menu', function(e) {
-			// if($(e.target) == 1) {
-			// 	return;
-			// }
-			pack.isOpen = false;
+				if(i + 1 == elProgram.length) {
+					styleTextAll = styleTextAll + ' @media screen and (max-width: ' + (mw + 200).toString() + 'px) { .tm .tm-more { display: inline; } } ';
+				}
+			});
 
-			$(document).off('click.for-hide-top-menu')
+			$('<style>'+ styleTextAll + '</style>').appendTo('body');
 		});
-		
 	}
 
 	initialize();
@@ -461,4 +452,11 @@ function computerFormatPrefix(val) {
 			value: val/Math.pow(1024, pow)
 		};
 	}
+}
+
+function dashToCamel(str) {
+	str = str.replace(/\W+(.)/g, function (x, chr) {
+		return chr.toUpperCase();
+	})
+	return str.charAt(0).toUpperCase() + str.slice(1);
 }
