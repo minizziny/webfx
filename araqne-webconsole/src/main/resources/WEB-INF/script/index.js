@@ -1,4 +1,5 @@
 var $lang = navigator.language;
+var proc = { pid: 0 };
 
 var logpresso = angular.module('app', [
 	'app.directive',
