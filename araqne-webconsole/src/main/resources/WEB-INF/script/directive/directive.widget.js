@@ -14,7 +14,7 @@ angular.module('app.directive.widget', [])
 			var cancel = false;
 
 			element.unbind('input').unbind('keydown.onBlur').unbind('change');
-			element.bind('blur.onBlur', function() {
+			element.bind('blur.onBlur', function(e) {
 				if(!cancel) {
 					var oldval = ngModelCtrl.$modelValue;
 					if(element.attr('type') == 'number') {
@@ -26,6 +26,7 @@ angular.module('app.directive.widget', [])
 							var newval = element.val();
 							ngModelCtrl.$setViewValue(newval);
 							scope.onChange({
+								'$event': e,
 								'$new': newval,
 								'$old': oldval
 							});
@@ -36,6 +37,7 @@ angular.module('app.directive.widget', [])
 						if(newval != oldval) {
 							ngModelCtrl.$setViewValue(newval);
 							scope.onChange({
+								'$event': e,
 								'$new': newval,
 								'$old': oldval
 							});
@@ -78,21 +80,22 @@ angular.module('app.directive.widget', [])
 			'onToggle': '&ngToggle',
 			'type': '='
 		},
-		template: '<input type="text" ng-model="val" style="display:none" ng-model-on-blur="onBlur()" ng-change="onValueChange($new, $old)" ng-cancel="onCancel()"></input><a ng-click="toggle()">{{val}}</a>',
+		template: '<input type="text" ng-model="val" style="display:none" ng-model-on-blur="onBlur()" ng-change="onValueChange($event, $new, $old)" ng-cancel="onCancel()"></input><a ng-click="toggle()">{{val}}</a>',
 		link: function(scope, element, attrs) {
 			var elInput = element.find('input');
 			var elA = element.find('a');
 
 			if(attrs.type == 'number') {
-				elInput.attr('type', 'number')
+				elInput.attr('type', 'number').attr('step', 'any')
 			}
 
 			scope.onBlur = function() {
 				scope.toggle();
 			}
 
-			scope.onValueChange = function(newval, oldval) {
+			scope.onValueChange = function(e, newval, oldval) {
 				scope.onChange({
+					'$event': e,
 					'$new': newval,
 					'$old': oldval
 				});
@@ -147,7 +150,7 @@ angular.module('app.directive.widget', [])
 				<div class="property-inner" ng-click="stopPropagation($event)">\
 					<code>{{query}}</code><br/>\
 					{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
-					<span click-to-edit type="number" ng-model="interval" ng-change="onIntervalChange($new, $old)" ng-cancel="onCancel()"></span>\
+					<span click-to-edit type="number" ng-model="interval" ng-change="onIntervalChange($event, $new, $old)" ng-cancel="onCancel()"></span>\
 					{{"$S_msg_QueryRunInterval" | translate}}\
 				</div>\
 			</div>',
@@ -171,8 +174,9 @@ angular.module('app.directive.widget', [])
 				});
 			}
 
-			scope.onIntervalChange = function(newval, oldval) {
+			scope.onIntervalChange = function(e, newval, oldval) {
 				scope.onChange({
+					'$event': e,
 					'$new': parseInt(newval),
 					'$old': parseInt(oldval),
 					'$key': 'interval'
