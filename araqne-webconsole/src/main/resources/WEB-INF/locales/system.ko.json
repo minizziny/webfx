@@ -550,12 +550,28 @@
 	"$S_str_CreateParser": "새 파서 만들기",
 	"$S_str_RemoveParser": "파서 삭제",
 
-	"$S_str_FactoryName": "팩토리 이름",
+	"$S_str_ParserType": "파서 유형",
+	"$S_str_SelectParserType": "파서 유형 선택",
+	"$S_str_ParserSetting": "파서 설정",
+
+	"$S_str_TransformerType": "트랜스포머 유형",
+	"$S_str_SelectTransformerType": "트랜스포머 유형 선택",
+	"$S_str_TransformerSetting": "트랜스포머 설정",
 
 	"$S_msg_RemoveParserConfirmPre": "정말 파서",
 	"$S_msg_RemoveParserConfirmPost": "을 삭제하시겠습니까?",
 
+	"$S_str_ConnectionString": "접속 문자열",
+
+	"$S_str_HDFSPath": "HDFS 경로",
+
+	"$S_str_CreateNewAPIKey": "새 API 키 만들기",
+	"$S_str_APIKey": "API 키",
+
 	"$S_msg_BloomfilterLv0": "블룸필터 Lv0",
 	"$S_msg_BloomfilterLv1": "블룸필터 Lv1",
-	"$S_msg_Inverted": "역인덱스"
+	"$S_msg_Inverted": "역인덱스",
+
+	"$S_str_RegisterFederationNode": "새 노드 등록하기",
+	"$S_str_WebserverPort": "웹서버 포트"
 }
