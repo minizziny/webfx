@@ -1,4 +1,4 @@
-	#view-dashboard {
+	.view {
 		position: absolute;
 		top: 30px;
 		bottom: 0;
@@ -7,11 +7,11 @@
 		overflow: hidden;
 	}
 
-	#view-dashboard .toolbar .navbar-inner {
+	.dashboard-container .toolbar .navbar-inner {
 		min-height: 35px;
 	}
 
-	#view-dashboard .modal-backdrop {
+	.dashboard-container .modal-backdrop {
 		z-index: 3040;
 	}
 

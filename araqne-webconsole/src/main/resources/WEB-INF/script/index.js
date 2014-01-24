@@ -8,6 +8,7 @@ var logpresso = angular.module('app', [
 	'app.directive.widget',
 	'app.directive.validation',
 	'app.filter',
+	'app.services',
 	'app.connection',
 	'app.connection.session',
 	'app.chart',
@@ -16,31 +17,69 @@ var logpresso = angular.module('app', [
 	'app.logdb',
 	'app.logdb.management',
 	'pascalprecht.translate',
-	'ui.sortable'
+	'ui.sortable',
+	'ajoslin.promise-tracker',
+	'ngAnimate'
 ], function() {
 });
 
-logpresso.run(function($rootScope, $location, $anchorScroll, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
+logpresso.config(['$translateProvider', function ($translateProvider) {
+	var str = location.hash.match( /(\?|\&)locale=\w{2}/g );
+	if(str != null) {
+		$lang = str[0].split('=')[1];
+	}
 
-	$rootScope.$on('$locationChangeSuccess', function() {
-		function route() {
-			
-			var hash = $location.path();
-			var hashSplit = hash.split('/');
-			if(hash == '/') {
-				$location.path('/system/starter');
-			}
+	var z = $translateProvider.useStaticFilesLoader({
+		prefix: 'locales/system.',
+		suffix: '.json'
+	});
 
-			if(hashSplit.length > 2) {
-				eventSender.root.go(hashSplit[1], hashSplit[2]);
-				if(!!eventSender.menu.onOpen) {
-					eventSender.menu.onOpen(hashSplit[2]);
-				}
-			}
-			else {
-				console.log($location.path(), $location.search());
+	$translateProvider.preferredLanguage($lang);
+	$translateProvider.fallbackLanguage('en');
+}]);
+
+logpresso.run(function($rootScope, $location, eventSender, serviceSession, $location, $translate, $q, promiseTracker) {
+	$location.path('/');
+
+	$rootScope.$on('$translateLoadingEnd', function(a) {
+		// console.log('$translateLoadingEnd', $translate.preferredLanguage(), $translate.proposedLanguage(), $translate.fallbackLanguage(), $translate.storage())
+	});
+
+	$rootScope.$on('$translateLoadingError', function() {
+		$translate.uses($translate.fallbackLanguage());
+	});
+	
+	$rootScope.loadingTracker = promiseTracker('loadingTracker');
+	$rootScope.src = 'partials/login.html';
+
+	function route() {
+		console.log('route')
+		var hash = $location.path();
+
+		var hashSplit = hash.split('/');
+		if(hash == '/') {
+			$location.path('/system/starter');
+		}
+
+		if(hashSplit.length > 2) {
+			eventSender.root.go(hashSplit[1], hashSplit[2]);
+			if(!!eventSender.menu.onOpen) {
+				eventSender.menu.onOpen(hashSplit[2]);
 			}
 		}
+		else {
+			console.log($location.path(), $location.search());
+		}
+	}
+
+	$rootScope.$on('$locationChangeSuccess', function() {
+		var deferred = $q.defer();
+		$rootScope.loadingTracker.addPromise(deferred.promise);
+		var contentResolve = $rootScope.$on('$includeContentLoaded', debounce(function() {
+			console.log('$includeContentLoaded');
+			deferred.resolve();
+			contentResolve();
+		}, 1000));
 
 		if( serviceSession.whoAmI() != null ) {
 			route();
@@ -55,29 +94,46 @@ logpresso.run(function($rootScope, $location, $anchorScroll, $compile, eventSend
 
 });
 
-logpresso.config(['$translateProvider', function ($translateProvider) {
-	var str = location.hash.match( /(\?|\&)locale=\w{2}/g );
-	if(str != null) {
-		$lang = str[0].split('=')[1];
+logpresso.factory('serviceResource', function() {
+	return {
+
 	}
+})
 
-	var z = $translateProvider.useStaticFilesLoader({
-		prefix: 'locales/system.',
-		suffix: '.json'
-	});
-	setTimeout(function() {
-		console.log(z.translations());
-	}, 1000)
-	
-
-	$translateProvider.preferredLanguage($lang);
-	$translateProvider.fallbackLanguage('en');
-	$translateProvider.uses('en');
-}]);
-
-logpresso.factory('eventSender', function() {
+logpresso.factory('eventSender', function($rootScope) {
 	var e = {
-		'root': {},
+		'root': {
+			'go': function(pack, program) {
+				console.log(arguments)
+				var deps = ['package/' + pack + '/' + program + '/' + program + '.js']
+				$script(deps, function() {
+					console.log('script loaded');
+					$rootScope.src = 'package/' + pack + '/' + program + '/index.html';
+					$rootScope.$apply();
+
+		if(!e[program].events.unload) {
+			console.log('--- load!', program);
+			var pe = e[program].$event = new CustomEvent(e[program].events);
+			pe.on('unload', function() {
+				console.log('--- unload', program);
+			});
+
+			pe.on('suspend', function() {
+				console.log('--- suspend', program);
+			});
+
+			pe.on('resume', function() {
+				console.log('--- resume', program);
+			})
+		}
+		else {
+			e[program].events.resume();
+		}
+
+				})
+				// console.log(arguments)
+			}
+		},
 		'menu': {},
 		'starter': { pid: 11 },
 		'dashboard': { pid: 22 },
@@ -167,24 +223,7 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 			eventSender[lastest].events.suspend();	
 		}
 
-		if(!eventSender[program].events.unload) {
-			console.log('--- load!', program);
-			var pe = eventSender[program].$event = new CustomEvent(eventSender[program].events);
-			pe.on('unload', function() {
-				console.log('--- unload', program);
-			});
-
-			pe.on('suspend', function() {
-				console.log('--- suspend', program);
-			});
-
-			pe.on('resume', function() {
-				console.log('--- resume', program);
-			})
-		}
-		else {
-			eventSender[program].events.resume();
-		}
+		
 		
 
 		if($('#view-starter').css('display') == "block") {
@@ -381,20 +420,28 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 	initialize();
 }
 
-function LoginController($scope, socket, serviceSession, eventSender, $location) {
+function LoginController($scope, socket, serviceSession, eventSender, $location, $rootScope) {
 	console.log('LoginController init');
 	$scope.txtLoginName = '';
 	$scope.txtPassword = '';
 
 	$scope.login = function() {
+		console.log('enter submit')
 		socket.send('org.araqne.dom.msgbus.LoginPlugin.hello', {}, 0)
 		.success(function(m) {
+			console.log('helloed')
 
 			serviceSession.login($scope.txtLoginName, $scope.txtPassword, m.body.nonce, function(m) {
+				
 				$location.path('/system/starter');
+				console.log('logined')
 
-				eventSender.root.loggedIn();
-				eventSender.root.startTimeout();
+				$rootScope.srcmenu = 'partials/menu.html';
+
+				$scope.$apply();
+
+				// eventSender.root.loggedIn();
+				// eventSender.root.startTimeout();
 			});
 		})
 		.failed(function(m, raw) {

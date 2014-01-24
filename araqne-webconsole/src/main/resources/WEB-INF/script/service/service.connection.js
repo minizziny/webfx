@@ -124,36 +124,51 @@ function CustomEvent(obj) {
 	this.clear = clear;
 }
 
-angular.module('app.connection', ['app.utility'])
-.factory('socket', function($q, $filter, serviceUtility) {
-	var ws = initialize();
-	var wse = new CustomEvent(ws);
-	var msgmap = {}
 
-	function initialize() {
-		var ws = new WebSocket('ws://' + location.host + '/websocket');
-		// var ws = new WebSocket('ws://172.20.0.10:8888/websocket');
+angular.module('app.connection', ['app.utility'])
+.provider('providerSocket', function () {
+	var ws = new WebSocket('ws://' + location.host + '/websocket');
+	// var ws = new WebSocket('ws://172.20.0.10:8888/websocket');
+	
+	ws.onerror = function(e) {
+		console.log(e);
+	}
+	
+	function ping() {
+		ws.send('ping');
+	}
+	setInterval(ping, 10000);
+
+	this.$get = ['$q', function($q) {
+		var deferred = $q.defer();
+		ws.onopen = function() {
+			deferred.resolve(ws);
+		}
+		return deferred.promise;
+	}];
+})
+.factory('socket', function($q, $filter, serviceUtility, providerSocket) {
+	var ws, msgmap = {};
+	providerSocket.then(function(_ws) {
+		ws = _ws;
 		ws.onmessage = function(e) {
 			onMessageReceived(e.data);
 		}
-		ws.onerror = function(e) {
-			console.log(e);
-		}
+
 		ws.onclose = function(e) {
 			alert($filter('translate')('$S_msg_SessionExpired'));
 			location.reload();
 		}
-
-		function ping() {
-			ws.send('ping');
-		}
-
-		setInterval(ping, 10000);
-		return ws;
-	}
+	});	
 
 	function send(method, options, pid) {
 		var self = this;
+		if(ws == undefined) {
+			providerSocket.then(function(_ws) {
+				send.call(self, method, options, pid);
+			});
+			return;
+		}
 
 		var request = [{
 			'guid': serviceUtility.generateType1(),
@@ -169,15 +184,16 @@ angular.module('app.connection', ['app.utility'])
 		};
 
 		if(ws.readyState == 1) {
+			// console.log('send', request[0].method);
 			ws.send(JSON.stringify(request));
 		}
 		else if(ws.readyState == 2 || ws.readyState == 3) {
 			alert($filter('translate')('$S_msg_SessionExpired'))
 		}
 		else if(ws.readyState == 0) {
+			var wse = new CustomEvent(ws);
 			console.log('websocket connection delayed', request[0].method);
 			var fnOnopen = function() {
-				console.log('send', request[0].method);
 				ws.send(JSON.stringify(request));
 				wse.clear('onopen');
 			};

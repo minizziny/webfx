@@ -1,4 +1,4 @@
-<form class="frm-login" name="frmLogin" ng-controller="LoginController">
+<form class="frm-login" name="frmLogin" ng-submit="login()" ng-controller="LoginController">
 	<div class="logpresso-brand"></div>
 	<div>
 		<label for="inputId">{{'$S_str_ID' | translate}}</label>
@@ -9,6 +9,6 @@
 		<input id="inputPassword" class="form-control" name="inputPassword" type="password" ng-model="txtPassword" required>
 	</div>
 
-	<button class="btn btn-primary" ng-click="login()" ng-disabled="frmLogin.inputPassword.$error.required">{{'$S_str_Login' | translate}}</button>
+	<input type="submit" class="btn btn-primary" ng-disabled="frmLogin.inputPassword.$error.required" value="{{'$S_str_Login' | translate}}">
 	<div class="login-footer">EEDIOM 2014</div>
 </form>
