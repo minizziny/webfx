@@ -72,14 +72,6 @@ angular.module('app.chart', [])
 				if(m.isString) {
 					return {name: o.label, y: o.value };
 				}
-			})
-			.sort(function(a,b) {
-				if(m.isNumber || m.isDateTime) {
-					return a.x - b.x;
-				}
-				if(m.isString) {
-					return a.name - b.name;
-				}
 			});
 			
 			var objSeries = {
@@ -155,14 +147,14 @@ angular.module('app.chart', [])
 					return {name: o.label, y: o.value };
 				}
 			})
-			.sort(function(a,b) {
-				if(m.isNumber || m.isDateTime) {
-					return a.x - b.x;
-				}
-				if(m.isString) {
-					return a.name - b.name;
-				}
-			});
+			// .sort(function(a,b) {
+			// 	if(m.isNumber || m.isDateTime) {
+			// 		return a.x - b.x;
+			// 	}
+			// 	if(m.isString) {
+			// 		return a.name - b.name;
+			// 	}
+			// });
 			
 			var objSeries = {
 				name: s.name,
