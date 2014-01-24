@@ -57,11 +57,11 @@
 	}
 
 .animate-show {
-  -webkit-transition:opacity linear 0.1s;
-  transition:opacity linear 0.1s;
+  /*-webkit-transition:opacity linear 0.1s;
+  transition:opacity linear 0.1s;*/
   opacity:1;
   z-index: 9999;
-  /*background:white;*/
+  background:white;
 }
  
 .animate-show.ng-hide-add,
@@ -71,6 +71,14 @@
  
 .animate-show.ng-hide {
   opacity:0;
+}
+
+.global-loading {
+	position: fixed;
+	top: 5px;
+	left: 5px;
+	background-color: lightyellow;
+	border: 1px solid silver;
 }
  
 	</style>
@@ -84,7 +92,9 @@
 		<div class="tooltip-inner">...</div>
 	</div>
 
-	<div class="modal-backdrop animate-show" ng-show="loadingTracker.active()">Loading...</div>
+	<div class="init-loading modal-backdrop animate-show" ng-show="loadingTracker.active()"></div>
+	<div class="global-loading animate-show" ng-show="loadingTracker.active()">Loading...</div>
+	<div class="global-loading" style="left: calc(100% - 150px); z-index:99999">{{timeout}}</div>
 
 	<script src="lib/jquery/jquery-2.0.3.js"></script>
 	<script src="lib/jquery/jquery.ui.core.js"></script>

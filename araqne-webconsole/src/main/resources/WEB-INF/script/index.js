@@ -38,7 +38,7 @@ logpresso.config(['$translateProvider', function ($translateProvider) {
 	$translateProvider.fallbackLanguage('en');
 }]);
 
-logpresso.run(function($rootScope, $location, eventSender, serviceSession, $location, $translate, $q, promiseTracker) {
+logpresso.run(function($rootScope, $location, socket, eventSender, serviceSession, $location, $translate, $q, promiseTracker, $filter) {
 	$location.path('/');
 
 	$rootScope.$on('$translateLoadingEnd', function(a) {
@@ -53,7 +53,7 @@ logpresso.run(function($rootScope, $location, eventSender, serviceSession, $loca
 	$rootScope.src = 'partials/login.html';
 
 	function route() {
-		console.log('route')
+		console.log('route');
 		var hash = $location.path();
 
 		var hashSplit = hash.split('/');
@@ -86,11 +86,78 @@ logpresso.run(function($rootScope, $location, eventSender, serviceSession, $loca
 		}
 		else {
 			serviceSession.getPrincipal({
-				'not_logged_in': eventSender.root.initialize,
+				'not_logged_in': function() {
+					$rootScope.src = 'partials/login.html';
+					$rootScope.$apply();
+				},
 				'logged_in': route
 			});
 		}
 	});
+
+	$rootScope.timeout = 1000 * 60 * 1;
+
+	function LogOutTimer() {
+		var S = {
+			timer : null,
+			limit : $rootScope.timeout,
+			fnc   : function() {
+				serviceSession.logout(function() {
+					var alertMsg = $filter('translate')('$S_str_TimeoutAlert');
+					console.log('idle time out [' + S.limit / 1000 + 'sec] log out.');
+					alert(alertMsg);					
+					location.href = '/';
+				});
+				S.stop();
+				
+			},
+			start : function() {
+				S.timer = window.setTimeout(S.fnc, S.limit);
+				console.log('start timeout function');
+			},
+			reset : function() {
+				console.log('reset timeout ['+ S.limit +']');
+				window.clearTimeout(S.timer);
+				S.start();
+			},
+			stop : function() {
+				console.log('stop timeout function');
+				window.clearInterval(S.timer);
+			}
+		};
+
+		console.log('saved: '+S.limit);
+
+		if(S.timer != null) {
+			document.onmousemove = function() {
+				S.reset(); 
+			};
+		}
+
+		return S;
+	}
+
+	eventSender.root.startTimeout = function() {
+		socket.send('org.araqne.dom.msgbus.OrganizationPlugin.getOrganizationParameter', {'key': 'admin_timeout'}, 0)
+		.success(function(m) {
+			console.log('startTimeout')
+			var timeout = m.body.result;
+			$rootScope.timeout = timeout * 1000;
+
+			console.log('loaded: ' + $rootScope.timeout);
+
+			if(timeout == null || timeout == '') {
+				LogOutTimer().stop();
+			} else {
+				LogOutTimer().start();
+			}			
+		})
+		.failed(function(m, raw) {
+			console.log(m, raw, 'error')
+		});
+
+		$rootScope.$apply();
+	}
 
 });
 
@@ -162,7 +229,7 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 
 	$scope.isShowStarter = false;
 	$scope.isShowDashboard = false;
-	$scope.timeout = 1000 * 60 * 1;
+	
 
 	$scope.src = {};
 	$scope.recentPrograms = [];
@@ -239,79 +306,7 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 		}
 	}
 
-	eventSender.root.loggedIn = function() {
-		$scope.src.login = '';
-		$scope.src.menu = 'partials/menu.html';
-		$scope.$apply();
-	}
-
-	eventSender.root.initialize = function() {
-		$scope.src.login = 'partials/login.html';
-		$scope.$apply();
-	}
-
-	eventSender.root.startTimeout = function() {
-		socket.send('org.araqne.dom.msgbus.OrganizationPlugin.getOrganizationParameter', {'key': 'admin_timeout'}, 0)
-		.success(function(m) {
-			var timeout = m.body.result;
-			$scope.timeout = timeout * 1000;
-
-			console.log('loaded: ' + $scope.timeout);
-
-			if(timeout == null || timeout == '') {
-				$scope.LogOutTimer().stop();
-			} else {
-				$scope.LogOutTimer().start();
-			}			
-		})
-		.failed(function(m, raw) {
-			console.log(m, raw, 'error')
-		});
-
-		$scope.$apply();
-	}
-
-	$scope.LogOutTimer = function(){
-		var S = {
-			timer : null,
-			limit : $scope.timeout,
-			fnc   : function() {
-				serviceSession.logout(function() {
-					var alertMsg = $filter('translate')('$S_str_TimeoutAlert');
-					console.log('idle time out [' + S.limit / 1000 + 'sec] log out.');
-					alert(alertMsg);					
-					location.href = '/';
-				});
-				S.stop();
-				
-			},
-			start : function() {
-				S.timer = window.setTimeout(S.fnc, S.limit);
-				console.log('start timeout function');
-			},
-			reset : function() {
-				console.log('reset timeout ['+ S.limit +']');
-				window.clearTimeout(S.timer);
-				S.start();
-			},
-			stop : function() {
-				console.log('stop timeout function');
-				window.clearInterval(S.timer);
-			}
-		};
-
-		S.limit = $scope.timeout;
-		console.log('saved: '+S.limit);
-
-		if(S.timer != null) {
-			document.onmousemove = function() {
-				S.reset(); 
-			};
-		}
-
-		return S;
-	}
-
+	
 }
 
 var color_map = ["#AFD8F8","#F6BD0F","#8BBA00","#FF8E46","#008E8E","#D64646","#8E468E","#588526","#B3AA00","#008ED6","#9D080D","#A186BE","#CC6600","#FDC689","#ABA000","#F26D7D","#FFF200","#0054A6","#F7941C","#CC3300","#006600","#663300","#6DCFF6"];
@@ -426,22 +421,16 @@ function LoginController($scope, socket, serviceSession, eventSender, $location,
 	$scope.txtPassword = '';
 
 	$scope.login = function() {
-		console.log('enter submit')
 		socket.send('org.araqne.dom.msgbus.LoginPlugin.hello', {}, 0)
 		.success(function(m) {
-			console.log('helloed')
-
 			serviceSession.login($scope.txtLoginName, $scope.txtPassword, m.body.nonce, function(m) {
 				
 				$location.path('/system/starter');
-				console.log('logined')
+				console.log('logged in')
 
 				$rootScope.srcmenu = 'partials/menu.html';
-
+				eventSender.root.startTimeout();
 				$scope.$apply();
-
-				// eventSender.root.loggedIn();
-				// eventSender.root.startTimeout();
 			});
 		})
 		.failed(function(m, raw) {

@@ -1,4 +1,8 @@
 function StarterController($scope, socket, eventSender) {
+	setTimeout(function() {
+		$('.init-loading').remove();	
+	}, 1000);
+	
 	$scope.getPid = eventSender.starter.pid;
 	$scope.partitions = [];
 
