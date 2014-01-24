@@ -23,6 +23,10 @@ var logpresso = angular.module('app', [
 
 logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
 
+	$rootScope.$on('$translateLoadingError', function() {
+		$translate.uses('en');
+	})
+
 	$rootScope.$on('$locationChangeSuccess', function() {
 		function route() {
 			
@@ -62,6 +66,10 @@ logpresso.config(['$translateProvider', function ($translateProvider) {
 		$lang = str[0].split('=')[1];
 	}
 
+	if( /([a-z]{2})-/.test($lang) ) {
+		$lang = $lang.substring(0,2);
+	}
+
 	var z = $translateProvider.useStaticFilesLoader({
 		prefix: 'locales/system.',
 		suffix: '.json'
@@ -73,7 +81,6 @@ logpresso.config(['$translateProvider', function ($translateProvider) {
 
 	$translateProvider.preferredLanguage($lang);
 	$translateProvider.fallbackLanguage('en');
-	$translateProvider.uses('en');
 }]);
 
 logpresso.factory('eventSender', function() {
