@@ -108,7 +108,7 @@ function StreamQueryController($scope) {
 		"name": "youtube", 
 		"interval": 60, 
 		"query_string": "search host == \"*youtube*\" and url == \"*/watch?*\" | rex field=url \"v=(?<v>\\w+)\" | search len(v) > 10 | import youtube", 
-		"streams": ["fideo"], 
+		"streams": ["video"], 
 		"enabled": true, 
 		"owner": "root", 
 		"created": "2014-01-26 19:57:08", 
@@ -170,7 +170,7 @@ function StreamQueryController($scope) {
 		"last_refresh": "2014-01-27 16:27:40"
 		},
 		{
-		"name": "fideo", 
+		"name": "video", 
 		"interval": 60, 
 		"query_string": "eval url = urldecode(url) | search in(host, \"*youtube*\", \"*pandora*\", \"*mgoon*\", \"*pann.nate*\") | fields _time, hour, ctn, host, url", 
 		"streams": ["lqms"], 
@@ -186,7 +186,7 @@ function StreamQueryController($scope) {
 		"name": "pann", 
 		"interval": 60, 
 		"query_string": "search host == \"*pann*\" and url == \"*video*\" | rex field=url \"/video/(?<video>\\d+)\" | search isnotnull(video) | import pann", 
-		"streams": ["fideo"], 
+		"streams": ["video"], 
 		"enabled": true, 
 		"owner": "root", 
 		"created": "2014-01-26 20:00:03", 
@@ -199,7 +199,7 @@ function StreamQueryController($scope) {
 		"name": "mgoon", 
 		"interval": 60, 
 		"query_string": "search host == \"*mgoon.com\" |  rex field=url \"(\\/view.htm\\?id=(?<v>\\d+)|\\/play\\/view\\/(?<v>\\d+))\" | search isnotnull(v) | import mgoon", 
-		"streams": ["fideo"], 
+		"streams": ["video"], 
 		"enabled": true, 
 		"owner": "root", 
 		"created": "2014-01-26 20:02:47", 
@@ -238,7 +238,7 @@ function StreamQueryController($scope) {
 		"name": "pandora", 
 		"interval": 60, 
 		"query_string": "search host == \"*pandora.tv*\" and url == \"/channel/video.ptv*\" | rex field=url \"userid=(?<userid>[^&]*)&prgid=(?<prgid>[^&]*)\" | search isnotnull(userid) and isnotnull(prgid) | import pandora", 
-		"streams": ["fideo"], 
+		"streams": ["video"], 
 		"enabled": true, 
 		"owner": "root", 
 		"created": "2014-01-26 19:58:38", 
@@ -248,6 +248,8 @@ function StreamQueryController($scope) {
 		"last_refresh": "2014-01-27 16:35:37"
 		}
 	];
+
+	/////////////// inital node hierachy, assign depth, append children
 
 	function getInputIndex(src, name) {
 		var found = src.filter(function(sq) {
@@ -299,12 +301,14 @@ function StreamQueryController($scope) {
 		assignDepth();
 	}
 
+	//////////////// assign position
+
 	console.log($scope.sqs);
 
-	function getStyle(sq) {
+	function getStyle() {
 		return function() {
+			var sq = this;
 			return {
-				position: 'absolute',
 				left: (sq._depth) * 200 + 'px',
 				top: sq._top * 20 + 'px'
 			}
@@ -327,7 +331,7 @@ function StreamQueryController($scope) {
 			}
 			else return false;
 		});
-		sq._getStyle = getStyle(sq);
+		sq._getStyle = getStyle();
 	});
 
 	function getTotalChildrenLength(sq) {
@@ -355,4 +359,38 @@ function StreamQueryController($scope) {
 	});
 
 	console.log($scope.reg);
+
+	///////////////// make arrow 
+	var multiplePos = { 'x': 200, 'y': 20 };
+
+	$scope.arrows = [];
+	$scope.sqs.forEach(function(sq) {
+		if(sq.hasOwnProperty('_streams')) {
+			sq._streams.forEach(function(str) {
+				// console.log(sq)
+				$scope.arrows.push({
+					source: str.raw,
+					target: sq,
+					pos_source: [str.raw._depth * multiplePos.x, str.raw._top * multiplePos.y],
+					pos_target: [sq._depth * multiplePos.x, sq._top * multiplePos.y]
+				});
+			});
+		}
+	});
+
+	var svg = d3.select('svg');
+	svg.selectAll('path')
+		.data($scope.arrows)
+		.enter()
+		.append('path')
+			.attr('d', function(d) {
+				console.log(d)
+				return 'M' + [
+					d.pos_source,
+					d.pos_target
+				].join('L');
+			})
+			.attr('stroke', '#0099ff')
+			.attr('stroke-width', '1')
+			.attr('transform', 'translate(10, 10)');
 }
