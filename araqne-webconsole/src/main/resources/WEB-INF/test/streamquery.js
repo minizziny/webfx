@@ -277,6 +277,9 @@ function StreamQueryController($scope) {
 			sq._depth = 1;
 		}
 		getChildrenLength($scope.sqs, sq);
+		sq._children.sort(function(a,b) {
+			return a.name > b.name;
+		});
 	});
 
 	function assignDepth() {
@@ -349,8 +352,9 @@ function StreamQueryController($scope) {
 		var parent_top = 0;
 		for (var i = 0; i < sqs.length; i++) {
 			if(sqs[i].hasOwnProperty('_streams')) {
-				if( sqs.indexOf(sqs[i]) == 0 ) {
+				if( sqs[i]._streams[0].raw._children.indexOf(sqs[i]) === 0 ) {
 					parent_top = sqs[i]._streams[0].raw._top;
+					total_children_len = 0;
 				}
 			}
 			sqs[i]._top = total_children_len + parent_top;
@@ -384,7 +388,7 @@ function StreamQueryController($scope) {
 		.enter()
 		.append('path')
 			.attr('d', function(d) {
-				console.log(d)
+				// console.log(d)
 				return 'M' + [
 					d.pos_source,
 					d.pos_target
