@@ -1305,7 +1305,7 @@
 	    replace: true,
 	    restrict: 'E',
 	    scope: { checkboxes: '=' },
-	    template: '<div><input type="checkbox" ng-model="master" ng-change="masterChange()"></div>',
+	    template: '<div><input type="checkbox" class="masterCheckbox" ng-model="master" ng-change="masterChange()"></div>',
 	    link: function($scope, $element) {
 	    	$scope.master = false;
 
@@ -1324,6 +1324,7 @@
 			var masterCheckbox = $element.children()[0];
 
 			$scope.checkboxChange = function() {
+				$scope.master = false;
 				var allSet = false;
 				var allClear = true;
 
