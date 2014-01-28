@@ -1324,6 +1324,7 @@
 			var masterCheckbox = $element.children()[0];
 
 			$scope.checkboxChange = function() {
+				$scope.master = false;
 				var allSet = false;
 				var allClear = true;
 
