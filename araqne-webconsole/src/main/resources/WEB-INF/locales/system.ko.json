@@ -196,6 +196,7 @@
 	"$S_str_DownloadQuery": "쿼리 결과 다운로드",
 	"$S_str_FileName": "파일 이름",
 	"$S_str_FileType": "파일 형식",
+	"$S_str_FileEncoding": "캐릭터셋",
 	"$S_str_Range": "범위",
 	"$S_str_Download": "다운로드",
 	"$S_str_Close": "닫기",

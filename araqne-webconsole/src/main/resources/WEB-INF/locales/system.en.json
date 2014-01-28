@@ -197,6 +197,7 @@
 	"$S_str_DownloadQuery": "Download query result",
 	"$S_str_FileName": "File Name",
 	"$S_str_FileType": "File Format",
+	"$S_str_FileEncoding": "Character set",
 	"$S_str_Range": "Row Range",
 	"$S_str_Download": "Download",
 	"$S_str_Close": "Close",
