@@ -314,7 +314,7 @@ angular.module('app.logdb', [])
 	}
 
 	function save(string, owner) {
-		socket.send('org.logpresso.core.msgbus.QueryHistoryPlugin.saveQuery', {
+		socket.send('com.logpresso.core.msgbus.QueryHistoryPlugin.saveQuery', {
 			'query': string, 'owner': owner
 		}, proc.pid)
 		.success(function(m) {

@@ -187,7 +187,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	function GetPresetList(callback) {
-		socket.send('org.logpresso.core.msgbus.WallPlugin.getPresetNames', {}, eventSender.dashboard.pid)
+		socket.send('com.logpresso.core.msgbus.WallPlugin.getPresetNames', {}, eventSender.dashboard.pid)
 		.success(function(m) {
 			console.log(m.body)
 
@@ -226,13 +226,13 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			delete state.layout; // <-----------------
 		}
 
-		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
+		return socket.send("com.logpresso.core.msgbus.WallPlugin.setPreset", 
 			{ 'guid': guid, 'name': name, 'state': state }
 		, eventSender.dashboard.pid);
 	}
 
 	function InitAutosave() {
-		return socket.send("org.logpresso.core.msgbus.WallPlugin.setPreset", 
+		return socket.send("com.logpresso.core.msgbus.WallPlugin.setPreset", 
 			{ "guid": "autosave", "name": $translate('$S_str_Autosave'), "state": { "widgets": [] } }
 		, eventSender.dashboard.pid);
 	}
@@ -250,7 +250,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 	function LoadPreset(guid) {
 
-		socket.send('org.logpresso.core.msgbus.WallPlugin.getPreset',
+		socket.send('com.logpresso.core.msgbus.WallPlugin.getPreset',
 			{ 'guid': guid }
 		, eventSender.dashboard.pid)
 		.success(function(m) {
@@ -362,7 +362,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			};
 		};
 
-		return socket.send("org.logpresso.core.msgbus.WallPlugin.removePresets", 
+		return socket.send("com.logpresso.core.msgbus.WallPlugin.removePresets", 
 			{ "guids": args }
 		, eventSender.dashboard.pid);
 	}
