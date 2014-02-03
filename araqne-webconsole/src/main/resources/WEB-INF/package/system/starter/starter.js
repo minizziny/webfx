@@ -95,7 +95,7 @@ function StarterController($scope, socket, eventSender) {
 	function getDiskUsages() {
 		$scope.partitions.splice(0, $scope.partitions.length);
 
-		socket.send('org.logpresso.core.msgbus.LauncherPlugin.getDiskUsages', {}, eventSender.starter.pid)
+		socket.send('com.logpresso.core.msgbus.LauncherPlugin.getDiskUsages', {}, eventSender.starter.pid)
 		.success(function(m) {
 			$.each(m.body.usages, function(i, obj) {
 
@@ -115,6 +115,6 @@ function StarterController($scope, socket, eventSender) {
 	}
 
 	getDiskUsages();
-	makeChart("div.chart1", "org.logpresso.core.msgbus.LauncherPlugin.getLogTrendGraph", "#ltLogTrend");
-	makeChart("div.chart2", "org.logpresso.core.msgbus.LauncherPlugin.getAlertTrendGraph", "#ltAlertTrend");
+	makeChart("div.chart1", "com.logpresso.core.msgbus.LauncherPlugin.getLogTrendGraph", "#ltLogTrend");
+	makeChart("div.chart2", "com.logpresso.core.msgbus.LauncherPlugin.getAlertTrendGraph", "#ltAlertTrend");
 }

@@ -131,6 +131,19 @@ function StreamQueryController($scope) {
 		"last_refresh": "2014-01-27 16:35:18"
 		},
 		{
+		"name": "lqm2s", 
+		"interval": 60, 
+		"query_string": "parse overlay=true lqms | eval hour = string(_time, \"yyyyMMddHH\")", 
+		"loggers": ["local\\app2_1"], 
+		"enabled": true, 
+		"owner": "root", 
+		"created": "2014-01-26 21:11:54", 
+		"modified": "2014-01-26 21:11:54", 
+		"description": null, 
+		"input_count": 226825721, 
+		"last_refresh": "2014-01-27 16:35:18"
+		},
+		{
 		"name": "pandora_stats", 
 		"interval": 600, 
 		"query_string": "stats count by hour, userid, prgid | import pandora_stats", 
@@ -326,6 +339,7 @@ function StreamQueryController($scope) {
 		$scope.reg[sq._depth].push(sq);
 
 		$scope.reg[sq._depth].sort(function(a,b) {
+			if(a.hasOwnProperty('streams') == false) return;
 			if(sq._depth > 0) {
 				if(a.streams[0] == b.streams[0]) {
 					return a.name > b.name;

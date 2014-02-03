@@ -108,6 +108,7 @@
 	"$S_str_Value": "값",
 	"$S_str_Label": "라벨",
 	"$S_str_AxisX": "X축",
+	"$S_str_NullToZero": "값이 없는 경우 0으로 표시",
 
 	"$S_str_Autosave": "자동 저장",
 	"$S_msg_SavePresetAs": "저장할 새 프리셋 이름을 입력하세요",
@@ -211,8 +212,7 @@
 
 	"$S_str_SavedQueryResult": "저장된 쿼리 결과 목록",
 	"$S_str_QueryTitle": "제목",
-	"$S_str_FileSize": "파일크기",
-	
+	"$S_str_FileSize": "파일크기",	
 
 	"$S_msg_LoadingQuery": "쿼리 로딩 중...",
 	"$S_msg_Searched": "{{p0}}건 검색됨",
@@ -298,9 +298,10 @@
 	"$S_str_HostTagName": "호스트 이름 태깅",
 	"$S_str_Create": "생성",
 
+	"$S_str_LoggerExistsMsg": "이미 로거가 존재 합니다.",
+	"$S_str_TableExistsMsg": "이미 테이블이 존재 합니다.",
+
 	"$S_msg_CreateLoggerSuccess": "새로운 수집 설정 {{p0}}이 성공적으로 추가되었습니다.",
-	"$S_msg_StopLoggerSuccess": "수집 설정 {{p0}}이 로그 수집을 중지합니다.",
-	"$S_msg_StartLoggerSuccess": "수집 설정 {{p0}}이 로그 수집을 시작합니다.",
 	"$S_msg_RemoveLoggerSuccess": "수집 설정 {{p0}}이 성공적으로 삭제되었습니다.",
 
 	"$S_msg_LoggerNotFound": "로거를 찾을 수 없습니다.",
@@ -547,9 +548,6 @@
 	"$S_str_Failed": "실패",
 
 	"--------config-----------": "",
-
-
-
 	"--------parser config-----------": "",
 	"$S_str_ParserSetting": "파서 설정",
 	"$S_str_Parser": "파서",
@@ -580,7 +578,6 @@
 	"$S_str_User": "사용자", 
 	"$S_str_ActiveMode": "액티브모드", 
 	"$S_msg_RemoveFtpProfileConfirmPre": "정말 FTP 프로파일",
-
 
 	"--------ssh config-----------": "",
 	"$S_str_SshSetting": "SSH 설정",
@@ -626,7 +623,7 @@
 	"$S_str_CreateCryptoProfile": "암호화 프로파일 생성",
 	"$S_str_Pkcs12Password": "PKCS#12 비밀키 암호",
 	"$S_str_RemoveCrypto": "암호화 프로파일 삭제",
-
+	"$S_msg_RemoveCryptoConfirmPre": "정말 암호화",
 
 	"--------index cache config-----------": "",
 	"$S_str_IndexCacheSetting": "인덱스 캐시 설정",
@@ -645,8 +642,7 @@
 	"$S_str_RegisterFederationNode": "새 노드 등록하기",
 	"$S_str_WebserverPort": "웹서버 포트",
 	"$S_str_RemoveNode": "노드 삭제",
-	"$S_msg_RemoveNodeConfirmPre": "정말로 노드",	
-
+	"$S_msg_RemoveNodeConfirmPre": "정말로 노드",
 
 	"--------common config msg-----------": "",
 	"$S_msg_PleaseEnterProfileName": "프로파일 이름을 입력하세요.",
