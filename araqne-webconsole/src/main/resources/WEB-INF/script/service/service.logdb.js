@@ -155,8 +155,8 @@ angular.module('app.logdb', [])
 				asyncQuery = this;	
 			}
 			
-			var name = 'logstorage-query-' + clazz.id;
-			var tname = 'logstorage-query-timeline-' + clazz.id;
+			var name = 'logdb-query-' + clazz.id;
+			var tname = 'logdb-query-timeline-' + clazz.id;
 
 			socket.register(name, pid, onTrap, function(resp) {
 
@@ -170,8 +170,8 @@ angular.module('app.logdb', [])
 		}
 
 		function unregisterTrap(callback) {
-			var name = 'logstorage-query-' + clazz.id;
-			var tname = 'logstorage-query-timeline-' + clazz.id;
+			var name = 'logdb-query-' + clazz.id;
+			var tname = 'logdb-query-timeline-' + clazz.id;
 
 			socket.unregister(name, pid, function(resp) {
 
