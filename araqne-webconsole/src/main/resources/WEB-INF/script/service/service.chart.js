@@ -193,7 +193,8 @@ angular.module('app.chart', [])
 				enabled: false
 			},
 			xAxis: {
-				type: m.type
+				type: m.type,
+				minTickInterval: 1000
 			},
 			yAxis: {
 				title: {
@@ -307,19 +308,20 @@ angular.module('app.chart', [])
 				'name': s.name,
 				'color': s.color,
 				'values': undefined,
-				'labelType': dataLabel.type
+				'labelType': dataLabel.type,
+				'nullToZero': s.nullToZero
 			};
 
 			series.values = dataResult.map(function(obj) {
 				if(!!s.value) {
 					return {
-						'value': obj[s.value.key],
+						'value': (series.nullToZero) ? (obj[s.value.key] == null ? 0 : obj[s.value.key] ) : obj[s.value.key],
 						'label': obj[dataLabel.name]
 					}
 				}
 				else {
 					return {
-						'value': obj[s.key],
+						'value': (series.nullToZero) ? (obj[s.key] == null ? 0 : obj[s.key] ) : obj[s.key],
 						'label': obj[dataLabel.name]
 					}
 				}

@@ -108,6 +108,7 @@
 	"$S_str_Value": "Value",
 	"$S_str_Label": "Label",
 	"$S_str_AxisX": "X axis",
+	"$S_str_NullToZero": "Display Null to Zero",
 
 	"$S_str_Autosave": "Auto Save",
 	"$S_msg_SavePresetAs": "Type preset name.",

@@ -108,6 +108,7 @@
 	"$S_str_Value": "값",
 	"$S_str_Label": "라벨",
 	"$S_str_AxisX": "X축",
+	"$S_str_NullToZero": "null값을 0으로 표시",
 
 	"$S_str_Autosave": "자동 저장",
 	"$S_msg_SavePresetAs": "저장할 새 프리셋 이름을 입력하세요",

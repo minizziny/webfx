@@ -574,7 +574,8 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 			series.push({
 				'key': obj.value.name,
 				'color': obj.color,
-				'name': obj.name
+				'name': obj.name,
+				'nullToZero': obj.nullToZero
 			})
 		});
 		var st = serviceChart.buildJSONStructure(series, $scope.qresult, $scope.dataLabel);
@@ -607,7 +608,8 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 				series.push({
 					'key': obj.value.name,
 					'color': obj.color,
-					'name': obj.name
+					'name': obj.name,
+					'nullToZero': obj.nullToZero
 				})
 			});
 			var st = serviceChart.buildJSONStructure(series, $scope.qresult, $scope.dataLabel);
@@ -1017,10 +1019,18 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		$scope.ctxWidget.data.label = dataChart.label.name;
 		$scope.ctxWidget.data.labelType = dataChart.label.type;
 		$scope.ctxWidget.data.series = dataChart.series.map(function(obj) {
-			return {
+			var s = {
 				'color': obj.color,
 				'name': obj.name,
 				'key': obj.value.name
+			}
+
+			if( !obj.nullToZero ) {
+				return s;
+			}
+			else {
+				s['nullToZero'] = obj.nullToZero;
+				return s;
 			}
 		});
 
