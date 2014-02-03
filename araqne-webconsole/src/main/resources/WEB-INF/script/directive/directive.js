@@ -1299,4 +1299,59 @@
 			});
 		}
 	}
+})
+.directive('selectAllCheckbox', function(){
+	return {
+	    replace: true,
+	    restrict: 'E',
+	    scope: {
+	    	checkboxes: '=',
+	    	master: '=',
+		},
+	    template: '<div><input type="checkbox" class="masterCheckbox" ng-model="master" ng-change="masterChange()"></div>',
+	    link: function($scope, $element) {
+	    	$scope.master = false;
+
+			$scope.masterChange = function() {
+				if($scope.master) {
+					angular.forEach($scope.checkboxes, function(checkbox, index){
+						checkbox.is_checked = true;
+					});
+				} else {
+					angular.forEach($scope.checkboxes, function(checkbox, index){
+						checkbox.is_checked = false;
+					});
+				}
+			};
+
+			var masterCheckbox = $element.children()[0];
+
+			$scope.checkboxChange = function() {
+				$scope.master = false;
+				var allSet = false;
+				var allClear = true;
+
+				angular.forEach($scope.checkboxes, function(checkbox, index){
+					if(checkbox.is_checked) {
+						allClear = false;
+					} else {
+						allSet = false;
+					}
+				});
+
+				if(allSet) { 
+					$scope.master = true; 
+					masterCheckbox.indeterminate = false;
+				} else if(allClear) { 
+					$scope.master = false; 
+					masterCheckbox.indeterminate = false;
+				} else { 
+					$scope.master = false;
+					masterCheckbox.indeterminate = true;
+				}
+			};
+
+			$scope.checkboxChange();  // initialize
+	    }
+	};
 });

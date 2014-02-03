@@ -82,9 +82,11 @@ function CustomEvent(obj) {
 	function fire() {
 		var eventArr = this;
 		var args = arguments;
+		var ret = true;
 		this.forEach(function(obj) {
-			obj.apply(eventArr, args);
+			ret = ret && obj.apply(eventArr, args);
 		});
+		return ret;
 	}
 
 	function on(eventName, fn) {
@@ -115,7 +117,7 @@ function CustomEvent(obj) {
 	this.dispatchEvent = function(eventName) {
 		// console.log('dispatchEvent', events)
 		if(events.hasOwnProperty(eventName)) {
-			events[eventName].fire();
+			return events[eventName].fire.apply(events[eventName], Array.prototype.slice.call(arguments, 1) );
 		}
 	}
 

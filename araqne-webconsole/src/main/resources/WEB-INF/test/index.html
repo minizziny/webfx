@@ -1,0 +1,70 @@
+<!doctype html>
+<html ng-app>
+<head>
+	<title>draw</title>
+	<style>
+	#sq-container {
+		width: 80%;
+		height: 400px;
+		border: 1px solid gray;
+		overflow: auto;
+	}
+
+	#sq-container .node {
+		border: 1px solid gray;
+		background-color: lightblue;
+		font-size: .75em;
+		padding: 1px 5px;
+		border-radius: 5px;
+		position: absolute;
+	}
+	</style>
+	<script src="/lib/angular/angular.js"></script>
+	<script src="/lib/d3/d3.js"></script>
+</head>
+<body ng-controller="StreamQueryController">
+	<div id="sq-container" style="position:relative">
+		<svg height="1000" width="1000"></svg>
+		<div ng-repeat="i in [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]" ng-style="{position: 'absolute',left: '0px',top: i * 20 + 'px', width: '100%', borderBottom: '1px dotted #ddd'}">{{i}}</div>
+		<div class="node" ng-repeat="sq in sqs" ng-style="sq._getStyle()">{{sq.name}}</div>
+	</div>
+	<!--
+	<path d="M150 0 L75 200 L225 200 Z"></path>
+	<table>
+		<tbody>
+			<tr ng-repeat="r in reg">
+				<td ng-repeat="sq in r">{{sq.name}}, {{sq._top}}, {{sq._depth}}</td>
+			</tr>
+		</tbody>
+	</table>
+	-->
+	<table>
+		<tbody>
+			<tr ng-repeat="ar in arrows">
+				<td>{{ar.pos_source}} {{ar.source.name}} -&gt; {{ar.target.name}} {{ar.pos_target}}</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<table>
+		<thead>
+			<tr>
+				<th>name</th>
+				<th>streams</th>
+				<th>depth</th>
+				<th>children</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="sq in sqs">
+				<td>{{sq.name}}</td>
+				<td>{{sq.streams}}</td>
+				<td>{{sq._depth}}</td>
+				<td>{{sq._children.length}}</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<script src="streamquery.js"></script>
+</body>
+</html>

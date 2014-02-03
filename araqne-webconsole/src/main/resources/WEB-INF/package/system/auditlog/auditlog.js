@@ -41,10 +41,10 @@ function AuditLogController($scope, $filter, $translate, socket, eventSender, se
 		
 		//console.log("offset: " + offset + ", limit: " + limit);
 		/*
-		method : org.logpresso.core.msgbus.AuditLogPlugin.getAuditLogs
+		method : com.logpresso.core.msgbus.AuditLogPlugin.getAuditLogs
 		argument : from, to, offset(nullable), limit(nullable)
 		 */
-		socket.send('org.logpresso.core.msgbus.AuditLogPlugin.getAuditLogs', {
+		socket.send('com.logpresso.core.msgbus.AuditLogPlugin.getAuditLogs', {
 			'from': $scope.from, 
 			'to': $scope.to, 
 			'offset': offset, 
