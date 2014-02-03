@@ -131,8 +131,8 @@
 						</div>
 					</div>
 					<div class="control-group submit-group">
-						<button class="wiz-prev btn" ng-click="go(0)">{{'$S_str_Previous' | translate}}</button>
-						<button class="wiz-next btn" ng-click="go(widgetType.s1next)">{{'$S_str_Next' | translate}}</button>
+						<button class="wiz-prev btn" ng-click="go(0, widgetType.s0prevCallback())">{{'$S_str_Previous' | translate}}</button>
+						<button class="wiz-next btn" ng-disabled="!isPageLoaded" ng-click="go(widgetType.s1next, null, widgetType.s1nextEvent())">{{'$S_str_Next' | translate}}</button>
 					</div>
 				</fieldset>
 			</li>

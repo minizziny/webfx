@@ -839,6 +839,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	}
 
 	eventSender.dashboard.onOpenNewWidget = function() {
+		$scope.isPageLoaded = false;
 		var newWidgetWin = $('.newWidget').removeClass(makeRemoveClassHandler(/^step/));
 		newWidgetWin[0].showDialog();
 			
@@ -846,10 +847,12 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		$('.wiz-next.btn:first').focus();
 		//$scope.ctxWidget = getDefaultContext('grid');
 		$scope.qresult = null;
+		$scope.qrCols = null;
 	}
 
 	$scope.qresult;
 	$scope.qrCols;
+	$scope.isPageLoaded = false;
 
 	$scope.inputOnloading = function() {
 		$('.qr1')[0].hideTable();
@@ -860,6 +863,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		$('.qr2.qr-select-table')[0].getColumns(function(cols) {
 			$scope.qrCols = cols;
 			$('.qr1')[0].showTable();
+			$scope.isPageLoaded = true;
 		});
 		
 	}
@@ -872,6 +876,9 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		{
 			'name': 'table',
 			's0next': 1,
+			's0prevCallback': function() {
+				$scope.isPageLoaded = false;
+			},
 			's0nextCallback': function() {
 				$scope.ctxWidget = getDefaultContext('grid');
 				$('.qr1')[0].hideTable();
@@ -881,11 +888,19 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 				
 			},
 			's1next': 2,
+			's1nextEvent': function() {
+				return function() {
+					return $scope.isPageLoaded;
+				}
+			},
 			's3prev': 2
 		},
 		{
 			'name': 'graph',
 			's0next': 1,
+			's0prevCallback': function() {
+				$scope.isPageLoaded = false;
+			},
 			's0nextCallback': function() {
 				$scope.ctxWidget = getDefaultContext('chart');
 				$('.qr1')[0].hideTable();
@@ -894,6 +909,11 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 				}, 250);
 			},
 			's1next': 4,
+			's1nextEvent': function() {
+				return function() {
+					return $scope.isPageLoaded;
+				}
+			},
 			's4nextEvent': function() {
 				return eventSender.dashboard.onSelectColumnFinishing;
 			},
