@@ -23,6 +23,8 @@ var logpresso = angular.module('app', [
 ], function() {
 });
 
+var pageCache = [];
+
 logpresso.config(['$translateProvider', function ($translateProvider) {
 	var str = location.hash.match( /(\?|\&)locale=\w{2}/g );
 	if(str != null) {
@@ -40,16 +42,17 @@ logpresso.config(['$translateProvider', function ($translateProvider) {
 
 logpresso.run(function($rootScope, $location, socket, eventSender, serviceSession, $location, $translate, $q, promiseTracker, $filter) {
 	$location.path('/');
+	$rootScope.loadingTracker = promiseTracker('loadingTracker');
 
 	$rootScope.$on('$translateLoadingEnd', function(a) {
-		// console.log('$translateLoadingEnd', $translate.preferredLanguage(), $translate.proposedLanguage(), $translate.fallbackLanguage(), $translate.storage())
+		console.log('$translateLoadingEnd', $translate.preferredLanguage(), $translate.proposedLanguage(), $translate.fallbackLanguage(), $translate.storage() )
 	});
 
 	$rootScope.$on('$translateLoadingError', function() {
 		$translate.uses($translate.fallbackLanguage());
 	});
 	
-	$rootScope.loadingTracker = promiseTracker('loadingTracker');
+	
 	$rootScope.src = 'partials/login.html';
 
 	function route() {
@@ -171,37 +174,80 @@ logpresso.factory('eventSender', function($rootScope) {
 	var e = {
 		'root': {
 			'go': function(pack, program) {
-				console.log(arguments)
+
+				function programStatusChangeEvent() {
+					if(!e[program].events.unload) {
+						console.log('--- load!', program);
+						var pe = e[program].$event = new CustomEvent(e[program].events);
+						pe.on('unload', function() {
+							console.log('--- unload', program);
+						});
+
+						pe.on('suspend', function() {
+							console.log('--- suspend', program);
+						});
+
+						pe.on('resume', function() {
+							console.log('--- resume', program);
+						})
+					}
+					else {
+						e[program].events.resume();
+					}
+				}
+
+				var idxProgram = e.menu.recentPrograms.indexOf(pack + '@' + program);
+				if(idxProgram != -1) {
+					e.menu.recentPrograms.splice(idxProgram, 1);
+				}
+
+				if(e.menu.recentPrograms.length > 0) {
+					console.log('recentPrograms', e.menu.recentPrograms)
+					var lastest = e.menu.recentPrograms[e.menu.recentPrograms.length - 1];
+					var lastestP = lastest.split('@')[1];
+					e[lastestP].events.suspend();
+					console.log(e.menu.index[lastest], lastest, e.menu.index)
+					pageCache[e.menu.index[lastest]] = document.querySelector('.view');
+					document.querySelector('.view').parentNode.removeChild(pageCache[e.menu.index[lastest]])
+
+					// pageCache[e.menu.index[lastest]] = $('.view').detach();
+				}
+
+				e.menu.recentPrograms.push(pack + '@' + program);
+
+				if(!!e.menu.index) {
+					var idx = e.menu.index[pack + '@' + program];
+					if(pageCache[idx] != undefined) {
+						// have cached
+
+						console.log('pageCache')
+
+						$('body').append(pageCache[idx]);
+
+						delete pageCache[idx];
+
+						// programStatusChangeEvent();
+
+						return;
+					}
+				}
+
+
+
 				var deps = ['package/' + pack + '/' + program + '/' + program + '.js']
 				$script(deps, function() {
 					console.log('script loaded');
 					$rootScope.src = 'package/' + pack + '/' + program + '/index.html';
 					$rootScope.$apply();
 
-		if(!e[program].events.unload) {
-			console.log('--- load!', program);
-			var pe = e[program].$event = new CustomEvent(e[program].events);
-			pe.on('unload', function() {
-				console.log('--- unload', program);
-			});
-
-			pe.on('suspend', function() {
-				console.log('--- suspend', program);
-			});
-
-			pe.on('resume', function() {
-				console.log('--- resume', program);
-			})
-		}
-		else {
-			e[program].events.resume();
-		}
-
-				})
+					programStatusChangeEvent();
+				});
 				// console.log(arguments)
 			}
 		},
-		'menu': {},
+		'menu': {
+			'recentPrograms': []
+		},
 		'starter': { pid: 11 },
 		'dashboard': { pid: 22 },
 		'orgchart': { pid: 33 },
@@ -365,7 +411,10 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 		.success(function(m) {
 			$scope.programs.splice(0, $scope.programs.length);
 
-			m.body.programs.forEach(function(p) {
+			pageCache = new Array(m.body.programs.length);
+			eventSender.menu.index = {};
+
+			m.body.programs.forEach(function(p, index) {
 				p.packdll = (function() {
 					var found = m.body.packs.filter(function(pack) {
 						return pack.name == p.pack;
@@ -386,6 +435,7 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 
 					eventSender.root.onClose(p.packdll, p.path);
 				}
+				eventSender.menu.index[p.packdll + '@' + p.path] = index;
 				$scope.programs.push(p);
 			});
 
