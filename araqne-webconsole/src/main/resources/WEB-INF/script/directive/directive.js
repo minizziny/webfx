@@ -1304,7 +1304,10 @@
 	return {
 	    replace: true,
 	    restrict: 'E',
-	    scope: { checkboxes: '=' },
+	    scope: {
+	    	checkboxes: '=',
+	    	master: '=',
+		},
 	    template: '<div><input type="checkbox" class="masterCheckbox" ng-model="master" ng-change="masterChange()"></div>',
 	    link: function($scope, $element) {
 	    	$scope.master = false;
