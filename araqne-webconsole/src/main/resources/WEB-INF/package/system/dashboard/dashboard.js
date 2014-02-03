@@ -369,7 +369,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 	$scope.SaveAs = function() {
 		var newname = prompt($translate('$S_msg_SavePresetAs'));
-		if(newname == undefined) return;
+		if(newname == undefined || newname === '') return;
 
 		var newguid = serviceUtility.generateType2();
 		SavePreset(newguid, newname, $scope.currentPreset.state).success(function() {
@@ -388,7 +388,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 	$scope.New = function() {
 		var newname = prompt($translate('$S_msg_NewPresetName'));
-		if(newname == undefined) return;
+		if(newname == undefined || newname === '') return;
 
 		var newguid = serviceUtility.generateType2();
 		SavePreset(newguid, newname, { 
