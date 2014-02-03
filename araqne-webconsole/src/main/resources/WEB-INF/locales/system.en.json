@@ -139,7 +139,6 @@
 	"$S_str_ManageLogger": "Manage Loggers",
 	"$S_str_TimeoutAlert": "Do not use auto-ended period of time",
 
-
 	"--------login--------": "",
 	"$S_str_ID": "ID",
 	"$S_str_Login": "Login",
@@ -303,8 +302,6 @@
 	"$S_str_TableExistsMsg": "Table already exists.",
 
 	"$S_msg_CreateLoggerSuccess": "Created new logger {{p0}}",
-	"$S_msg_StopLoggerSuccess": "Stopped logger {{p0}}",
-	"$S_msg_StartLoggerSuccess": "Started logger {{p0}}",
 	"$S_msg_RemoveLoggerSuccess": "Deleted logger {{p0}}",
 
 	"$S_msg_LoggerNotFound": "Logger not found.",
@@ -414,7 +411,6 @@
 	"$S_str_RegexHelp": "Regular Expression Help",
 
 	"$S_str_UseLinePatternMatch": "Line Pattern matching",
-
 	
 	"--------regexhelp--------": "",
 	"$S_str_RegexHelp1": "A single character of: a, b, or c",
@@ -552,7 +548,6 @@
 	"$S_str_Failed": "Failed",
 
 	"--------config-----------": "",
-
 	"--------parser config-----------": "",
 	"$S_str_ParserSetting": "Parser Setting",
 	"$S_str_Parser": "Parser",
@@ -583,7 +578,6 @@
 	"$S_str_User": "User", 
 	"$S_str_ActiveMode": "Use Active mode", 
 	"$S_msg_RemoveFtpProfileConfirmPre": "Do you really want to delete FTP profile",
-
 
 	"--------ssh config-----------": "",
 	"$S_str_SshSetting": "SSH Setting",
@@ -631,7 +625,6 @@
 	"$S_str_RemoveCrypto": "Remove Crypto profile",
 	"$S_msg_RemoveCryptoConfirmPre": "Do you really want to delete Crypto profile",
 
-
 	"--------index cache config-----------": "",
 	"$S_str_IndexCacheSetting": "Index Cache Setting",
 	"$S_str_CleanIndexCache": "Remove Index Cache",
@@ -650,7 +643,6 @@
 	"$S_str_WebserverPort": "Webserver port",
 	"$S_str_RemoveNode": "Unregister node",
 	"$S_msg_RemoveNodeConfirmPre": "Do you really want to delete Node",	
-
 
 	"--------common config msg-----------": "",
 	"$S_msg_PleaseEnterProfileName": "Please enter profile name.",
