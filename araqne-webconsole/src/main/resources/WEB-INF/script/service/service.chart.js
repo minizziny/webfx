@@ -144,6 +144,9 @@ angular.module('app.chart', [])
 				}
 
 				if(m.isString) {
+					if(categories.indexOf(o.label) == -1) {
+						categories.push(o.label);
+					}
 					return {name: o.label, y: o.value };
 				}
 			})
@@ -193,8 +196,7 @@ angular.module('app.chart', [])
 				enabled: false
 			},
 			xAxis: {
-				type: m.type,
-				minTickInterval: 1000
+				type: m.type
 			},
 			yAxis: {
 				title: {
@@ -207,6 +209,14 @@ angular.module('app.chart', [])
 					animation: false
 				}
 			}
+		}
+
+		if(m.isString) {
+			console.log(categories, m.type)
+			c1.xAxis.categories = categories;
+		}
+		if(m.isDateTime) {
+			c1.xAxis.minTickInterval = 1000;
 		}
 
 		if(!underZero) {
