@@ -38,6 +38,9 @@ angular.module('app.filter', ['pascalprecht.translate'])
 		if(toString.call(val) == '[object String]') {
 			return val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>');
 		}
+		else if(toString.call(val) == '[object Object]' || toString.call(val) == '[object Array]') {
+			return JSON.stringify(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>');
+		}
 		else return val;
 	}
 })
