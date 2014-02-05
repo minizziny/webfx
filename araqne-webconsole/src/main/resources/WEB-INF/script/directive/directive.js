@@ -729,7 +729,7 @@
 			currentIndex: '@'
 		},
 		require: 'ngModel',
-		template: '<div class="pagination" ng-hide="ngTotalCount == 0">\
+		template: '<div class="pagination" ng-hide="ngTotalCount == 0" style="margin:0">\
 					<ul>\
 						<li>\
 							<a  ng-click="firstPage()">{{"$S_str_First" | translate}}</a>\
