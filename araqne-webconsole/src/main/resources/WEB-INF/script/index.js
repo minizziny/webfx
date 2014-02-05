@@ -468,3 +468,35 @@ function dashToCamel(str) {
 	})
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+function deferScroller(fn, interval, callback) {
+	var i = 0, direction, dy = 0, lastScrollTop = 0, currentScrollTop = 0;
+	var callbacker = function() {
+		dy = currentScrollTop - lastScrollTop;
+		lastScrollTop = currentScrollTop;
+
+		callback.call(this, i, direction, dy, currentScrollTop);
+		clearTimeout(timer);
+		i = 0;
+		timer = null;
+	}
+	var timer = setTimeout(callbacker, interval);
+	
+	return function(e) {
+		currentScrollTop = $(this).scrollTop();
+
+		if (currentScrollTop > lastScrollTop) {
+			direction = 'down';
+		}
+		else {
+			direction = 'up';
+		}
+
+		i++;
+		fn.call(this, e);
+		if(timer == null) {
+			timer = setTimeout(callbacker, interval); 
+		}
+	}
+}
+

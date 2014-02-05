@@ -75,4 +75,9 @@ angular.module('app.filter', ['pascalprecht.translate'])
 			return value.en;
 		}
 	}
+})
+.filter('suppresstable', function() {
+	return function(t) {
+		return (t.substring(0,5) === 'table') ? t.substring(6) : t;
+	}
 });
