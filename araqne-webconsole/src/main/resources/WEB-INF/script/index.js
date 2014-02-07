@@ -446,7 +446,7 @@ function throttle(fn, threshhold, scope) {
 	};
 }
 
-function computerFormatPrefix(val) {
+function computerFormatPrefix(val, precision) {
 	var computerFormatPrefixes = [ "", "K", "M", "G", "T", "P", "E", "Z", "Y" ];
 	function log1024(val) { return Math.log(val) / Math.log(1024); }
 
@@ -457,7 +457,7 @@ function computerFormatPrefix(val) {
 	else {
 		return {
 			symbol: computerFormatPrefixes[pow],
-			value: val/Math.pow(1024, pow)
+			value: (!!precision ? (val/Math.pow(1024, pow)).toFixed(precision) : val/Math.pow(1024, pow))
 		};
 	}
 }
