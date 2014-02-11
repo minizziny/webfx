@@ -271,7 +271,7 @@
 	"$S_msg_StartLoggerSuccess": "수집 설정 {{p0}}이 로그 수집을 시작합니다.",
 	"$S_msg_StopLoggerSuccess": "수집 설정 {{p0}}이 로그 수집을 중지합니다.",
 	"$S_str_LogTrend": "로그 발생 추이",
-	"$S_str_LogCountAfterBoot": "부팅 후 저장된 로그 수:",
+	"$S_str_LogCountAfterBoot": "로그 수:",
 	"$S_str_LogSize": "로그 사이즈",
 	"$S_str_LoggerProperty": "구성 내역",
 	"$S_str_Key": "키",
