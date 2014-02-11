@@ -27,18 +27,20 @@ logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $comp
 		$translate.uses('en');
 	})
 
-	$rootScope.$on('$locationChangeSuccess', function() {
-		function route() {
-			
-			var hash = $location.path();
+	$rootScope.$on('$locationChangeSuccess', function(loc, newurl, oldurl) {
+		var patt = /[^#(\/|\?)]+/g;
+		var oldHashSplit = oldurl.match(patt);
+		var newHashSplit = newurl.match(patt);
 
+		function route() {
+			var hash = $location.path();
 			var hashSplit = hash.split('/');
 			if(hash == '/') {
 				$location.path('/system/starter');
 			}
 
 			if(hashSplit.length > 2) {
-				eventSender.root.go(hashSplit[1], hashSplit[2], (hashSplit.length > 3 ? hashSplit[3] : null), (hashSplit.length > 3 ? $location.search() : null));
+				eventSender.root.go(newHashSplit, oldHashSplit);
 				if(!!eventSender.menu.onOpen) {
 					eventSender.menu.onOpen(hashSplit[2]);
 				}
@@ -144,7 +146,16 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 		}
 	}
 
-	eventSender.root.go = function(pack, program, action, args) {
+	eventSender.root.go = function(newl, oldl) {
+		var pack = newl[2];
+		var program = newl[3];
+
+		var oldpack = oldl[2];
+		var oldprogram = oldl[3];
+
+		var action = (newl.length > 4 ? newl[4] : null);
+		var args = (newl.length > 5 ? $location.search() : null);
+
 		if(program == '') {
 			return;
 		}
@@ -160,20 +171,26 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 			return;
 		}
 
-		angular.element('.view').hide();
-		angular.element('.view#view-' + program).show();
-
-		$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';
-
-		var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
-		if(idxProgram != -1) {
-			$scope.recentPrograms.splice(idxProgram, 1);
+		if(pack === oldpack && program === oldprogram) {
+			// same program
 		}
-		$scope.recentPrograms.push(program + '@' + pack);
+		else {
+			angular.element('.view').hide();
+			angular.element('.view#view-' + program).show();
 
-		if($scope.recentPrograms.length > 1) {
-			var lastest = $scope.recentPrograms[$scope.recentPrograms.length - 2].split('@')[0];
-			eventSender[lastest].$event.dispatchEvent('suspend');
+			$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';
+
+			var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
+			if(idxProgram != -1) {
+				$scope.recentPrograms.splice(idxProgram, 1);
+			}
+
+			$scope.recentPrograms.push(program + '@' + pack);
+
+			if($scope.recentPrograms.length > 1) {
+				var lastest = $scope.recentPrograms[$scope.recentPrograms.length - 2].split('@')[0];
+				eventSender[lastest].$event.dispatchEvent('suspend');
+			}	
 		}
 
 		if(!eventSender[program].events.unload) {
