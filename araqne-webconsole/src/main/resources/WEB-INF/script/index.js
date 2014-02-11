@@ -211,6 +211,10 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 				console.log('--- resume', program, action, args);
 			});
 
+			pe.on('action', function(action, args) {
+				console.log('--- action', program, action, args);
+			});
+
 			// 나중에 promiseTracker 방식으로 바꿔야 함
 			setTimeout(function() {
 				eventSender[program].$event.dispatchEvent('load', action, args);	
@@ -218,7 +222,12 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 			
 		}
 		else {
-			eventSender[program].$event.dispatchEvent('resume', action, args);
+			if(pack === oldpack && program === oldprogram) {
+				eventSender[program].$event.dispatchEvent('action', action, args);
+			}
+			else {
+				eventSender[program].$event.dispatchEvent('resume', action, args);	
+			}
 		}
 		
 
