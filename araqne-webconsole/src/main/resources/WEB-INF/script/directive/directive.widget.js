@@ -230,7 +230,7 @@ angular.module('app.directive.widget', [])
 				console.log(timer);
 				$timeout.cancel(timer);
 
-				scope.isPaused = false;
+				// scope.isPaused = false;
 
 				$timeout(run, 250);
 			}

@@ -631,3 +631,8 @@ input[type=search].input-search-table:focus {
 	width: calc(100% - 30px);
 	margin-bottom: 10px;
 }
+
+pager .popover {
+	display: block;
+	box-shadow: 0 5px 10px rgba(0,0,0,.1);
+}

@@ -31,13 +31,14 @@ logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $comp
 		function route() {
 			
 			var hash = $location.path();
+
 			var hashSplit = hash.split('/');
 			if(hash == '/') {
 				$location.path('/system/starter');
 			}
 
 			if(hashSplit.length > 2) {
-				eventSender.root.go(hashSplit[1], hashSplit[2]);
+				eventSender.root.go(hashSplit[1], hashSplit[2], (hashSplit.length > 3 ? hashSplit[3] : null), (hashSplit.length > 3 ? $location.search() : null));
 				if(!!eventSender.menu.onOpen) {
 					eventSender.menu.onOpen(hashSplit[2]);
 				}
@@ -126,7 +127,7 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 		var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
 		$scope.recentPrograms.splice(idxProgram, 1);
 
-		eventSender[program].events.unload();
+		eventSender[program].$event.dispatchEvent('unload');
 		eventSender[program].events = {};
 
 		if($scope.recentPrograms.length == 0) {
@@ -143,7 +144,7 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 		}
 	}
 
-	eventSender.root.go = function(pack, program) {
+	eventSender.root.go = function(pack, program, action, args) {
 		if(program == '') {
 			return;
 		}
@@ -172,12 +173,15 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 
 		if($scope.recentPrograms.length > 1) {
 			var lastest = $scope.recentPrograms[$scope.recentPrograms.length - 2].split('@')[0];
-			eventSender[lastest].events.suspend();	
+			eventSender[lastest].$event.dispatchEvent('suspend');
 		}
 
 		if(!eventSender[program].events.unload) {
-			console.log('--- load!', program);
 			var pe = eventSender[program].$event = new CustomEvent(eventSender[program].events);
+			pe.on('load', function(action, args) {
+				console.log('--- load!', program, action, args);
+			});
+
 			pe.on('unload', function() {
 				console.log('--- unload', program);
 			});
@@ -186,12 +190,18 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 				console.log('--- suspend', program);
 			});
 
-			pe.on('resume', function() {
-				console.log('--- resume', program);
-			})
+			pe.on('resume', function(action, args) {
+				console.log('--- resume', program, action, args);
+			});
+
+			// 나중에 promiseTracker 방식으로 바꿔야 함
+			setTimeout(function() {
+				eventSender[program].$event.dispatchEvent('load', action, args);	
+			}, 300);
+			
 		}
 		else {
-			eventSender[program].events.resume();
+			eventSender[program].$event.dispatchEvent('resume', action, args);
 		}
 		
 
@@ -446,7 +456,7 @@ function throttle(fn, threshhold, scope) {
 	};
 }
 
-function computerFormatPrefix(val) {
+function computerFormatPrefix(val, precision) {
 	var computerFormatPrefixes = [ "", "K", "M", "G", "T", "P", "E", "Z", "Y" ];
 	function log1024(val) { return Math.log(val) / Math.log(1024); }
 
@@ -457,7 +467,7 @@ function computerFormatPrefix(val) {
 	else {
 		return {
 			symbol: computerFormatPrefixes[pow],
-			value: val/Math.pow(1024, pow)
+			value: (!!precision ? (val/Math.pow(1024, pow)).toFixed(precision) : val/Math.pow(1024, pow))
 		};
 	}
 }
@@ -468,3 +478,35 @@ function dashToCamel(str) {
 	})
 	return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+function deferScroller(fn, interval, callback) {
+	var i = 0, direction, dy = 0, lastScrollTop = 0, currentScrollTop = 0;
+	var callbacker = function() {
+		dy = currentScrollTop - lastScrollTop;
+		lastScrollTop = currentScrollTop;
+
+		callback.call(this, i, direction, dy, currentScrollTop);
+		clearTimeout(timer);
+		i = 0;
+		timer = null;
+	}
+	var timer = setTimeout(callbacker, interval);
+	
+	return function(e) {
+		currentScrollTop = $(this).scrollTop();
+
+		if (currentScrollTop > lastScrollTop) {
+			direction = 'down';
+		}
+		else {
+			direction = 'up';
+		}
+
+		i++;
+		fn.call(this, e);
+		if(timer == null) {
+			timer = setTimeout(callbacker, interval); 
+		}
+	}
+}
+

@@ -219,7 +219,8 @@
 
 			scope.$watch(attrs.treeData, function(val) {				
 				var template = angular.element(
-					'<div class="tree-container"><input type="search" placeholder="' + attrs.treeSearchPlaceholder + '" ng-model="filterValue"/>' + 
+					'<div class="tree-container">' +
+					(attrs.displaySearch == 'false' ? '' : '<input type="search" placeholder="' + attrs.treeSearchPlaceholder + '" ng-model="filterValue"/>') + 
 					'<ul class="nav nav-list tree-root">\
 						<li ng-repeat="node in ' + attrs.treeData + ' | filter: filterItem"\
 							ng-class="{\'active\': node.isSelected}"\
@@ -228,6 +229,7 @@
 							node-parent="{{node.' + attrs.nodeParent + '}}">\
 							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)">\
 								<tree-toggle></tree-toggle>\
+								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>\
 								<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' +
 								indiRefresh +
 								iconRefresh +
@@ -729,7 +731,7 @@
 			currentIndex: '@'
 		},
 		require: 'ngModel',
-		template: '<div class="pagination" ng-hide="ngTotalCount == 0">\
+		template: '<div class="pagination" ng-hide="ngTotalCount == 0" style="margin:0">\
 					<ul>\
 						<li>\
 							<a  ng-click="firstPage()">{{"$S_str_First" | translate}}</a>\
@@ -737,7 +739,7 @@
 					</ul>\
 					<ul>\
 						<li>\
-							<a ng-click="prevPage()">&lt;&lt;</a>\
+							<a ng-click="prevPage()" style="letter-spacing:-3px">&lt;&lt;</a>\
 						</li>\
 						<li>\
 							<a ng-click="prevOnePage()">&lt;</a>\
@@ -751,7 +753,7 @@
 							<a ng-click="nextOnePage()">&gt;</a>\
 						</li>\
 						<li>\
-							<a ng-click="nextPage()">&gt;&gt;</a>\
+							<a ng-click="nextPage()" style="letter-spacing:-3px">&gt;&gt;</a>\
 						</li>\
 					</ul>\
 					<ul>\
@@ -759,7 +761,7 @@
 							<a  ng-click="lastPage()">{{"$S_str_Last" | translate}}(<span>{{totalIndexCount}}</span>)</a>\
 						</li>\
 					</ul>\
-					<button class="btn btn-mini" style="vertical-align: top; margin: 2px 5px 0px 0px" ng-click="openJumpPopup($event)"><i class="icon-share-alt"></i></button>\
+					<button class="btn btn-small" style="vertical-align: top; margin: 2px 5px 0px 0px" ng-click="openJumpPopup($event)"><i class="icon-share-alt"></i></button>\
 					<div style="position: relative; float: right">\
 						<div class="popover top" style="display:block; left: -235px; top: -130px" ng-show="isShowJumpPopup" ng-click="stopPropagation($event)">\
 							<div class="arrow" style="left:94%"></div>\
