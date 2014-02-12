@@ -25,7 +25,17 @@ logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $comp
 
 	$rootScope.$on('$translateLoadingError', function() {
 		$translate.uses('en');
-	})
+	});
+
+	$rootScope.suppressEvent = function(e) {
+		e.stopPropagation();
+	}
+
+	$rootScope.actions = {
+		'move_to': function(args) {
+			location.href = args['move_to'];
+		}
+	}
 
 	$rootScope.$on('$locationChangeSuccess', function(loc, newurl, oldurl) {
 		var patt = /[^#(\/|\?)]+/g;
