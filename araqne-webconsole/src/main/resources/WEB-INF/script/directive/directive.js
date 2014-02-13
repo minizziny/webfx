@@ -52,24 +52,23 @@
 .directive('trSelectable', function() {
 	return {
 		restrict: 'A',
-		link: function(scope, element, attrs) {
-			var parentTbody = element.parent();
-			element.on('click', function() {
+		link: function(scope, el, attrs) {
+			var expression = attrs.trSelectable;
+			var match = expression.match(/^\s*(.+)\s+\=\s+(.*)\s*$/), lhs, rhs;
+			if (! match) {
+				throw new Error("Expected trSelectable in form of '_storageTargetVariable_ = _item_' but got '" + expression + "'.");
+				return;
+			}
+			
+			lhs = match[1];
+			rhs = match[2];
+
+			var parentTbody = el.parent();
+			el.on('click.tr-selectable', function() {
 				parentTbody.find('tr.tr-selected').removeClass('tr-selected');
-				element.addClass('tr-selected');
-				var radio = element.find('input[type=radio]');
-				radio.prop('checked', true);
-				if(scope.$parent.hasOwnProperty(attrs.trSelectable)) {
-					scope.$parent[attrs.trSelectable] = radio.val();
-				}
-				else {
-					if(scope.$parent.$parent.hasOwnProperty(attrs.trSelectable)) {
-						scope.$parent.$parent[attrs.trSelectable] = radio.val();
-					}
-					else {
-						alert('not binding')
-					}
-				}
+				el.addClass('tr-selected');
+
+				scope.$parent[lhs] = scope.$eval(rhs);
 				scope.$apply();
 			});
 		}
