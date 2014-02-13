@@ -135,7 +135,11 @@ angular.module('app.connection', ['app.utility'])
 	var msgmap = {}
 
 	function initialize() {
-		var ws = new WebSocket('ws://' + location.host + '/websocket');
+		var protocol = 'ws://';
+		if( location.protocol === 'https:' ) {
+			protocol = 'wss://';	
+		}
+		var ws = new WebSocket(protocol + location.host + '/websocket');
 		// var ws = new WebSocket('ws://172.20.0.10:8888/websocket');
 		ws.onmessage = function(e) {
 			onMessageReceived(e.data);
