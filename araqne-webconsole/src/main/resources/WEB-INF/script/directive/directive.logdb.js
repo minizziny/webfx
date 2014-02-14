@@ -4,10 +4,8 @@ angular.module('app.directive.logdb', [])
 		restrict: 'E',
 		scope: {
 			onLoading: '&',
-			onPageLoaded: '&',
 			onLoaded: '&',
 			onStatusChange: '&',
-			onTimeline: '&',
 			ngTemplate: '=ngTemplate',
 			ngPageSize: '&',
 			ngQueryString: '=',
@@ -17,7 +15,6 @@ angular.module('app.directive.logdb', [])
 			<button class="search btn btn-primary">{{ "$S_str_Run" | translate}}</button>\
 			<button class="stop btn btn-warning">{{ "$S_str_Stop" | translate}}</button>',
 		link: function(scope, element, attrs) {
-			var autoflush = attrs.isAutoFlush;
 			var textarea = element.find('textarea');
 			
 			
@@ -47,36 +44,23 @@ angular.module('app.directive.logdb', [])
 				});
 			}
 
-			function pageLoadedFn(m) {
+			function getResultFn(m) {
 				scope.$parent[attrs.ngModel] = m.body.result;
-
-				if(autoflush != 'false') {
-					serviceLogdb.remove(z);	
-					element.removeClass('loading').addClass('loaded');
-				}
-
-				scope.onPageLoaded({
-					'$msg': m
-				});
 				scope.$parent.$apply();
 			}
 
 			function loadedFn(m) {
 				element.removeClass('loading').addClass('loaded');
 				scope.onLoaded({
-					'$msg': m
-				});
-			}
-
-			function onTimelineFn(m) {
-				scope.onTimeline({
-					'$msg': m
+					'$msg': m,
+					'$inst': z
 				});
 			}
 
 			function onStatusChangeFn(m) {
 				scope.onStatusChange({
-					'$msg': m
+					'$msg': m,
+					'$inst': z
 				});
 			}
 
@@ -101,19 +85,14 @@ angular.module('app.directive.logdb', [])
 				z.query(scope.ngQueryString.replace(/\n/gi, ' '), limit)
 				.created(createdFn)
 				.started(startedFn)
-				.pageLoaded(pageLoadedFn)
-				.getResult(pageLoadedFn)
+				.getResult(getResultFn)
 				.loaded(loadedFn)
-				.onTimeline(onTimelineFn)
 				.onStatusChange(onStatusChangeFn)
 				.failed(failedFn)
 			}
 
 			function stop() {
 				element.removeClass('loading').addClass('loaded');
-				if(autoflush != 'false') {
-					serviceLogdb.remove(z);	
-				}
 
 				z.stop()
 				.success(function() {
@@ -148,10 +127,8 @@ angular.module('app.directive.logdb', [])
 				})
 				.created(createdFn)
 				.started(startedFn)
-				.pageLoaded(pageLoadedFn)
-				.getResult(pageLoadedFn)
+				.getResult(getResultFn)
 				.loaded(loadedFn)
-				.onTimeline(onTimelineFn)
 				.onStatusChange(onStatusChangeFn)
 				.failed(failedFn);
 
