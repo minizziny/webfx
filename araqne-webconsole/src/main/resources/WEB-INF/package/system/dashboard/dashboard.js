@@ -856,22 +856,35 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	$scope.qrCols;
 	$scope.isPageLoaded = false;
 
+	var isStopped = false;
+
 	$scope.inputOnloading = function() {
 		$('.qr1')[0].hideTable();
 		$('.qr1')[0].newSearch();
+		isStopped = false;
 	}
+	
+	$scope.inputOnStatusChange = function(m, instance) {
+		if( (m.body.type === 'eof') || ((m.body.type === 'status_change') && m.body.count > $scope.numPagerPagesize) ) {
+			if(isStopped) return;
+			instance.stop(); // instant search
+			isStopped = true;
 
-	$scope.inputOnpageloaded = function(m) {
-		$('.qr2.qr-select-table')[0].getColumns(function(cols) {
-			$scope.qrCols = cols;
-			$('.qr1')[0].showTable();
-			$scope.isPageLoaded = true;
-		});
-		
-	}
+			instance.getResult(0, $scope.numPagerPagesize, function() {
+				// console.log('getResult');
 
-	$scope.inputOnloaded = function() {
-		$('.wiz-next.btn:eq(1)').focus();
+				$('.qr2.qr-select-table')[0].getColumns(function(cols) {
+					// console.log('getColumns')
+					$scope.qrCols = cols;
+					$('.qr1')[0].showTable();
+					$scope.isPageLoaded = true;
+
+					$('.wiz-next.btn:eq(1)').focus();
+				});
+
+				$scope.$apply();
+			});
+		}
 	}
 
 	var wtypes = [

@@ -119,8 +119,8 @@
 							ng-query-string="ctxWidget.data.query"
 							ng-pid="getPid"
 							on-loading="inputOnloading($msg)"
-							on-loaded="inputOnloaded($msg)"
-							on-page-loaded="inputOnpageloaded()"></query-input>
+							on-loaded="inputOnStatusChange($msg, $inst)"
+							on-status-change="inputOnStatusChange($msg, $inst)"></query-input>
 						<div class="qr-container" style="width: 880px">
 							<query-result class="qr1"
 								ng-model="qresult"
