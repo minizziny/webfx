@@ -144,13 +144,65 @@ code {
 	font-size: 21px;
 }
 
-.wizard > li, .wizard-parser > li, .wizard-index > li, .wizard-transformer > li {
+.wizard > li, .wizard-parser > li, .wizard-index > li, .wizard-transformer > li, .wizard-scheduled-query > li {
 	display: none;
 }
 
-.wizard > li.active, .wizard-parser > li.active, .wizard-index > li.active, .wizard-transformer > li.active {
+.wizard > li.active, .wizard-parser > li.active, .wizard-index > li.active, .wizard-transformer > li.active, .wizard-scheduled-query > li.active {
 	display: block;
 }
+
+.wizard-scheduled-cron {
+	margin: 0px;
+	margin-bottom: 20px;
+	padding: 0px;
+	float: left !important;
+	width: 70px !important;
+}
+
+.wizard-scheduled-cron > li {
+	list-style: none;
+    margin:0px; 
+    padding:5px;
+    border-right: 1px solid #ccc;
+}
+
+.wizard-scheduled-cron > li > input {
+	margin: 0px;
+	margin-right: 5px;
+	margin-left: 5px;
+}
+
+.wizard-scheduled-cron-detail {
+	float: left;
+	padding-left: 10px;
+	margin-left: 0px;
+}
+
+.wizard-scheduled-cron-detail > li {
+	display: none;
+}
+
+.wizard-scheduled-cron-detail > li.active {
+	display: block;
+}
+
+
+.wizard-scheduled-cron-detail > li > div > input {
+	margin: 0px;
+	margin-right: 5px;
+	margin-left: 5px;	
+}
+
+
+.wizard-text {
+	width: 30px;
+}
+
+.wizard-select {
+	width: 100px;
+}
+
 
 tree-root .hide {
 	display: none;
