@@ -4,14 +4,14 @@ angular.module('app', [])
 		restrict: 'E',
 		template: '<div class="input-tags">' +
 			'<div class="input-tags-cont" ng-click="focus()">' +
-				'<span class="tags" ng-repeat="tag in tags">' +
+				'<span class="tags" ng-repeat="tag in tags" ng-click="stopPropagation($event)">' +
 					'<span contenteditable="true" class="term"></span>' +
 					'<a class="tag-text">{{tag}}</a>' +
 				'</span>' +
 				'<span contenteditable="true" class="term last"></span>' +
 			'</div>' +
 			'<ul>' +
-				'<li ng-repeat="src in sources | filter:filter"><a>{{src}}</a></li>' +
+				'<li ng-repeat="src in sources | filter:filter" ng-class="{\'active\': src == selected}"><a>{{src}}</a></li>' +
 			'</ul>' +
 			'{{inputText}}' +
 		'</div>',
@@ -26,16 +26,19 @@ angular.module('app', [])
 				'right': 39,
 				'up': 38,
 				'down': 40,
-				'backspace' 8,
+				'backspace': 8,
 				'space': 32,
 				'enter': 18,
 				'comma': 188
 			};
 
+			scope.stopPropagation = function(e) {
+				e.stopPropagation();
+			}
+
 			scope.filter = function(item) {
 				if (!scope.inputText) return true;
-				var found = item.toLowerCase().indexOf(scope.inputText.toLowerCase()) != -1;
-				return found;
+				return item.toLowerCase().indexOf(scope.inputText.toLowerCase()) != -1;
 			}
 
 			scope.focus = function() {
@@ -58,29 +61,63 @@ angular.module('app', [])
 			});
 
 
-			function SuggestionList() {
-				this.selectPrev = function() {
+			scope.selected;
 
+			function SuggestionList(source, filterFn) {
+				var selected, idx = 0;
+				
+				this.selectPrev = function() {
+					var src = source.filter(filterFn);
+					if(!selected || src[--idx] === undefined) {
+						selected = src[src.length - 1];
+						idx = src.length - 1;
+					}
+					else {
+						selected = src[idx];
+					}
+					return selected;
 				}
 
 				this.selectNext = function() {
-					
+					var src = source.filter(filterFn);
+					if(!selected || src[++idx] === undefined) {
+						idx = 0;
+						selected = src[0];
+					}
+					else {
+						selected = src[idx];
+					}
+					return selected;
 				}
+
+				this.unselect = function() {
+					selected = undefined;
+					idx = 0;
+					return selected;
+				}
+
 			}
 
-			var suggestionList = new SuggestionList();
+			var suggestionList = new SuggestionList(scope.sources, scope.filter);
 
 			$tl.on('change', function(e) {
 				console.log('onchange', e);
+				scope.selected = suggestionList.unselect();
+				scope.$apply();
 			})
 			.on('keydown', function(e) {
+				console.log('keydown')
 				var key = e.keyCode;
 				if(key === KEYS.up) {
-					suggestionList.selectPrev();
+					scope.selected = suggestionList.selectPrev();
+					e.preventDefault();
 				}
 				else if (key === KEYS.down) {
-					suggestionList.selectNext();
+					scope.selected = suggestionList.selectNext();
 				}
+				console.log(scope.selected)
+
+				scope.$apply();
 			});
 		}
 	}
