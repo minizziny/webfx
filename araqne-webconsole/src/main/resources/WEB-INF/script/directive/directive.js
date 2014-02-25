@@ -771,7 +771,7 @@
 							</form></div>\
 						</div>\
 					</div>\
-					<div style="display:none"><br>\
+					<div style="display:none; position:fixed; top: 30px; right:0; width: 200px; height:auto"><br>\
 					ngTotalCount: {{ngTotalCount}}<br>\
 					ngItemsPerPage: {{ngItemsPerPage}}<br>\
 					ngPageSize: {{ngPageSize}}<br>\
@@ -930,23 +930,23 @@
 				render();
 			});
 
-			scope.$watch('ngItemsPerPage', function(val) {
+			// scope.$watch('ngItemsPerPage', function(val) {
 
-				var totalPageCount = getTotalPageCount();
-				if(scope.currentIndex > totalPageCount - 1) {
-					scope.currentIndex = totalPageCount - 1;
-					changePage(scope.currentIndex);
-				}
+			// 	var totalPageCount = getTotalPageCount();
+			// 	if(scope.currentIndex > totalPageCount - 1) {
+			// 		scope.currentIndex = totalPageCount - 1;
+			// 		changePage(scope.currentIndex);
+			// 	}
 
-				// console.log(getTotalPageCount(), scope.ngPageSize, scope.currentPage, getLastPage())
+			// 	// console.log(getTotalPageCount(), scope.ngPageSize, scope.currentPage, getLastPage())
 
-				if(getLastPage() < scope.currentPage) {
-					scope.currentPage = getLastPage();
-				}
+			// 	if(getLastPage() < scope.currentPage) {
+			// 		scope.currentPage = getLastPage();
+			// 	}
 
-				render();
-				scope.$parent.$eval(attr.onItemsPerPageChange);
-			});
+			// 	render();
+			// 	scope.$parent.$eval(attr.onItemsPerPageChange);
+			// });
 
 			scope.isShowJumpPopup = false;
 
