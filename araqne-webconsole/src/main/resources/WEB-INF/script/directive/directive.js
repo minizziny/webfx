@@ -125,6 +125,8 @@
 		restrict: 'E',
 		link: function (scope, element, attrs)
 		{	
+			var htmlstring = element.html();
+			var isEmpty = htmlstring.trim() === '';
 			var iconRefresh = '<button ng-click="childRefresh($event)" el-type="refresh" class="icon pull-right" style="display:none">\
 				<i class="icon-refresh" style="margin-top:0"></i>\
 			</button>';
@@ -143,8 +145,8 @@
 							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)">\
 								<input type="checkbox" ng-show="node.is_edit_mode">\
 								<tree-toggle is-collapsed="node.isCollapsed"></tree-toggle>\
-								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>\
-								<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' +
+								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
+								(isEmpty ? '<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' : htmlstring) +
 								indiRefresh +
 								iconRefresh +
 							'</a>\
@@ -154,15 +156,17 @@
 								node-icon="' + attrs.nodeIcon + '"\
 								node-icon-class="' + attrs.nodeIconClass + '"\
 								node-name="' + attrs.nodeName + '"\
-								node-parent="' + attrs.nodeParent + '">\
-							</tree-element>\
+								node-parent="' + attrs.nodeParent + '">' +
+								(isEmpty ? '' : htmlstring) +
+							'</tree-element>\
 						</li>\
 					</ul>');
 				
 				var linkFunction = $compile(template);
 				linkFunction(scope);
 				// element.replaceWith( template );
-				element.append(template);
+				// element.append(template);
+				element.html(null).append( template );
 			}
 			else {
 				element.remove();
@@ -210,6 +214,8 @@
 	return {
 		restrict: 'E',
 		link: function (scope, element, attrs) {
+			var htmlstring = element.html();
+			var isEmpty = htmlstring.trim() === '';
 			var iconRefresh = '<button ng-click="childRefresh($event)" el-type="refresh" class="icon pull-right" style="display:none">\
 				<i class="icon-refresh" style="margin-top:0"></i>\
 			</button>';
@@ -228,8 +234,8 @@
 							node-parent="{{node.' + attrs.nodeParent + '}}">\
 							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)">\
 								<tree-toggle></tree-toggle>\
-								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>\
-								<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' +
+								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
+								(isEmpty ? '<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' : htmlstring) +
 								indiRefresh +
 								iconRefresh +
 							'</a>\
@@ -239,8 +245,9 @@
 								node-icon="' + attrs.nodeIcon + '"\
 								node-icon-class="' + attrs.nodeIconClass + '"\
 								node-name="' + attrs.nodeName + '"\
-								node-parent="' + attrs.nodeParent + '">\
-							</tree-element>\
+								node-parent="' + attrs.nodeParent + '">' +
+								(isEmpty ? '' : htmlstring) +
+							'</tree-element>\
 						</li>\
 					</ul></div>');
 				
