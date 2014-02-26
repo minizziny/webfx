@@ -657,7 +657,7 @@
 				var option = scope.$eval(attrs.ngUnique);
 				if(option.condition) {
 					var has = option.source.some(function(obj) {
-						return obj[option.property] == value;
+						return $parse(option.property)(obj) === value;
 					});
 
 					ctrl.$setValidity('unique', !has);
