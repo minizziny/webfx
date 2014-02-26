@@ -220,6 +220,42 @@
 	"$S_str_Week": "일주일",
 	"$S_str_Month": "한달",
 
+	"--------streamquery---------": "",
+	"$S_str_Stream": "스트림",
+	"$S_str_Scheduled": "예약",
+	"$S_str_Saved": "불러오기",
+	"$S_str_Background": "백그라운드",
+
+	"$S_str_AddStreamQuery": "새 스트림 쿼리 추가",
+	"$S_str_LoggerType": "로거 타입",
+	"$S_str_TableType": "테이블 타입",
+	"$S_str_StreamQueryType": "스트림 쿼리 타입",
+	"$S_msg_LoggerType": "로그 수집 설정을 통해 생성한 로거를 입력으로 사용합니다. 수집되는 모든 로그가 스트림 쿼리에 입력됩니다.",
+	"$S_msg_TableType": "테이블에 새로운 행(row)이 쓰여질 때마다 스트림 쿼리에 입력됩니다. 관계형 데이터베이스(RDBMS)에서 사용하던 트리거의 진화된 사용 예로 생각할 수 있습니다.",
+	"$S_msg_StreamQueryType": "다른 스트림 쿼리의 출력을 입력으로 사용할 수 있습니다. ",
+
+	"$S_str_ListView": "목록 보기",
+	"$S_str_Layout": "레이아웃",
+	"$S_str_InputCount": "입력 카운트",
+	"$S_str_LastRefresh": "최근 갱신",
+
+	"$S_msg_PleaseEnterStreamQueryName": "이름을 입력하세요",
+	"$S_msg_NameUniqueError": "이미 존재하는 이름입니다.",
+	"$S_msg_IntervalRequiredError": "실행 주기는 반드시 필요합니다.",
+	"$S_msg_MinusIntervalError": "실행주기는 0 이상이어야 합니다.",
+
+	"$S_msg_QueryRequiredError": "쿼리는 반드시 필요합니다.",
+	"$S_msg_OneMoreSourceRequiredError": "하나 이상의 소스가 필요합니다.",
+
+	"$S_str_QueryString": "쿼리 문자열",
+	"$S_str_StreamQuery": "스트림 쿼리",
+	"$S_str_Enabled": "활성화",
+
+	"$S_str_RemoveThisStreamQuery": "이 스트림 쿼리 삭제",
+	"$S_str_RemoveStreamQueries": "스트림 쿼리 삭제",
+	"$S_msg_ConfirmRemoveStreamQueriesPre": "정말 스트림 쿼리 ",
+	"$S_msg_ConfirmRemoveStreamQueriesPost": "를 삭제하시겠습니까?",
+
 	"--------logsource--------": "",
 	"$S_str_Logger": "로거",
 	"$S_str_LoggerTree": "로컬 수집 설정",

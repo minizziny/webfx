@@ -148,7 +148,7 @@ angular.module('app.directive.widget', [])
 			</div>\
 			<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
 				<div class="property-inner" ng-click="stopPropagation($event)">\
-					<code>{{query}}</code><br/>\
+					<code style="display:inline-block">{{query}}</code><br/>\
 					{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
 					<span click-to-edit type="number" ng-model="interval" ng-change="onIntervalChange($event, $new, $old)" ng-cancel="onCancel()"></span>\
 					{{"$S_msg_QueryRunInterval" | translate}}\

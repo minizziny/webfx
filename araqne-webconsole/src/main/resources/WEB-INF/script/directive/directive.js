@@ -52,24 +52,23 @@
 .directive('trSelectable', function() {
 	return {
 		restrict: 'A',
-		link: function(scope, element, attrs) {
-			var parentTbody = element.parent();
-			element.on('click', function() {
+		link: function(scope, el, attrs) {
+			var expression = attrs.trSelectable;
+			var match = expression.match(/^\s*(.+)\s+\=\s+(.*)\s*$/), lhs, rhs;
+			if (! match) {
+				throw new Error("Expected trSelectable in form of '_storageTargetVariable_ = _item_' but got '" + expression + "'.");
+				return;
+			}
+			
+			lhs = match[1];
+			rhs = match[2];
+
+			var parentTbody = el.parent();
+			el.on('click.tr-selectable', function() {
 				parentTbody.find('tr.tr-selected').removeClass('tr-selected');
-				element.addClass('tr-selected');
-				var radio = element.find('input[type=radio]');
-				radio.prop('checked', true);
-				if(scope.$parent.hasOwnProperty(attrs.trSelectable)) {
-					scope.$parent[attrs.trSelectable] = radio.val();
-				}
-				else {
-					if(scope.$parent.$parent.hasOwnProperty(attrs.trSelectable)) {
-						scope.$parent.$parent[attrs.trSelectable] = radio.val();
-					}
-					else {
-						alert('not binding')
-					}
-				}
+				el.addClass('tr-selected');
+
+				scope.$parent[lhs] = scope.$eval(rhs);
 				scope.$apply();
 			});
 		}
@@ -658,7 +657,7 @@
 				var option = scope.$eval(attrs.ngUnique);
 				if(option.condition) {
 					var has = option.source.some(function(obj) {
-						return obj[option.property] == value;
+						return $parse(option.property)(obj) === value;
 					});
 
 					ctrl.$setValidity('unique', !has);
@@ -772,7 +771,7 @@
 							</form></div>\
 						</div>\
 					</div>\
-					<div style="display:none"><br>\
+					<div style="display:none; position:fixed; top: 30px; right:0; width: 200px; height:auto"><br>\
 					ngTotalCount: {{ngTotalCount}}<br>\
 					ngItemsPerPage: {{ngItemsPerPage}}<br>\
 					ngPageSize: {{ngPageSize}}<br>\
@@ -931,23 +930,23 @@
 				render();
 			});
 
-			scope.$watch('ngItemsPerPage', function(val) {
+			// scope.$watch('ngItemsPerPage', function(val) {
 
-				var totalPageCount = getTotalPageCount();
-				if(scope.currentIndex > totalPageCount - 1) {
-					scope.currentIndex = totalPageCount - 1;
-					changePage(scope.currentIndex);
-				}
+			// 	var totalPageCount = getTotalPageCount();
+			// 	if(scope.currentIndex > totalPageCount - 1) {
+			// 		scope.currentIndex = totalPageCount - 1;
+			// 		changePage(scope.currentIndex);
+			// 	}
 
-				// console.log(getTotalPageCount(), scope.ngPageSize, scope.currentPage, getLastPage())
+			// 	// console.log(getTotalPageCount(), scope.ngPageSize, scope.currentPage, getLastPage())
 
-				if(getLastPage() < scope.currentPage) {
-					scope.currentPage = getLastPage();
-				}
+			// 	if(getLastPage() < scope.currentPage) {
+			// 		scope.currentPage = getLastPage();
+			// 	}
 
-				render();
-				scope.$parent.$eval(attr.onItemsPerPageChange);
-			});
+			// 	render();
+			// 	scope.$parent.$eval(attr.onItemsPerPageChange);
+			// });
 
 			scope.isShowJumpPopup = false;
 
