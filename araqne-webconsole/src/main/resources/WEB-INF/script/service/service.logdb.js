@@ -313,13 +313,11 @@ angular.module('app.logdb', [])
 		/* End QueryClass */
 	}
 
-	function save(string, owner) {
+	function save(string) {
 		socket.send('com.logpresso.core.msgbus.QueryHistoryPlugin.saveQuery', {
-			'query': string, 'owner': owner
+			'query': string
 		}, proc.pid)
 		.success(function(m) {
-			console.log("query: " + string);
-			// console.log("owner: " + owner);
 		})
 		.failed(function(m, raw) {
 			console.log(raw, 'cannot save query');
