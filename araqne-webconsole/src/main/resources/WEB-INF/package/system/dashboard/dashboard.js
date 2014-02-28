@@ -60,7 +60,7 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 	$(window).on('resize', debounce(redraw, 200));
 }
 
-function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
+function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility, serviceSession) {
 	function setObjectValue(object, ns, value) {
 		function retObject(object, keys, value) {
 			if(keys.length == 1) {
@@ -232,8 +232,9 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	function InitAutosave() {
+		var amIRoot = serviceSession.whoAmI() === 'root';
 		return socket.send("com.logpresso.core.msgbus.WallPlugin.setPreset", 
-			{ "guid": "autosave", "name": $translate('$S_str_Autosave'), "state": { "widgets": [] } }
+			{ "guid": "autosave" + (amIRoot ? '' : ('_' + serviceSession.whoAmI())), "name": $translate('$S_str_Autosave'), "state": { "widgets": [] } }
 		, eventSender.dashboard.pid);
 	}
 
@@ -411,8 +412,9 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	$scope.Remove = function() {
+		var amIRoot = serviceSession.whoAmI() === 'root';
 		RemovePresets($scope.currentPreset.guid).success(function() {
-			LoadPreset('autosave');
+			LoadPreset( ( amIRoot ? 'autosave' : ('autosave_' + serviceSession.whoAmI()) ) );
 			$('.removePreset')[0].hideDialog();
 		});
 	}
@@ -443,7 +445,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 		GetPresetList(function() {
 			for (var i = $scope.dataPresetList.length - 1; i >= 0; i--) {
-				if($scope.dataPresetList[i].guid == "autosave") {
+				if($scope.dataPresetList[i].guid.indexOf("autosave") === 0) {
 					$scope.currentPreset = $scope.dataPresetList[i];
 					LoadPreset($scope.dataPresetList[i].guid);
 					break;
