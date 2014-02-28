@@ -115,21 +115,40 @@ public class InitialSchema {
 			}
 		}
 
-		List<Program> programs = new ArrayList<Program>();
-		programs.add(createProgram(context, programApi, "Home", "Home", "홈", "starter", 1));
-		programs.add(createProgram(context, programApi, "Dashboard", "Dashboard", "대시보드", "dashboard", 2));
-		programs.add(createProgram(context, programApi, "Account", "Account", "계정관리", "orgchart", 3));
-		programs.add(createProgram(context, programApi, "Auditlog", "Auditlog", "감사로그", "auditlog", 4));
-		// programs.add(createProgram(context, programApi, "Task Manager", "Task Manager", "작업관리자", "taskmanager", 5));
-		// programs.add(createProgram(context, programApi, "Run", "Run", "실행", "run", 6));
-		// programs.add(createProgram(context, programApi, "Developer Console", "Developer Console", "개발자콘솔", "devconsole", 7));
+		Program home = createProgram(context, programApi, "Home", "Home", "홈", "starter", 1);
+		Program dashBoard = createProgram(context, programApi, "Dashboard", "Dashboard", "대시보드", "dashboard", 2);
+		Program account = createProgram(context, programApi, "Account", "Account", "계정관리", "orgchart", 3);
+		Program auditLog = createProgram(context, programApi, "Auditlog", "Auditlog", "감사로그", "auditlog", 4);
+		Program taskManager = createProgram(context, programApi, "Task Manager", "Task Manager", "작업관리자", "taskmanager", 5);
+		Program run = createProgram(context, programApi, "Run", "Run", "실행", "run", 6);
+		Program devConsole = createProgram(context, programApi, "Developer Console", "Developer Console", "개발자콘솔", "devconsole",
+				7);
+
+		List<Program> allPrograms = new ArrayList<Program>();
+		allPrograms.add(home);
+		allPrograms.add(dashBoard);
+		allPrograms.add(account);
+		allPrograms.add(auditLog);
+
+		List<Program> memberPrograms = new ArrayList<Program>();
+		memberPrograms.add(home);
+		memberPrograms.add(dashBoard);
+		memberPrograms.add(account);
 
 		if (programApi.findProgramProfile(DEFAULT_DOMAIN, "all") == null) {
-			ProgramProfile profile = new ProgramProfile();
-			profile.setName("all");
-			profile.setPrograms(programs);
+			// master
+			ProgramProfile allProfile = new ProgramProfile();
+			allProfile.setName("all");
+			allProfile.setPrograms(allPrograms);
+
+			// member
+			ProgramProfile memberProfile = new ProgramProfile();
+			memberProfile.setName("member");
+			memberProfile.setPrograms(memberPrograms);
+
 			try {
-				programApi.createProgramProfile(DEFAULT_DOMAIN, profile);
+				programApi.createProgramProfile(DEFAULT_DOMAIN, allProfile);
+				programApi.createProgramProfile(DEFAULT_DOMAIN, memberProfile);
 			} catch (Exception e) {
 				logger.error("araqne dom: program profile initialize failed", e);
 				context.println("program profile pack initialize failed");
@@ -168,7 +187,7 @@ public class InitialSchema {
 		addPermission(master, "dom", "admin_grant");
 		addPermission(master, "dom", "user_edit");
 		addPermission(master, "dom", "config_edit");
-		addPermission(master, "dom", "config_view");		
+		addPermission(master, "dom", "config_view");
 		updateRole(context, roleApi, master);
 
 		Role admin = createRole(context, roleApi, "admin", 3);
