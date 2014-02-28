@@ -525,7 +525,12 @@ function TablePrivilegeController($scope, socket, eventSender, serviceLogdbManag
 	function resetPrivilegeSetting(bool) {
 		if(bool == undefined) bool = false;
 		$scope.dataTables.forEach(function(obj) {
-			obj['can_read'] = bool;
+			if(obj.table === 'logpresso-log-trend' || obj.table === 'logpresso-alert-trend') {
+				obj['can_read'] = true;
+			}
+			else {
+				obj['can_read'] = bool;	
+			}
 		});
 	}
 
