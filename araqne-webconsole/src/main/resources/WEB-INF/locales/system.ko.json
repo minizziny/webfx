@@ -698,5 +698,11 @@
 	"$S_msg_PleaseEnterCipher": "암호 알고리즘을 입력하세요.",
 	"$S_msg_PleaseEnterDigest": "다이제스트 알고리즘을 입력하세요.",
 	"$S_msg_PleaseEnterPkcs12FilePath": "암호화 파일 경로를 입력하세요.",
-	"$S_msg_PleaseEnterNodeName": "노드 이름을 입력하세요."
+	"$S_msg_PleaseEnterNodeName": "노드 이름을 입력하세요.",
+
+	"---------query error message-----------": "",
+	"$S_str_Type": "타입",
+	"$S_str_Note": "노트",
+	"unsupported-command": "지원하지 않는 커맨드",
+	"unsupported-function": "지원하지 않는 함수"
 }

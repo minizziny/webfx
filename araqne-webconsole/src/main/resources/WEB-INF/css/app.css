@@ -833,3 +833,7 @@ input[type=text].input-single.error:focus {
 	-moz-box-shadow: 0 0 6px #f8b9b7;
 	box-shadow: 0 0 6px #f8b9b7;
 }
+
+.cicon-error {
+	content: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAAuCAQAAAD9sOO8AAAASUlEQVR4Xu3SMQoAIAzFUO/o/c+iY4fSSfgQyesgOESHrs9I0j7TEOL9pk5i/OmB/s9IvAYQH6DjxmtTWPEWBcS52zJPIJ4lSRfUZeB1c/cgSwAAAABJRU5ErkJggg==');
+}
