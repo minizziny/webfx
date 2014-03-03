@@ -1300,7 +1300,7 @@
 			element.on('keydown', function(e) {
 				if (e.type === 'keydown') {
 					if((e.keyCode < 48) || (e.keyCode > 57)){
-						if(e.keyCode != 8)
+						if((e.keyCode != 8) && (e.keyCode != 9))
 							e.preventDefault();
 					}
 				}
