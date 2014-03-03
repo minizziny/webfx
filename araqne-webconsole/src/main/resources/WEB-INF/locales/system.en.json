@@ -220,6 +220,11 @@
 	"$S_str_Week": "Week",
 	"$S_str_Month": "Month",
 
+	"$S_str_Small": "Small",
+	"$S_str_Normal": "Normal",
+	"$S_str_Big": "Big",
+	"$S_str_Huge": "Huge",
+
 	"--------streamquery---------": "",
 	"$S_str_Stream": "Stream",
 	"$S_str_Scheduled": "Schedule",
