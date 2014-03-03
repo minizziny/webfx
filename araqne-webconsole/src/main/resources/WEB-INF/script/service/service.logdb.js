@@ -143,7 +143,7 @@ angular.module('app.logdb', [])
 			.failed(function(m, raw) {
 				clazz.status = 'Failed';
 
-				asyncQuery.done('failed', m, raw);
+				asyncQuery.done('failed', raw);
 				applyFn();
 				console.log(raw, 'cannot create query');
 			})

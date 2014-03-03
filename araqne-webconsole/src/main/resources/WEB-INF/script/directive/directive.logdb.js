@@ -64,8 +64,26 @@ angular.module('app.directive.logdb', [])
 				});
 			}
 
-			function failedFn(m) {
-				alert($translate('$S_msg_WrongQuery'));
+			function failedFn(raw) {
+				var errorType, errorNote;
+				console.log('mmmesage', raw[0].errorCode)
+
+				var rxType = /type=(\w*(-|_)?)*/;
+				var rxNote= /note=(.*)/;
+
+
+				if( rxType.test(raw[0].errorCode) ) {
+					errorType = raw[0].errorCode.match(rxType)[0].split('type=')[1];
+				}
+				if( rxNote.test(raw[0].errorCode) ) {
+					errorNote = raw[0].errorCode.match(rxNote)[0].split('note=')[1];
+				}
+				var errorMsg = $translate('$S_msg_WrongQuery') +
+					(!!errorType ? ('\n\n' + $translate('$S_str_Type') + ': ' + $translate(errorType)) : '') +
+					(!!errorNote ? ('\n' + $translate('$S_str_Note') + ': ' + $translate(errorNote)) : '')
+
+				alert(errorMsg);
+
 				scope.$apply();
 			}
 

@@ -698,5 +698,11 @@
 	"$S_msg_PleaseEnterCipher": "Please enter cipher algorithm.",
 	"$S_msg_PleaseEnterDigest": "Please enter digest algorithm.",
 	"$S_msg_PleaseEnterPkcs12FilePath": "Please enter PKCS#12 file path.",
-	"$S_msg_PleaseEnterNodeName": "Please enter node name."
+	"$S_msg_PleaseEnterNodeName": "Please enter node name.",
+
+	"---------query error message-----------": "",
+	"$S_str_Type": "Type",
+	"$S_str_Note": "Note",
+	"unsupported-command": "unsupported-command",
+	"unsupported-function": "unsupported-function"
 }
