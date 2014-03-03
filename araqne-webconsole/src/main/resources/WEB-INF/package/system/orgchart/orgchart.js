@@ -142,7 +142,7 @@ function RemoveUsersController($scope, socket, eventSender) {
 	}
 }
 
-function UserController($scope, socket, eventSender, serviceDom) {
+function UserController($scope, socket, eventSender, serviceDom, serviceSession) {
 	$scope.selectedUser = null;
 	$scope.paramChangePassword = function() { 
 		return {
@@ -157,8 +157,7 @@ function UserController($scope, socket, eventSender, serviceDom) {
 		console.log('----', user.login_name, '----');
 		console.log('::: onShowUser:\t', user);
 		$scope.selectedUser = user;
-		console.log(user)
-		if(serviceDom.whoAmI() == user.login_name) {
+		if(serviceSession.whoAmI() == user.login_name) {
 			$scope.$parent.amI = true;
 		}
 		else {
@@ -293,7 +292,7 @@ function UserController($scope, socket, eventSender, serviceDom) {
 			return;
 		}
 
-		var canPrivilege = (serviceDom.whoAmI() == valnew.login_name) || $scope.$parent.canAdminGrant;
+		var canPrivilege = (serviceSession.whoAmI() == valnew.login_name) || $scope.$parent.canAdminGrant;
 
 		if(valold == null) {
 			eventSender.onSelectUserAdmin(valnew);
@@ -335,7 +334,7 @@ function UserController($scope, socket, eventSender, serviceDom) {
 
 }
 
-function AdminController($scope, socket, eventSender, serviceDom) {
+function AdminController($scope, socket, eventSender, serviceDom, serviceSession) {
 	$scope.listRoles = [];
 	$scope.currentUser;
 	$scope.currentRole;
@@ -356,7 +355,7 @@ function AdminController($scope, socket, eventSender, serviceDom) {
 	}
 
 	function getMyRole() {
-		getAdminMsgbus(serviceDom.whoAmI()).success(function(m) {
+		getAdminMsgbus(serviceSession.whoAmI()).success(function(m) {
 			if(m.body.admin != null) {
 				console.log('::: getMyRole:\t', m.body);
 				var r = getRoleByName(m.body.admin.role.name);
@@ -526,7 +525,12 @@ function TablePrivilegeController($scope, socket, eventSender, serviceLogdbManag
 	function resetPrivilegeSetting(bool) {
 		if(bool == undefined) bool = false;
 		$scope.dataTables.forEach(function(obj) {
-			obj['can_read'] = bool;
+			if(obj.table === 'logpresso-log-trend' || obj.table === 'logpresso-alert-trend') {
+				obj['can_read'] = true;
+			}
+			else {
+				obj['can_read'] = bool;	
+			}
 		});
 	}
 

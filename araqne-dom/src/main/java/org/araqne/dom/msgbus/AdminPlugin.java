@@ -21,9 +21,11 @@ import org.araqne.api.PrimitiveConverter;
 import org.araqne.dom.api.AdminApi;
 import org.araqne.dom.api.ConfigManager;
 import org.araqne.dom.api.DOMException;
+import org.araqne.dom.api.ProgramApi;
 import org.araqne.dom.api.RoleApi;
 import org.araqne.dom.api.UserApi;
 import org.araqne.dom.model.Admin;
+import org.araqne.dom.model.ProgramProfile;
 import org.araqne.dom.model.User;
 import org.araqne.msgbus.MsgbusException;
 import org.araqne.msgbus.Request;
@@ -43,6 +45,9 @@ public class AdminPlugin {
 
 	@Requires
 	private RoleApi roleApi;
+	
+	@Requires
+	private ProgramApi programApi;
 
 	@Requires
 	private ConfigManager conf;
@@ -67,6 +72,8 @@ public class AdminPlugin {
 		if (before == null)
 			before = new Admin();
 		Admin admin = (Admin) PrimitiveConverter.overwrite(before, req.getParams(), conf.getParseCallback(req.getOrgDomain()));
+		ProgramProfile programProfile = programApi.findProgramProfile(req.getOrgDomain(), admin.getRole().getName());
+		admin.setProfile(programProfile);
 		adminApi.setAdmin(req.getOrgDomain(), req.getAdminLoginName(), loginName, admin);
 	}
 

@@ -1,5 +1,5 @@
 angular.module('app.directive.logdb', [])
-.directive('queryInput', function($compile, $parse, $translate, serviceLogdb, serviceDom) {
+.directive('queryInput', function($compile, $parse, $translate, serviceLogdb, serviceSession) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -35,7 +35,7 @@ angular.module('app.directive.logdb', [])
 				element.removeClass('loaded').addClass('loading');
 				//사용자 입력 쿼리 기록 넣기
 				var queryValue = scope.ngQueryString.replace(/\n/gi, ' ');
-				serviceLogdb.save(queryValue, serviceDom.whoAmI());
+				serviceLogdb.save(queryValue);
 			}
 
 			function startedFn(m) {

@@ -197,10 +197,18 @@ code {
 
 .wizard-text {
 	width: 30px;
+	margin-bottom: 0px !important;
 }
 
 .wizard-select {
 	width: 100px;
+	margin: 0px;
+	margin-left: 5px;
+}
+
+.wizard-month {
+	width: 66px;
+	margin: 0px;
 }
 
 
