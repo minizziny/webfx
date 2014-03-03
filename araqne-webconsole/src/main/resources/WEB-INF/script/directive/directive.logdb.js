@@ -9,7 +9,8 @@ angular.module('app.directive.logdb', [])
 			ngTemplate: '=ngTemplate',
 			ngPageSize: '&',
 			ngQueryString: '=',
-			ngPid: '='
+			ngPid: '=',
+			onError: '&'
 		},
 		template: '<textarea ng-model="ngQueryString" placeholder="{{ \'$S_msg_QueryHere\' | translate }}" spellcheck="false" autosize autosize-max-height="145" ng-model-onblur></textarea>\
 			<button class="search btn btn-primary">{{ "$S_str_Run" | translate}}</button>\
@@ -66,7 +67,6 @@ angular.module('app.directive.logdb', [])
 
 			function failedFn(raw) {
 				var errorType, errorNote;
-				console.log('mmmesage', raw[0].errorCode)
 
 				var rxType = /type=(\w*(-|_)?)*/;
 				var rxNote= /note=(.*)/;
@@ -82,7 +82,13 @@ angular.module('app.directive.logdb', [])
 					(!!errorType ? ('\n\n' + $translate('$S_str_Type') + ': ' + $translate(errorType)) : '') +
 					(!!errorNote ? ('\n' + $translate('$S_str_Note') + ': ' + $translate(errorNote)) : '')
 
-				alert(errorMsg);
+				// alert(errorMsg);
+
+				scope.onError({
+					'$raw': raw,
+					'$type': errorType,
+					'$note': errorNote
+				});
 
 				scope.$apply();
 			}
@@ -181,7 +187,7 @@ angular.module('app.directive.logdb', [])
 			ngModel: '=',
 			isCheckType: '@',
 			isSelectable: '@',
-			ngQuery: '='			
+			ngQuery: '='
 		},
 		template: '<div style="display: inline-block; position: relative">'+
 		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: -5px; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\

@@ -805,7 +805,7 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 
 }
 
-function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility) {
+function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility, $translate) {
 	var dataChart;
 	
 	function getDefaultContext(type) {
@@ -861,10 +861,24 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 
 	var isStopped = false;
 
+	$scope.isOnError = false;
+	$scope.errorType;
+	$scope.errorNote;
+	$scope.inputOnError = function(type, note) {
+		$('.qr1')[0].hideTable();
+		$scope.errorType = type;
+		$scope.errorNote = note;
+		$scope.isOnError = true;
+		$scope.isPageLoaded = false;
+	}
+
 	$scope.inputOnloading = function() {
 		$('.qr1')[0].hideTable();
 		$('.qr1')[0].newSearch();
 		isStopped = false;
+		$scope.isOnError = false;
+		$scope.errorType = undefined;
+		$scope.errorNote = undefined;
 	}
 	
 	$scope.inputOnStatusChange = function(m, instance) {
