@@ -844,6 +844,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 
 	eventSender.dashboard.onOpenNewWidget = function() {
 		$scope.isPageLoaded = false;
+		$scope.moreCol = false;
 		var newWidgetWin = $('.newWidget').removeClass(makeRemoveClassHandler(/^step/));
 		newWidgetWin[0].showDialog();
 			
