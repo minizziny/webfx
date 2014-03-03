@@ -144,11 +144,6 @@ function RemoveUsersController($scope, socket, eventSender) {
 
 function UserController($scope, socket, eventSender, serviceDom, serviceSession) {
 	$scope.selectedUser = null;
-	$scope.paramChangePassword = function() { 
-		return {
-			'p0': ($scope.selectedUser != null) ? $scope.selectedUser.login_name : ''
-		}
-	}
 	$scope.selectedUserCopy = null;
 
 	$scope.isLowerLevel = false;
@@ -822,6 +817,13 @@ function UserListController($scope, $filter, $compile, socket, eventSender) {
 
 function ChangePasswordController($scope, socket, eventSender, $filter) {
 	var currentUser;
+
+	$scope.paramChangePassword = function() { 
+		return {
+			'p0': (currentUser != null) ? currentUser.login_name : ''
+		}
+	}
+
 	eventSender.onOpenDialogChangePassword = function(user) {
 		currentUser = angular.copy(user);
 		$('[modal].mdlChangePassword')[0].showDialog();
