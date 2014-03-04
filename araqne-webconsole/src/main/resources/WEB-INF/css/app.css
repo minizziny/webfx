@@ -593,6 +593,7 @@ query-input .btn {
 }
 
 query-input textarea {
+	margin-bottom: 0;
 	/*-webkit-transition: background-color .6s ease;
 	-moz-transition: background-color .6s ease;
 	-o-transition: background-color .6s ease;
