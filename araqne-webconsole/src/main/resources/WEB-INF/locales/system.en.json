@@ -437,6 +437,11 @@
 	"$S_str_NetworkMask": "Netmask",
 	"$S_str_Metric": "Metric",
 
+	"$S_str_MoreInfo": "Details",
+	"$S_msg_WarningStopLoggerBeforeRemovalPre": "Following loggers will not be stopped. Please stop logger first.",
+	"$S_msg_WarningStopLoggerBeforeRemovalPost": "",
+	"$S_msg_StopLoggerFirst": "Please stop logger first.",
+
 	"--------license--------": "",
 	"$S_msg_InvalidVolumnLicense": "Volume license limit exceeded",
 	"$S_str_HardwareKey": "Hardware Key",

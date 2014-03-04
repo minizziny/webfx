@@ -430,6 +430,11 @@
 	"$S_str_NetworkMask": "네트워크 마스크",
 	"$S_str_Metric": "메트릭",
 
+	"$S_str_MoreInfo": "추가 정보",
+	"$S_msg_WarningStopLoggerBeforeRemovalPre": "",
+	"$S_msg_WarningStopLoggerBeforeRemovalPost": "는 삭제되지 않습니다. 먼저 수집을 종료해야 합니다.",
+	"$S_msg_StopLoggerFirst": "수집이 진행중입니다. 먼저 수집을 중지하고 삭제하세요.",
+
 	"--------license--------": "",
 	"$S_msg_InvalidVolumnLicense": "볼륨 라이센스가 초과 되었습니다.",
 	"$S_str_HardwareKey": "하드웨어 키",

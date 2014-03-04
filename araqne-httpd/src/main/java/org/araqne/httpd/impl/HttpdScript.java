@@ -131,18 +131,21 @@ public class HttpdScript implements Script {
 
 	@ScriptUsage(description = "open https server", arguments = {
 			@ScriptArgument(name = "port", type = "int", description = "bind port"),
+			@ScriptArgument(name = "default context", type = "String", description = "default http context"),
 			@ScriptArgument(name = "key alias", type = "string", description = "JKS keystore name"),
 			@ScriptArgument(name = "trust alias", type = "string", description = "JKS truststore name for client authentication", optional = true) })
 	public void openSsl(String[] args) {
 		try {
 			int port = Integer.valueOf(args[0]);
-			String keyAlias = args[1];
+			String defaultContext = args[1];
+			String keyAlias = args[2];
 			String trustAlias = null;
-			if (args.length > 2)
-				trustAlias = args[2];
+			if (args.length > 3)
+				trustAlias = args[3];
 
 			InetSocketAddress listen = new InetSocketAddress(port);
 			HttpConfiguration config = new HttpConfiguration(listen, keyAlias, trustAlias);
+			config.setDefaultHttpContext(defaultContext);
 			httpd.createServer(config);
 			context.println("opened https server");
 		} catch (Exception e) {
