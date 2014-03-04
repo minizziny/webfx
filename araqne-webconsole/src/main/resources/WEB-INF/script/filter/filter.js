@@ -1,8 +1,13 @@
 angular.module('app.filter', ['pascalprecht.translate'])
 .filter('isSelected', function() {
-	return function(arr, prop) {
+	return function(arr, prop, unselect) {
+		var isUnselect = unselect === false;
 		return arr.filter(function(obj) {
-			return obj[prop];
+			if(isUnselect) {
+				return !obj[prop];
+			} else {
+				return obj[prop];	
+			}
 		});
 	}
 })
