@@ -650,6 +650,7 @@
 	"$S_str_HostAddress": "호스트 주소",
 	"$S_str_NewFtpProfile": "새 FTP 프로파일 만들기",
 	"$S_str_FtpPort": "FTP 포트",
+	"$S_str_Timeout": "타임아웃",
 	"$S_str_CreateFtpProfile": "FTP 프로파일 생성",
 	"$S_str_RemoveFtpProfile": "FTP 프로파일 삭제",
 	"$S_str_User": "사용자", 

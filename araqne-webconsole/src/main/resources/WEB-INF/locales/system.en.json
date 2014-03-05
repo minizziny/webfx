@@ -657,6 +657,7 @@
 	"$S_str_HostAddress": "Host address",
 	"$S_str_NewFtpProfile": "Create FTP profile",
 	"$S_str_FtpPort": "FTP port",
+	"$S_str_Timeout": "Timeout",
 	"$S_str_CreateFtpProfile": "Create FTP profile",
 	"$S_str_RemoveFtpProfile": "Remove FTP profile",
 	"$S_str_User": "User", 
