@@ -232,6 +232,10 @@ tree-root .hide {
 	text-align: right; 
 }
 
+.cell-center, .table td.cell-center {
+	text-align: center; 
+}
+
 .cell-editable {
 	display: inline-block;
 	width: 90px !important;
