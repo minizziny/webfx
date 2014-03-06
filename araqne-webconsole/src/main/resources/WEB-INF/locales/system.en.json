@@ -615,14 +615,6 @@
 	"$S_str_ValidateDateFormat": "Date Format is yyyymmdd",
 	"$S_str_InvalidateDateFormat": "Invalid Date Format",
 
-	"$S_str_Sunday": "Sun",
-	"$S_str_Monday": "Mon",
-	"$S_str_Tuesday": "Tue",
-	"$S_str_Wednesday": "Wed",
-	"$S_str_Thursday": "Thu",
-	"$S_str_Friday": "Fri",
-	"$S_str_Saturday": "Sat",
-
 	"--------audit log--------": "",
 	"$S_str_AuditLog": "Audit Log",
 	"$S_str_Duration": "Duration",
