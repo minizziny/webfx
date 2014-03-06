@@ -514,34 +514,22 @@ li.area:last-child {
 	margin-bottom: 0px;
 }
 
-
-.alert-cont {
-	float: right;
-	right: 50%;
-	position: relative;
-}
-
-.alert.alert-fix {
-	float: right;
-	right: -50%;
-	position: relative;
-	z-index: 9999;
-	
-	box-shadow: 0 0 40px #000;
-}
-
-.alert.alert-fix-side {
+#alert-fix-side.alert {
 	position: fixed;
-	right: 38px;
-	top: 60px;
-	/*bottom: -40px;*/
+	left: 0;
+	right: 0;
+	top: 0;
 	opacity: 0;
-	-webkit-transition: bottom .5s ease, opacity .5s ease;
+	padding: 5px 10px;
+	margin: 0;
+	-webkit-transition: opacity .2s ease;
+	z-index: 10000;
+	border-radius: 0;
+	border-top: 0;
+	text-align: center;
 }
 
-.alert.alert-fix-side.show {
-	
-	top: 60px;
+#alert-fix-side.alert.show {
 	opacity: 1;
 }
 

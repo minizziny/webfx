@@ -433,6 +433,14 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 	}
 
 	initialize();
+
+
+	$('#alert-fix-side').bind('webkitTransitionEnd', function() {
+		if( !$(this).hasClass('show') ) {
+			$(this).hide();
+		}
+	});
+
 }
 
 function LoginController($scope, socket, serviceSession, eventSender, $location) {
@@ -546,3 +554,42 @@ function deferScroller(fn, interval, callback) {
 	}
 }
 
+function notify(type, msg, autohide) {
+	function makeRemoveClassHandler(regex) {
+		return function (index, classes) {
+			return classes.split(/\s+/).filter(function (el) { return regex.test(el);}).join(' ');
+		}
+	}
+
+	function display() {
+		var btnClose = $('#alert-fix-side > .close');
+		if(autohide == true) btnClose.hide();
+		else btnClose.off('click').show();
+
+		$('#alert-fix-side').show()
+			.removeClass(makeRemoveClassHandler(/(alert-success|alert-info|alert-error|alert-danger)/))
+			.addClass('alert-' + type)
+			.addClass('show')
+			.find('span.msg')
+			.html(msg);
+
+		if(autohide == true) {
+			setTimeout(function() {
+				$('#alert-fix-side.show').removeClass('show');
+			}, 3000);
+		}
+		else {
+			btnClose.on('click', function() {
+				$('#alert-fix-side.show').removeClass('show');
+			});
+		}
+	}
+
+	if($('#alert-fix-side').hasClass('show')) {
+		$('#alert-fix-side.show').removeClass('show');
+		setTimeout(display, 200);
+	}
+	else {
+		display();
+	}
+}
