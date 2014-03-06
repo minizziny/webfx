@@ -118,7 +118,7 @@ public class InitialSchema {
 		Program home = createProgram(context, programApi, "Home", "Home", "홈", "starter", 1);
 		Program dashBoard = createProgram(context, programApi, "Dashboard", "Dashboard", "대시보드", "dashboard", 2);
 		Program account = createProgram(context, programApi, "Account", "Account", "계정관리", "orgchart", 3);
-		Program auditLog = createProgram(context, programApi, "Auditlog", "Auditlog", "감사로그", "auditlog", 4);
+		Program auditLog = createProgram(context, programApi, "Audit Log", "Audit Log", "감사로그", "auditlog", 4);
 		Program taskManager = createProgram(context, programApi, "Task Manager", "Task Manager", "작업관리자", "taskmanager", 5);
 		Program run = createProgram(context, programApi, "Run", "Run", "실행", "run", 6);
 		Program devConsole = createProgram(context, programApi, "Developer Console", "Developer Console", "개발자콘솔", "devconsole",
