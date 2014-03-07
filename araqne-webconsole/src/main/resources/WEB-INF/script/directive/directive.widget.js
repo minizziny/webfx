@@ -400,7 +400,6 @@ angular.module('app.directive.widget', [])
 					scope.progress = { 'width': '20%' };
 					scope.$apply();
 				})
-				.pageLoaded(getResult)
 				.getResult(getResult)
 				.loaded(function(m) {
 					if(!!options.loaded) {

@@ -22,11 +22,6 @@ function Async(fn) {
 		return this;
 	}
 
-	this.pageLoaded = function(fn) {
-		callback.pageLoaded = fn;
-		return this;
-	}
-
 	this.getResult = function(fn) {
 		callback.getResult = fn;
 		return this;

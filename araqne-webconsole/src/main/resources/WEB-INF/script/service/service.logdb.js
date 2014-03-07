@@ -63,11 +63,7 @@ angular.module('app.logdb', [])
 				return;	
 			}
 
-			if(m.body.type == "page_loaded") {
-				asyncQuery.done('pageLoaded', m);
-				applyFn();
-			}
-			else if(m.body.type == "eof" && m.body.hasOwnProperty('total_count')) {
+			if(m.body.type == "eof" && m.body.hasOwnProperty('total_count')) {
 				//console.log("eof unregistered")
 				unregisterTrap();
 
