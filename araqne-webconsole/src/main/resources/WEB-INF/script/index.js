@@ -554,6 +554,7 @@ function deferScroller(fn, interval, callback) {
 	}
 }
 
+var timerNofity;
 function notify(type, msg, autohide) {
 	function makeRemoveClassHandler(regex) {
 		return function (index, classes) {
@@ -573,8 +574,10 @@ function notify(type, msg, autohide) {
 			.find('span.msg')
 			.html(msg);
 
+		clearTimeout(timerNofity);
+		timerNofity = undefined;
 		if(autohide == true) {
-			setTimeout(function() {
+			timerNofity = setTimeout(function() {
 				$('#alert-fix-side.show').removeClass('show');
 			}, 3000);
 		}
