@@ -259,6 +259,7 @@
 	[fx-dashboard-id=series-list] {
 		border: 1px solid silver;
 		height: 160px;
+		overflow: auto;
 	}
 
 	[fx-dashboard-id=series-toolbar] {
