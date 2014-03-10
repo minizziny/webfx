@@ -202,6 +202,8 @@
 	"$S_str_Download": "Download",
 	"$S_str_Close": "Close",
 
+	"$S_str_SubQuery": "SUB QUERY",
+
 	"$S_str_SaveThisQuery": "Save this query",
 	"$S_str_QueryName": "Save query name",
 
@@ -718,6 +720,9 @@
 	"$S_str_Address": "Address",
 	"$S_str_RegisterFederationNode": "Register Node",
 	"$S_str_WebserverPort": "Webserver port",
+	"$S_str_ActiveStatus": "Active",
+	"$S_str_DeactiveStatus": "Deactive",
+	"$S_str_ConnectionFailed": "Connection Failed",
 	"$S_str_RemoveNode": "Unregister node",
 	"$S_msg_RemoveNodeConfirmPre": "Do you really want to delete Node",	
 

@@ -202,6 +202,8 @@
 	"$S_str_Download": "ダウンロード",
 	"$S_str_Close": "閉める",
 
+	"$S_str_SubQuery": "SUB QUERY",
+
 	"$S_str_SaveThisQuery": "クエリ保存",
 	"$S_str_QueryName": "セーブするクエリ名",
 
@@ -717,6 +719,9 @@
 	"$S_str_Address": "アドレス",
 	"$S_str_RegisterFederationNode": "新しいノードを登録する",
 	"$S_str_WebserverPort": "Webサーバーポート",
+	"$S_str_ActiveStatus": "Active",
+	"$S_str_DeactiveStatus": "Deactive",
+	"$S_str_ConnectionFailed": "Connection Failed",
 	"$S_str_RemoveNode": "ノード削除",
 	"$S_msg_RemoveNodeConfirmPre": "本当にノード ",
 

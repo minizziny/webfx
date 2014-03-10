@@ -202,6 +202,8 @@
 	"$S_str_Download": "다운로드",
 	"$S_str_Close": "닫기",
 
+	"$S_str_SubQuery": "서브 쿼리",
+
 	"$S_str_SaveThisQuery": "쿼리 저장",
 	"$S_str_QueryName": "저장 할 쿼리 이름",
 
@@ -725,6 +727,9 @@
 	"$S_str_Address": "주소",
 	"$S_str_RegisterFederationNode": "새 노드 등록하기",
 	"$S_str_WebserverPort": "웹서버 포트",
+	"$S_str_ActiveStatus": "활성화",
+	"$S_str_DeactiveStatus": "비활성화",
+	"$S_str_ConnectionFailed": "연결 실패",
 	"$S_str_RemoveNode": "노드 삭제",
 	"$S_msg_RemoveNodeConfirmPre": "정말로 노드",
 
