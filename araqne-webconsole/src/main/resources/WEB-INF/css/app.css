@@ -38,11 +38,11 @@ code {
 	width: 78.5%;
 }
 
-.extraPane {
+.extraPane, .extraPane-scheduled {
 	-webkit-transition: right .3s ease;
 }
 
-.extraPane {
+.extraPane, .extraPane-scheduled {
 	position: fixed;
 	top: 30px;
 	bottom: 0;
@@ -54,7 +54,7 @@ code {
 	background-color: rgba(0,0,0,.7);
 }
 
-.extraPane-inner {
+.extraPane-inner, .extraPane-scheduled-inner {
 	position: relative;
 	top: 0;
 	bottom: 0;
@@ -69,19 +69,18 @@ code {
 	background-color: #f5f5f5;
 }
 
-.extraPane.in {
+.extraPane.in, .extraPane-scheduled.in {
 	right: 0;
 }
 
-.extraPane.in.extend {
+.extraPane.in.extend, .extraPane-scheduled.in.extend {
 	width: 100%;
 }
 
-.extraPane.in.extend .extraPane-inner {
+.extraPane.in.extend .extraPane-inner, .extraPane-scheduled.in.extend .extraPane-scheduled-inner {
 	left: 50%;
 	width: 50%;
 }
-
 
 .clearboth {
 	clear: both;
@@ -533,6 +532,9 @@ li.area:last-child {
 	opacity: 1;
 }
 
+#alert-fix-side button.close {
+	right: 0;
+}
 
 .qr-th-type {
 	/*display: none;*/
