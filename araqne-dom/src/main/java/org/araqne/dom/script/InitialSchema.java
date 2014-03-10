@@ -241,7 +241,6 @@ public class InitialSchema {
 		updateRole(context, roleApi, admin);
 
 		createRole(context, roleApi, "member", 2);
-		createRole(context, roleApi, "guest", 1);
 	}
 
 	private static void updateRole(ScriptContext context, RoleApi roleApi, Role master) {
