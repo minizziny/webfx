@@ -60,7 +60,7 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 	$(window).on('resize', debounce(redraw, 200));
 }
 
-function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility, serviceSession) {
+function PresetController($scope, $compile, $filter, $translate, socket, eventSender, $timeout, serviceUtility, serviceSession) {
 	function setObjectValue(object, ns, value) {
 		function retObject(object, keys, value) {
 			if(keys.length == 1) {
@@ -183,6 +183,9 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		</div>');
 		$compile(el)($scope);
 		el.appendTo('.dockpanel .k-d-col');
+		$timeout(function() {
+			$('.droppable').addClass('max');	
+		}, 300);
 		$scope.$apply();
 	}
 
@@ -273,6 +276,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 				// console.log(resizable);
 				// console.trace()
 				$('.blank-info').remove();
+				$('.droppable.max').removeClass('max');
 
 				
 				if(!!layoutEngine.ui.layout.box.root) {
@@ -319,8 +323,10 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 					effsp.find('.widget-grid').each(syncHandle);
 				}
 
-				console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
-				$scope.currentPreset.state.layout[0] = layoutEngine.ui.layout.box.root.getObject();
+				var rootobj = layoutEngine.ui.layout.box.root.getObject();
+				if(!!rootobj) {
+					$scope.currentPreset.state.layout[0] = layoutEngine.ui.layout.box.root.getObject();	
+				}
 				eventSender.dashboard.onCurrentPresetChanged(); // save state
 
 				if($scope.currentPreset.state.widgets.length == 0) {
