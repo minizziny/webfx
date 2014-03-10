@@ -53,13 +53,14 @@ public class ProgramPlugin {
 
 	@MsgbusMethod
 	public void getAvailablePrograms(Request req, Response resp) {
-		Collection<ProgramPack> packs = programApi.getProgramPacks(req.getOrgDomain());
-		resp.put("packs", PrimitiveConverter.serialize(packs, PrimitiveConverter.SerializeOption.INCLUDE_SKIP_FIELD));
-
+		Collection<ProgramPack> packs = programApi.getProgramPacks(req.getOrgDomain()); 
 		ProgramProfile profile = adminApi.getAdmin(req.getOrgDomain(), req.getAdminLoginName()).getProfile();
+		
 		Collection<Program> programs = new ArrayList<Program>();
 		if (profile != null)
 			programs = profile.getPrograms();
+		
 		resp.put("programs", PrimitiveConverter.serialize(programs));
+		resp.put("packs", PrimitiveConverter.serialize(packs, PrimitiveConverter.SerializeOption.INCLUDE_SKIP_FIELD));
 	}
 }

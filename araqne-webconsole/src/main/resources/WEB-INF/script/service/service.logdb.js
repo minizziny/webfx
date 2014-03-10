@@ -63,11 +63,7 @@ angular.module('app.logdb', [])
 				return;	
 			}
 
-			if(m.body.type == "page_loaded") {
-				asyncQuery.done('pageLoaded', m);
-				applyFn();
-			}
-			else if(m.body.type == "eof" && m.body.hasOwnProperty('total_count')) {
+			if(m.body.type == "eof" && m.body.hasOwnProperty('total_count')) {
 				//console.log("eof unregistered")
 				unregisterTrap();
 
@@ -143,7 +139,7 @@ angular.module('app.logdb', [])
 			.failed(function(m, raw) {
 				clazz.status = 'Failed';
 
-				asyncQuery.done('failed', m, raw);
+				asyncQuery.done('failed', raw);
 				applyFn();
 				console.log(raw, 'cannot create query');
 			})
@@ -313,13 +309,11 @@ angular.module('app.logdb', [])
 		/* End QueryClass */
 	}
 
-	function save(string, owner) {
+	function save(string) {
 		socket.send('com.logpresso.core.msgbus.QueryHistoryPlugin.saveQuery', {
-			'query': string, 'owner': owner
+			'query': string
 		}, proc.pid)
 		.success(function(m) {
-			console.log("query: " + string);
-			// console.log("owner: " + owner);
 		})
 		.failed(function(m, raw) {
 			console.log(raw, 'cannot save query');

@@ -119,9 +119,20 @@
 							ng-query-string="ctxWidget.data.query"
 							ng-pid="getPid"
 							on-loading="inputOnloading($msg)"
+							on-error="inputOnError($type, $note)"
 							on-loaded="inputOnStatusChange($msg, $inst)"
 							on-status-change="inputOnStatusChange($msg, $inst)"></query-input>
-						<div class="qr-container" style="width: 880px">
+						<div class="qr-container" style="width: 880px; margin-top:10px">
+							<div class="paneError" ng-show="isOnError">
+								<div class="alert alert-error inner" style="text-align:center; margin: 0">
+									<img class="cicon-error">
+									<h4>{{'$S_msg_WrongQuery' | translate}}</h4>
+									<ul>
+										<li>{{'$S_str_Type' | translate}}: {{errorType | translate}}</li>
+										<li>{{'$S_str_Note' | translate}}: {{errorNote | translate}}</li>
+									</ul>
+								</div>
+							</div>
 							<query-result class="qr1"
 								ng-model="qresult"
 								ng-query="ctxWidget.data.query"
@@ -211,10 +222,10 @@
 							<a ng-click="showMoreColOption($event)" ng-hide="moreCol">{{'$S_msg_NoSelectableColumn' | translate}}</a>
 							<div class="well" style="margin-top: 5px" ng-show="moreCol" ng-class="{ moreCol: moreCol }">
 								<div style="margin-bottom: 5px;line-height: 2;">{{'$S_msg_SelectableColumn' | translate}}</div>
-								<label>{{'$S_str_ColumnName' | translate}}</label> <input type="text" ng-model="dataCustomColumn">
-								<label>{{'$S_str_ColumnType' | translate}}</label>
+								<label style="display:inline">{{'$S_str_ColumnName' | translate}}</label> <input type="text" ng-model="dataCustomColumn">
+								<label style="display:inline">{{'$S_str_ColumnType' | translate}}</label>
 								<select ng-model="selectedCustomColumnType" ng-options="ct.displayName for ct in dataCustomColumnTypes"></select>
-								<button class="btn" style="margin-bottom:-2px" ng-click="addCustomColumn()">{{'$S_str_AddAndSelectColumn' | translate}}</button>
+								<button class="btn pull-right" style="margin-bottom:-2px" ng-click="addCustomColumn()">{{'$S_str_AddAndSelectColumn' | translate}}</button>
 							</div>
 						</div>
 						<div class="qr-container" style="width: 978px; height: 240px; overflow: scroll; margin-top: 5px">

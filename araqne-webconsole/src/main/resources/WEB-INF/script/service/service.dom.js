@@ -6,12 +6,7 @@ angular.module('app.dom', [])
 		.failed(openError);	
 	}
 
-	function whoAmI() {
-		return 'root';
-	}
-
 	return {
-		hasPermission: hasPermission,
-		whoAmI: whoAmI
+		hasPermission: hasPermission
 	}
 });

@@ -1,5 +1,5 @@
 angular.module('app.directive.logdb', [])
-.directive('queryInput', function($compile, $parse, $translate, serviceLogdb, serviceDom) {
+.directive('queryInput', function($compile, $parse, $translate, serviceLogdb, serviceSession) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -9,7 +9,8 @@ angular.module('app.directive.logdb', [])
 			ngTemplate: '=ngTemplate',
 			ngPageSize: '&',
 			ngQueryString: '=',
-			ngPid: '='
+			ngPid: '=',
+			onError: '&'
 		},
 		template: '<textarea ng-model="ngQueryString" placeholder="{{ \'$S_msg_QueryHere\' | translate }}" spellcheck="false" autosize autosize-max-height="145" ng-model-onblur></textarea>\
 			<button class="search btn btn-primary">{{ "$S_str_Run" | translate}}</button>\
@@ -35,7 +36,7 @@ angular.module('app.directive.logdb', [])
 				element.removeClass('loaded').addClass('loading');
 				//사용자 입력 쿼리 기록 넣기
 				var queryValue = scope.ngQueryString.replace(/\n/gi, ' ');
-				serviceLogdb.save(queryValue, serviceDom.whoAmI());
+				serviceLogdb.save(queryValue);
 			}
 
 			function startedFn(m) {
@@ -64,8 +65,31 @@ angular.module('app.directive.logdb', [])
 				});
 			}
 
-			function failedFn(m) {
-				alert($translate('$S_msg_WrongQuery'));
+			function failedFn(raw) {
+				var errorType, errorNote;
+
+				var rxType = /type=(\w*(-|_)?)*/;
+				var rxNote= /note=(.*)/;
+
+
+				if( rxType.test(raw[0].errorCode) ) {
+					errorType = raw[0].errorCode.match(rxType)[0].split('type=')[1];
+				}
+				if( rxNote.test(raw[0].errorCode) ) {
+					errorNote = raw[0].errorCode.match(rxNote)[0].split('note=')[1];
+				}
+				var errorMsg = $translate('$S_msg_WrongQuery') +
+					(!!errorType ? ('\n\n' + $translate('$S_str_Type') + ': ' + $translate(errorType)) : '') +
+					(!!errorNote ? ('\n' + $translate('$S_str_Note') + ': ' + $translate(errorNote)) : '')
+
+				// alert(errorMsg);
+
+				scope.onError({
+					'$raw': raw,
+					'$type': errorType,
+					'$note': errorNote
+				});
+
 				scope.$apply();
 			}
 
@@ -163,7 +187,7 @@ angular.module('app.directive.logdb', [])
 			ngModel: '=',
 			isCheckType: '@',
 			isSelectable: '@',
-			ngQuery: '='			
+			ngQuery: '='
 		},
 		template: '<div style="display: inline-block; position: relative">'+
 		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: -5px; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\

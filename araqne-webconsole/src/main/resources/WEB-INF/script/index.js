@@ -25,20 +25,32 @@ logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $comp
 
 	$rootScope.$on('$translateLoadingError', function() {
 		$translate.uses('en');
-	})
+	});
 
-	$rootScope.$on('$locationChangeSuccess', function() {
+	$rootScope.suppressEvent = function(e) {
+		e.stopPropagation();
+	}
+
+	$rootScope.actions = {
+		'move_to': function(args) {
+			location.href = args['move_to'];
+		}
+	}
+
+	$rootScope.$on('$locationChangeSuccess', function(loc, newurl, oldurl) {
+		var patt = /[^#(\/|\?)]+/g;
+		var oldHashSplit = oldurl.match(patt);
+		var newHashSplit = newurl.match(patt);
+
 		function route() {
-			
 			var hash = $location.path();
-
 			var hashSplit = hash.split('/');
 			if(hash == '/') {
 				$location.path('/system/starter');
 			}
 
 			if(hashSplit.length > 2) {
-				eventSender.root.go(hashSplit[1], hashSplit[2], (hashSplit.length > 3 ? hashSplit[3] : null), (hashSplit.length > 3 ? $location.search() : null));
+				eventSender.root.go(newHashSplit, oldHashSplit);
 				if(!!eventSender.menu.onOpen) {
 					eventSender.menu.onOpen(hashSplit[2]);
 				}
@@ -144,7 +156,16 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 		}
 	}
 
-	eventSender.root.go = function(pack, program, action, args) {
+	eventSender.root.go = function(newl, oldl) {
+		var pack = newl[2];
+		var program = newl[3];
+
+		var oldpack = oldl[2];
+		var oldprogram = oldl[3];
+
+		var action = (newl.length > 4 ? newl[4] : null);
+		var args = (newl.length > 5 ? $location.search() : null);
+
 		if(program == '') {
 			return;
 		}
@@ -160,20 +181,26 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 			return;
 		}
 
-		angular.element('.view').hide();
-		angular.element('.view#view-' + program).show();
-
-		$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';
-
-		var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
-		if(idxProgram != -1) {
-			$scope.recentPrograms.splice(idxProgram, 1);
+		if(pack === oldpack && program === oldprogram) {
+			// same program
 		}
-		$scope.recentPrograms.push(program + '@' + pack);
+		else {
+			angular.element('.view').hide();
+			angular.element('.view#view-' + program).show();
 
-		if($scope.recentPrograms.length > 1) {
-			var lastest = $scope.recentPrograms[$scope.recentPrograms.length - 2].split('@')[0];
-			eventSender[lastest].$event.dispatchEvent('suspend');
+			$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';
+
+			var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
+			if(idxProgram != -1) {
+				$scope.recentPrograms.splice(idxProgram, 1);
+			}
+
+			$scope.recentPrograms.push(program + '@' + pack);
+
+			if($scope.recentPrograms.length > 1) {
+				var lastest = $scope.recentPrograms[$scope.recentPrograms.length - 2].split('@')[0];
+				eventSender[lastest].$event.dispatchEvent('suspend');
+			}	
 		}
 
 		if(!eventSender[program].events.unload) {
@@ -194,6 +221,10 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 				console.log('--- resume', program, action, args);
 			});
 
+			pe.on('action', function(action, args) {
+				console.log('--- action', program, action, args);
+			});
+
 			// 나중에 promiseTracker 방식으로 바꿔야 함
 			setTimeout(function() {
 				eventSender[program].$event.dispatchEvent('load', action, args);	
@@ -201,7 +232,12 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 			
 		}
 		else {
-			eventSender[program].$event.dispatchEvent('resume', action, args);
+			if(pack === oldpack && program === oldprogram) {
+				eventSender[program].$event.dispatchEvent('action', action, args);
+			}
+			else {
+				eventSender[program].$event.dispatchEvent('resume', action, args);	
+			}
 		}
 		
 
@@ -397,6 +433,14 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 	}
 
 	initialize();
+
+
+	$('#alert-fix-side').bind('webkitTransitionEnd', function() {
+		if( !$(this).hasClass('show') ) {
+			$(this).hide();
+		}
+	});
+
 }
 
 function LoginController($scope, socket, serviceSession, eventSender, $location) {
@@ -510,3 +554,45 @@ function deferScroller(fn, interval, callback) {
 	}
 }
 
+var timerNofity;
+function notify(type, msg, autohide) {
+	function makeRemoveClassHandler(regex) {
+		return function (index, classes) {
+			return classes.split(/\s+/).filter(function (el) { return regex.test(el);}).join(' ');
+		}
+	}
+
+	function display() {
+		var btnClose = $('#alert-fix-side > .close');
+		if(autohide == true) btnClose.hide();
+		else btnClose.off('click').show();
+
+		$('#alert-fix-side').show()
+			.removeClass(makeRemoveClassHandler(/(alert-success|alert-info|alert-error|alert-danger)/))
+			.addClass('alert-' + type)
+			.addClass('show')
+			.find('span.msg')
+			.html(msg);
+
+		clearTimeout(timerNofity);
+		timerNofity = undefined;
+		if(autohide == true) {
+			timerNofity = setTimeout(function() {
+				$('#alert-fix-side.show').removeClass('show');
+			}, 3000);
+		}
+		else {
+			btnClose.on('click', function() {
+				$('#alert-fix-side.show').removeClass('show');
+			});
+		}
+	}
+
+	if($('#alert-fix-side').hasClass('show')) {
+		$('#alert-fix-side.show').removeClass('show');
+		setTimeout(display, 200);
+	}
+	else {
+		display();
+	}
+}

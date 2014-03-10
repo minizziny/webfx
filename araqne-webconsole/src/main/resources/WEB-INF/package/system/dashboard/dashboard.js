@@ -60,7 +60,7 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 	$(window).on('resize', debounce(redraw, 200));
 }
 
-function PresetController($scope, $compile, $filter, $translate, socket, eventSender, serviceUtility) {
+function PresetController($scope, $compile, $filter, $translate, socket, eventSender, $timeout, serviceUtility, serviceSession) {
 	function setObjectValue(object, ns, value) {
 		function retObject(object, keys, value) {
 			if(keys.length == 1) {
@@ -183,6 +183,9 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		</div>');
 		$compile(el)($scope);
 		el.appendTo('.dockpanel .k-d-col');
+		$timeout(function() {
+			$('.droppable').addClass('max');	
+		}, 300);
 		$scope.$apply();
 	}
 
@@ -232,8 +235,9 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	function InitAutosave() {
+		var amIRoot = serviceSession.whoAmI() === 'root';
 		return socket.send("com.logpresso.core.msgbus.WallPlugin.setPreset", 
-			{ "guid": "autosave", "name": $translate('$S_str_Autosave'), "state": { "widgets": [] } }
+			{ "guid": "autosave" + (amIRoot ? '' : ('_' + serviceSession.whoAmI())), "name": $translate('$S_str_Autosave'), "state": { "widgets": [] } }
 		, eventSender.dashboard.pid);
 	}
 
@@ -272,6 +276,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 				// console.log(resizable);
 				// console.trace()
 				$('.blank-info').remove();
+				$('.droppable.max').removeClass('max');
 
 				
 				if(!!layoutEngine.ui.layout.box.root) {
@@ -318,8 +323,10 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 					effsp.find('.widget-grid').each(syncHandle);
 				}
 
-				console.log( layoutEngine.ui.layout.box.root.getObject() ) ;
-				$scope.currentPreset.state.layout[0] = layoutEngine.ui.layout.box.root.getObject();
+				var rootobj = layoutEngine.ui.layout.box.root.getObject();
+				if(!!rootobj) {
+					$scope.currentPreset.state.layout[0] = layoutEngine.ui.layout.box.root.getObject();	
+				}
 				eventSender.dashboard.onCurrentPresetChanged(); // save state
 
 				if($scope.currentPreset.state.widgets.length == 0) {
@@ -411,8 +418,9 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	$scope.Remove = function() {
+		var amIRoot = serviceSession.whoAmI() === 'root';
 		RemovePresets($scope.currentPreset.guid).success(function() {
-			LoadPreset('autosave');
+			LoadPreset( ( amIRoot ? 'autosave' : ('autosave_' + serviceSession.whoAmI()) ) );
 			$('.removePreset')[0].hideDialog();
 		});
 	}
@@ -443,7 +451,7 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 
 		GetPresetList(function() {
 			for (var i = $scope.dataPresetList.length - 1; i >= 0; i--) {
-				if($scope.dataPresetList[i].guid == "autosave") {
+				if($scope.dataPresetList[i].guid.indexOf("autosave") === 0) {
 					$scope.currentPreset = $scope.dataPresetList[i];
 					LoadPreset($scope.dataPresetList[i].guid);
 					break;
@@ -803,7 +811,7 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 
 }
 
-function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility) {
+function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility, $translate) {
 	var dataChart;
 	
 	function getDefaultContext(type) {
@@ -842,6 +850,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 
 	eventSender.dashboard.onOpenNewWidget = function() {
 		$scope.isPageLoaded = false;
+		$scope.moreCol = false;
 		var newWidgetWin = $('.newWidget').removeClass(makeRemoveClassHandler(/^step/));
 		newWidgetWin[0].showDialog();
 			
@@ -858,10 +867,24 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 
 	var isStopped = false;
 
+	$scope.isOnError = false;
+	$scope.errorType;
+	$scope.errorNote;
+	$scope.inputOnError = function(type, note) {
+		$('.qr1')[0].hideTable();
+		$scope.errorType = type;
+		$scope.errorNote = note;
+		$scope.isOnError = true;
+		$scope.isPageLoaded = false;
+	}
+
 	$scope.inputOnloading = function() {
 		$('.qr1')[0].hideTable();
 		$('.qr1')[0].newSearch();
 		isStopped = false;
+		$scope.isOnError = false;
+		$scope.errorType = undefined;
+		$scope.errorNote = undefined;
 	}
 	
 	$scope.inputOnStatusChange = function(m, instance) {

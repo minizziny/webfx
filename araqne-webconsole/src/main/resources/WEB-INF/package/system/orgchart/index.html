@@ -40,10 +40,6 @@
 	-webkit-transition: .3s ease;
 }
 
-.extraPane {
-	-webkit-transition: right .3s ease;
-}
-
 .leftPane {
 	left: 0;
 }
@@ -71,46 +67,6 @@
 	margin-left: -2%;
 }
 
-.extraPane {
-	position: fixed;
-	top: 30px;
-	bottom: 0;
-	right: -65%;
-	width: 50%;
-	overflow-y: auto;
-	overflow-x: hidden;
-	box-shadow: 0 0 40px rgba(0,0,0,.4);
-	background-color: rgba(0,0,0,.7);
-}
-
-.extraPane-inner {
-	position: relative;
-	top: 0;
-	bottom: 0;
-	right: 0;
-	left: 0;
-	overflow: visible;
-	border-left: 1px solid #ccc;
-	box-shadow: 0 0 40px rgba(0,0,0,.4);
-	min-height: 100%;
-	height: auto;
-
-	background-color: #f5f5f5;
-}
-
-.extraPane.in {
-	right: 0;
-}
-
-.extraPane.in.extend {
-	width: 100%;
-}
-
-.extraPane.in.extend .extraPane-inner {
-	left: 50%;
-	width: 50%;
-}
-
 button[el-type=dropdown] {
 	background: transparent;
 	border: 0;
@@ -126,27 +82,6 @@ button[el-type=dropdown] span.caret {
 
 button[el-type=dropdown]:hover span.caret {
 	border-top-color: #333;
-}
-
-tr[tr-selectable]:nth-child(odd).tr-single-selected > td, tr[tr-multi-selectable]:nth-child(odd).tr-single-selected > td {
-	background-color: rgba(0, 153, 255, .3) !important;
-}
-
-tr[tr-selectable]:nth-child(even).tr-single-selected > td, tr[tr-multi-selectable]:nth-child(even).tr-single-selected > td {
-	background-color: rgba(0, 153, 255, .2) !important;
-}
-
-tr[tr-multi-selectable] > td:first-child, tr > th:first-child {
-	-webkit-transition: width .2s ease-out;
-}
-
-td.td-check-show, th.td-check-show {
-	width: 28px !important;
-}
-
-td.td-check-hide, th.td-check-hide {
-	width: 0px !important;
-	overflow-x: hidden;
 }
 
 .table-form td:first-child {
@@ -180,42 +115,8 @@ input.searchbox {
 	top: 5px;
 }
 
-.popover {
-	display: block;
-	min-width: 276px;
-}
-
-.popover.popover-black {
-	background-color: rgba(0,0,0,.5);
-}
-
-.popover.popover-black .arrow:after {
-	border-left-color: rgba(0,0,0,0.25);
-}
-
-.popover.popover-black .popover-title {
-	background-color: rgba(0,0,0,.5);
-	border-bottom: #000;
-	color: white;
-}
-
 .controls > .help-inline {
 	margin-top: 6px;
-}
-
-input[type=text].input-single.error {
-	border-color: #b94a48;
-	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
-	-moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
-	box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
-	color: #b94a48;
-}
-
-input[type=text].input-single.error:focus {
-	border-color: #e9322d;
-	-webkit-box-shadow: 0 0 6px #f8b9b7;
-	-moz-box-shadow: 0 0 6px #f8b9b7;
-	box-shadow: 0 0 6px #f8b9b7;
 }
 
 	</style>
@@ -341,7 +242,7 @@ input[type=text].input-single.error:focus {
 		<div class="extraPane-inner">
 			<ul style="margin: 0">
 				<li class="pane pane-nomargin">
-					<form name="frmUser" style="margin:0">
+					<form name="frmUser" style="margin:0" novalidate>
 						<div class="navbar extraPane-navbar">
 							<div class="navbar-inner" style="position:relative">
 								<input type="text" class="txtNewLoginName input-single" name="login_name" placeholder="{{'$S_msg_PleaseEnterLoginName' | translate}}" style="float: left; margin: 5px;"
@@ -607,7 +508,9 @@ input[type=text].input-single.error:focus {
 				</li>
 			</ul>
 		</div>
-		<div class="modal mdlChangePassword" modal ng-controller="ChangePasswordController" style="z-index:99";>
+	</div>
+
+	<div class="modal mdlChangePassword" modal ng-controller="ChangePasswordController" style="z-index:99";>
 			<a class="modal-close close" ng-click="closePasswordChangeModal()" style="margin-bottom: -30px">×</a>
 			<legend>{{'$S_str_ChangePassword' | translate}}</legend>
 			<form name="frmChangePassword">
@@ -633,7 +536,6 @@ input[type=text].input-single.error:focus {
 				</fieldset>
 			</form>
 		</div>
-	</div>
 
 	<br class="clearboth" />
 
@@ -652,11 +554,6 @@ input[type=text].input-single.error:focus {
 			<button class="btn btn-danger" ng-click="removeUsers()">{{'$S_str_Remove' | translate}}</button>
 			<button class="btn" ng-click="cancelRemoveUsers()">{{'$S_str_Cancel' | translate}}</button>
 		</div>
-	</div>
-
-	<div class="alert alert-success alert-fix-side">
-		<button type="button" class="close">&times;</button>
-		<span class="msg">{{'$S_msg_MoveSuccess' | translate}}</span>
 	</div>
 	
 </div>

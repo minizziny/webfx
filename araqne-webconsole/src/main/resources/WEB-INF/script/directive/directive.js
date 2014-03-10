@@ -52,24 +52,23 @@
 .directive('trSelectable', function() {
 	return {
 		restrict: 'A',
-		link: function(scope, element, attrs) {
-			var parentTbody = element.parent();
-			element.on('click', function() {
+		link: function(scope, el, attrs) {
+			var expression = attrs.trSelectable;
+			var match = expression.match(/^\s*(.+)\s+\=\s+(.*)\s*$/), lhs, rhs;
+			if (! match) {
+				throw new Error("Expected trSelectable in form of '_storageTargetVariable_ = _item_' but got '" + expression + "'.");
+				return;
+			}
+			
+			lhs = match[1];
+			rhs = match[2];
+
+			var parentTbody = el.parent();
+			el.on('click.tr-selectable', function() {
 				parentTbody.find('tr.tr-selected').removeClass('tr-selected');
-				element.addClass('tr-selected');
-				var radio = element.find('input[type=radio]');
-				radio.prop('checked', true);
-				if(scope.$parent.hasOwnProperty(attrs.trSelectable)) {
-					scope.$parent[attrs.trSelectable] = radio.val();
-				}
-				else {
-					if(scope.$parent.$parent.hasOwnProperty(attrs.trSelectable)) {
-						scope.$parent.$parent[attrs.trSelectable] = radio.val();
-					}
-					else {
-						alert('not binding')
-					}
-				}
+				el.addClass('tr-selected');
+
+				scope.$parent[lhs] = scope.$eval(rhs);
 				scope.$apply();
 			});
 		}
@@ -126,6 +125,8 @@
 		restrict: 'E',
 		link: function (scope, element, attrs)
 		{	
+			var htmlstring = element.html();
+			var isEmpty = htmlstring.trim() === '';
 			var iconRefresh = '<button ng-click="childRefresh($event)" el-type="refresh" class="icon pull-right" style="display:none">\
 				<i class="icon-refresh" style="margin-top:0"></i>\
 			</button>';
@@ -144,8 +145,8 @@
 							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)">\
 								<input type="checkbox" ng-show="node.is_edit_mode">\
 								<tree-toggle is-collapsed="node.isCollapsed"></tree-toggle>\
-								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>\
-								<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' +
+								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
+								(isEmpty ? '<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' : htmlstring) +
 								indiRefresh +
 								iconRefresh +
 							'</a>\
@@ -155,15 +156,17 @@
 								node-icon="' + attrs.nodeIcon + '"\
 								node-icon-class="' + attrs.nodeIconClass + '"\
 								node-name="' + attrs.nodeName + '"\
-								node-parent="' + attrs.nodeParent + '">\
-							</tree-element>\
+								node-parent="' + attrs.nodeParent + '">' +
+								(isEmpty ? '' : htmlstring) +
+							'</tree-element>\
 						</li>\
 					</ul>');
 				
 				var linkFunction = $compile(template);
 				linkFunction(scope);
 				// element.replaceWith( template );
-				element.append(template);
+				// element.append(template);
+				element.html(null).append( template );
 			}
 			else {
 				element.remove();
@@ -211,6 +214,8 @@
 	return {
 		restrict: 'E',
 		link: function (scope, element, attrs) {
+			var htmlstring = element.html();
+			var isEmpty = htmlstring.trim() === '';
 			var iconRefresh = '<button ng-click="childRefresh($event)" el-type="refresh" class="icon pull-right" style="display:none">\
 				<i class="icon-refresh" style="margin-top:0"></i>\
 			</button>';
@@ -229,8 +234,8 @@
 							node-parent="{{node.' + attrs.nodeParent + '}}">\
 							<a el-type="item" ng-mouseover="showIcon($event)" ng-mouseout="hideIcon($event)">\
 								<tree-toggle></tree-toggle>\
-								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>\
-								<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' +
+								<i class="tree-node-icon {{node.' + attrs.nodeIconClass + '}}"></i>' +
+								(isEmpty ? '<span el-type="item">{{node.' + attrs.nodeName + '}}</span>' : htmlstring) +
 								indiRefresh +
 								iconRefresh +
 							'</a>\
@@ -240,8 +245,9 @@
 								node-icon="' + attrs.nodeIcon + '"\
 								node-icon-class="' + attrs.nodeIconClass + '"\
 								node-name="' + attrs.nodeName + '"\
-								node-parent="' + attrs.nodeParent + '">\
-							</tree-element>\
+								node-parent="' + attrs.nodeParent + '">' +
+								(isEmpty ? '' : htmlstring) +
+							'</tree-element>\
 						</li>\
 					</ul></div>');
 				
@@ -658,7 +664,7 @@
 				var option = scope.$eval(attrs.ngUnique);
 				if(option.condition) {
 					var has = option.source.some(function(obj) {
-						return obj[option.property] == value;
+						return $parse(option.property)(obj) === value;
 					});
 
 					ctrl.$setValidity('unique', !has);
@@ -772,7 +778,7 @@
 							</form></div>\
 						</div>\
 					</div>\
-					<div style="display:none"><br>\
+					<div style="display:none; position:fixed; top: 30px; right:0; width: 200px; height:auto"><br>\
 					ngTotalCount: {{ngTotalCount}}<br>\
 					ngItemsPerPage: {{ngItemsPerPage}}<br>\
 					ngPageSize: {{ngPageSize}}<br>\
@@ -931,23 +937,23 @@
 				render();
 			});
 
-			scope.$watch('ngItemsPerPage', function(val) {
+			// scope.$watch('ngItemsPerPage', function(val) {
 
-				var totalPageCount = getTotalPageCount();
-				if(scope.currentIndex > totalPageCount - 1) {
-					scope.currentIndex = totalPageCount - 1;
-					changePage(scope.currentIndex);
-				}
+			// 	var totalPageCount = getTotalPageCount();
+			// 	if(scope.currentIndex > totalPageCount - 1) {
+			// 		scope.currentIndex = totalPageCount - 1;
+			// 		changePage(scope.currentIndex);
+			// 	}
 
-				// console.log(getTotalPageCount(), scope.ngPageSize, scope.currentPage, getLastPage())
+			// 	// console.log(getTotalPageCount(), scope.ngPageSize, scope.currentPage, getLastPage())
 
-				if(getLastPage() < scope.currentPage) {
-					scope.currentPage = getLastPage();
-				}
+			// 	if(getLastPage() < scope.currentPage) {
+			// 		scope.currentPage = getLastPage();
+			// 	}
 
-				render();
-				scope.$parent.$eval(attr.onItemsPerPageChange);
-			});
+			// 	render();
+			// 	scope.$parent.$eval(attr.onItemsPerPageChange);
+			// });
 
 			scope.isShowJumpPopup = false;
 
@@ -1294,7 +1300,7 @@
 			element.on('keydown', function(e) {
 				if (e.type === 'keydown') {
 					if((e.keyCode < 48) || (e.keyCode > 57)){
-						if(e.keyCode != 8)
+						if((e.keyCode != 8) && (e.keyCode != 9))
 							e.preventDefault();
 					}
 				}

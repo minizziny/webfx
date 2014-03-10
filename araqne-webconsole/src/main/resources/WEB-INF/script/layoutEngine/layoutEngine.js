@@ -783,7 +783,10 @@ var layoutEngine = (function() {
 					newrow.append(boxn);
 					boxn.row = newrow;
 
-					this.rows[this.rows.length - 2].resizerV.show();
+					if(this.rows[this.rows.length - 2] != undefined) {
+						this.rows[this.rows.length - 2].resizerV.show();
+					}
+
 					boxn.resizerH.hide();
 					newrow.resizerV.hide();
 
