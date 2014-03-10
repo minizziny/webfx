@@ -176,6 +176,7 @@ public class InitialSchema {
 		if (programApi.findProgramProfile(DEFAULT_DOMAIN, "all") == null) {
 			try {
 				programApi.createProgramProfile(DEFAULT_DOMAIN, allProfile);
+				programApi.createProgramProfile(DEFAULT_DOMAIN, adminProfile);
 				programApi.createProgramProfile(DEFAULT_DOMAIN, memberProfile);
 			} catch (Exception e) {
 				logger.error("araqne dom: program profile initialize failed", e);
