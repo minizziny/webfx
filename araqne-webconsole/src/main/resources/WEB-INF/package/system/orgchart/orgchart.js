@@ -401,29 +401,39 @@ function AdminController($scope, socket, eventSender, serviceDom, serviceSession
 		var found = $scope.listRoles.filter(function(obj) {
 			return obj.name == name;
 		});
-		return found[0];
+		if(found.length === 0) {
+			return {
+				'level': 1,
+				'name': 'unknown'
+			};
+		}
+		else {
+			return found[0];	
+		}
 	}
 
 	function setAdmin() {
 		var rolename = $scope.currentRoleCopy.name;
-		var option = {
-			'login_name': $scope.currentUser.login_name,
-			'role': {
-				'name': rolename
-			},
-			'use_login_lock': false,
-			'is_enabled': true
+		if(rolename === 'member' || rolename === 'admin') {
+			var option = {
+				'login_name': $scope.currentUser.login_name,
+				'role': {
+					'name': rolename
+				},
+				'use_login_lock': false,
+				'is_enabled': true
+			}
+
+			socket.send('org.araqne.dom.msgbus.AdminPlugin.setAdmin', option, eventSender.orgchart.pid)
+			.success(function(m) {
+				$scope.currentRole = getRoleByName(rolename);
+				console.log('::: setAdmin:\t', option, rolename);
+				$scope.$apply();
+			})
+			.failed(openError);
+
+			resetRoleCopy();	
 		}
-
-		socket.send('org.araqne.dom.msgbus.AdminPlugin.setAdmin', option, eventSender.orgchart.pid)
-		.success(function(m) {
-			$scope.currentRole = getRoleByName(rolename);
-			console.log('::: setAdmin:\t', option, rolename);
-			$scope.$apply();
-		})
-		.failed(openError);
-
-		resetRoleCopy();
 	}	
 
 	function resetRoleCopy() {
