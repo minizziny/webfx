@@ -202,6 +202,8 @@
 	"$S_str_Download": "Download",
 	"$S_str_Close": "Close",
 
+	"$S_str_SubQuery": "SUB QUERY",
+
 	"$S_str_SaveThisQuery": "Save this query",
 	"$S_str_QueryName": "Save query name",
 
@@ -210,7 +212,7 @@
 
 	"$S_str_SavedQuery": "Saved query list",
 
-	"$S_str_SavedQueryResult": "Saved query result list",
+	"$S_str_SavedQueryResult": "Saved query results",
 	"$S_str_QueryTitle": "Title",
 	"$S_str_FileSize": "File Size",
 
@@ -219,6 +221,85 @@
 	"$S_str_Day": "Day",
 	"$S_str_Week": "Week",
 	"$S_str_Month": "Month",
+
+	"$S_str_Small": "Small",
+	"$S_str_Normal": "Normal",
+	"$S_str_Big": "Big",
+	"$S_str_Huge": "Huge",
+
+	"--------streamquery---------": "",
+	"$S_str_Stream": "Stream",
+	"$S_str_Scheduled": "Schedule",
+	"$S_str_Saved": "Load",
+	"$S_str_Background": "Background",
+
+	"$S_str_AddStreamQuery": "Add Stream Query",
+	"$S_str_LoggerType": "Logger Source",
+	"$S_str_TableType": "Table Source",
+	"$S_str_StreamQueryType": "Stream Source",
+	"$S_msg_LoggerType": "Use logger as stream query input. All logger output will be passed to stream query.",
+	"$S_msg_TableType": "Use table as stream query input. This can be considered as RDBMS trigger.",
+	"$S_msg_StreamQueryType": "Use stream query output as stream query input.",
+
+	"$S_str_ListView": "List View",
+	"$S_str_Layout": "Layout",
+	"$S_str_InputCount": "Input Count",
+	"$S_str_LastRefresh": "Last Refresh",
+
+	"$S_msg_PleaseEnterStreamQueryName": "Name is required.",
+	"$S_msg_NameUniqueError": "Duplicated name.",
+	"$S_msg_IntervalRequiredError": "Interval is required.",
+	"$S_msg_MinusIntervalError": "Interval should be zero or positive.",
+
+	"$S_msg_QueryRequiredError": "Query string is required.",
+	"$S_msg_OneMoreSourceRequiredError": "One or more data sources is required.",
+
+	"$S_str_QueryString": "Query String",
+	"$S_str_StreamQuery": "Stream Query",
+	"$S_str_Enabled": "Enable",
+
+	"$S_str_RemoveThisStreamQuery": "Delete Stream Query",
+	"$S_str_RemoveStreamQueries": "Delete Stream Query",
+	"$S_msg_ConfirmRemoveStreamQueriesPre": "Do you really want to delete stream queries? ",
+	"$S_msg_ConfirmRemoveStreamQueriesPost": "",
+
+	"--------scheduled query---------": "",
+	"$S_str_Schedule": "Schedule",
+	"$S_str_ScheduledQuery": "Scheduled Query",
+	"$S_str_IsSaveThisQueryResult": "Save This Query Result",
+	"$S_str_IsUseAlert": "Use Alert",
+	"$S_str_RunQueryString": "Run Query String", 
+	"$S_str_AlertQueryString": "Alert Query String",
+	"$S_str_SuppressInterval": "Suppress Interval",
+	"$S_str_CreateScheduledQuery": "Create Scheduled Query",
+	"$S_str_Save": "Save",
+	"$S_str_NotSave": "Not Save",
+	"$S_str_Time": "Time",
+	"$S_str_EveryTime": "Everytime",
+	"$S_str_PerMinutePre": "per",
+	"$S_str_PerMinutePost": "minute",
+	"$S_str_PerDayPre": "per",
+	"$S_str_PerDayPost": "day",	
+	"$S_str_Every": "Every",
+	"$S_Str_RepeatMethod": "Repeat method",
+	"$S_Str_EveryDay": "Everyday",
+	"$S_Str_EveryWeek": "Everyweek",
+	"$S_Str_EveryMonth": "Everymonth",
+	"$S_Str_EveryYear": "Everyyear",
+	"$S_str_EveryWeekRepeatNextDay": "EveryWeek Repeat Next Day",
+	"$S_str_Date": "Date",
+	"$S_str_DayOfWeek": "Day Of Week",
+	"$S_str_PerMonthPre" : "per",
+	"$S_str_PerMonthPost": "month",
+	"$S_str_DateTh": "",
+	"$S_str_RemoveScheduledQuery": "Remove Scheduled Query",
+	"$S_msg_ConfirmRemoveScheduledQueriesPre": "Do you really want to delete scheduled queries? ",
+	"$S_msg_ConfirmRemoveScheduledQueriesPost": "",
+	"$S_str_TimePost": " H",
+	"$S_str_MonthPost": " Month",
+	"$S_str_Weekend": "Weekend",
+	"$S_str_Weekday": "Weekday",
+
 
 	"--------logsource--------": "",
 	"$S_str_Logger": "Loggers",
@@ -357,6 +438,11 @@
 	"$S_str_Protocol": "Protocol",
 	"$S_str_NetworkMask": "Netmask",
 	"$S_str_Metric": "Metric",
+
+	"$S_str_MoreInfo": "Details",
+	"$S_msg_WarningStopLoggerBeforeRemovalPre": "Following loggers will not be stopped. Please stop logger first.",
+	"$S_msg_WarningStopLoggerBeforeRemovalPost": "",
+	"$S_msg_StopLoggerFirst": "Please stop logger first.",
 
 	"--------license--------": "",
 	"$S_msg_InvalidVolumnLicense": "Volume license limit exceeded",
@@ -531,14 +617,6 @@
 	"$S_str_ValidateDateFormat": "Date Format is yyyymmdd",
 	"$S_str_InvalidateDateFormat": "Invalid Date Format",
 
-	"$S_str_Sunday": "Sun",
-	"$S_str_Monday": "Mon",
-	"$S_str_Tuesday": "Tue",
-	"$S_str_Wednesday": "Wed",
-	"$S_str_Thursday": "Thu",
-	"$S_str_Friday": "Fri",
-	"$S_str_Saturday": "Sat",
-
 	"--------audit log--------": "",
 	"$S_str_AuditLog": "Audit Log",
 	"$S_str_Duration": "Duration",
@@ -573,6 +651,7 @@
 	"$S_str_HostAddress": "Host address",
 	"$S_str_NewFtpProfile": "Create FTP profile",
 	"$S_str_FtpPort": "FTP port",
+	"$S_str_Timeout": "Timeout",
 	"$S_str_CreateFtpProfile": "Create FTP profile",
 	"$S_str_RemoveFtpProfile": "Remove FTP profile",
 	"$S_str_User": "User", 
@@ -641,6 +720,9 @@
 	"$S_str_Address": "Address",
 	"$S_str_RegisterFederationNode": "Register Node",
 	"$S_str_WebserverPort": "Webserver port",
+	"$S_str_ActiveStatus": "Active",
+	"$S_str_DeactiveStatus": "Deactive",
+	"$S_str_ConnectionFailed": "Connection Failed",
 	"$S_str_RemoveNode": "Unregister node",
 	"$S_msg_RemoveNodeConfirmPre": "Do you really want to delete Node",	
 
@@ -662,5 +744,11 @@
 	"$S_msg_PleaseEnterCipher": "Please enter cipher algorithm.",
 	"$S_msg_PleaseEnterDigest": "Please enter digest algorithm.",
 	"$S_msg_PleaseEnterPkcs12FilePath": "Please enter PKCS#12 file path.",
-	"$S_msg_PleaseEnterNodeName": "Please enter node name."
+	"$S_msg_PleaseEnterNodeName": "Please enter node name.",
+
+	"---------query error message-----------": "",
+	"$S_str_Type": "Type",
+	"$S_str_Note": "Note",
+	"unsupported-command": "unsupported-command",
+	"unsupported-function": "unsupported-function"
 }
