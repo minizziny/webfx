@@ -331,6 +331,7 @@ function UserController($scope, socket, eventSender, serviceDom, serviceSession)
 
 function AdminController($scope, socket, eventSender, serviceDom, serviceSession) {
 	$scope.listRoles = [];
+	$scope.listRolesAvailable = [];
 	$scope.currentUser;
 	$scope.currentRole;
 	$scope.currentRoleCopy;
@@ -339,8 +340,14 @@ function AdminController($scope, socket, eventSender, serviceDom, serviceSession
 	function getRoles() {
 		socket.send('org.araqne.dom.msgbus.RolePlugin.getRoles', {}, eventSender.orgchart.pid)
 		.success(function(m) {
-			$scope.listRoles = m.body.roles;
-			console.log(m.body);
+			
+			m.body.roles.forEach(function(role) {
+				$scope.listRoles.push(role);
+				if(role.name === 'member' || role.name === 'admin') {
+					$scope.listRolesAvailable.push(role);	
+				}
+			});
+			console.log($scope.listRoles);
 
 			resetRole();
 			getMyRole();
@@ -420,11 +427,11 @@ function AdminController($scope, socket, eventSender, serviceDom, serviceSession
 	}	
 
 	function resetRoleCopy() {
-		$scope.currentRoleCopy = $scope.listRoles[2]; // 기본값으로 돌려줌
+		$scope.currentRoleCopy = getRoleByName('member'); // 기본값으로 돌려줌
 	}
 
 	function resetRole() {
-		$scope.currentRole = $scope.listRoles[2]; // 기본값으로 돌려줌
+		$scope.currentRole = getRoleByName('member'); // 기본값으로 돌려줌
 	}
 
 	eventSender.onSelectUserAdmin = function(user) {

@@ -532,6 +532,9 @@ li.area:last-child {
 	opacity: 1;
 }
 
+#alert-fix-side button.close {
+	right: 0;
+}
 
 .qr-th-type {
 	/*display: none;*/
