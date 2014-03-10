@@ -162,6 +162,11 @@ public class InitialSchema {
 		ProgramProfile allProfile = new ProgramProfile();
 		allProfile.setName("all");
 		allProfile.setPrograms(allPrograms);
+		
+		// admin
+		ProgramProfile adminProfile = new ProgramProfile();
+		adminProfile.setName("admin");
+		adminProfile.setPrograms(allPrograms);
 
 		// member
 		ProgramProfile memberProfile = new ProgramProfile();
@@ -180,8 +185,10 @@ public class InitialSchema {
 		} else {
 			try {
 				allProfile.getPrograms().addAll(allPrograms);
+				adminProfile.getPrograms().addAll(allPrograms);
 				memberProfile.getPrograms().addAll(memberPrograms);
 				programApi.updateProgramProfile(DEFAULT_DOMAIN, allProfile);
+				programApi.updateProgramProfile(DEFAULT_DOMAIN, adminProfile);
 				programApi.updateProgramProfile(DEFAULT_DOMAIN, memberProfile);
 			} catch (Exception e) {
 				logger.error("araqne dom: program profile initialize failed", e);
