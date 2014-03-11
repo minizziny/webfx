@@ -141,11 +141,6 @@ public class InitialSchema {
 		Program dashBoard = createProgram(context, programApi, "Dashboard", "Dashboard", "대시보드", "ダッシュボード", "dashboard", 2);
 		Program account = createProgram(context, programApi, "Account", "Account", "계정관리", "アカウント管理", "orgchart", 3);
 		Program auditLog = createProgram(context, programApi, "Audit Log", "Audit Log", "감사로그", "監査ログ", "auditlog", 4);
-		Program taskManager = createProgram(context, programApi, "Task Manager", "Task Manager", "작업관리자", "作業管理者", "taskmanager",
-				5);
-		Program run = createProgram(context, programApi, "Run", "Run", "실행", "実行", "run", 6);
-		Program devConsole = createProgram(context, programApi, "Developer Console", "Developer Console", "개발자콘솔", "デベロッパーコンソール",
-				"devconsole", 7);
 
 		List<Program> allPrograms = new ArrayList<Program>();
 		allPrograms.add(home);
@@ -158,49 +153,31 @@ public class InitialSchema {
 		memberPrograms.add(dashBoard);
 		memberPrograms.add(account);
 
-		// master
-		ProgramProfile allProfile = new ProgramProfile();
-		allProfile.setName("all");
-		allProfile.setPrograms(allPrograms);
-		
-		// admin
-		ProgramProfile adminProfile = new ProgramProfile();
-		adminProfile.setName("admin");
-		adminProfile.setPrograms(allPrograms);
-
-		// member
-		ProgramProfile memberProfile = new ProgramProfile();
-		memberProfile.setName("member");
-		memberProfile.setPrograms(memberPrograms);
-
-		if (programApi.findProgramProfile(DEFAULT_DOMAIN, "all") == null) {
-			try {
-				programApi.createProgramProfile(DEFAULT_DOMAIN, allProfile);
-				programApi.createProgramProfile(DEFAULT_DOMAIN, adminProfile);
-				programApi.createProgramProfile(DEFAULT_DOMAIN, memberProfile);
-			} catch (Exception e) {
-				logger.error("araqne dom: program profile initialize failed", e);
-				context.println("program profile pack initialize failed");
-			}
-			orgApi.setOrganizationParameter(DEFAULT_DOMAIN, "default_program_profile_id", "all");
-		} else {
-			try {
-				allProfile.getPrograms().addAll(allPrograms);
-				adminProfile.getPrograms().addAll(allPrograms);
-				memberProfile.getPrograms().addAll(memberPrograms);
-				programApi.updateProgramProfile(DEFAULT_DOMAIN, allProfile);
-				programApi.updateProgramProfile(DEFAULT_DOMAIN, adminProfile);
-				programApi.updateProgramProfile(DEFAULT_DOMAIN, memberProfile);
-			} catch (Exception e) {
-				logger.error("araqne dom: program profile initialize failed", e);
-				context.println("program profile pack initialize failed");
-			}
-		}
+		updated = createOrUpdateProfile(programApi, "all", allPrograms, updated);
+		updated = createOrUpdateProfile(programApi, "admin", allPrograms, updated);
+		updated = createOrUpdateProfile(programApi, "member", memberPrograms, updated);
 
 		if (updated)
 			logger.info("araqne dom: program profiles updated");
 		else
 			logger.info("araqne dom: program profiles installed");
+	}
+
+	private static boolean createOrUpdateProfile(ProgramApi programApi, String profileName, List<Program> programs,
+			boolean updated) {
+		ProgramProfile profile = programApi.findProgramProfile(DEFAULT_DOMAIN, profileName);
+		if (profile == null) {
+			profile = new ProgramProfile();
+			profile.setName(profileName);
+			profile.setPrograms(programs);
+			programApi.createProgramProfile(DEFAULT_DOMAIN, profile);
+		} else {
+			updated = true;
+			profile.getPrograms().addAll(programs);
+			programApi.updateProgramProfile(DEFAULT_DOMAIN, profile);
+		}
+
+		return updated;
 	}
 
 	private static Program createProgram(ScriptContext context, ProgramApi programApi, String name, String enName, String koName,
