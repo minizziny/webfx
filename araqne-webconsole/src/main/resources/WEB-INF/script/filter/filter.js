@@ -91,4 +91,9 @@ angular.module('app.filter', ['pascalprecht.translate'])
 		var regex = /\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/;
 		return regex.test(t) ? t.match(regex)[0] : t;
 	}
+})
+.filter('capitalizeFirstLetter', function() {
+    return function(t) {
+    	return t.charAt(0).toUpperCase() + t.slice(1);
+    }
 });
