@@ -271,7 +271,7 @@
 	"$S_str_RunQueryString": "실행할 쿼리문", 
 	"$S_str_AlertQueryString": "경보 쿼리문",
 	"$S_str_SuppressInterval": "무시주기",
-	"$S_str_CreateScheduledQuery": "예약된 쿼리 경보 생성",
+	"$S_str_CreateScheduledQuery": "예약된 쿼리 생성",
 	"$S_str_Save": "저장",
 	"$S_str_NotSave": "저장안함",
 	"$S_str_Time": "시간",
