@@ -618,7 +618,7 @@
 	"$S_str_InputIndexName": "作成するインデックス名を入力してください",
 	"$S_str_SelectTokenizer": "トークナイザを選んでください",
 	"$S_str_DefaultValueDescription": "入力をしない場合、基本値で設定されます",
-	"$S_str_NameValidationErrorMsg" : "名前はアルファベット、数字、'-'、'_'で作成してください",
+	"$S_str_NameValidationErrorMsg" : "名前はアルファベット、数字、'_'で作成してください",
 	"$S_str_AlreadyExistsMsg": "すでに存在するテーブルです",
 
 	"--------index--------": "",
