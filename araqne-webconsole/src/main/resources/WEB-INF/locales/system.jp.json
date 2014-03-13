@@ -448,6 +448,10 @@
 	"$S_msg_runAsPrimary": "로거 {{p0}}의 백업 로거로 {{p1}}이 지정되었습니다.",
 	"$S_msg_runAsBackup": "로거 {{p0}}의 프라이머리 로거로 {{p1}}이 지정되었습니다.",
 
+    "$S_str_Primary": "Primary",
+    "$S_str_Backup": "Backup",
+    "$S_str_Standalone": "Standalone",
+
 	"--------license--------": "",
 	"$S_msg_InvalidVolumnLicense": "ボーリュウムライセンスが超過されました",
 	"$S_str_HardwareKey": "ハードウェアキー",
