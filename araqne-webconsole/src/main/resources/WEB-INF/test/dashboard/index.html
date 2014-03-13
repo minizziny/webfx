@@ -1,0 +1,120 @@
+<!doctype html>
+<html ng-app="app">
+<head>
+	<title>Logpresso</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="/lib/bootstrap2/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+	<link href="/css/app.css" rel="stylesheet" media="screen">
+	<link rel="stylesheet" href="/css/toggle-switch.css" />
+
+	<link rel="stylesheet" type="text/css" href="/css/base.css" />
+	<link rel="stylesheet" type="text/css" href="/css/menu.css" />
+	<link rel="stylesheet" type="text/css" href="/css/logo.css" />
+	<link rel="stylesheet" type="text/css" href="/lib/jquery/jquery.resizableColumns.css" />
+	<link rel="stylesheet" href="/package/logpresso/logquery/logquery2.css"/> 
+
+	<script src="/lib/jquery/jquery-2.0.3.js"></script>
+	<script src="/lib/jquery/jquery.ui.core.js"></script>
+	<script src="/lib/jquery/jquery.ui.widget.js"></script>
+	<script src="/lib/jquery/jquery.ui.mouse.js"></script>
+	<script src="/lib/jquery/jquery.ui.draggable.js"></script>
+	<script src="/lib/jquery/jquery.ui.droppable.js"></script>
+	<script src="/lib/jquery/jquery.ui.datepicker.js"></script>
+	<script src="/lib/jquery/jquery.ui.sortable.js"></script>
+	<script src="/lib/jquery/scrollsync.js"></script>
+	<script src="/lib/jquery/dragscrollable.js"></script>
+	<script src="/lib/angular/angular.js"></script>
+	<script src="/lib/angular/angular-translate.js"></script>
+	<script src="/lib/angular/angular-translate-loader-static-files.js"></script>
+	<script src="/lib/cryptojs/sha1.js"></script>
+	<script src="/lib/d3/d3.js"></script>
+	<script src="/lib/bootstrap2/js/bootstrap.min.js"></script>
+	<script src="/lib/highcharts/highcharts.js"></script>
+
+	<script type="text/javascript" src="/lib/jquery/jquery.resizableColumns.js"></script>
+
+	<script src="/script/service/service.connection.js"></script>
+	<script src="/script/service/service.connection.session.js"></script>
+	<script src="/script/service/service.program.js"></script>
+	<script src="/script/service/service.dom.js"></script>
+	<script src="/script/service/service.logdb.js"></script>
+	<script src="/script/service/service.logdb.management.js"></script>
+	<script src="/script/service/service.utility.js"></script>
+	<script src="/script/service/service.chart.js"></script>
+	<script src="/script/directive/directive.js"></script>
+	<script src="/script/directive/directive.logdb.js"></script>
+	<script src="/script/directive/directive.orgunit.js"></script>
+	<script src="/script/directive/directive.widget.js"></script>
+	<script src="/script/directive/directive.validation.js"></script>
+	<script src="/script/directive/sortable.js"></script>
+
+	<script src="/script/filter/filter.js"></script>
+
+	<script src="/script/layoutEngine/observableArray.js"></script>
+	<script src="/script/layoutEngine/layoutEngine.js"></script>
+
+	<link href="/script/layoutEngine/layoutEngine.css" rel="stylesheet" media="screen">
+	<link href="/css/dashboard.css" rel="stylesheet" media="screen">
+
+	
+
+</head>
+<body>
+
+<div class="dashboard-container" ng-controller="DashboardController">
+	<div ng-controller="PresetController" class="toolbar navbar navbar-top" style="margin-bottom: 0px">
+		<div class="navbar-inner">
+			<!--<select style="float: left; margin-top: 5px; margin-bottom: 0; margin-left: 5px" ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
+			-->
+			<div class="btn-group">
+				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
+					{{'$S_str_NewPreset' | translate}}
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li><a tabindex="-1" ng-click="New()">{{'$S_str_BlankPreset' | translate}}</a></li>
+					<li><a tabindex="-1" ng-click="SaveAs()">{{'$S_str_SavePresetAs' | translate}}</a></li>
+				</ul>
+			</div>
+			<div class="btn-group">
+				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
+					{{'$S_str_LoadPreset' | translate}}
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li ng-repeat="preset in dataPresetList">
+						<a tabindex="-1" ng-click="Load(preset)" style="padding-left:10px">
+							<i ng-class="{ 'icon-ok': preset.guid == currentPreset.guid, 'icon-noncheck': preset.guid != currentPreset.guid }"></i>
+							{{preset.name}}
+						</a>
+					</li>
+				</ul>
+			</div>
+			<div class="btn-group">
+				<button class="btn btn-small dropdown-toggle" data-toggle="dropdown">
+					<i class="icon-wrench"></i>
+					<span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu">
+					<li><a tabindex="-1" ng-click="AlertRemove()">{{'$S_str_RemoveThisPreset' | translate}}</a></li>
+					<!-- <li class="divider"></li>
+					<li><a tabindex="-1" ng-click="AlertClear()">{{'$S_str_RemoveAllWidgets' | translate}}</a></li> -->
+				</ul>
+			</div>
+			<button class="btn btn-small btn-primary pull-right" style="margin-right: 5px" ng-click="openNewWidget()">{{'$S_str_AddWidget' | translate}}</button>
+			<div class="brandpreset" click-to-edit ng-model="currentPreset.name" ng-change="RenamePreset($new)" ng-cancel="" ng-toggle=""></div>
+		</div>
+
+	</div>
+
+	<div class="preset-container">
+		<div class="dockpanel"></div>
+	</div>
+
+	<script src="dashboard.test.js"></script>
+</div>
+
+</body>
+</html>
