@@ -18,6 +18,15 @@ var logpresso = angular.module('app', [
 ], function($routeProvider) {
 });
 
+angular.module('app.directive.custom', []).directive('tabs', function() {
+	return {
+		restrict: 'A',
+		link: function(scope, el, attrs) {
+			
+		}
+	}
+});
+
 logpresso.config(['$translateProvider', function ($translateProvider) {
 	$translateProvider.useStaticFilesLoader({
 		prefix: '/locales/system.',
@@ -112,6 +121,39 @@ function DashboardController($scope) {
 		"guid": "root"
 	}
 
+	var ld = {
+		"w": 100,
+		"rows": [
+			{
+				"cols": [
+					{
+						"w": 100,
+						"guid": "y-a"
+					}
+				],
+				"h": 50
+			},
+			{
+				"cols": [
+					{
+						"w": 100,
+						"guid": "y-b"
+					}
+				],
+				"h": 30
+			},
+			{
+				"cols": [
+					{
+						"w": 100,
+						"guid": "y-c"
+					}
+				],
+				"h": 20
+			}
+		],
+		"guid": "y"
+	}
 
 	$scope.addWidget = function() {
 		// console.log(box)
@@ -151,6 +193,34 @@ function DashboardController($scope) {
 
 	var box = layoutEngine.ui.layout.box.create(layoutdata, true); // Box - Resizable - CustomEvent	
 	box.appendTo(".dockpanel");
+
+
+	
+
+var tabel = '<div class="tab-comp">\
+	<ul class="nav nav-tabs">\
+		<li><a href=".tab-content .home" data-toggle="tab">Home</a></li>\
+		<li><a href=".tab-content .profile" data-toggle="tab">Profile</a></li>\
+		<li class="active"><a href=".tab-content .messages" data-toggle="tab">Messages</a></li>\
+		<li><a href=".tab-content .settings" data-toggle="tab">Settings</a></li>\
+	</ul>\
+\
+	<div class="tab-content">\
+		<div class="tab-pane home">..home.</div>\
+		<div class="tab-pane profile">profile</div>\
+		<div class="tab-pane active messages">meeee.</div>\
+		<div class="tab-pane settings">..ssssss<br>\
+			asdfasdf<br>asdfasdf.</div>\
+	</div>\
+</div>';
+
+	var cbox = angular.element('div[dock-id=b] .contentbox');
+	cbox.css('position','relative');
+	angular.element(tabel).appendTo(cbox);
+
+
+	var zbox = layoutEngine.ui.layout.box.create(ld); // Box - Resizable - CustomEvent
+	zbox.appendTo('.tab-content div.tab-pane.messages');
 }
 
 function PresetController($scope) {

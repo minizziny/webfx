@@ -544,7 +544,6 @@ var layoutEngine = (function() {
 						}
 					}, 200)
 				}
-				// layoutEngine.ui.layout.box.root.updateLayout(false);
 			}
 		}
 
@@ -1113,7 +1112,6 @@ var layoutEngine = (function() {
 				}
 			}
 			
-			// layoutEngine.ui.layout.box.root.updateLayout(false);
 			return true;
 		}
 		
@@ -1579,7 +1577,6 @@ var layoutEngine = (function() {
 					unwrapRow(row.box.rows[0]);
 				}
 				
-				// layoutEngine.ui.layout.box.root.updateLayout(false);
 			}
 		}
 
