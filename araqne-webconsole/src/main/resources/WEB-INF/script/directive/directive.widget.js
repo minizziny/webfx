@@ -349,6 +349,19 @@ angular.module('app.directive.widget', [])
 					elContent.prepend(svg);
 
 					
+				},
+				'wordcloud': function(ctx) {
+					run();
+					el.addClass('wordcloud');
+					var divcont = angular.element('<div class="widget-wordcloud">');
+
+					function render() {
+						serviceChart.getWordCloud(scope.dataQueryResult, ctx.data.size, ctx.data.text, divcont);
+					}
+
+					options.pageLoaded = render;
+
+					elContent.prepend(divcont);
 				}
 			}
 

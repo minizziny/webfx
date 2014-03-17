@@ -364,11 +364,80 @@ angular.module('app.chart', [])
 		return dataSeries;
 	}
 
+	function getWordCloud(result, colNameNumber, colNameString, el) {
+
+		var w = 800, h = 600;
+		
+		var maxValue = Math.max.apply(this, result.map(function(item) { return item[colNameNumber]} ));
+		var fill = d3.scale.category20();
+		var fontSize = d3.scale.linear().range([14, 100]);
+		fontSize.domain([1, maxValue]);
+
+		el = $(el);
+		el.empty();
+
+		var layout = d3.layout.cloud()
+			.size([w,h])
+			.spiral("archimedean")
+			.font("Impact")
+			.text(function(d) { return d[colNameString]; })
+			.fontSize(function(d) { 
+				return fontSize(d[colNameNumber]);
+			})
+			.on("end", draw);
+
+		var svg = d3.select(el[0]).append("svg")
+			.attr("width", w)
+			.attr("height", h);
+
+		var background = svg.append("g");
+
+		var vis = svg.append("g")
+			.attr("transform", "translate(" + [w >> 1, h >> 1] +")");
+
+		function draw(words, bounds) {
+			scale = bounds ? Math.min(
+				w / Math.abs(bounds[1].x - w / 2),
+				w / Math.abs(bounds[0].x - w / 2),
+				h / Math.abs(bounds[1].y - h / 2),
+				h / Math.abs(bounds[0].y - h / 2)) / 2 : 1;
+
+			var text = vis.selectAll("text")
+				.data(words, function(d) { return d[colNameString]; });
+
+			text.transition()
+				.duration(1000)
+				.attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
+				.style("font-size", function(d) { return d.size + "px"; });
+
+			text.enter().append("text")
+				.attr("text-anchor", "middle")
+				.attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
+				.style("font-size", function(d) { return d.size + "px"; })
+
+			text.style("font-family", 'Impact')
+				.style("fill", function(d) { return fill(d[colNameString]); })
+				.text(function(d) { return d.text; });
+
+			var exitGroup = background.append("g")
+				.attr("transform", vis.attr("transform"));
+			
+			var exitGroupNode = exitGroup.node();
+			text.exit().each(function() {
+				exitGroupNode.appendChild(this);
+			});
+
+		}
+
+		layout.stop().words(result).start();
+	}
+
 	return {
 		multiBarHorizontalChart: multiBarHorizontalChart,
 		lineChart: lineChart,
 		pie: pie,
 		buildJSONStructure: buildJSONStructure,
-		getDataSeries: getDataSeries
+		getDataSeries: getDataSeries,
+		getWordCloud: getWordCloud
 	}
 });
