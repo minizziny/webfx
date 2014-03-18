@@ -366,7 +366,7 @@ angular.module('app.chart', [])
 
 	function getWordCloud(result, colNameNumber, colNameString, el) {
 
-		var w = 800, h = 600;
+		var w = 800, h = 800;
 		
 		var maxValue = Math.max.apply(this, result.map(function(item) { return item[colNameNumber]} ));
 		var fill = d3.scale.category20();

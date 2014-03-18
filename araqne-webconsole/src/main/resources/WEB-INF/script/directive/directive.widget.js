@@ -361,6 +361,17 @@ angular.module('app.directive.widget', [])
 
 					options.pageLoaded = render;
 
+					divcont[0].onResize = function() {
+						var w = el.parent().width(), h = el.parent().height(), scale;
+						if(w > h) {
+							scale = h / 700;
+						}
+						else {
+							scale = w / 700;
+						}
+						divcont.css('zoom', scale);
+					}
+
 					elContent.prepend(divcont);
 				}
 			}

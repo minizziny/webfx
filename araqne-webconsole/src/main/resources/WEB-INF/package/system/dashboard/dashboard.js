@@ -52,7 +52,14 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 				}
 			}
 
+			function resizeWordCloud(i, wc) {
+				if(!!wc.onResize) {
+					wc.onResize();
+				}
+			}
+
 			box.el.find('.widget-chart').each(resizeCharts);
+			box.el.find('.widget-wordcloud').each(resizeWordCloud);
 		});
 	}
 	eventSender.dashboard.$event.on('resume', redraw);
@@ -321,6 +328,16 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 					curr.find('.widget-grid').each(syncHandle);
 					effsn.find('.widget-grid').each(syncHandle);
 					effsp.find('.widget-grid').each(syncHandle);
+
+					function resizeWordCloud(i, wc) {
+						if(!!wc.onResize) {
+							wc.onResize();
+						}
+					}
+
+					curr.find('.widget-wordcloud').each(resizeWordCloud);
+					effsn.find('.widget-wordcloud').each(resizeWordCloud);
+					effsp.find('.widget-wordcloud').each(resizeWordCloud);
 				}
 
 				var rootobj = layoutEngine.ui.layout.box.root.getObject();
