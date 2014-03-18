@@ -271,7 +271,7 @@
 	"$S_str_RunQueryString": "실행할 쿼리문", 
 	"$S_str_AlertQueryString": "경보 쿼리문",
 	"$S_str_SuppressInterval": "무시주기",
-	"$S_str_CreateScheduledQuery": "예약된 쿼리 경보 생성",
+	"$S_str_CreateScheduledQuery": "예약된 쿼리 생성",
 	"$S_str_Save": "저장",
 	"$S_str_NotSave": "저장안함",
 	"$S_str_Time": "시간",
@@ -450,6 +450,14 @@
 	"$S_msg_WarningStopLoggerBeforeRemovalPost": "는 삭제되지 않습니다. 먼저 수집을 종료해야 합니다.",
 	"$S_msg_StopLoggerFirst": "수집이 진행중입니다. 먼저 수집을 중지하고 삭제하세요.",
 
+	"$S_msg_runAsStandalone": "로거 {{p0}}의 HA 구성이 해제되었습니다. 앞으로 독립적으로 실행됩니다.",
+	"$S_msg_runAsPrimary": "로거 {{p0}}의 백업 로거로 {{p1}}이 지정되었습니다.",
+	"$S_msg_runAsBackup": "로거 {{p0}}의 프라이머리 로거로 {{p1}}이 지정되었습니다.",
+
+    "$S_str_Primary": "프라이머리",
+    "$S_str_Backup": "백업",
+    "$S_str_Standalone": "독립 실행형",
+
 	"--------license--------": "",
 	"$S_msg_InvalidVolumnLicense": "볼륨 라이센스가 초과 되었습니다.",
 	"$S_str_HardwareKey": "하드웨어 키",
@@ -616,7 +624,7 @@
 	"$S_str_InputIndexName": "생성하실 인덱스 이름을 입력하십시오.",
 	"$S_str_SelectTokenizer": "토크나이저를 선택하십시오.",
 	"$S_str_DefaultValueDescription": "입력을 하지 않을 경우 기본 값으로 설정 됩니다.",
-	"$S_str_NameValidationErrorMsg" : "이름은 영어, 숫자 , '-', '_' 로 구성되어야 합니다.",
+	"$S_str_NameValidationErrorMsg" : "이름은 영어, 숫자, '_' 로 구성되어야 합니다.",
 	"$S_str_AlreadyExistsMsg": "이미 존재하는 테이블 입니다.",
 
 	"--------index--------": "",

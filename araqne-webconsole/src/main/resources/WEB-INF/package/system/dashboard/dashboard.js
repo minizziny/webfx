@@ -52,7 +52,14 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 				}
 			}
 
+			function resizeWordCloud(i, wc) {
+				if(!!wc.onResize) {
+					wc.onResize();
+				}
+			}
+
 			box.el.find('.widget-chart').each(resizeCharts);
+			box.el.find('.widget-wordcloud').each(resizeWordCloud);
 		});
 	}
 	eventSender.dashboard.$event.on('resume', redraw);
@@ -321,6 +328,16 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 					curr.find('.widget-grid').each(syncHandle);
 					effsn.find('.widget-grid').each(syncHandle);
 					effsp.find('.widget-grid').each(syncHandle);
+
+					function resizeWordCloud(i, wc) {
+						if(!!wc.onResize) {
+							wc.onResize();
+						}
+					}
+
+					curr.find('.widget-wordcloud').each(resizeWordCloud);
+					effsn.find('.widget-wordcloud').each(resizeWordCloud);
+					effsp.find('.widget-wordcloud').each(resizeWordCloud);
 				}
 
 				var rootobj = layoutEngine.ui.layout.box.root.getObject();
@@ -533,13 +550,24 @@ function SelectColumnController($scope, $filter, $translate, eventSender) {
 	}
 
 	eventSender.dashboard.onSelectColumnFinished = function(fn) {
-		// 바인딩 화면에 컬럼 정보를 넘겨줍니다.
-		$('.qr2.qr-selectable')[0].getColumns(function(cols) {
-			fn.call($scope, {
-				'cols': cols,
-				'result': $scope.qresult
+		if($scope.chartType.name === 'wordcloud') {
+			$('.qr2.qr-selectable')[0].getColumns(function(cols) {
+				eventSender.dashboard.initWordCloud(cols, $scope.qresult);
+				fn.call($scope, {
+					'cols': cols
+				});
 			});
-		});
+		}
+		else {
+			// 바인딩 화면에 컬럼 정보를 넘겨줍니다.
+			$('.qr2.qr-selectable')[0].getColumns(function(cols) {
+				fn.call($scope, {
+					'cols': cols,
+					'result': $scope.qresult
+				});
+			});			
+		}
+
 	}
 
 	window._recovery = {
@@ -952,17 +980,36 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 					return $scope.isPageLoaded;
 				}
 			},
+			's4next': function() {
+				return $scope.chartType.nextType;
+			},
 			's4nextEvent': function() {
 				return eventSender.dashboard.onSelectColumnFinishing;
 			},
 			's4nextCallback': function() {
-				return eventSender.dashboard.onChartBindingStarting;
+				if($scope.chartType.name === 'wordcloud') {
+					$scope.ctxWidget.type = 'wordcloud';
+					delete $scope.ctxWidget.data.label;
+					delete $scope.ctxWidget.data.series;
+					console.log('s4nextCallback wordcloud')
+					return function() {
+						eventSender.dashboard.onSelectColumnFinished(function(sender) {
+							$scope.ctxWidget.data.text = sender.cols.filter(function(col) { return col.type === 'string' }).first().name;
+							$scope.ctxWidget.data.size = sender.cols.filter(function(col) { return col.type === 'number' }).first().name;
+						});
+					};
+				}
+				else {
+					return eventSender.dashboard.onChartBindingStarting;
+				}
 			},
 			's5nextCallback': function() {
 				dataChart = eventSender.dashboard.onSendChartDataWizard();
 				return;
 			},
-			's3prev': 5
+			's3prev': function() {
+				return $scope.chartType.nextType;
+			}
 		}
 	];
 	$scope.widgetType = wtypes[1];
@@ -1001,7 +1048,12 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 			submitTable();
 		}
 		else if ($scope.widgetType.name == 'graph') {
-			submitGraph();
+			if($scope.chartType.name === 'wordcloud') {
+				submitWordCloud();
+			}
+			else {
+				submitGraph();	
+			}
 		}
 
 	}
@@ -1026,17 +1078,27 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		{
 			'name': 'bar',
 			'required': ['number'],
-			'invalid_msg': $translate('$S_msg_SelectOneMoreNumberType')
+			'invalid_msg': $translate('$S_msg_SelectOneMoreNumberType'),
+			'nextType': 5
 		},
 		{
 			'name': 'line',
 			'required': ['number'],
-			'invalid_msg': $translate('$S_msg_SelectOneMoreNumberType')
+			'invalid_msg': $translate('$S_msg_SelectOneMoreNumberType'),
+			'nextType': 5
 		},
 		{
 			'name': 'pie',
 			'required': ['number'],
-			'invalid_msg': $translate('$S_msg_SelectOneMoreNumberType')
+			'invalid_msg': $translate('$S_msg_SelectOneMoreNumberType'),
+			'nextType': 5
+		},
+		{
+			'name': 'wordcloud',
+			'required': ['number', 'string'],
+			'one': ['number', 'string'],
+			'invalid_msg': '하나의 문자열, 하나의 숫자 컬럼이 필요합니다.',
+			'nextType': 6
 		}
 	];
 	$scope.chartType = $scope.ctypes[0];
@@ -1074,5 +1136,20 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		console.log($scope.ctxWidget)
 		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
 		$('.newWidget')[0].hideDialog();
+	}
+
+	function submitWordCloud() {
+		console.log($scope.ctxWidget);
+		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
+		$('.newWidget')[0].hideDialog();
+	}
+
+}
+function WordCloudController($scope, socket, eventSender, serviceChart) {
+	eventSender.dashboard.initWordCloud = function(cols, result) {
+		var colNameString = cols.filter(function(col) { return col.type === 'string' }).first().name;
+		var colNameNumber = cols.filter(function(col) { return col.type === 'number' }).first().name;
+
+		serviceChart.getWordCloud(result, colNameNumber, colNameString, '.cloud-preview');
 	}
 }

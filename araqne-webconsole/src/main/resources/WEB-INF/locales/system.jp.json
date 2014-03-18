@@ -444,6 +444,14 @@
 	"$S_msg_WarningStopLoggerBeforeRemovalPost": "",
 	"$S_msg_StopLoggerFirst": "Please stop logger first.",
 
+	"$S_msg_runAsStandalone": "로거 {{p0}}의 HA 구성이 해제되었습니다. 앞으로 독립적으로 실행됩니다.",
+	"$S_msg_runAsPrimary": "로거 {{p0}}의 백업 로거로 {{p1}}이 지정되었습니다.",
+	"$S_msg_runAsBackup": "로거 {{p0}}의 프라이머리 로거로 {{p1}}이 지정되었습니다.",
+
+    "$S_str_Primary": "Primary",
+    "$S_str_Backup": "Backup",
+    "$S_str_Standalone": "Standalone",
+
 	"--------license--------": "",
 	"$S_msg_InvalidVolumnLicense": "ボーリュウムライセンスが超過されました",
 	"$S_str_HardwareKey": "ハードウェアキー",
@@ -610,7 +618,7 @@
 	"$S_str_InputIndexName": "作成するインデックス名を入力してください",
 	"$S_str_SelectTokenizer": "トークナイザを選んでください",
 	"$S_str_DefaultValueDescription": "入力をしない場合、基本値で設定されます",
-	"$S_str_NameValidationErrorMsg" : "名前はアルファベット、数字、'-'、'_'で作成してください",
+	"$S_str_NameValidationErrorMsg" : "名前はアルファベット、数字、'_'で作成してください",
 	"$S_str_AlreadyExistsMsg": "すでに存在するテーブルです",
 
 	"--------index--------": "",
