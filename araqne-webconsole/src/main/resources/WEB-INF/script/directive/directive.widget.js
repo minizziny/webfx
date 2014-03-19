@@ -364,10 +364,10 @@ angular.module('app.directive.widget', [])
 					divcont[0].onResize = function() {
 						var w = el.parent().width(), h = el.parent().height(), scale;
 						if(w > h) {
-							scale = h / 700;
+							scale = h / 500;
 						}
 						else {
-							scale = w / 700;
+							scale = w / 500;
 						}
 						divcont.css('zoom', scale);
 					}

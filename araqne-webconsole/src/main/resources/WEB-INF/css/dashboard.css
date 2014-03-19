@@ -174,7 +174,7 @@
 	}
 
 	widget.wordcloud .widget-content svg {
-		margin-top: -40px;
+		margin-top: -20px;
 	}
 
 	.brandpreset {
@@ -245,6 +245,11 @@
 		margin-left: -49%;
 		min-height: 90%;
 		top: 10px;
+	}
+
+	.newWidget.step6 {
+		width: 620px;
+		margin-left: -320px;
 	}
 
 	[fx-dashboard-id=binding-left] {

@@ -110,6 +110,10 @@
 	"$S_str_AxisX": "X axis",
 	"$S_str_NullToZero": "Display Null to Zero",
 
+	"$S_str_WordCloud": "Word Cloud",
+	"$S_str_Preview": "Preview",
+	"$S_msg_ClickNextToContinue": "Please click 'Next' to continue.",
+
 	"$S_str_Autosave": "Auto Save",
 	"$S_msg_SavePresetAs": "Type preset name.",
 	"$S_msg_NewPresetName": "Type new preset name.",
