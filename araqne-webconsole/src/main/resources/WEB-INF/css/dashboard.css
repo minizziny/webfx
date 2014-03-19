@@ -151,6 +151,32 @@
 		height: calc(100% - 3px);
 	}
 
+	.widget-wordcloud {
+		text-align: center;
+	}
+
+	widget.wordcloud .widget-status {
+		float: none;
+		position: absolute;
+		left: 2px;
+		bottom: 0;
+	}
+
+	widget.wordcloud .widget-lastupdate {
+		float: none;
+		position: absolute;
+		right: 2px;
+		bottom: 0;
+	}
+
+	widget.wordcloud .widget-content {
+		overflow: hidden;
+	}
+
+	widget.wordcloud .widget-content svg {
+		margin-top: -20px;
+	}
+
 	.brandpreset {
 		line-height: 34px;
 		font-size: 20px;
@@ -219,6 +245,11 @@
 		margin-left: -49%;
 		min-height: 90%;
 		top: 10px;
+	}
+
+	.newWidget.step6 {
+		width: 620px;
+		margin-left: -320px;
 	}
 
 	[fx-dashboard-id=binding-left] {

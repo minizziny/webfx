@@ -110,6 +110,10 @@
 	"$S_str_AxisX": "X axis",
 	"$S_str_NullToZero": "Display Null to Zero",
 
+	"$S_str_WordCloud": "Word Cloud",
+	"$S_str_Preview": "Preview",
+	"$S_msg_ClickNextToContinue": "Please click 'Next' to continue.",
+
 	"$S_str_Autosave": "Auto Save",
 	"$S_msg_SavePresetAs": "Type preset name.",
 	"$S_msg_NewPresetName": "Type new preset name.",
@@ -443,6 +447,14 @@
 	"$S_msg_WarningStopLoggerBeforeRemovalPost": "",
 	"$S_msg_StopLoggerFirst": "Please stop logger first.",
 
+	"$S_msg_runAsStandalone": "로거 {{p0}}의 HA 구성이 해제되었습니다. 앞으로 독립적으로 실행됩니다.",
+	"$S_msg_runAsPrimary": "로거 {{p0}}의 백업 로거로 {{p1}}이 지정되었습니다.",
+	"$S_msg_runAsBackup": "로거 {{p0}}의 프라이머리 로거로 {{p1}}이 지정되었습니다.",
+
+    "$S_str_Primary": "Primary",
+    "$S_str_Backup": "Backup",
+    "$S_str_Standalone": "Standalone",
+
 	"--------license--------": "",
 	"$S_msg_InvalidVolumnLicense": "Volume license limit exceeded",
 	"$S_str_HardwareKey": "Hardware Key",
@@ -609,7 +621,7 @@
 	"$S_str_InputIndexName": "Input Index Name",
 	"$S_str_SelectTokenizer": "Select Tokenizer",
 	"$S_str_DefaultValueDescription": "if you don't input, this information is set default value",
-	"$S_str_NameValidationErrorMsg" : "Name can only contain alphabets, numbers, '-' and '_' characters",
+	"$S_str_NameValidationErrorMsg" : "Name can only contain alphabets, numbers, '_' characters",
 	"$S_str_AlreadyExistsMsg": "table already exists",
 
 	"--------index--------": "",

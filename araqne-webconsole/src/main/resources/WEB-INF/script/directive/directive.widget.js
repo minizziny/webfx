@@ -349,6 +349,30 @@ angular.module('app.directive.widget', [])
 					elContent.prepend(svg);
 
 					
+				},
+				'wordcloud': function(ctx) {
+					run();
+					el.addClass('wordcloud');
+					var divcont = angular.element('<div class="widget-wordcloud">');
+
+					function render() {
+						serviceChart.getWordCloud(scope.dataQueryResult, ctx.data.size, ctx.data.text, divcont);
+					}
+
+					options.pageLoaded = render;
+
+					divcont[0].onResize = function() {
+						var w = el.parent().width(), h = el.parent().height(), scale;
+						if(w > h) {
+							scale = h / 560;
+						}
+						else {
+							scale = w / 560;
+						}
+						divcont.css('zoom', scale);
+					}
+
+					elContent.prepend(divcont);
 				}
 			}
 

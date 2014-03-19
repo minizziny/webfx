@@ -331,6 +331,7 @@ function UserController($scope, socket, eventSender, serviceDom, serviceSession)
 
 function AdminController($scope, socket, eventSender, serviceDom, serviceSession) {
 	$scope.listRoles = [];
+	$scope.listRolesAvailable = [];
 	$scope.currentUser;
 	$scope.currentRole;
 	$scope.currentRoleCopy;
@@ -339,8 +340,14 @@ function AdminController($scope, socket, eventSender, serviceDom, serviceSession
 	function getRoles() {
 		socket.send('org.araqne.dom.msgbus.RolePlugin.getRoles', {}, eventSender.orgchart.pid)
 		.success(function(m) {
-			$scope.listRoles = m.body.roles;
-			console.log(m.body);
+			
+			m.body.roles.forEach(function(role) {
+				$scope.listRoles.push(role);
+				if(role.name === 'member' || role.name === 'admin') {
+					$scope.listRolesAvailable.push(role);	
+				}
+			});
+			console.log($scope.listRoles);
 
 			resetRole();
 			getMyRole();
@@ -394,37 +401,47 @@ function AdminController($scope, socket, eventSender, serviceDom, serviceSession
 		var found = $scope.listRoles.filter(function(obj) {
 			return obj.name == name;
 		});
-		return found[0];
+		if(found.length === 0) {
+			return {
+				'level': 1,
+				'name': 'unknown'
+			};
+		}
+		else {
+			return found[0];	
+		}
 	}
 
 	function setAdmin() {
 		var rolename = $scope.currentRoleCopy.name;
-		var option = {
-			'login_name': $scope.currentUser.login_name,
-			'role': {
-				'name': rolename
-			},
-			'use_login_lock': false,
-			'is_enabled': true
+		if(rolename === 'member' || rolename === 'admin') {
+			var option = {
+				'login_name': $scope.currentUser.login_name,
+				'role': {
+					'name': rolename
+				},
+				'use_login_lock': false,
+				'is_enabled': true
+			}
+
+			socket.send('org.araqne.dom.msgbus.AdminPlugin.setAdmin', option, eventSender.orgchart.pid)
+			.success(function(m) {
+				$scope.currentRole = getRoleByName(rolename);
+				console.log('::: setAdmin:\t', option, rolename);
+				$scope.$apply();
+			})
+			.failed(openError);
+
+			resetRoleCopy();	
 		}
-
-		socket.send('org.araqne.dom.msgbus.AdminPlugin.setAdmin', option, eventSender.orgchart.pid)
-		.success(function(m) {
-			$scope.currentRole = getRoleByName(rolename);
-			console.log('::: setAdmin:\t', option, rolename);
-			$scope.$apply();
-		})
-		.failed(openError);
-
-		resetRoleCopy();
 	}	
 
 	function resetRoleCopy() {
-		$scope.currentRoleCopy = $scope.listRoles[2]; // 기본값으로 돌려줌
+		$scope.currentRoleCopy = getRoleByName('member'); // 기본값으로 돌려줌
 	}
 
 	function resetRole() {
-		$scope.currentRole = $scope.listRoles[2]; // 기본값으로 돌려줌
+		$scope.currentRole = getRoleByName('member'); // 기본값으로 돌려줌
 	}
 
 	eventSender.onSelectUserAdmin = function(user) {

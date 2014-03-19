@@ -87,7 +87,7 @@ angular.module('app.directive.validation', [])
 	return {
 		require: 'ngModel',
 		link: function(scope, elm, attrs, ctrl) {
-			var VALIDATE_NAME_REGEXP = /^([\u00c0-\u01ffa-zA-Z\-\_0-9])+$/;
+			var VALIDATE_NAME_REGEXP = /^([\u00c0-\u01ffa-zA-Z\_0-9])+$/;
 			ctrl.$parsers.unshift(function(viewValue) {
 				if (VALIDATE_NAME_REGEXP.test(viewValue)) {
 					// it is valid

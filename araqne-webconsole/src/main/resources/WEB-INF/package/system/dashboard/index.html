@@ -194,7 +194,7 @@
 						</div>
 					</form>
 					<div class="control-group submit-group clearboth">
-						<button class="wiz-prev btn" ng-click="go(widgetType.s3prev)">{{'$S_str_Previous' | translate}}</button>
+						<button class="wiz-prev btn" ng-click="go(widgetType.s3prev())">{{'$S_str_Previous' | translate}}</button>
 						<button class="wiz-next btn" ng-click="submit()" ng-disabled="formWidgetCommon.$invalid || ctxWidget.name == undefined">{{'$S_str_Done' | translate}}</button>
 					</div>
 				</fieldset>
@@ -214,6 +214,7 @@
 							<button class="btn btn-large active" data-toggle="button" ng-click="selectChartType(0)">{{'$S_str_BarChart' | translate}}</button>
 							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(1)">{{'$S_str_LineChart' | translate}}</button>
 							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(2)">{{'$S_str_PieChart' | translate}}</button>
+							<button class="btn btn-large" data-toggle="button" ng-click="selectChartType(3)">{{'$S_str_WordCloud' | translate}}</button>
 						</div>
 					</div>
 					<div class="clearfix" style="margin-top: 20px">
@@ -241,7 +242,7 @@
 					</div>
 					<div class="control-group submit-group">
 						<button class="wiz-prev btn" ng-click="go(1)">{{'$S_str_Previous' | translate}}</button>
-						<button class="wiz-next btn" ng-click="go(5, widgetType.s4nextCallback(), widgetType.s4nextEvent())">{{'$S_str_Next' | translate}}</button>
+						<button class="wiz-next btn" ng-click="go(widgetType.s4next(), widgetType.s4nextCallback(), widgetType.s4nextEvent())">{{'$S_str_Next' | translate}}</button>
 					</div>
 				</fieldset>
 			</li>
@@ -320,6 +321,19 @@
 				<div class="control-group submit-group clearboth">
 					<button class="wiz-prev btn" ng-click="go(4)">{{'$S_str_Previous' | translate}}</button>
 					<button class="wiz-next btn" ng-click="go(3, widgetType.s5nextCallback())">{{'$S_str_Next' | translate}}</button>
+				</div>
+			</li>
+			<!-- 6 -->
+			<li class="wiz-step" ng-controller="WordCloudController">
+				<legend>{{'$S_str_Preview' | translate}}</legend>
+				<fieldset style="position: relative">
+					<div>{{'$S_msg_ClickNextToContinue' | translate}}</div>
+					<div class="cloud-preview" style="width: 600px; height: 600px; border: 1px solid silver; margin-top:10px">
+					</div>
+				</fieldset>
+				<div class="control-group submit-group clearboth">
+					<button class="wiz-prev btn" ng-click="go(4)">{{'$S_str_Previous' | translate}}</button>
+					<button class="wiz-next btn" ng-click="go(3)">{{'$S_str_Next' | translate}}</button>
 				</div>
 			</li>
 		</ol>
