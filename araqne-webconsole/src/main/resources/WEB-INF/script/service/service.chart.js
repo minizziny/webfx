@@ -366,11 +366,11 @@ angular.module('app.chart', [])
 
 	function getWordCloud(result, colNameNumber, colNameString, el) {
 
-		var w = 800, h = 800;
+		var w = 600, h = 600;
 		
 		var maxValue = Math.max.apply(this, result.map(function(item) { return item[colNameNumber]} ));
 		var fill = d3.scale.category20();
-		var fontSize = d3.scale.linear().range([14, 100]);
+		var fontSize = d3.scale.linear().range([11, 80]);
 		fontSize.domain([1, maxValue]);
 
 		el = $(el);
@@ -379,7 +379,7 @@ angular.module('app.chart', [])
 		var layout = d3.layout.cloud()
 			.size([w,h])
 			.spiral("archimedean")
-			.font("Impact")
+			.font("Impact, Malgun Gothic")
 			.text(function(d) { return d[colNameString]; })
 			.fontSize(function(d) { 
 				return fontSize(d[colNameNumber]);
@@ -415,7 +415,7 @@ angular.module('app.chart', [])
 				.attr("transform", function(d) { return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")"; })
 				.style("font-size", function(d) { return d.size + "px"; })
 
-			text.style("font-family", 'Impact')
+			text.style("font-family", 'Impact, Malgun Gothic')
 				.style("fill", function(d) { return fill(d[colNameString]); })
 				.text(function(d) { return d.text; });
 
