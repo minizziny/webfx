@@ -148,7 +148,7 @@ angular.module('app.directive.widget', [])
 			</div>\
 			<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
 				<div class="property-inner" ng-click="stopPropagation($event)">\
-					<code style="display:inline-block">{{query}}</code><br/>\
+					<code style="display:inline-block; max-height:200px; overflow:auto">{{query}}</code><br/>\
 					{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
 					<span click-to-edit type="number" ng-model="interval" ng-change="onIntervalChange($event, $new, $old)" ng-cancel="onCancel()"></span>\
 					{{"$S_msg_QueryRunInterval" | translate}}\
@@ -364,10 +364,10 @@ angular.module('app.directive.widget', [])
 					divcont[0].onResize = function() {
 						var w = el.parent().width(), h = el.parent().height(), scale;
 						if(w > h) {
-							scale = h / 700;
+							scale = h / 560;
 						}
 						else {
-							scale = w / 700;
+							scale = w / 560;
 						}
 						divcont.css('zoom', scale);
 					}
@@ -389,6 +389,7 @@ angular.module('app.directive.widget', [])
 
 				function getResult(m) {
 					var result = m.body.result;
+					console.log(m)
 					scope.dataQueryResult.splice(0, scope.dataQueryResult.length); // array 비워주기
 		
 					for (var i = 0; i < result.length; i++) {
@@ -417,15 +418,24 @@ angular.module('app.directive.widget', [])
 					}
 				}
 		
-				queryInst.query(scope.query, 200)
+				queryInst.query(scope.query, 100)
 				.created(function(m) {
 					//console.log('created')
 					// elProgressBar.addClass('ani');
 					scope.progress = { 'width': '20%' };
 					scope.$apply();
 				})
-				.getResult(getResult)
+				.onStatusChange(function(m) {
+					// console.log(m.body)
+					if(m.body.type === 'eof') {
+						queryInst.getResult(0, 100, getResult);	
+					}
+				})
 				.loaded(function(m) {
+					// console.log(m.body)
+					if(m.body.type === 'eof') {
+						queryInst.getResult(0, 100, getResult);	
+					}
 					if(!!options.loaded) {
 						options.loaded(m);
 					}

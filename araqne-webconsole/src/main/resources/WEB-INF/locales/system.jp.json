@@ -110,6 +110,10 @@
 	"$S_str_AxisX": "横軸",
 	"$S_str_NullToZero": "バリューがない時は0で表示",
 
+	"$S_str_WordCloud": "Word Cloud",
+	"$S_str_Preview": "Preview",
+	"$S_msg_ClickNextToContinue": "Please click 'Next' to continue.",
+
 	"$S_str_Autosave": "自動保存",
 	"$S_msg_SavePresetAs": "保存する新しいプリセットの名前を入力してください",
 	"$S_msg_NewPresetName": "新しいプリセットの名前を入力してください",

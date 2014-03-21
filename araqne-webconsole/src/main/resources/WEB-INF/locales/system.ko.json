@@ -110,6 +110,10 @@
 	"$S_str_AxisX": "X축",
 	"$S_str_NullToZero": "값이 없는 경우 0으로 표시",
 
+	"$S_str_WordCloud": "단어구름",
+	"$S_str_Preview": "미리보기",
+	"$S_msg_ClickNextToContinue": "계속하려면 다음을 누르십시오.",
+
 	"$S_str_Autosave": "자동 저장",
 	"$S_msg_SavePresetAs": "저장할 새 프리셋 이름을 입력하세요",
 	"$S_msg_NewPresetName": "새 프리셋 이름을 입력하세요",
@@ -306,7 +310,6 @@
 	"$S_str_MonthPost": "월",
 	"$S_str_Weekend": "주말",
 	"$S_str_Weekday": "평일",
-
 
 	"--------logsource--------": "",
 	"$S_str_Logger": "로거",

@@ -110,6 +110,10 @@
 	"$S_str_AxisX": "X axis",
 	"$S_str_NullToZero": "Display Null to Zero",
 
+	"$S_str_WordCloud": "Word Cloud",
+	"$S_str_Preview": "Preview",
+	"$S_msg_ClickNextToContinue": "Please click 'Next' to continue.",
+
 	"$S_str_Autosave": "Auto Save",
 	"$S_msg_SavePresetAs": "Type preset name.",
 	"$S_msg_NewPresetName": "Type new preset name.",
@@ -208,7 +212,7 @@
 	"$S_str_QueryName": "Save query name",
 
 	"$S_str_SaveThisQueryResult": "Save this query result",
-	"$S_str_QueryName": "Save query result name",
+	"$S_str_QueryResultName": "Save query result name",
 
 	"$S_str_SavedQuery": "Saved query list",
 
@@ -299,7 +303,6 @@
 	"$S_str_MonthPost": " Month",
 	"$S_str_Weekend": "Weekend",
 	"$S_str_Weekday": "Weekday",
-
 
 	"--------logsource--------": "",
 	"$S_str_Logger": "Loggers",
