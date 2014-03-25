@@ -1,0 +1,328 @@
+[
+	{
+		"guid": "dbdd35bc-8aa0-4234-9aa4-c5ba7875efff",
+		"source": "",
+		"session": "9646ea7f-e2a2-4d3f-a1f4-05e6d870131e",
+		"requestId": "ba491a30-7021-aace-f951-1e50f1d475c7",
+		"target": "22",
+		"method": "com.logpresso.core.msgbus.WallPlugin.getPreset",
+		"type": "Response"
+	},
+	{
+		"preset": {
+			"guid": "autosave",
+			"name": "ìë ì ì¥",
+			"state": {
+				"widgets": [
+					{
+						"guid": "w09ab1248d623c426",
+						"interval": 15,
+						"name": "tables",
+						"data": {
+							"order": [
+								"table"
+							],
+							"query": "logdb tables"
+						},
+						"type": "grid"
+					},
+					{
+						"guid": "wbdd7a61cb7186f0a",
+						"interval": 2,
+						"name": "sorttest",
+						"data": {
+							"tabs": [
+								{
+									"name": "xeraph",
+									"guid": "gxeraph",
+									"is_active": false,
+									"type": "dockpanel",
+									"contents": {
+										"widgets": [
+											{
+												"guid": "y-c",
+												"interval": 2,
+												"name": "sorttest",
+												"data": {
+													"series": [
+														{
+															"color": "#AFD8F8",
+															"name": "value",
+															"key": "value"
+														}
+													],
+													"query": "json \"[{col: \\\"hello\\\", value: 134}, {col: \\\"world\\\", value: 100}, {col: \\\"abc\\\", value: 80}, {col: \\\"dfg\\\", value: 34}]\"",
+													"labelType": "string",
+													"label": "col",
+													"type": "bar"
+												}
+											}
+										],
+										"layout": [
+											{
+												"rows": [
+													{
+														"cols": [
+															{
+																"w": 100,
+																"guid": "w31c2319acaee45dd"
+															}
+														],
+														"h": 100
+													}
+												],
+												"w": 100,
+												"guid": "zz"
+											}
+										]
+									}
+								},
+								{
+									"name": "gotoweb",
+									"is_active": true,
+									"guid": "ggotoweb",
+									"type": "html",
+									"contents": "hello world"
+								}
+							]
+						},
+						"type": "tabs"
+					},
+					{
+						"guid": "w81606f23386b1aaf",
+						"interval": 15,
+						"name": "sorttest",
+						"data": {
+							"series": [
+								{
+									"color": "#AFD8F8",
+									"name": "value",
+									"key": "value"
+								}
+							],
+							"query": "json \"[{col: \\\"444\\\", value: 134}, {col: \\\"111\\\", value: 100}, {col: \\\"222\\\", value: 80}, {col: \\\"555\\\", value: 34}]\"",
+							"labelType": "string",
+							"label": "col",
+							"type": "bar"
+						},
+						"type": "chart"
+					},
+					{
+						"guid": "wa620a356b9751e80",
+						"interval": 15,
+						"name": "test",
+						"data": {
+							"series": [
+								{
+									"color": "#AFD8F8",
+									"name": "col",
+									"key": "col"
+								},
+								{
+									"color": "#F6BD0F",
+									"name": "value",
+									"key": "value"
+								}
+							],
+							"labelType": "number",
+							"query": "json \"[{col: 444, value: 134}, {col: 111, value: 100}, {col: 222, value: 80}, {col: 555, value: 34}]\"",
+							"label": "col",
+							"type": "line"
+						},
+						"type": "chart"
+					},
+					{
+						"guid": "wd4324f3da4e9c967",
+						"interval": 15,
+						"name": "test2",
+						"data": {
+							"series": [
+								{
+									"color": "#AFD8F8",
+									"name": "col",
+									"key": "col"
+								},
+								{
+									"color": "#F6BD0F",
+									"name": "value",
+									"key": "value"
+								}
+							],
+							"labelType": "number",
+							"query": "json \"[{col: 444, value: 134}, {col: 111, value: 100}, {col: 222, value: 80}, {col: 555, value: 34}]\"",
+							"label": "value",
+							"type": "line"
+						},
+						"type": "chart"
+					},
+					{
+						"guid": "w722fdd559a83334a",
+						"interval": 15,
+						"name": "has null",
+						"data": {
+							"series": [
+								{
+									"color": "#AFD8F8",
+									"name": "value",
+									"key": "value"
+								}
+							],
+							"labelType": "datetime",
+							"query": "json \"[{col: \\\"2014-02-02 02:22:22+0900\\\", value: 134}, {col: \\\"2014-02-02 02:22:23+0900\\\", value: null}, {col: \\\"2014-02-02 02:22:24+0900\\\", value: 80}, {col: \\\"2014-02-02 02:22:25+0900\\\", value: 34}]\"",
+							"label": "col",
+							"type": "line"
+						},
+						"type": "chart"
+					},
+					{
+						"guid": "w0b624b9e068264d0",
+						"interval": 15,
+						"name": "zzz",
+						"data": {
+							"series": [
+								{
+									"color": "#AFD8F8",
+									"name": "value",
+									"nullToZero": true,
+									"key": "value"
+								}
+							],
+							"labelType": "datetime",
+							"query": "json \"[{col: \\\"2014-02-02 02:22:22+0900\\\", value: 134}, {col: \\\"2014-02-02 02:22:23+0900\\\", value: null}, {col: \\\"2014-02-02 02:22:24+0900\\\", value: 80}, {col: \\\"2014-02-02 02:22:25+0900\\\", value: 34}]\"",
+							"label": "col",
+							"type": "line"
+						},
+						"type": "chart"
+					},
+					{
+						"guid": "w31c2319acaee45dd",
+						"interval": 15,
+						"name": "frozen",
+						"data": {
+							"series": [
+								{
+									"color": "#AFD8F8",
+									"name": "value",
+									"nullToZero": true,
+									"key": "value"
+								}
+							],
+							"query": "json \"[{col: \\\"elsa\\\", value: 134}, {col: \\\"anna\\\", value: null}, {col: \\\"hans\\\", value: 80}, {col: \\\"sben\\\", value: 34}]\"",
+							"labelType": "string",
+							"label": "col",
+							"type": "line"
+						},
+						"type": "chart"
+					}
+				],
+				"layout": [
+					{
+						"w": 100,
+						"rows": [
+							{
+								"cols": [
+									{
+										"w": 85.59602649006622,
+										"rows": [
+											{
+												"cols": [
+													{
+														"guid": "wbdd7a61cb7186f0a",
+														"w": 30.4635761589404
+													},
+													{
+														"w": 32.86423841059602,
+														"rows": [
+															{
+																"cols": [
+																	{
+																		"guid": "wa620a356b9751e80",
+																		"w": 100
+																	}
+																],
+																"h": 50
+															},
+															{
+																"cols": [
+																	{
+																		"guid": "w0b624b9e068264d0",
+																		"w": 100
+																	}
+																],
+																"h": 50
+															}
+														]
+													},
+													{
+														"w": 36.67218543046358,
+														"rows": [
+															{
+																"cols": [
+																	{
+																		"guid": "w81606f23386b1aaf",
+																		"w": 100
+																	}
+																],
+																"h": 33
+															},
+															{
+																"cols": [
+																	{
+																		"guid": "w722fdd559a83334a",
+																		"w": 100
+																	}
+																],
+																"h": 33
+															},
+															{
+																"cols": [
+																	{
+																		"guid": "xxx",
+																		"w": 100
+																	}
+																],
+																"h": 34
+															}
+														]
+													}
+												],
+												"h": 61.917098445595855
+											},
+											{
+												"cols": [
+													{
+														"guid": "wd4324f3da4e9c967",
+														"w": 25
+													},
+													{
+														"guid": "w31c2319acaee45dd___",
+														"w": 25
+													},
+													{
+														"guid": "zzz",
+														"w": 25
+													},
+													{
+														"guid": "kkk",
+														"w": 25
+													}
+												],
+												"h": 38.34196891191709
+											}
+										]
+									},
+									{
+										"guid": "w09ab1248d623c426",
+										"w": 14.403973509933774
+									}
+								],
+								"h": 100
+							}
+						]
+					}
+				]
+			},
+			"owner": "root"
+		}
+	}
+]
