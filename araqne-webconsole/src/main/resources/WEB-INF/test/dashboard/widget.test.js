@@ -40,8 +40,12 @@ angular.module('app.directive.widget', [])
 			var ret = widgets.filter(function(widget) {
 				return widget.attrs.id === id
 			}).first();
-			console.log(id, ret)
+			// console.log(id, ret)
 			return ret.attrs.$$element;
+		}
+
+		this.listWidgets = function() {
+			return widgets;
 		}
 	}
 
@@ -53,6 +57,9 @@ angular.module('app.directive.widget', [])
 	var widgets = [];
 	
 	function buildWidget(json) {
+		if(json.guid == 'w09ab1248d623c426') {
+			console.log(json)
+		}
 		if(json.type === 'tabs') {
 			return '<widget id="' + json.guid + '" ng-model="ctxz.' + json.guid + '">' + 
 				'<div class="tab-comp" style="height: 100%">' +
@@ -146,6 +153,10 @@ angular.module('app.directive.widget', [])
 							var w = serviceWidget.getWidget(scope.guid);
 							var kdcol = $('[dock-id=' + scope.guid + '] .contentbox:last');
 							angular.element(w).appendTo(kdcol);
+
+							if(scope.guid === 'w09ab1248d623c426') {
+								console.log(kdcol, w)
+							}
 							// console.log('make widget', w)
 						});
 					})
@@ -155,7 +166,7 @@ angular.module('app.directive.widget', [])
 		}
 	}
 })
-.directive('dockpanel', function($timeout) {
+.directive('dockpanel', function($timeout, widgetRegistry) {
 	return {
 		restrict: 'E',
 		require: 'ngModel',
@@ -180,9 +191,16 @@ angular.module('app.directive.widget', [])
 				box.appendTo($el);
 
 				$timeout(function() {
+					console.log(scope.widgets, widgetRegistry.listWidgets(), widgetRegistry.listWidgets().filter(function(w) { return w.attrs.id == 'w09ab1248d623c426'}))
 					scope.widgets.forEach(function(widget) {
+
 						var kdcol = $('[dock-id=' + widget.id + '] .contentbox:last');
 						$(widget).appendTo(kdcol);
+
+						if(widget.id == 'w09ab1248d623c426') {
+							console.log(widget)
+						}
+
 					});
 				});
 			})
@@ -217,27 +235,34 @@ function WidgetController($scope, $http, serviceWidget, $compile) {
 
 		$scope.dataLayout = m.preset.state.layout[0];
 
-		var widgets = m.preset.state.widgets;
 
 
-		$scope.ctxz = {};
+		setTimeout(function() {
+			console.log('------------------------------------------------------------')
+			var widgets = m.preset.state.widgets;
+			$scope.ctxz = {};
+			
+			widgets.forEach(function(widget) {
+				var elReady = $compile(angular.element(serviceWidget.buildWidget(widget)))($scope);
+				serviceWidget.registerWidget(elReady);
+
+				if(widget.guid == 'w09ab1248d623c426') {
+					console.log(elReady)
+				}
+				$scope.ctxz[widget.guid] = widget;
+			});
+		}, 4000)
 		
-		var appendWidgetString = '';
-		widgets.forEach(function(widget) {
-			// appendWidgetString = appendWidgetString + serviceWidget.buildWidget(widget);
-			serviceWidget.registerWidget( $compile(angular.element(serviceWidget.buildWidget(widget)))($scope) );
-			// console.log(widget)
-			$scope.ctxz[widget.guid] = widget;
-		});
 
-		// console.log(appendWidgetString)
+		// setTimeout(function() {
+		// 	$scope.dataLayout = ddataLayout;
+		// 	$scope.$apply();
 
-		// var wz = $compile( angular.element(appendWidgetString) )($scope);
-		// console.log('append widget')
-		// wz.appendTo('#dp');
-		
-
-
+		// 	setTimeout(function() {
+		// 		$scope.dataLayout = myLayout;
+		// 		$scope.$apply();
+		// 	}, 2000)
+		// }, 4000)
 
 	})
 
@@ -260,7 +285,7 @@ function WidgetController($scope, $http, serviceWidget, $compile) {
 		}
 	], 'w': 100 };
 
-	$scope.ddataLayout = {
+	var ddataLayout = {
 		"rows": [
 			{
 				"cols": [
@@ -280,7 +305,7 @@ function WidgetController($scope, $http, serviceWidget, $compile) {
 								"cols": [
 									{
 										"w": 100,
-										"guid": "a-b"
+										"guid": "kkk"
 									}
 								],
 								"h": 30
@@ -289,7 +314,7 @@ function WidgetController($scope, $http, serviceWidget, $compile) {
 								"cols": [
 									{
 										"w": 100,
-										"guid": "a-c"
+										"guid": "xxx"
 									}
 								],
 								"h": 20
@@ -303,7 +328,7 @@ function WidgetController($scope, $http, serviceWidget, $compile) {
 					},
 					{
 						"w": 25,
-						"guid": "c"
+						"guid": "wbdd7a61cb7186f0a"
 					}
 				],
 				"h": 50
@@ -316,7 +341,7 @@ function WidgetController($scope, $http, serviceWidget, $compile) {
 					},
 					{
 						"w": 50,
-						"guid": "w31c2319acaee45dd"
+						"guid": "zzz"
 					}
 				],
 				"h": 50
@@ -326,13 +351,13 @@ function WidgetController($scope, $http, serviceWidget, $compile) {
 		"guid": "root"
 	}
 
-	$scope.myLayout = {
+	var myLayout = {
 		"rows": [
 			{
 				"cols": [
 					{
 						"w": 100,
-						"guid": "y-a"
+						"guid": "w81606f23386b1aaf"
 					}
 				],
 				"h": 50
@@ -341,7 +366,7 @@ function WidgetController($scope, $http, serviceWidget, $compile) {
 				"cols": [
 					{
 						"w": 100,
-						"guid": "y-b"
+						"guid": "w722fdd559a83334a"
 					}
 				],
 				"h": 30
@@ -350,7 +375,7 @@ function WidgetController($scope, $http, serviceWidget, $compile) {
 				"cols": [
 					{
 						"w": 100,
-						"guid": "y-c"
+						"guid": "w09ab1248d623c426"
 					}
 				],
 				"h": 20
