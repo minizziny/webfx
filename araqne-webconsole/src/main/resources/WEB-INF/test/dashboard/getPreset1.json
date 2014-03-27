@@ -90,8 +90,46 @@
 									"name": "gotoweb",
 									"is_active": true,
 									"guid": "ggotoweb",
-									"type": "html",
-									"contents": "hello world"
+									"type": "dockpanel",
+									"contents": {
+										"widgets": [
+											{
+												"guid": "y-c",
+												"interval": 2,
+												"name": "sorttest",
+												"data": {
+													"series": [
+														{
+															"color": "#AFD8F8",
+															"name": "value",
+															"key": "value"
+														}
+													],
+													"query": "json \"[{col: \\\"hello\\\", value: 134}, {col: \\\"world\\\", value: 100}, {col: \\\"abc\\\", value: 80}, {col: \\\"dfg\\\", value: 34}]\"",
+													"labelType": "string",
+													"label": "col",
+													"type": "bar"
+												}
+											}
+										],
+										"layout": [
+											{
+												"rows": [
+													{
+														"cols": [
+															{
+																"w": 100,
+																"guid": "wa620a356b9751e80"
+															}
+														],
+														"h": 100
+													}
+												],
+												"w": 100,
+												"guid": "zz"
+											}
+										]
+									}
 								}
 							]
 						},
@@ -246,7 +284,7 @@
 															{
 																"cols": [
 																	{
-																		"guid": "wa620a356b9751e80",
+																		"guid": "wa620a356b9751e80__",
 																		"w": 100
 																	}
 																],

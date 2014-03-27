@@ -18,6 +18,8 @@ function hasClassIndexOf(s, klass) {
 	return ("" + s).split(" ").indexOf(klass) >= 0;
 }
 
+console.logdash = function() {}
+
 function findElementsByCoordinate(classArr, e, els) {
 	if(els === undefined) els = [];
 	
@@ -222,8 +224,8 @@ var layoutEngine = (function() {
 					$(el).css("height", perc.toString() + "%");
 
 					el.obj.obj.h = perc;
-					//console.log(el.obj);
-					//console.log(perc + "%\t" + i + "/" + rows.length);
+					//console.logdash(el.obj);
+					//console.logdash(perc + "%\t" + i + "/" + rows.length);
 				});
 				// end
 
@@ -284,15 +286,15 @@ var layoutEngine = (function() {
 					$(el).css("width", perc.toString() + "%");
 
 					el.obj.obj.w = perc;
-					//console.log(el.obj);
-					console.log(perc + "%\t" + i + "/" + rows.length)
+					//console.logdash(el.obj);
+					console.logdash(perc + "%\t" + i + "/" + rows.length)
 					totalwper = totalwper + perc;
 
 					if(totalwper < 100 && i == rows.length - 1) {
-						console.log(totalwper, 'arranged!');
+						console.logdash(totalwper, 'arranged!');
 					}
 				});
-				console.log(totalwper)
+				console.logdash(totalwper)
 				// end
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
@@ -528,7 +530,7 @@ var layoutEngine = (function() {
 			var allidx = layoutEngine.ui.layout.box.allboxes.indexOf(box);
 			layoutEngine.ui.layout.box.allboxes.removeAt(allidx);
 			
-			// console.log('deleteBox',box)
+			// console.logdash('deleteBox',box)
 			if(box.row.boxes.length === 0) {
 				box.row.close();
 				
@@ -547,7 +549,7 @@ var layoutEngine = (function() {
 		}
 
 		function unwrapBox(box) {
-			console.log('unwrapBox');
+			console.logdash('unwrapBox');
 			
 			var prow = box.row;
 			var prowh = box.row.obj.h;
@@ -579,7 +581,7 @@ var layoutEngine = (function() {
 				var nextrow = nextel[0].obj;
 				var originh = nextel.height();
 				var dy = newy - oldy;
-				// console.log(that.getMinHeight(), newy, nextrow.getMinHeight(), originh - dy, originh )
+				// console.logdash(that.getMinHeight(), newy, nextrow.getMinHeight(), originh - dy, originh )
 				var can = (that.getMinHeight() < newy) && (nextrow.getMinHeight() < originh - dy);
 				if(can) {
 					if(nextel.length > 0) {
@@ -709,7 +711,7 @@ var layoutEngine = (function() {
 				el.appendTo(selector);
 				
 				if(!no_root) {
-					console.log('set root')
+					console.logdash('set root')
 					layoutEngine.ui.layout.box.root = that;	
 					_box.event.modify(that);
 				}
@@ -769,7 +771,7 @@ var layoutEngine = (function() {
 			if(direction === "bottom") {
 				
 				if(this.row === undefined) {
-					console.log("bottom case1: add to root");
+					console.logdash("bottom case1: add to root");
 					
 					newrow = this.addRow();
 					
@@ -806,7 +808,7 @@ var layoutEngine = (function() {
 						var original_idx = this.row.box.rows.indexOf(this.row);
 						
 						if(multi_line) {
-							console.log("bottom case3: append to last");
+							console.logdash("bottom case3: append to last");
 							
 							box.close();
 							var newrow = this.addRow();
@@ -815,11 +817,11 @@ var layoutEngine = (function() {
 						}
 						else {
 							function case5bottom() {
-								console.log("bottom case5: insert row");
+								console.logdash("bottom case5: insert row");
 
 								var contents = box.el.find('.contentbox').detach();
 								box.close();
-								// console.log(box.row.box.rows)
+								// console.logdash(box.row.box.rows)
 								var newrow = that.row.box.addRow(original_idx + 1);
 								newrow.append(boxn);
 								boxn.row = newrow;
@@ -838,7 +840,7 @@ var layoutEngine = (function() {
 							}
 							else {
 								if(this.row.box === box.row.box) {
-									console.log("bottom case4: reorder");
+									console.logdash("bottom case4: reorder");
 
 									var contents = box.el.find('.contentbox').detach();
 									
@@ -860,7 +862,7 @@ var layoutEngine = (function() {
 						}
 					}
 					else {
-						console.log("bottom case2: add to single box");
+						console.logdash("bottom case2: add to single box");
 						
 						var contentsTop = box.el.find('.contentbox').detach();
 						var contentsBottom = this.el.find('.contentbox').detach();
@@ -891,7 +893,7 @@ var layoutEngine = (function() {
 			else if(direction === "top") {
 				
 				if(this.row === undefined) {
-					console.log("top case1: add to root");
+					console.logdash("top case1: add to root");
 					
 					newrow = this.addRow(0);
 					
@@ -923,7 +925,7 @@ var layoutEngine = (function() {
 						var original_idx = this.row.box.rows.indexOf(this.row);
 						
 						if(multi_line) {
-							console.log("top case3: append to first");
+							console.logdash("top case3: append to first");
 							
 							box.close();
 							var newrow = this.addRow(0);
@@ -932,7 +934,7 @@ var layoutEngine = (function() {
 						}
 						else {
 							function case5top() {
-								console.log("top case5: insert row");
+								console.logdash("top case5: insert row");
 								
 								var contents = box.el.find('.contentbox').detach();
 								box.close();
@@ -948,7 +950,7 @@ var layoutEngine = (function() {
 							}
 							else {
 								if(this.row.box === box.row.box) {
-									console.log("top case4: reorder");
+									console.logdash("top case4: reorder");
 									
 									var contents = box.el.find('.contentbox').detach();
 									var newrow = this.row.box.addRow(original_idx);
@@ -968,7 +970,7 @@ var layoutEngine = (function() {
 						}
 					}
 					else {
-						console.log("top case2: add to single box");
+						console.logdash("top case2: add to single box");
 						
 						var contentsTop = box.el.find('.contentbox').detach();
 						var contentsBottom = this.el.find('.contentbox').detach();
@@ -997,7 +999,7 @@ var layoutEngine = (function() {
 			}
 			else if(direction === "left") {
 				if(this.row === undefined) {
-					console.log("left case: root");
+					console.logdash("left case: root");
 
 					var p = this.el.parent();
 					var boxobj = $.extend({}, box.obj); // object copy
@@ -1034,7 +1036,7 @@ var layoutEngine = (function() {
 					boxn.resizerH.show();
 				}
 				else {
-					console.log("left case: basic");
+					console.logdash("left case: basic");
 					var original_idx = this.row.boxes.indexOf(this);
 					
 					var contents = box.el.find('.contentbox').detach();
@@ -1051,7 +1053,7 @@ var layoutEngine = (function() {
 			}
 			else if(direction === "right") {
 				if(this.row === undefined) {
-					console.log("right case: root");
+					console.logdash("right case: root");
 
 					var p = this.el.parent();
 					var boxobj = $.extend({}, box.obj); // object copy
@@ -1089,7 +1091,7 @@ var layoutEngine = (function() {
 					contb.rows[0].boxes[0].resizerH.show();
 				}
 				else {
-					console.log("right case: basic");
+					console.logdash("right case: basic");
 					var original_idx = this.row.boxes.indexOf(this);
 
 					var contents = box.el.find('.contentbox').detach();
@@ -1180,7 +1182,7 @@ var layoutEngine = (function() {
 			else {
 				
 				setTimeout(function() {
-					// console.log(that.row, that.guid)
+					// console.logdash(that.row, that.guid)
 					if(that.row == undefined) {
 						if(prop.dragHandler != 'none') {
 							makeDroppable(that, true);
@@ -1199,7 +1201,7 @@ var layoutEngine = (function() {
 			el.css("width", prop.w + "%");
 			el.css("height", "100%");
 			
-			//console.log(that.guid); // this shows rendering order
+			//console.logdash(that.guid); // this shows rendering order
 		}
 
 
@@ -1230,7 +1232,7 @@ var layoutEngine = (function() {
 						else {
 							box.resize(addboxw, false);
 						}
-						//console.log(i + " " + box.obj.h);
+						//console.logdash(i + " " + box.obj.h);
 					}
 
 					totalper = totalper + box.obj.h;
@@ -1302,7 +1304,7 @@ var layoutEngine = (function() {
 				if(!!b.row.box) {
 					checkZ(b.row.box)
 					var pz = parseInt( b.row.box.droppable.css("z-index") ) ;
-					//console.log("has parent: " + b.row.box.droppable.css("z-index") );
+					//console.logdash("has parent: " + b.row.box.droppable.css("z-index") );
 					
 					b.droppable.css("z-index", pz + 1);
 					b.dropCompass.css("z-index", pz + 101);
@@ -1381,7 +1383,7 @@ var layoutEngine = (function() {
 					if( Math.abs(initp.x - e.pageX) < 20 && Math.abs(initp.y - e.pageY) < 20 ) return;
 
 					if(!!options.onDragbox) {
-						options.onDragbox(box, e);
+						options.onDragbox(box, e, ee);
 					}
 					
 					if(!isDraggable) {
@@ -1416,7 +1418,7 @@ var layoutEngine = (function() {
 						
 					}
 				}).
-				on("mouseup.activeDroppable", function() {
+				on("mouseup.activeDroppable", function(e) {
 					
 					$(document).off("mousemove.activeDroppable").off("mouseup.activeDroppable").off("selectstart");
 					dragHandler.off("mousemove");
@@ -1432,6 +1434,10 @@ var layoutEngine = (function() {
 					}
 					
 					drop(box);
+
+					if(!!options.onDropbox) {
+						options.onDropbox(box, e);
+					}
 
 				})
 			});
@@ -1591,7 +1597,7 @@ var layoutEngine = (function() {
 
 		function unwrapRow(row) {
 			if(row == undefined) return;
-			console.log('unwrapRow');
+			console.logdash('unwrapRow');
 
 			var pbox = row.box;
 			var pobjw = row.box.obj.w;
@@ -1625,7 +1631,7 @@ var layoutEngine = (function() {
 				var nextbox = nextel[0].obj;
 				var originw = nextel.width();
 				var dx = newx - oldx;
-				// console.log(that, nextbox, that.getMinWidth(), nextbox.getMinWidth(), oldx, newx, originw - dx, originw )
+				// console.logdash(that, nextbox, that.getMinWidth(), nextbox.getMinWidth(), oldx, newx, originw - dx, originw )
 				var can = (that.getMinWidth() < newx) && (nextbox.getMinWidth() < originw - dx);
 				if(can) {
 					if(nextel.length > 0) {

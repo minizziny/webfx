@@ -37,7 +37,8 @@ angular.module('app.directive.widget', [])
 		require: 'ngModel',
 		scope: {
 			'ngModel': '=',
-			'onDragbox': '&'
+			'onDragbox': '&',
+			'onDropbox': '&'
 		},
 		controller: function($scope, $element) {
 			this.append = function(model, detached) {
@@ -84,9 +85,15 @@ angular.module('app.directive.widget', [])
 				console.log('---render---')
 				
 				var _box = layoutEngine.ui.layout.box.create(layout, false, {
-					'onDragbox': function(box, event) {
-						// console.log('-',scope)
+					'onDragbox': function(box, em, ed) {
 						return scope.onDragbox({
+							'$box': box,
+							'$moveevent': em,
+							'$downevent': ed
+						});
+					},
+					'onDropbox': function(box, event) {
+						return scope.onDropbox({
 							'$box': box,
 							'$event': event
 						});
@@ -180,12 +187,12 @@ angular.module('app.directive.widget', [])
 			return '<widget id="' + json.guid + '" ng-model="ctxz.' + json.guid + '">' + 
 				'<div class="tab-comp" style="height: 100%">' +
 					'<ul class="nav nav-tabs" style="margin-bottom: 0">' +
-						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}"><a href=".tab-content .{{tab.guid}}" data-toggle="tab" widget-droppable>{{tab.name}}</a></li>' +
+						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}"><a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" widget-droppable>{{tab.name}}</a></li>' +
 					'</ul>' +
 					'<div class="tab-content" style="height: calc(100% - 4px)">' +
 						'<div ng-repeat="tab in data.tabs"  style="height:100%" ng-class="{\'active\': tab.is_active}" class="tab-pane {{tab.guid}}">' + 
 							'<div ng-switch on="tab.type" style="height:100%" class="content-switch-container">' +
-								'<div ng-switch-when="dockpanel" style="height:100%"><dockpanel on-dragbox="$parent.$parent.$parent.onDragInnerbox($box, $event)" ng-model="tab.contents.layout[0]"></dockpanel></div>' + 
+								'<div ng-switch-when="dockpanel" style="height:100%"><dockpanel on-dragbox="$parent.$parent.$parent.onDragInnerbox($box, $moveevent, $downevent)" on-dropbox="$parent.$parent.$parent.onDropbox($box, $event)"  ng-model="tab.contents.layout[0]"></dockpanel></div>' + 
 								'<div ng-switch-when="html" style="height:100%">{{tab.contents}}</div>' + 
 							'</div>' +
 						'</div>' +
@@ -229,7 +236,7 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 
 		$scope.ctxz = {};
 		$scope.dataLayout = m.preset.state.layout[0];
-		var el = angular.element('<dockpanel id="dp" on-dragbox="onDragbox($box, $event)" ng-model="dataLayout"></dockpanel>');
+		var el = angular.element('<dockpanel id="dp" on-dragbox="onDragbox($box, $moveevent, $downevent)" on-dropbox="onDropbox($box, $event)" ng-model="dataLayout"></dockpanel>');
 
 		var widgets = m.preset.state.widgets;
 
@@ -244,6 +251,7 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 		$compile(el)($scope);
 		el.appendTo('.dashboard-container');
 
+		$timeout(function() { console.clear(); }, 400);
 
 		// setTimeout(function() {
 		// 	$scope.dataLayout = dataLayout2;
@@ -252,7 +260,7 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 		
 	});
 
-	$scope.onDragbox = function(box, e) {
+	$scope.onDragbox = function(box, e, ed) {
 		console.log('onDragbox')
 		var found = findElementsByCoordinate(["droppable", "widget-drop-zone"], e);
 		$('#lelen').text(found.length);
@@ -272,28 +280,36 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 		
 	}
 
-	$scope.onDragInnerbox = function(box, e) {
+	$scope.onDragInnerbox = function(box, e, ed) {
 		console.log('onDragInnerbox')
 		var found = findElementsByCoordinate(["droppable", "widget-drop-zone"], e);
 		if(found.length) {
 			$('[widget-droppable].over').removeClass('over');
 			var a = $(found[0]).parent();
 			a.addClass('over');
-			$timeout(function() {
-				
 
+			$timeout(function() {
 				if($('.k-d-col.virtual').length == 0) {
-					console.log(e)
 					var w = box.el.width(), h = box.el.height();
 					box.el.clone()
 						.addClass('virtual')
 						.width(w)
 						.height(h)
-						.css('top', e.pageY)
-						.css('left', e.pageX)
+						.css('top', e.pageY - ed.offsetY)
+						.css('left', e.pageX - ed.offsetX)
 						.appendTo('body');
 				}
+				else {
+					
+				}
 				a.click().removeClass('over');
+
+				if($('.k-d-col.virtual').length != 0) {
+					var owntab = hasClassIndexOf(box.el.parents('.tab-pane')[0].className, a.attr('tab-id'));
+					if(owntab) {
+						$('.k-d-col.virtual').remove();
+					}
+				}
 			}, 600);
 			
 			// debugger;
@@ -302,7 +318,12 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 			$('[widget-droppable].over').removeClass('over');
 		}
 
-		$('.k-d-col.virtual').css('top', e.pageY).css('left', e.pageX)
+		$('.k-d-col.virtual').css('top', e.pageY - ed.offsetY).css('left', e.pageX - ed.offsetX)
+	}
+
+	$scope.onDropbox = function(box, e) {
+		// console.log('dropped!')
+		$('.k-d-col.virtual').remove();
 	}
 
 	
