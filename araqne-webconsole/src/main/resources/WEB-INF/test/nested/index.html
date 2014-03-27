@@ -72,11 +72,19 @@
 		border: 1px solid blue;
 	}
 
+	/* widget */
+
 	widget {
-		border: 1px dotted silver;
-		margin: 10px;
-		height: calc(100% - 60px);
+		/*border: 1px dotted silver;*/
+		margin: 2px;
+		height: calc(100% - 40px);
 	}
+
+	.contentbox > [ng-transclude] {
+		height: 100%;
+	}
+
+	/* widget end */
 
 	.box {
 		float: left;
@@ -97,10 +105,61 @@
 		overflow: visible;
 	}
 
+
+	/* widget-droppable */
+
+	@-webkit-keyframes blinker {
+		from {
+			background-color: #08c;
+			color: white;
+		}
+		to {
+			background-color: white;
+			color: #08c;
+		}
+	}
+
+	[widget-droppable] {
+		position: relative;
+	}
+
+	.nav-tabs>li [widget-droppable].over {
+		/*background-color: yellow;*/
+		-webkit-animation-name: blinker;
+		-webkit-animation-iteration-count: infinite;
+		-webkit-animation-timing-function: cubic-bezier(1.0,0,0,1.0);
+		-webkit-animation-duration: 0.2s;
+	}
+
+	.nav-tabs>li.active [widget-droppable].over {
+		/*background-color: #fff;*/
+		-webkit-animation: none;
+	}
+
+	[widget-droppable] > .widget-drop-zone {
+		z-index: 9989;
+		position: absolute;
+		color: transparent;
+		top: 0;
+		left: 0;
+	}
+
+	
+
+
+	/* */
+
+	#dp {
+		width: 1024px;
+		height: 800px;
+	}
+
 	</style>
 
 </head>
 <body>
+<div id="lelen">0</div>
+
 
 <div class="dashboard-container" ng-controller="DashboardController">
 	<!-- <dockpanel class="clearfix" id="dp" ng-model="dataLayout">
@@ -112,9 +171,9 @@
 		</widget>
 		<widget id="w3" ng-model="blank3">{{hello}}</widget>
 	</dockpanel>
-
+-->
 	<widget ng-model="blank">{{hello}}</widget>
- -->
+
 	<script src="nested.js"></script>
 </div>
 

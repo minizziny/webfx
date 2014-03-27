@@ -36,7 +36,8 @@ angular.module('app.directive.widget', [])
 		restrict: 'E',
 		require: 'ngModel',
 		scope: {
-			ngModel: '='
+			'ngModel': '=',
+			'onDragbox': '&'
 		},
 		controller: function($scope, $element) {
 			this.append = function(model, detached) {
@@ -82,8 +83,16 @@ angular.module('app.directive.widget', [])
 				el.empty();
 				console.log('---render---')
 				
-				var box = layoutEngine.ui.layout.box.create(layout, false);
-				box.appendTo(el);
+				var _box = layoutEngine.ui.layout.box.create(layout, false, {
+					'onDragbox': function(box, event) {
+						// console.log('-',scope)
+						return scope.onDragbox({
+							'$box': box,
+							'$event': event
+						});
+					}
+				});
+				_box.appendTo(el);
 				restore();
 			}
 
@@ -97,43 +106,69 @@ angular.module('app.directive.widget', [])
 .directive('widget', function($timeout) {
 	return {
 		restrict: 'E',
-		scope: true,
+		scope: {
+		},
+		transclude: 'element',
+		replace: true,
 		require: ['?^dockpanel', '?ngModel'],
-		compile: function(tel, tattrs) {
-			return {
-				pre: function(scope, el, attrs, ctrl) {
-					// console.log('compile widget');
-				},
-				post: function(scope, el, attrs, ctrl) {
-					console.log('linking widget', attrs.id);
-					var ctlrDockpanel = ctrl[0];
-					var ctlrModel = ctrl[1];
+		template: '<div ng-transclude></div>',
+		link: function(scope, el, attrs, ctrl, transclude) {
+			transclude(scope, function(elc, scopec) {
+				console.log('linking widget', attrs.id);
+				var ctlrDockpanel = ctrl[0];
+				var ctlrModel = ctrl[1];
 
-					if(!!ctlrDockpanel) {
-						// DockPanel 밑에 있는 widget들은 append 보류
-						var detached = el.detach();
-					}
-
-					scope.hello = 'world';
-
-					// console.log(ctlrModel.$modelValue); // 여기엔 모델이 없다.
-
-					if(!!ctlrDockpanel) {
-
-						$timeout(function() {
-							// ngModel이 활성화되는 시점
-							
-							// console.log(ctlrModel.$modelValue);
-							angular.extend(scope, ctlrModel.$modelValue);
-							scope.hello = ctlrModel.$modelValue.type + '/' + ctlrModel.$modelValue.guid;
-
-							el.attr('guid', ctlrModel.$modelValue.guid);
-							ctlrDockpanel.append(ctlrModel.$modelValue, detached);
-						});
-
-					}
+				if(!!ctlrDockpanel) {
+					// DockPanel 밑에 있는 widget들은 append 보류
+					var detached = el.detach();
 				}
-			}
+
+				scope.hello = 'world';
+				// console.log(ctlrModel.$modelValue); // 여기엔 모델이 없다.
+
+				if(!!ctlrDockpanel) {
+
+					$timeout(function() {
+						// ngModel이 활성화되는 시점
+						
+						// console.log(ctlrModel.$modelValue);
+						angular.extend(scope, ctlrModel.$modelValue);
+						scope.hello = ctlrModel.$modelValue.type + '/' + ctlrModel.$modelValue.guid;
+
+						el.attr('guid', ctlrModel.$modelValue.guid);
+						ctlrDockpanel.append(ctlrModel.$modelValue, detached);
+					});
+
+				}
+
+				el.children('widget').replaceWith(elc);
+			});
+		}
+	}
+})
+.directive('widgetDroppable', function($compile) {
+	return {
+		restrict: 'A',
+		link: function(scope, el, attrs) {
+			// el.css('border', '1px solid red');
+			el.addClass('drop-tab');
+
+			var padding = el.css('padding');
+			var dropzone = angular.element('<div class="widget-drop-zone">' + el[0].innerHTML + '</div>');
+			dropzone.css('padding', padding);
+			$compile(dropzone)(scope);
+			el.append(dropzone);
+
+			// var isEnter = false;
+
+			// el.on('mouseenter', function() {
+			// 	el.addClass('over');
+			// 	isEnter = true;
+				
+			// }).on('mouseout', function() {
+			// 	el.removeClass('over')
+			// 	isEnter = false;
+			// });
 		}
 	}
 })
@@ -145,12 +180,12 @@ angular.module('app.directive.widget', [])
 			return '<widget id="' + json.guid + '" ng-model="ctxz.' + json.guid + '">' + 
 				'<div class="tab-comp" style="height: 100%">' +
 					'<ul class="nav nav-tabs" style="margin-bottom: 0">' +
-						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}"><a href=".tab-content .{{tab.guid}}" data-toggle="tab">{{tab.name}}</a></li>' +
+						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}"><a href=".tab-content .{{tab.guid}}" data-toggle="tab" widget-droppable>{{tab.name}}</a></li>' +
 					'</ul>' +
-					'<div class="tab-content" style="height: 85%">' +
+					'<div class="tab-content" style="height: calc(100% - 4px)">' +
 						'<div ng-repeat="tab in data.tabs"  style="height:100%" ng-class="{\'active\': tab.is_active}" class="tab-pane {{tab.guid}}">' + 
 							'<div ng-switch on="tab.type" style="height:100%" class="content-switch-container">' +
-								'<div ng-switch-when="dockpanel" style="height:100%"><dockpanel ng-model="tab.contents.layout[0]"></dockpanel></div>' + 
+								'<div ng-switch-when="dockpanel" style="height:100%"><dockpanel on-dragbox="$parent.$parent.$parent.onDragInnerbox($box, $event)" ng-model="tab.contents.layout[0]"></dockpanel></div>' + 
 								'<div ng-switch-when="html" style="height:100%">{{tab.contents}}</div>' + 
 							'</div>' +
 						'</div>' +
@@ -194,7 +229,7 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 
 		$scope.ctxz = {};
 		$scope.dataLayout = m.preset.state.layout[0];
-		var el = angular.element('<dockpanel ng-model="dataLayout"></dockpanel>');
+		var el = angular.element('<dockpanel id="dp" on-dragbox="onDragbox($box, $event)" ng-model="dataLayout"></dockpanel>');
 
 		var widgets = m.preset.state.widgets;
 
@@ -210,12 +245,65 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 		el.appendTo('.dashboard-container');
 
 
-		setTimeout(function() {
-			$scope.dataLayout = dataLayout2;
-			$scope.$apply();
-		}, 4000)
+		// setTimeout(function() {
+		// 	$scope.dataLayout = dataLayout2;
+		// 	$scope.$apply();
+		// }, 4000)
 		
-	})
+	});
+
+	$scope.onDragbox = function(box, e) {
+		console.log('onDragbox')
+		var found = findElementsByCoordinate(["droppable", "widget-drop-zone"], e);
+		$('#lelen').text(found.length);
+		if(found.length) {
+			$('[widget-droppable].over').removeClass('over');
+			var a = $(found[0]).parent();
+			a.addClass('over');
+			$timeout(function() {
+				a.click().removeClass('over');
+
+
+			}, 600);
+		}
+		else {
+			$('[widget-droppable].over').removeClass('over');
+		}
+		
+	}
+
+	$scope.onDragInnerbox = function(box, e) {
+		console.log('onDragInnerbox')
+		var found = findElementsByCoordinate(["droppable", "widget-drop-zone"], e);
+		if(found.length) {
+			$('[widget-droppable].over').removeClass('over');
+			var a = $(found[0]).parent();
+			a.addClass('over');
+			$timeout(function() {
+				
+
+				if($('.k-d-col.virtual').length == 0) {
+					console.log(e)
+					var w = box.el.width(), h = box.el.height();
+					box.el.clone()
+						.addClass('virtual')
+						.width(w)
+						.height(h)
+						.css('top', e.pageY)
+						.css('left', e.pageX)
+						.appendTo('body');
+				}
+				a.click().removeClass('over');
+			}, 600);
+			
+			// debugger;
+		}
+		else {
+			$('[widget-droppable].over').removeClass('over');
+		}
+
+		$('.k-d-col.virtual').css('top', e.pageY).css('left', e.pageX)
+	}
 
 	
 	$scope.blank = { 'hellob': 'w81606f23386b1aaf' }

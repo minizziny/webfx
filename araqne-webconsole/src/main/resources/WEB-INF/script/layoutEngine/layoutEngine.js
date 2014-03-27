@@ -43,7 +43,6 @@ function findElementsByCoordinate(classArr, e, els) {
 		}
 	});
 	
-	
 	if(gotcha) {
 		findElementsByCoordinate(classArr, e, els);
 		found_el.style.zIndex = original_zidx;
@@ -595,7 +594,7 @@ var layoutEngine = (function() {
 		this.resizerV = $(el.find('.k-rs-b')[0]);
 	}
 
-	function Box(prop) {
+	function Box(prop, options) {
 		var that = this;
 		var el = this.el = $("<div>").addClass("k-d-col");
 		var obj = this.obj = $.extend({}, prop); // object copy
@@ -776,7 +775,7 @@ var layoutEngine = (function() {
 					
 					var contents = box.el.find('.contentbox').detach();
 					box.close();
-					var boxn = _box.create(box.obj);
+					var boxn = _box.create(box.obj, false, options);
 					
 					delete box.obj.w;
 					newrow.append(boxn);
@@ -800,7 +799,7 @@ var layoutEngine = (function() {
 					var multi_line = (this.rows.length !== 0) // absolutely multi line
 
 					box.obj.w = this.obj.w;
-					var boxn = _box.create(box.obj);
+					var boxn = _box.create(box.obj, false, options);
 
 					if(multi_line || single_row_box) {
 
@@ -820,7 +819,7 @@ var layoutEngine = (function() {
 
 								var contents = box.el.find('.contentbox').detach();
 								box.close();
-//								console.log(box.row.box.rows)
+								// console.log(box.row.box.rows)
 								var newrow = that.row.box.addRow(original_idx + 1);
 								newrow.append(boxn);
 								boxn.row = newrow;
@@ -898,7 +897,7 @@ var layoutEngine = (function() {
 					
 					var contents = box.el.find('.contentbox').detach();
 					box.close();
-					var boxn = _box.create(box.obj);
+					var boxn = _box.create(box.obj, false, options);
 					
 					delete box.obj.w;
 					newrow.append(boxn);
@@ -917,7 +916,7 @@ var layoutEngine = (function() {
 					var multi_line = (this.rows.length !== 0) // absolutely multi line
 
 					box.obj.w = this.obj.w;
-					var boxn = _box.create(box.obj);
+					var boxn = _box.create(box.obj, false, options);
 
 					if(multi_line || single_row_box) {
 
@@ -1016,7 +1015,7 @@ var layoutEngine = (function() {
 							}
 						],
 						"w": 100
-					});
+					}, false, options);
 
 					unmakeDroppable(this);
 
@@ -1040,7 +1039,7 @@ var layoutEngine = (function() {
 					
 					var contents = box.el.find('.contentbox').detach();
 					box.obj.w = this.obj.w / 2;
-					var boxn = _box.create(box.obj)
+					var boxn = _box.create(box.obj, false, options)
 					
 					this.row.insertAt(boxn, original_idx);
 					this.row.boxes[original_idx + 1].resize(boxn.obj.w, false);
@@ -1070,7 +1069,7 @@ var layoutEngine = (function() {
 							}
 						],
 						"w": 100
-					});
+					}, false, options);
 
 					unmakeDroppable(this);
 
@@ -1095,7 +1094,7 @@ var layoutEngine = (function() {
 
 					var contents = box.el.find('.contentbox').detach();
 					box.obj.w = this.obj.w / 2;
-					var boxn = _box.create(box.obj)
+					var boxn = _box.create(box.obj, false, options)
 					
 					this.row.insertAt(boxn, original_idx + 1);
 
@@ -1126,7 +1125,7 @@ var layoutEngine = (function() {
 			delete boxobj.w;
 			var boxel = box.el.children(".mybox").remove();
 			
-			var boxn = _box.create(boxobj);
+			var boxn = _box.create(boxobj, false, options);
 			newrow.append(boxn);
 			
 			delete box.guid;
@@ -1149,7 +1148,7 @@ var layoutEngine = (function() {
 				for(var j = 0; j < objRow.cols.length; j++) {
 					// making box
 					var objBox = objRow.cols[j];
-					var box = new Box(objBox);
+					var box = new Box(objBox, options);
 					box.appendTo(row);
 				}
 			}
@@ -1174,14 +1173,18 @@ var layoutEngine = (function() {
 				
 				makeDraggable(that);
 				
-				makeDroppable(that, false);
+				if(prop.dragHandler != 'none') {
+					makeDroppable(that, false);
+				}
 			}
 			else {
 				
 				setTimeout(function() {
 					// console.log(that.row, that.guid)
 					if(that.row == undefined) {
-						makeDroppable(that, true);
+						if(prop.dragHandler != 'none') {
+							makeDroppable(that, true);
+						}
 
 						that.resizerH.hide();
 					}
@@ -1376,8 +1379,10 @@ var layoutEngine = (function() {
 				$(document).on("mousemove.activeDroppable", function(e) {
 					
 					if( Math.abs(initp.x - e.pageX) < 20 && Math.abs(initp.y - e.pageY) < 20 ) return;
-					
-					//console.log(e);
+
+					if(!!options.onDragbox) {
+						options.onDragbox(box, e);
+					}
 					
 					if(!isDraggable) {
 						
@@ -1537,6 +1542,10 @@ var layoutEngine = (function() {
 				$.each(found, function(i, cont) {
 					$(cont).mouseover();
 				});
+
+				// if(!!options.onDragbox) {
+				// 	options.onDragbox(box, e);
+				// }
 			})
 			.on("mouseout", function() {
 				if(!isContainer) {
@@ -1640,13 +1649,13 @@ var layoutEngine = (function() {
 		layoutEngine.ui.layout.box.allboxes.push(this);
 	}
 
-	_box.create = function(prop, isreset) {
+	_box.create = function(prop, isreset, options) {
 		if(isreset != undefined) {
 			if(isreset) {
 				layoutEngine.ui.layout.box.allboxes = [];
 			}
 		}
-		return new Box(prop);
+		return new Box(prop, options);
 	}
 
 	layoutEngine.ui.layout.box.create({'w': 100,'guid': 'zz'}); // Box
