@@ -166,16 +166,6 @@ angular.module('app.directive.widget', [])
 			$compile(dropzone)(scope);
 			el.append(dropzone);
 
-			// var isEnter = false;
-
-			// el.on('mouseenter', function() {
-			// 	el.addClass('over');
-			// 	isEnter = true;
-				
-			// }).on('mouseout', function() {
-			// 	el.removeClass('over')
-			// 	isEnter = false;
-			// });
 		}
 	}
 })
@@ -260,61 +250,107 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 		
 	});
 
+	var isEnter = false;
+	var timer;
+	var a;
+
 	$scope.onDragbox = function(box, e, ed) {
-		console.log('onDragbox')
+		
 		var found = findElementsByCoordinate(["droppable", "widget-drop-zone"], e);
 		$('#lelen').text(found.length);
 		if(found.length) {
-			$('[widget-droppable].over').removeClass('over');
-			var a = $(found[0]).parent();
-			a.addClass('over');
-			$timeout(function() {
-				a.click().removeClass('over');
+			console.log('onDragbox');
 
+			if((a == undefined) || a.attr('tab-id') != $(found[0]).parent().attr('tab-id')) {
+				$('[widget-droppable].over').removeClass('over');
+				isEnter = false;
+				a = $(found[0]).parent();
+				a.addClass('over');
+			}
 
-			}, 600);
+			if(a.attr('tab-id') === $(found[0]).parent().attr('tab-id')) {
+				a.addClass('over');
+			}
+
+			if(!isEnter) {
+				isEnter = true;
+				timer = setTimeout(function() {
+					a.click().removeClass('over');
+				}, 600);
+			}
 		}
 		else {
+			isEnter = false;
+			clearTimeout(timer);
+			timer = undefined;
+			if(!!a) {
+				a.removeClass('over')
+			}
+
 			$('[widget-droppable].over').removeClass('over');
 		}
-		
+	}
+
+	function onEnterDroppableTab(a, box, e, ed) {
+		if($('.k-d-col.virtual').length == 0) {
+			var w = box.el.width(), h = box.el.height();
+			box.el.clone()
+				.addClass('virtual')
+				.width(w)
+				.height(h)
+				.css('top', e.pageY - ed.offsetY)
+				.css('left', e.pageX - ed.offsetX)
+				.appendTo('body');
+		}
+		else {
+			
+		}
+		a.click().removeClass('over');
+
+		if($('.k-d-col.virtual').length != 0) {
+			var owntab = hasClassIndexOf(box.el.parents('.tab-pane')[0].className, a.attr('tab-id'));
+			if(owntab) {
+				$('.k-d-col.virtual').remove();
+			}
+		}
 	}
 
 	$scope.onDragInnerbox = function(box, e, ed) {
 		console.log('onDragInnerbox')
 		var found = findElementsByCoordinate(["droppable", "widget-drop-zone"], e);
 		if(found.length) {
-			$('[widget-droppable].over').removeClass('over');
-			var a = $(found[0]).parent();
-			a.addClass('over');
+			if(!!a) {
+				// console.log(a.attr('tab-id'), $(found[0]).parent().attr('tab-id'))	
+			}
+			
+			if((a == undefined) || a.attr('tab-id') != $(found[0]).parent().attr('tab-id')) {
+				$('[widget-droppable].over').removeClass('over');
+				isEnter = false;
+				a = $(found[0]).parent();
+				a.addClass('over');
+			}
 
-			$timeout(function() {
-				if($('.k-d-col.virtual').length == 0) {
-					var w = box.el.width(), h = box.el.height();
-					box.el.clone()
-						.addClass('virtual')
-						.width(w)
-						.height(h)
-						.css('top', e.pageY - ed.offsetY)
-						.css('left', e.pageX - ed.offsetX)
-						.appendTo('body');
-				}
-				else {
-					
-				}
-				a.click().removeClass('over');
+			if(a.attr('tab-id') === $(found[0]).parent().attr('tab-id')) {
+				a.addClass('over');
+			}
 
-				if($('.k-d-col.virtual').length != 0) {
-					var owntab = hasClassIndexOf(box.el.parents('.tab-pane')[0].className, a.attr('tab-id'));
-					if(owntab) {
-						$('.k-d-col.virtual').remove();
-					}
-				}
-			}, 600);
+			if(!isEnter) {
+				isEnter = true;
+				timer = setTimeout(function() {
+					return onEnterDroppableTab(a,box,e,ed);
+				}, 600);
+			}
 			
 			// debugger;
 		}
 		else {
+			isEnter = false;
+			clearTimeout(timer);
+			timer = undefined;
+			if(!!a) {
+				a.removeClass('over')
+			}
+
 			$('[widget-droppable].over').removeClass('over');
 		}
 
