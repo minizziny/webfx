@@ -275,7 +275,8 @@
 												"cols": [
 													{
 														"guid": "wbdd7a61cb7186f0a",
-														"dragHandler": "none",
+														"droppable": false,
+														"dragHandler": false,
 														"w": 30.4635761589404
 													},
 													{

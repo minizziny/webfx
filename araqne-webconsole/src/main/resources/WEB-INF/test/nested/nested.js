@@ -99,6 +99,15 @@ angular.module('app.directive.widget', [])
 						});
 					}
 				});
+
+				var boxe = new CustomEvent(layoutEngine.ui.layout.box.event);
+				boxe.on('modify', function() {
+					console.log('modify');
+				});
+				boxe.on('resize', function() {
+					console.log('resize');
+				});
+				
 				_box.appendTo(el);
 				restore();
 			}
@@ -178,8 +187,9 @@ angular.module('app.directive.widget', [])
 				'<div class="tab-comp" style="height: 100%">' +
 					'<ul class="nav nav-tabs" style="margin-bottom: 0">' +
 						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}"><a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" widget-droppable>{{tab.name}}</a></li>' +
+						'<li class="plus"><button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event)"><i class="icon-plus"></i></button></li>' +
 					'</ul>' +
-					'<div class="tab-content" style="height: calc(100% - 4px)">' +
+					'<div class="tab-content">' +
 						'<div ng-repeat="tab in data.tabs"  style="height:100%" ng-class="{\'active\': tab.is_active}" class="tab-pane {{tab.guid}}">' + 
 							'<div ng-switch on="tab.type" style="height:100%" class="content-switch-container">' +
 								'<div ng-switch-when="dockpanel" style="height:100%"><dockpanel on-dragbox="$parent.$parent.$parent.onDragInnerbox($box, $moveevent, $downevent)" on-dropbox="$parent.$parent.$parent.onDropbox($box, $event)"  ng-model="tab.contents.layout[0]"></dockpanel></div>' + 
@@ -249,6 +259,43 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 		// }, 4000)
 		
 	});
+
+	var z = 0;
+
+	$scope.addTab = function(tabdata, e) {
+		tabdata.push({
+			'name': 'hello',
+			'guid': 'world' + (z++).toString(),
+			'type': 'dockpanel',
+			"contents": {
+				"layout": [
+					{
+						'guid': undefined,
+						'w': 100,
+						'blank': true
+					}
+					// {
+					// 	"rows": [
+					// 		{
+					// 			"cols": [
+					// 				{
+					// 					"w": 100,
+					// 					"guid": "wzxz"
+					// 				}
+					// 			],
+					// 			"h": 100
+					// 		}
+					// 	],
+					// 	"w": 100,
+					// 	"guid": "zz"
+					// }
+				]
+			}
+		});
+		$timeout(function() {
+			$(e.target).parents('li').prev().children('a').click();
+		});
+	}
 
 	var isEnter = false;
 	var timer;

@@ -13,6 +13,7 @@
 	overflow: hidden; */
 	position: relative;
 	background: #fff;
+	box-sizing: border-box;
 }
 
 .k-rs-r {
@@ -77,6 +78,10 @@
 
 .k-d-col {
 	background: transparent;
+}
+
+.k-d-col.blank {
+	background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAP0lEQVQYV43M2QkAIAwEUVPS9l/ElqREUDxyzfdjpBUi2SVzigBICBfSmQtP5MIXmdBCH/TQBSO0YYYmrCCFAyhcJ3dwnKl2AAAAAElFTkSuQmCC) repeat;
 }
 
 .mybox {
@@ -181,7 +186,7 @@
 	margin-top: -47px;
 }
 
-.droppable.max > .drp-t {
+.k-d-col.blank > .droppable > .drp-t {
 	left: 0;
 	right: 0;
 	top: 0;
@@ -195,11 +200,11 @@
 	z-index: 9997;
 }
 
-.droppable.max > .drop-compass:not(.drp-t) {
+.k-d-col.blank > .droppable > .drop-compass:not(.drp-t) {
 	display: none !important;
 }
 
-.droppable.max > .dock-preview {
+.k-d-col.blank > .droppable > .dock-preview {
 	display: none !important;
 }
 

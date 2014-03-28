@@ -24,6 +24,7 @@ function findElementsByCoordinate(classArr, e, els) {
 	if(els === undefined) els = [];
 	
 	var found_el = document.elementFromPoint(e.clientX, e.clientY);
+	if(found_el == null) return els;
 	
 	if(els.indexOf(found_el) >= 0) return els;
 	
@@ -248,6 +249,7 @@ var layoutEngine = (function() {
 
 			// dock panel로 옮겨야함
 			var parent = sender.el.parent();
+			parent.width(parent.width());
 			var rows = parent.children(".k-d-col");
 			var totalpx = 0;
 			$.each(rows, function(i, el) {
@@ -295,6 +297,7 @@ var layoutEngine = (function() {
 					}
 				});
 				console.logdash(totalwper)
+				parent.css('width', '');
 				// end
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
@@ -322,11 +325,14 @@ var layoutEngine = (function() {
 	var _box = layoutEngine.namespace("ui.layout.box");
 
 	_box.allboxes = [];
-	_box.event = {
-		modify: function() {},
-		resize: function() {}
-	};
-
+	_box.event = {};
+	if(!_box.event.resize) {
+		_box.event.resize = function() {};
+	} 
+	if(!_box.event.modify) {
+		_box.event.modify = function() {};	
+	}
+	
 	function Row(prop) {
 		var that = this;
 		var el = this.el = $("<div>").addClass("k-d-row");
@@ -590,7 +596,9 @@ var layoutEngine = (function() {
 				}
 				return can;
 			},
-			"afterResize": _box.event.resize
+			"afterResize": function() {
+				return _box.event.resize()
+			}
 		});
 
 		this.resizerV = $(el.find('.k-rs-b')[0]);
@@ -775,7 +783,7 @@ var layoutEngine = (function() {
 					
 					newrow = this.addRow();
 					
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 					box.close();
 					var boxn = _box.create(box.obj, false, options);
 					
@@ -819,7 +827,7 @@ var layoutEngine = (function() {
 							function case5bottom() {
 								console.logdash("bottom case5: insert row");
 
-								var contents = box.el.find('.contentbox').detach();
+								var contents = box.el.find('.contentbox:first').detach();
 								box.close();
 								// console.logdash(box.row.box.rows)
 								var newrow = that.row.box.addRow(original_idx + 1);
@@ -842,7 +850,7 @@ var layoutEngine = (function() {
 								if(this.row.box === box.row.box) {
 									console.logdash("bottom case4: reorder");
 
-									var contents = box.el.find('.contentbox').detach();
+									var contents = box.el.find('.contentbox:first').detach();
 									
 									var newrow = this.row.box.addRow(original_idx + 1);
 									newrow.append(boxn);
@@ -864,8 +872,8 @@ var layoutEngine = (function() {
 					else {
 						console.logdash("bottom case2: add to single box");
 						
-						var contentsTop = box.el.find('.contentbox').detach();
-						var contentsBottom = this.el.find('.contentbox').detach();
+						var contentsTop = box.el.find('.contentbox:first').detach();
+						var contentsBottom = this.el.find('.contentbox:first').detach();
 						box.close();
 						var child = wrapRow(this); // <-- it is child
 						// "this" is parent box
@@ -897,7 +905,7 @@ var layoutEngine = (function() {
 					
 					newrow = this.addRow(0);
 					
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 					box.close();
 					var boxn = _box.create(box.obj, false, options);
 					
@@ -908,6 +916,9 @@ var layoutEngine = (function() {
 					boxn.resizerH.hide();
 					boxn.el.find('.contentbox').remove();
 					contents.appendTo(boxn.el.find('.mybox'));
+
+					this.el.removeClass('blank');
+					// this.droppable.removeClass('max');
 					
 					delete this.guid;
 					delete this.obj.guid;
@@ -936,7 +947,7 @@ var layoutEngine = (function() {
 							function case5top() {
 								console.logdash("top case5: insert row");
 								
-								var contents = box.el.find('.contentbox').detach();
+								var contents = box.el.find('.contentbox:first').detach();
 								box.close();
 								var newrow = that.row.box.addRow(original_idx);
 								newrow.append(boxn);
@@ -952,7 +963,7 @@ var layoutEngine = (function() {
 								if(this.row.box === box.row.box) {
 									console.logdash("top case4: reorder");
 									
-									var contents = box.el.find('.contentbox').detach();
+									var contents = box.el.find('.contentbox:first').detach();
 									var newrow = this.row.box.addRow(original_idx);
 									newrow.append(boxn);
 									boxn.row = newrow;
@@ -972,8 +983,8 @@ var layoutEngine = (function() {
 					else {
 						console.logdash("top case2: add to single box");
 						
-						var contentsTop = box.el.find('.contentbox').detach();
-						var contentsBottom = this.el.find('.contentbox').detach();
+						var contentsTop = box.el.find('.contentbox:first').detach();
+						var contentsBottom = this.el.find('.contentbox:first').detach();
 						box.close();
 						var child = wrapRow(this); // <-- it is child
 						// "this" is parent box
@@ -1005,7 +1016,7 @@ var layoutEngine = (function() {
 					var boxobj = $.extend({}, box.obj); // object copy
 					boxobj.w = 50;
 
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 
 					var contb = _box.create({
 						"rows": [
@@ -1039,7 +1050,7 @@ var layoutEngine = (function() {
 					console.logdash("left case: basic");
 					var original_idx = this.row.boxes.indexOf(this);
 					
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 					box.obj.w = this.obj.w / 2;
 					var boxn = _box.create(box.obj, false, options)
 					
@@ -1059,7 +1070,7 @@ var layoutEngine = (function() {
 					var boxobj = $.extend({}, box.obj); // object copy
 					boxobj.w = 50;
 
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 
 					var contb = _box.create({
 						"rows": [
@@ -1094,7 +1105,7 @@ var layoutEngine = (function() {
 					console.logdash("right case: basic");
 					var original_idx = this.row.boxes.indexOf(this);
 
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 					box.obj.w = this.obj.w / 2;
 					var boxn = _box.create(box.obj, false, options)
 					
@@ -1159,23 +1170,35 @@ var layoutEngine = (function() {
 		function draw() {
 
 			if(prop.rows == undefined) {
-				el.attr('dock-id', that.guid)
-				var closebtn = $("<button>").addClass("btn").addClass("internal-close")
-											.text("x")
-											.on("click",function() {
-												that.close();
-											});
-				var mybox = $("<div>").addClass("mybox")
-						  .append(closebtn)
-						  .appendTo(el);
-				
-				$("<div>&nbsp;</div>").addClass("handler").appendTo(mybox);
+				if(prop.blank) {
+					el.addClass('blank');
+					el.find('.k-rs-r').hide();
+				}
+				else {
+					el.attr('dock-id', that.guid)
+					var closebtn = $("<button>").addClass("btn").addClass("internal-close")
+												.text("x")
+												.on("click",function() {
+													that.close();
+												});
+					var mybox = $("<div>").addClass("mybox")
+							  .append(closebtn)
+							  .appendTo(el);
+					
+					var handler = $("<div>&nbsp;</div>").addClass("handler").appendTo(mybox);
 
-				var contentbox = $('<div>').addClass('contentbox').appendTo(mybox);
-				
-				makeDraggable(that);
-				
-				if(prop.dragHandler != 'none') {
+					var contentbox = $('<div>').addClass('contentbox').appendTo(mybox);
+					
+					if(prop.dragHandler != false) {
+						makeDraggable(that);	
+					}
+					else {
+						handler.css('opacity', 0)
+					}
+					
+				}
+
+				if(prop.droppable != false) {
 					makeDroppable(that, false);
 				}
 			}
@@ -1184,7 +1207,7 @@ var layoutEngine = (function() {
 				setTimeout(function() {
 					// console.logdash(that.row, that.guid)
 					if(that.row == undefined) {
-						if(prop.dragHandler != 'none') {
+						if(prop.droppable != false) {
 							makeDroppable(that, true);
 						}
 
@@ -1382,7 +1405,7 @@ var layoutEngine = (function() {
 					
 					if( Math.abs(initp.x - e.pageX) < 20 && Math.abs(initp.y - e.pageY) < 20 ) return;
 
-					if(!!options.onDragbox) {
+					if((!!options) && !!options.onDragbox) {
 						options.onDragbox(box, e, ee);
 					}
 					
@@ -1392,7 +1415,8 @@ var layoutEngine = (function() {
 						
 						scaf = $("<div>").addClass("k-d-col").css("width", box.obj.w + "%"); //.css("background-color", "rgba(0,0,0,.1)");
 						
-						box.el.css("position", "absolute").css("z-index", "8000");
+						box.el.css("position", "absolute").css("z-index", "8000")
+							.css("top", (e.pageY - initp.y) + "px").css("left", (e.pageX - boxp.x - poffset.left) + "px");
 						box.el.after(scaf);
 						box.el.removeClass("ani");
 						/*
@@ -1435,7 +1459,7 @@ var layoutEngine = (function() {
 					
 					drop(box);
 
-					if(!!options.onDropbox) {
+					if((!!options) && !!options.onDropbox) {
 						options.onDropbox(box, e);
 					}
 
@@ -1549,9 +1573,6 @@ var layoutEngine = (function() {
 					$(cont).mouseover();
 				});
 
-				// if(!!options.onDragbox) {
-				// 	options.onDragbox(box, e);
-				// }
 			})
 			.on("mouseout", function() {
 				if(!isContainer) {
@@ -1569,7 +1590,9 @@ var layoutEngine = (function() {
 		
 		this.close = function() {
 			if(this.row == undefined) {
-				// this.el.remove();
+				console.log('close last one box');
+				this.el.addClass('blank');
+				// this.droppable.addClass('max');
 			}
 			else {
 				this.row.deleteBox(this);
@@ -1640,7 +1663,9 @@ var layoutEngine = (function() {
 				}
 				return can;
 			},
-			"afterResize": _box.event.resize
+			"afterResize": function() {
+				return _box.event.resize()
+			}
 		});
 
 

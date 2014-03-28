@@ -62,6 +62,7 @@
 	<style>
 	body {
 		padding: 10px;
+		background-color: #eee;
 	}
 
 	dockpanel, widget {
@@ -69,15 +70,15 @@
 	}
 
 	dockpanel {
-		border: 1px solid blue;
+		/*border: 1px solid blue;*/
 	}
 
 	/* widget */
 
 	widget {
 		/*border: 1px dotted silver;*/
-		margin: 2px;
-		height: calc(100% - 40px);
+		margin: 0px;
+		height: calc(100% - 26px);
 	}
 
 	.contentbox > [ng-transclude] {
@@ -103,6 +104,10 @@
 
 	.contentbox .tab-content {
 		overflow: visible;
+		height: calc(100% - 4px);
+		border-bottom: 1px solid #ddd;
+		border-left: 1px solid #ddd;
+		border-right: 1px solid #ddd;
 	}
 
 
@@ -142,18 +147,75 @@
 		color: transparent;
 		top: 0;
 		left: 0;
+		right: 0;
 	}
 
 	
+
+	widget > .tab-comp {
+
+	}
+
+	widget > .tab-comp > ul.nav-tabs {
+		display: flex;
+	}
+
+	widget > .tab-comp > ul.nav-tabs > li {
+		flex: 1;
+		overflow: hidden;
+	}
+
+	widget > .tab-comp > ul.nav-tabs > li > a {
+		padding: 2px 4px;
+		font-size: 0.9em;
+		margin-right: 0;
+		border-radius: 0;
+	}
+
+	widget > .tab-comp > ul.nav-tabs > li.active > a {
+		background-image: linear-gradient(to bottom, #c00 0px, #c00 2px, #fff 2.1px);
+		background-repeat: no-repeat;
+	}
+
+	widget > .tab-comp > ul.nav-tabs > li.plus {
+		flex: none;
+		width: 28px;
+		cursor: pointer;
+	}
+
+	widget > .tab-comp > ul.nav-tabs > li.plus > button {
+		line-height: 24px;
+		outline: none;
+	}
 
 
 	/* */
 
 	#dp {
-		width: 1024px;
+		/*width: 1024px;*/
 		height: 800px;
 	}
 
+/*	.mybox {
+		border: 1px dotted transparent;
+		
+	}
+
+	.mybox .handler {
+		background-image: none;
+		width: 20px;
+		height: 20px;
+		border-radius: 0;
+	}
+
+	.mybox:hover {
+		border: 1px solid #ddd;
+	}
+
+	.mybox:hover .handler {
+		background-color: #eee;
+	}
+*/
 	</style>
 
 </head>
