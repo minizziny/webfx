@@ -114,7 +114,16 @@ angular.module('app.directive.widget', [])
 
 			scope.$watch('ngModel', function(val) {
 				console.log('ngModel changed', attrs.id);
-				render(val);
+				if(angular.isObject(val)) {
+					render(val.layout[0]);
+				}
+				else {
+					// $http.get('../dashboard/' + val + '.json')
+					// .success(function(data) {
+					// 	console.log(data[1].preset.state)
+					// 	render(data[1].preset.state.layout[0]);
+					// });
+				}
 			});
 		}
 	}
@@ -181,27 +190,23 @@ angular.module('app.directive.widget', [])
 .factory('serviceWidget', function() {
 	var widgets = [];
 	
-	function buildWidget(json) {
+	function buildWidget(preset, json) {
 		if(json.type === 'tabs') {
-			return '<widget id="' + json.guid + '" ng-model="ctxz.' + json.guid + '">' + 
+			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '">' + 
 				'<div class="tab-comp" style="height: 100%">' +
 					'<ul class="nav nav-tabs" style="margin-bottom: 0">' +
-						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}"><a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" widget-droppable>{{tab.name}}</a></li>' +
+						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}"><a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" ng-click="$parent.$parent.activeTab(tab, $event)" widget-droppable>{{tab.name}}</a></li>' +
 						'<li class="plus"><button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event)"><i class="icon-plus"></i></button></li>' +
 					'</ul>' +
 					'<div class="tab-content">' +
 						'<div ng-repeat="tab in data.tabs"  style="height:100%" ng-class="{\'active\': tab.is_active}" class="tab-pane {{tab.guid}}">' + 
-							'<div ng-switch on="tab.type" style="height:100%" class="content-switch-container">' +
-								'<div ng-switch-when="dockpanel" style="height:100%"><dockpanel on-dragbox="$parent.$parent.$parent.onDragInnerbox($box, $moveevent, $downevent)" on-dropbox="$parent.$parent.$parent.onDropbox($box, $event)"  ng-model="tab.contents.layout[0]"></dockpanel></div>' + 
-								'<div ng-switch-when="html" style="height:100%">{{tab.contents}}</div>' + 
-							'</div>' +
 						'</div>' +
 					'</div>' +
 				'</div>' +
 			'</widget>';
 		}
 		else {
-			return '<widget id="' + json.guid + '" ng-model="ctxz.' + json.guid + '"><div>{{hello}} {{1+1}}</div></widget>';	
+			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '"><div>{{hello}} {{1+1}}</div></widget>';	
 		}
 	}
 	
@@ -230,35 +235,70 @@ logpresso.factory('eventSender', function() {
 
 function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 
-	$http.get('../dashboard/getPreset1.json')
-	.success(function(data) {
-		var m = data[1];
+	$scope.ctxPreset = {};
 
-		$scope.ctxz = {};
-		$scope.dataLayout = m.preset.state.layout[0];
-		var el = angular.element('<dockpanel id="dp" on-dragbox="onDragbox($box, $moveevent, $downevent)" on-dropbox="onDropbox($box, $event)" ng-model="dataLayout"></dockpanel>');
+	$http.get('../dashboard/getPreset1.json').success(getPresetWidgets(
+		'getPreset1',
+		angular.element('.dashboard-container'),
+		function() {
+			$timeout(function() { console.clear(); }, 400);
 
-		var widgets = m.preset.state.widgets;
+			// setTimeout(function() {
+			// 	$scope.dataLayout = dataLayout2;
+			// 	$scope.$apply();
+			// }, 4000)
+		}
+	));
 
-		widgets.forEach(function(widget) {
-			var elWidget = angular.element(serviceWidget.buildWidget(widget));
-			$scope.ctxz[widget.guid] = widget;
-			elWidget.appendTo(el);
-		});
+	function getPresetWidgets(name, target, callback) {
+		return function(data) {
+			var m = data[1];
 
-		console.log(el[0]);
+			$scope.ctxPreset[name] = {
+				ctxWidget: {},
+				dataLayout: m.preset.state
+			}
+			var el = angular.element('<dockpanel id="' + name + '" on-dragbox="onDragbox($box, $moveevent, $downevent)" on-dropbox="onDropbox($box, $event)" ng-model="ctxPreset.' + name + '.dataLayout"></dockpanel>');
 
-		$compile(el)($scope);
-		el.appendTo('.dashboard-container');
+			var widgets = m.preset.state.widgets;
 
-		$timeout(function() { console.clear(); }, 400);
+			widgets.forEach(function(widget) {
+				var elWidget = angular.element(serviceWidget.buildWidget(name, widget));
+				$scope.ctxPreset[name].ctxWidget[widget.guid] = widget;
+				elWidget.appendTo(el);
+			});
 
-		// setTimeout(function() {
-		// 	$scope.dataLayout = dataLayout2;
-		// 	$scope.$apply();
-		// }, 4000)
-		
-	});
+			console.log(el[0]);
+
+			$compile(el)($scope);
+
+			$timeout(function() {
+				el.appendTo(target);
+
+				if(!!callback) {
+					callback();
+				}
+			});
+			
+		}
+	}
+
+	$scope.activeTab = function(tab, e) {
+		var pane = angular.element(e.target).parents('.tab-comp').find('.tab-pane.' + tab.guid);
+		if(tab.type === 'dockpanel') {
+			if( angular.isString(tab.contents) ) {
+				if(!pane.data('isLoaded')) {
+					$http.get('../dashboard/' + tab.contents + '.json').success(getPresetWidgets(
+						tab.contents,
+						pane,
+						function() {
+							pane.data('isLoaded', true)
+						}
+					));
+				}
+			}
+		}
+	}
 
 	var z = 0;
 
@@ -274,21 +314,6 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 						'w': 100,
 						'blank': true
 					}
-					// {
-					// 	"rows": [
-					// 		{
-					// 			"cols": [
-					// 				{
-					// 					"w": 100,
-					// 					"guid": "wzxz"
-					// 				}
-					// 			],
-					// 			"h": 100
-					// 		}
-					// 	],
-					// 	"w": 100,
-					// 	"guid": "zz"
-					// }
 				]
 			}
 		});
@@ -415,17 +440,21 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 	$scope.blank3 = { 'hellob': 'w722fdd559a83334azzz' }
 	$scope.blank4 = { 'hellob': 'zzz' }
 
-	$scope.dataLayout = { 'rows': [ 
-		{ 
-			'cols': [
-				{
-					'w': 100,
-					'guid': 'w09ab1248d623c426'
+	$scope.dataLayout = {
+		'layout': [
+			{ 'rows': [ 
+				{ 
+					'cols': [
+						{
+							'w': 100,
+							'guid': 'w09ab1248d623c426'
+						}
+					],
+					'h': 100
 				}
-			],
-			'h': 100
-		}
-	], 'w': 100 };
+			], 'w': 100 }
+		]
+	}
 
 	var dataLayout2 = {
 		"rows": [

@@ -1,0 +1,65 @@
+[
+	{
+		"guid": "dbdd35bc-8aa0-4234-9aa4-c5ba7875efff",
+		"source": "",
+		"session": "9646ea7f-e2a2-4d3f-a1f4-05e6d870131e",
+		"requestId": "ba491a30-7021-aace-f951-1e50f1d475c7",
+		"target": "22",
+		"method": "com.logpresso.core.msgbus.WallPlugin.getPreset",
+		"type": "Response"
+	},
+	{
+		"preset": {
+			"guid": "preset1",
+			"name": "ìë ì ì¥",
+			"state": {
+				"widgets": [
+					{
+						"guid": "w31c2319acaee45dd",
+						"interval": 2,
+						"name": "sorttest",
+						"data": {
+							"series": [
+								{
+									"color": "#AFD8F8",
+									"name": "value",
+									"key": "value"
+								}
+							],
+							"query": "json \"[{col: \\\"hello\\\", value: 134}, {col: \\\"world\\\", value: 100}, {col: \\\"abc\\\", value: 80}, {col: \\\"dfg\\\", value: 34}]\"",
+							"labelType": "string",
+							"label": "col",
+							"type": "bar"
+						}
+					}
+				],
+				"layout": [
+					{
+						"rows": [
+							{
+								"cols": [
+									{
+										"w": 100,
+										"guid": "w31c2319acaee45dd"
+									}
+								],
+								"h": 50
+							},
+							{
+								"cols": [
+									{
+										"w": 100,
+										"guid": "wd4324f3da4e9c967"
+									}
+								],
+								"h": 50
+							}
+						],
+						"w": 100,
+						"guid": "zz"
+					}
+				]
+			}
+		}
+	}
+]

@@ -325,13 +325,16 @@ var layoutEngine = (function() {
 	var _box = layoutEngine.namespace("ui.layout.box");
 
 	_box.allboxes = [];
-	_box.event = {};
-	if(!_box.event.resize) {
-		_box.event.resize = function() {};
-	} 
-	if(!_box.event.modify) {
-		_box.event.modify = function() {};	
-	}
+	_box.event = {
+		resize: function() {},
+		modify: function() {}
+	};
+	// if(!_box.event.resize) {
+	// 	_box.event.resize = function() {};
+	// } 
+	// if(!_box.event.modify) {
+	// 	_box.event.modify = function() {};	
+	// }
 	
 	function Row(prop) {
 		var that = this;

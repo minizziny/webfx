@@ -33,103 +33,18 @@
 						"data": {
 							"tabs": [
 								{
-									"name": "xeraph",
+									"name": "preset1",
 									"guid": "gxeraph",
 									"is_active": false,
 									"type": "dockpanel",
-									"contents": {
-										"widgets": [
-											{
-												"guid": "y-c",
-												"interval": 2,
-												"name": "sorttest",
-												"data": {
-													"series": [
-														{
-															"color": "#AFD8F8",
-															"name": "value",
-															"key": "value"
-														}
-													],
-													"query": "json \"[{col: \\\"hello\\\", value: 134}, {col: \\\"world\\\", value: 100}, {col: \\\"abc\\\", value: 80}, {col: \\\"dfg\\\", value: 34}]\"",
-													"labelType": "string",
-													"label": "col",
-													"type": "bar"
-												}
-											}
-										],
-										"layout": [
-											{
-												"rows": [
-													{
-														"cols": [
-															{
-																"w": 100,
-																"guid": "w31c2319acaee45dd"
-															}
-														],
-														"h": 50
-													},
-													{
-														"cols": [
-															{
-																"w": 100,
-																"guid": "wd4324f3da4e9c967"
-															}
-														],
-														"h": 50
-													}
-												],
-												"w": 100,
-												"guid": "zz"
-											}
-										]
-									}
+									"contents": "preset1"
 								},
 								{
-									"name": "gotoweb",
+									"name": "preset2",
 									"is_active": true,
 									"guid": "ggotoweb",
 									"type": "dockpanel",
-									"contents": {
-										"widgets": [
-											{
-												"guid": "y-c",
-												"interval": 2,
-												"name": "sorttest",
-												"data": {
-													"series": [
-														{
-															"color": "#AFD8F8",
-															"name": "value",
-															"key": "value"
-														}
-													],
-													"query": "json \"[{col: \\\"hello\\\", value: 134}, {col: \\\"world\\\", value: 100}, {col: \\\"abc\\\", value: 80}, {col: \\\"dfg\\\", value: 34}]\"",
-													"labelType": "string",
-													"label": "col",
-													"type": "bar"
-												}
-											}
-										],
-										"layout": [
-											{
-												"rows": [
-													{
-														"cols": [
-															{
-																"w": 100,
-																"guid": "wa620a356b9751e80"
-															}
-														],
-														"h": 100
-													}
-												],
-												"w": 100,
-												"guid": "zz"
-											}
-										]
-									}
+									"contents": "preset2"
 								}
 							]
 						},
