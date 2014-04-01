@@ -607,10 +607,18 @@ var layoutEngine = (function() {
 
 		this.getObject = function() {
 			if(this.rows.length == 0) {
-				return {
+				var o = {
 					'guid': this.guid,
-					'w': this.obj.w
+					'w': this.obj.w,
 				}
+				if(this.obj.hasOwnProperty('droppable')) {
+					o['droppable'] = this.obj.droppable;
+				}
+				if(this.obj.hasOwnProperty('dragHandler')) {
+					o['dragHandler'] = this.obj.dragHandler;
+				}
+
+				return o;
 			}
 			else {
 				return {

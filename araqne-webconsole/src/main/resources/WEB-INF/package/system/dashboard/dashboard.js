@@ -417,7 +417,9 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 						}],
 						'h': 100
 					}],
-					'w': 100
+					'w': 100,
+					'droppable': false,
+					'dragHandler': false
 				}],
 				'widgets': [{
 					'data': {

@@ -90,7 +90,9 @@ dockpanel {
 	top: 0;
 	left: 0;
 	right: 0;
+	height: 27px;
 }
+
 
 
 
@@ -102,23 +104,82 @@ widget > .tab-comp > ul.nav-tabs {
 	display: flex;
 }
 
+widget > .tab-comp > ul.nav-tabs > li:before, widget > .tab-comp > ul.nav-tabs > li {
+	background-image: -webkit-linear-gradient(top, #e8e8e8, #d9d9d9);
+	border-top: 1px solid #b9b9b9;
+}
+
+widget > .tab-comp > ul.nav-tabs > li.active:before, widget > .tab-comp > ul.nav-tabs > li.active {
+	/*background: #f0f0f0;*/
+	border-top: 1px solid #c00;
+	height: 27px;
+	box-shadow: none;
+	background-image: linear-gradient(to bottom, #c00 0px, #c00 1px, #fff 1.1px);
+	background-repeat: no-repeat;
+}
+
+widget > .tab-comp > ul.nav-tabs > li:before {
+	content: '';
+	position: absolute;
+	top: -1px;
+	left: -16px;
+	height: 26px;
+	width: 30px;
+	border-top-left-radius: 3px;
+	border-left: 1px solid #b9b9b9;
+	box-shadow: inset 1px -1px 1px rgba(0, 0, 0, 0.05);
+	-webkit-transform: skewX(133deg);
+}
+
 widget > .tab-comp > ul.nav-tabs > li {
 	flex: 1;
 	max-width: 175px;
 	min-width: 40px;
-	overflow: hidden;
+	padding-right: 24px;
+
+	position: relative;
+	top: 3px;
+	height: 26px;
+	line-height: 26px;
+	color: #444444;
+	padding-left: 0;
+	margin-left: 15px;
+	border-top-right-radius: 3px;
+	border-right: 1px solid #b9b9b9;
+	box-shadow: inset -1px -1px 1px rgba(0, 0, 0, 0.05);
+	-webkit-transform: skewX(30deg);
+	transition: color 0.1s ease-in;
+
+	display: inline-block;
 }
+
 
 widget > .tab-comp > ul.nav-tabs > li > a {
 	padding: 2px 4px;
 	font-size: 0.9em;
 	margin-right: 0;
 	border-radius: 0;
+	background-color: transparent;
+	border: 0;
+
+	-webkit-transform: skewX(-30deg);
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+widget > .tab-comp > ul.nav-tabs > li > a:hover {
+	background-color: transparent;
+	border: 0;
+}
+
+widget > .tab-comp > ul.nav-tabs > li.active {
+	z-index: 10;
+	line-height: 24px;
+	color: #000000;
 }
 
 widget > .tab-comp > ul.nav-tabs > li.active > a {
-	background-image: linear-gradient(to bottom, #c00 0px, #c00 2px, #fff 2.1px);
-	background-repeat: no-repeat;
 }
 
 widget > .tab-comp > ul.nav-tabs > li.plus {
