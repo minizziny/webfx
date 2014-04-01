@@ -398,6 +398,52 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		});
 	}
 
+	function MigrationPreset(preset) {	
+		console.log('===== Migration this preset =====')
+
+		var newguid = 'p' + serviceUtility.generateType2();
+
+		SavePreset(newguid, newguid, preset.state, false, true).success(function() {
+			var dockId = serviceUtility.generateType2();
+
+			var newstate = {
+				'layout': [{
+					'rows': [{
+						'cols': [{
+							'droppable': false,
+							'dragHandler': false,
+							'guid': dockId,
+							'w': 100
+						}],
+						'h': 100
+					}],
+					'w': 100
+				}],
+				'widgets': [{
+					'data': {
+						'tabs': [
+							{
+								'name': preset.name,
+								'guid': serviceUtility.generateType2(),
+								'is_active': true,
+								'type': 'dockpanel',
+								'contents': newguid
+							}
+						]
+					},
+					'guid': dockId,
+					'name': preset.name,
+					'type': 'tabs'
+				}]
+			};
+			SavePreset(preset.guid, preset.name, newstate).success(function() {
+				LoadPreset(preset.guid);
+
+				console.log('===== Migration ended =====')
+			});
+		});
+	}
+
 	function LoadPreset(guid, el) {
 
 		socket.send('com.logpresso.core.msgbus.WallPlugin.getPreset',
@@ -408,10 +454,25 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 				var widgets = m.body.preset.state.widgets;
 				m.body.preset.state.layout = [ layoutEngine.ui.layout.autoLayout(widgets) ];
 			}
+
+			// root preset
+			if(el == undefined) {
+				console.log('---- Loading Preset',m.body.preset.name, '----');
+
+				//////////////// FOR MIGRATION /////////////
+				var hasWidget = m.body.preset.state.widgets.some(function(widget) {
+					return widget.type === 'tabs';
+				});
+				if(!hasWidget) {
+					MigrationPreset(m.body.preset);
+					return;
+				}
+				//////////////// END MIGRATION //////////////
+
+			}
 			
 			// root preset
 			if(el == undefined) {
-				console.log('----LOADING PRESET----', m.body.preset.name);
 				$scope.isLoadedCurrentPreset = false;
 				$scope.currentPreset = m.body.preset;
 				ClearPreset();
