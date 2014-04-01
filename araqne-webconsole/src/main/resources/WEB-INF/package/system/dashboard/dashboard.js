@@ -18,14 +18,14 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 	window._recovery = {
 		resetCurrentLayout: function() {
-			eventSender.dashboard.onSpecificPresetChanged($scope.currentPreset.guid, true);
+			OnPresetChanged($scope.currentPreset.guid, true);
 		},
 		resetSpecificLayout: function(guid) {
-			eventSender.dashboard.onSpecificPresetChanged(guid, true);
+			OnPresetChanged(guid, true);
 		}
 	};
 
-	eventSender.dashboard.onSpecificPresetChanged = function(guid, reset_layout) {
+	function OnPresetChanged(guid, reset_layout) {
 		var specific = $scope.dataPresetList.filter(function(p) {
 			return p.guid === guid;
 		}).first();
@@ -54,7 +54,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			target[0].obj.close();
 
 			$timeout(function() {
-				eventSender.dashboard.onSpecificPresetChanged(presetId); // save state	
+				OnPresetChanged(presetId); // save state	
 			}, 200);
 		}
 	}
@@ -135,11 +135,11 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		tabdata.push(tabctx);
 		$timeout(function() {
 			var pane = angular.element(e.target).parents('.tab-comp').find('.tab-pane.' + tabctx.guid);
-			NewPreset(tabctx.contents, pane);
+			NewInnerPreset(tabctx.contents, pane);
 			angular.element(e.target).parents('li').prev().children('a').click();
 			
 			var presetId = angular.element(e.target).parents('dockpanel:first').attr('id');
-			eventSender.dashboard.onSpecificPresetChanged(presetId); // save state
+			OnPresetChanged(presetId); // save state
 		});
 	}
 
@@ -242,7 +242,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 					var target = document.elementFromPoint(eu.clientX, eu.clientY);
 					var presetId = angular.element(target).parents('dockpanel:first').attr('id');
 					$scope.ctxPreset[presetId].ctxWidget[ctx.guid] = ctx;
-					eventSender.dashboard.onSpecificPresetChanged(presetId); // save state
+					OnPresetChanged(presetId); // save state
 
 					widget.find('.widget-toolbox').show();
 				}
@@ -294,31 +294,41 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		.failed(msgbusFailed);
 	}
 
-	function SavePreset(guid, name, state, reset_layout) {
-		var isExist = false;
-		for (var i = $scope.dataPresetList.length - 1; i >= 0; i--) {
-			if($scope.dataPresetList[i].guid == guid) {
-				isExist = true;
-				break;
+	function SavePreset(guid, name, state, reset_layout, is_embedded) {
+		var found = $scope.dataPresetList.filter(function(preset) {
+			return preset.guid === guid;
+		});
+
+		var sendContext = { 'guid': guid, 'name': name, 'state': state };
+
+		if(found.length > 0) {
+			console.log('update preset');
+			if( !!found.first().is_embedded ) {
+				sendContext['is_embedded'] = found.first().is_embedded;
 			}
-		};
-
-		if(!isExist) {
-			$scope.dataPresetList.push({
-				'guid': guid,
-				'name': name
-			});
 		}
-
+		else {
+			console.log('new preset');
+			var listContext = {
+				'guid': guid,
+				'name': name,
+				'is_embedded': null
+			};
+			if(is_embedded) {
+				listContext['is_embedded'] = true;
+				sendContext['is_embedded'] = true;
+			}
+			$scope.dataPresetList.push(listContext);
+		}
+		
 		if(reset_layout === true) {
 			console.warn('reset layout!');
 			delete state.layout; // <-----------------
 		}
 
+		console.log(sendContext)
 
-		return socket.send("com.logpresso.core.msgbus.WallPlugin.setPreset", 
-			{ 'guid': guid, 'name': name, 'state': state }
-		, eventSender.dashboard.pid);
+		return socket.send("com.logpresso.core.msgbus.WallPlugin.setPreset", sendContext, eventSender.dashboard.pid);
 	}
 
 	function InitAutosave() {
@@ -338,7 +348,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	$scope.onChangePreset = function(id, box) {
 		console.log('onChangePreset', id);
 		if($scope.isLoadedCurrentPreset) {
-			eventSender.dashboard.onSpecificPresetChanged(id); // save state	
+			OnPresetChanged(id); // save state	
 		}
 	}
 
@@ -365,8 +375,6 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			elWidget.appendTo(el);
 		});
 
-		console.log('<dockpanel id="' + el[0].id + '">');
-
 		$compile(el)($scope);
 
 		$timeout(function() {
@@ -377,7 +385,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 						var pane = el.find('.tab-pane.' + tab.guid);
 						if(!~has) {
 							console.log('innerDockpanel', tab.contents, 'created')
-							NewPreset(tab.contents, pane);
+							NewInnerPreset(tab.contents, pane);
 						}
 						else {
 							console.log('innerDockpanel', tab.contents, 'load')
@@ -400,10 +408,10 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 				var widgets = m.body.preset.state.widgets;
 				m.body.preset.state.layout = [ layoutEngine.ui.layout.autoLayout(widgets) ];
 			}
-
-			console.log(m.body.preset.state)
 			
+			// root preset
 			if(el == undefined) {
+				console.log('----LOADING PRESET----', m.body.preset.name);
 				$scope.isLoadedCurrentPreset = false;
 				$scope.currentPreset = m.body.preset;
 				ClearPreset();
@@ -414,9 +422,11 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 					$scope.isLoadedCurrentPreset = true;
 				}, 1000);
 			}
+			// inner preset
 			else {
 				getPresetWidgets(guid, m.body.preset.state, el, true);
 			}
+			console.log(m.body.preset.state)
 
 			$scope.$apply();
 		})
@@ -446,7 +456,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		var newguid = 'p' + serviceUtility.generateType2();
 		SavePreset(newguid, newname, $scope.currentPreset.state).success(function() {
 			LoadPreset(newguid);
-		})
+		});
 	}
 
 	$scope.RenamePreset = function(newval) {
@@ -460,9 +470,9 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 	$scope.New = function() {
 		var name = prompt($translate('$S_msg_NewPresetName'));
-		if(name == undefined || name === '') return;	
+		if(name == undefined || name === '') return;
 		
-		var newguid = 'p' + serviceUtility.generateType2();
+		var newguid = serviceUtility.generateType2();
 		SavePreset(newguid, name, { 
 			'layout': [{
 				'blank': true,
@@ -475,7 +485,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		})
 	}
 
-	function NewPreset(newguid, el) {
+	function NewInnerPreset(newguid, el) {
 		SavePreset(newguid, newguid, { 
 			'layout': [{
 				'guid': undefined,
@@ -483,7 +493,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 				'blank': true
 			}],
 			'widgets': []
-		}).success(function() {
+		}, false, true).success(function() {
 			LoadPreset(newguid, el);
 		})
 	}
@@ -522,22 +532,22 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	$scope.Load = function(preset) {
-		console.log(preset)
 		LoadPreset(preset.guid);
 	}
 
 	function Init() {
+		var hasAutosave = false;
 
 		GetPresetList(function() {
 			for (var i = $scope.dataPresetList.length - 1; i >= 0; i--) {
 				if($scope.dataPresetList[i].guid.indexOf("autosave") === 0) {
-					$scope.currentPreset = $scope.dataPresetList[i];
+					hasAutosave = true;
 					LoadPreset($scope.dataPresetList[i].guid);
 					break;
 				}
 			};
 
-			if($scope.currentPreset == undefined) {
+			if(!hasAutosave) {
 				console.log("InitAutosave");
 				InitAutosave().success(Init);
 			}
