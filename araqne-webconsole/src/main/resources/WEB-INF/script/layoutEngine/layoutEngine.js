@@ -325,18 +325,8 @@ var layoutEngine = (function() {
 	var _box = layoutEngine.namespace("ui.layout.box");
 
 	_box.allboxes = [];
-	_box.event = {
-		resize: function() {},
-		modify: function() {}
-	};
-	// if(!_box.event.resize) {
-	// 	_box.event.resize = function() {};
-	// } 
-	// if(!_box.event.modify) {
-	// 	_box.event.modify = function() {};	
-	// }
 	
-	function Row(prop) {
+	function Row(prop, options) {
 		var that = this;
 		var el = this.el = $("<div>").addClass("k-d-row");
 		var obj = this.obj = $.extend({}, prop); // object copy
@@ -356,11 +346,11 @@ var layoutEngine = (function() {
 		}
 
 		this.boxes.onItemAdded = function() {
-			_box.event.modify(that)
+			options.onModify(that);
 		} 
 		// this.boxes.onItemSet = _box.event.modify;
 		this.boxes.onItemRemoved = function() {
-			_box.event.modify(that)
+			options.onModify(that);
 		} 
 
 		this.getMinHeight = function() {
@@ -600,7 +590,7 @@ var layoutEngine = (function() {
 				return can;
 			},
 			"afterResize": function() {
-				return _box.event.resize()
+				return options.onResize()
 			}
 		});
 
@@ -638,11 +628,11 @@ var layoutEngine = (function() {
 		this.rows = new ObservableArray([]);
 
 		this.rows.onItemAdded = function() {
-			_box.event.modify(that)
+			options.onModify(that);
 		}
 		// this.rows.onItemSet = _box.event.modify;
 		this.rows.onItemRemoved = function() {
-			_box.event.modify(that)
+			options.onModify(that);
 		}
 		
 		this.getMinWidth = function() {
@@ -721,10 +711,11 @@ var layoutEngine = (function() {
 				$(selector).empty();
 				el.appendTo(selector);
 				
+				// clear all settings
 				if(!no_root) {
-					console.logdash('set root')
+					console.log('set root');
 					layoutEngine.ui.layout.box.root = that;	
-					_box.event.modify(that);
+					// _box.event.modify(that);
 				}
 			}
 			else {
@@ -757,7 +748,7 @@ var layoutEngine = (function() {
 		}
 
 		this.addRow = function(idx) {
-			var row = new Row([]);
+			var row = new Row([], options);
 			if(idx !== undefined) {
 				row.obj.h = Math.floor(100 / (this.rows.length + 1));
 				this.insert(row, idx);
@@ -1158,7 +1149,7 @@ var layoutEngine = (function() {
 			for(var i = 0; i < obj.rows.length; i++) {
 				// making row
 				var objRow = obj.rows[i];
-				var row = new Row(objRow);
+				var row = new Row(objRow, options);
 				row.appendTo(that);
 
 				for(var j = 0; j < objRow.cols.length; j++) {
@@ -1553,7 +1544,6 @@ var layoutEngine = (function() {
 				isEnter = true;
 			})
 			.on("mousemove", function(e) {
-				
 				if(!isEnter) return;
 				
 				var all = $(".drop-compass");
@@ -1667,12 +1657,15 @@ var layoutEngine = (function() {
 				return can;
 			},
 			"afterResize": function() {
-				return _box.event.resize()
+				return options.onResize()
 			}
 		});
 
 
 		// drawing row
+		if(!prop.hasOwnProperty('rows') && !prop.hasOwnProperty('guid')) {
+			prop.blank = true;
+		}
 		traverse(prop);
 
 		draw();
@@ -1700,7 +1693,7 @@ var layoutEngine = (function() {
 
 (function() {
 	function AutoLayout(widgets) {
-		var layout = { 'rows':[], 'w':100, 'guid':'root' };
+		var layout = { 'rows':[], 'w':100 };
 		var h = 100 / Math.ceil(widgets.length / 4);
 		if(h < 25) h = 25;
 

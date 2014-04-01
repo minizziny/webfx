@@ -18,10 +18,10 @@ var logpresso = angular.module('app', [
 	'pascalprecht.translate',
 	'ui.sortable',
 	'resettableForm'
-], function($routeProvider) {
+], function() {
 });
 
-logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
+logpresso.run(function($rootScope, $location, $anchorScroll, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
 
 	$rootScope.$on('$translateLoadingError', function() {
 		$translate.uses('en');
@@ -453,7 +453,7 @@ function LoginController($scope, socket, serviceSession, eventSender, $location)
 		.success(function(m) {
 
 			serviceSession.login($scope.txtLoginName, $scope.txtPassword, m.body.nonce, function(m) {
-				$location.path('/system/starter');
+				$location.path('/system/dashboard');
 
 				eventSender.root.loggedIn();
 				eventSender.root.startTimeout();

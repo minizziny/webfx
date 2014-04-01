@@ -1,7 +1,167 @@
 <link href="script/layoutEngine/layoutEngine.css" rel="stylesheet" media="screen">
 <link href="css/dashboard.css" rel="stylesheet" media="screen">
+
+<style>
+body {
+	padding: 10px;
+	background-color: #eee;
+}
+
+dockpanel, widget {
+	display: block;
+}
+
+dockpanel {
+	/*border: 1px solid blue;*/
+}
+
+/* widget */
+
+widget {
+	/*border: 1px dotted silver;*/
+	margin: 0px;
+	height: calc(100% - 26px);
+}
+
+.contentbox > [ng-transclude] {
+	height: 100%;
+}
+
+/* widget end */
+
+.box {
+	float: left;
+	width: 180px;
+	height: 180px;
+	background-color: #eee;
+	margin: 10px;
+	border: 1px solid gray;
+
+}
+
+dockpanel {
+	width: 100%;
+	height: 100%;
+}
+
+.contentbox .tab-content {
+	overflow: visible;
+	height: calc(100% - 4px);
+	border-bottom: 1px solid #ddd;
+	border-left: 1px solid #ddd;
+	border-right: 1px solid #ddd;
+}
+
+
+/* widget-droppable */
+
+@-webkit-keyframes blinker {
+	from {
+		background-color: #08c;
+		color: white;
+	}
+	to {
+		background-color: white;
+		color: #08c;
+	}
+}
+
+[widget-droppable] {
+	position: relative;
+}
+
+.nav-tabs>li [widget-droppable].over {
+	/*background-color: yellow;*/
+	-webkit-animation-name: blinker;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-timing-function: cubic-bezier(1.0,0,0,1.0);
+	-webkit-animation-duration: 0.2s;
+}
+
+.nav-tabs>li.active [widget-droppable].over {
+	/*background-color: #fff;*/
+	-webkit-animation: none;
+}
+
+[widget-droppable] > .widget-drop-zone {
+	z-index: 9989;
+	position: absolute;
+	color: transparent;
+	top: 0;
+	left: 0;
+	right: 0;
+}
+
+
+
+widget > .tab-comp {
+
+}
+
+widget > .tab-comp > ul.nav-tabs {
+	display: flex;
+}
+
+widget > .tab-comp > ul.nav-tabs > li {
+	flex: 1;
+	overflow: hidden;
+}
+
+widget > .tab-comp > ul.nav-tabs > li > a {
+	padding: 2px 4px;
+	font-size: 0.9em;
+	margin-right: 0;
+	border-radius: 0;
+}
+
+widget > .tab-comp > ul.nav-tabs > li.active > a {
+	background-image: linear-gradient(to bottom, #c00 0px, #c00 2px, #fff 2.1px);
+	background-repeat: no-repeat;
+}
+
+widget > .tab-comp > ul.nav-tabs > li.plus {
+	flex: none;
+	width: 28px;
+	cursor: pointer;
+}
+
+widget > .tab-comp > ul.nav-tabs > li.plus > button {
+	line-height: 24px;
+	outline: none;
+}
+
+
+/* */
+
+#dp {
+	/*width: 1024px;*/
+	height: 800px;
+}
+
+/*	.mybox {
+	border: 1px dotted transparent;
+	
+}
+
+.mybox .handler {
+	background-image: none;
+	width: 20px;
+	height: 20px;
+	border-radius: 0;
+}
+
+.mybox:hover {
+	border: 1px solid #ddd;
+}
+
+.mybox:hover .handler {
+	background-color: #eee;
+}
+*/
+</style>
+
 <div class="dashboard-container" ng-controller="DashboardController">
-	<div ng-controller="PresetController" class="toolbar navbar navbar-top" style="margin-bottom: 0px">
+	<div class="toolbar navbar navbar-top" style="margin-bottom: 0px">
 		<div class="navbar-inner">
 			<!--<select style="float: left; margin-top: 5px; margin-bottom: 0; margin-left: 5px" ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
 			-->
@@ -41,6 +201,7 @@
 				</ul>
 			</div>
 			<button class="btn btn-small btn-primary pull-right" style="margin-right: 5px" ng-click="openNewWidget()">{{'$S_str_AddWidget' | translate}}</button>
+			<button class="btn btn-small pull-right" style="margin-right: 5px" ng-click="addTabWidget()">New Tab</button>
 			<div class="brandpreset" click-to-edit ng-model="currentPreset.name" ng-change="RenamePreset($new)" ng-cancel="" ng-toggle=""></div>
 		</div>
 
@@ -67,6 +228,9 @@
 				<button class="btn" ng-click="CancelRemove()">{{'$S_str_Cancel' | translate}}</button>
 			</div>
 		</div>
+		<!--{{ctxPreset}}
+		<hr>
+		{{currentPreset}}-->
 	</div>
 
 	<div class="preset-container">

@@ -20,202 +20,6 @@ var logpresso = angular.module('app', [
 ], function($routeProvider) {
 });
 
-
-angular.module('app.directive.widget', [])
-.directive('widgetTarget', function() {
-	return {
-		restrict: 'A',
-		require: ['ngModel'],
-		link: function(scope, el, attrs, ctrl) {
-			
-		}
-	}
-})
-.directive('dockpanel', function() {
-	return {
-		restrict: 'E',
-		require: 'ngModel',
-		scope: {
-			'ngModel': '=',
-			'onDragbox': '&',
-			'onDropbox': '&'
-		},
-		controller: function($scope, $element) {
-			this.append = function(model, detached) {
-				var contentbox = $element.find('[dock-id=' + model.guid + '] > .mybox > .contentbox');
-				// 이때 append되지 않은건 버려짐.
-				if(contentbox.length) {
-					console.log('append widget', detached[0].id, model.guid);
-					contentbox.append(detached);	
-				}
-			}
-		},
-		link: function(scope, el, attrs, ctrl) {
-			console.log('linking dockpanel');
-			var cached;
-
-			function cache() {
-				// 이 시점에선 dockpanel 아래의 link된 widget을 캐시하는 것이 아니고,
-				// 이미 append된 widget들을 캐시한다. link됐으나 append되지 않은건 이미 아까 사라짐.
-				cached = el.find('widget').detach();
-				console.log('cache', cached.length, 'item cached');
-			}
-
-			function restore() {
-				if(!cached.length) return;
-				console.log('restore');
-
-				cached.each(function(i, widget) {
-					var guid = angular.element(widget).attr('guid');
-
-					var contentbox = el.find('[dock-id=' + guid + '] > .mybox > .contentbox');
-					if(contentbox.length) {
-						// 이때 append되지 않은건 버려짐.
-						console.log('restore widget', widget.id, guid);
-						contentbox.append(widget);
-					}
-				});
-
-				cached = undefined;
-			}
-
-			function render(layout) {
-				cache();
-				el.empty();
-				console.log('---render---')
-				
-				var _box = layoutEngine.ui.layout.box.create(layout, false, {
-					'onDragbox': function(box, em, ed) {
-						return scope.onDragbox({
-							'$box': box,
-							'$moveevent': em,
-							'$downevent': ed
-						});
-					},
-					'onDropbox': function(box, event) {
-						return scope.onDropbox({
-							'$box': box,
-							'$event': event
-						});
-					}
-				});
-
-				var boxe = new CustomEvent(layoutEngine.ui.layout.box.event);
-				boxe.on('modify', function() {
-					console.log('modify');
-				});
-				boxe.on('resize', function() {
-					console.log('resize');
-				});
-				
-				_box.appendTo(el);
-				restore();
-			}
-
-			scope.$watch('ngModel', function(val) {
-				console.log('ngModel changed', attrs.id);
-				if(angular.isObject(val)) {
-					render(val.layout[0]);
-				}
-				else {
-					// $http.get('../dashboard/' + val + '.json')
-					// .success(function(data) {
-					// 	console.log(data[1].preset.state)
-					// 	render(data[1].preset.state.layout[0]);
-					// });
-				}
-			});
-		}
-	}
-})
-.directive('widget', function($timeout) {
-	return {
-		restrict: 'E',
-		scope: {
-		},
-		transclude: 'element',
-		replace: true,
-		require: ['?^dockpanel', '?ngModel'],
-		template: '<div ng-transclude></div>',
-		link: function(scope, el, attrs, ctrl, transclude) {
-			transclude(scope, function(elc, scopec) {
-				console.log('linking widget', attrs.id);
-				var ctlrDockpanel = ctrl[0];
-				var ctlrModel = ctrl[1];
-
-				if(!!ctlrDockpanel) {
-					// DockPanel 밑에 있는 widget들은 append 보류
-					var detached = el.detach();
-				}
-
-				scope.hello = 'world';
-				// console.log(ctlrModel.$modelValue); // 여기엔 모델이 없다.
-
-				if(!!ctlrDockpanel) {
-
-					$timeout(function() {
-						// ngModel이 활성화되는 시점
-						
-						// console.log(ctlrModel.$modelValue);
-						angular.extend(scope, ctlrModel.$modelValue);
-						scope.hello = ctlrModel.$modelValue.type + '/' + ctlrModel.$modelValue.guid;
-
-						el.attr('guid', ctlrModel.$modelValue.guid);
-						ctlrDockpanel.append(ctlrModel.$modelValue, detached);
-					});
-
-				}
-
-				el.children('widget').replaceWith(elc);
-			});
-		}
-	}
-})
-.directive('widgetDroppable', function($compile) {
-	return {
-		restrict: 'A',
-		link: function(scope, el, attrs) {
-			// el.css('border', '1px solid red');
-			el.addClass('drop-tab');
-
-			var padding = el.css('padding');
-			var dropzone = angular.element('<div class="widget-drop-zone">' + el[0].innerHTML + '</div>');
-			dropzone.css('padding', padding);
-			$compile(dropzone)(scope);
-			el.append(dropzone);
-
-		}
-	}
-})
-.factory('serviceWidget', function() {
-	var widgets = [];
-	
-	function buildWidget(preset, json) {
-		if(json.type === 'tabs') {
-			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '">' + 
-				'<div class="tab-comp" style="height: 100%">' +
-					'<ul class="nav nav-tabs" style="margin-bottom: 0">' +
-						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}"><a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" ng-click="$parent.$parent.activeTab(tab, $event)" widget-droppable>{{tab.name}}</a></li>' +
-						'<li class="plus"><button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event)"><i class="icon-plus"></i></button></li>' +
-					'</ul>' +
-					'<div class="tab-content">' +
-						'<div ng-repeat="tab in data.tabs"  style="height:100%" ng-class="{\'active\': tab.is_active}" class="tab-pane {{tab.guid}}">' + 
-						'</div>' +
-					'</div>' +
-				'</div>' +
-			'</widget>';
-		}
-		else {
-			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '"><div>{{hello}} {{1+1}}</div></widget>';	
-		}
-	}
-	
-	return {
-		buildWidget: buildWidget
-	}
-})
-;
-
 logpresso.config(['$translateProvider', function ($translateProvider) {
 	$translateProvider.useStaticFilesLoader({
 		prefix: '/locales/system.',
@@ -241,7 +45,7 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 		'getPreset1',
 		angular.element('.dashboard-container'),
 		function() {
-			$timeout(function() { console.clear(); }, 400);
+			// $timeout(function() { console.clear(); }, 400);
 
 			// setTimeout(function() {
 			// 	$scope.dataLayout = dataLayout2;
@@ -256,7 +60,7 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 
 			$scope.ctxPreset[name] = {
 				ctxWidget: {},
-				dataLayout: m.preset.state
+				dataLayout: m.preset.state.layout[0]
 			}
 			var el = angular.element('<dockpanel id="' + name + '" on-dragbox="onDragbox($box, $moveevent, $downevent)" on-dropbox="onDropbox($box, $event)" ng-model="ctxPreset.' + name + '.dataLayout"></dockpanel>');
 
@@ -557,4 +361,15 @@ function DashboardController($scope, $http, $compile, $timeout, serviceWidget) {
 	}
 
 	
+}
+
+function debounce(fn, delay) {
+	var timer = null;
+	return function () {
+		var context = this, args = arguments;
+		clearTimeout(timer);
+		timer = setTimeout(function () {
+			fn.apply(context, args);
+		}, delay);
+	};
 }
