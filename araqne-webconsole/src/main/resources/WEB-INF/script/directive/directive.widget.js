@@ -238,7 +238,6 @@ angular.module('app.directive.widget', [])
 		template: '<div ng-transclude></div>',
 		controller: function($scope, $element) {
 			var self = this;
-			var timer;
 			this.isLoaded = false;
 
 			$scope.$watch('isRunning', function(val) {
@@ -249,7 +248,7 @@ angular.module('app.directive.widget', [])
 				else {
 					$el.removeClass('w-running');
 				}
-				console.log($el)
+				console.log($el[0])
 			})
 			$scope.isRunning = false;
 
@@ -264,6 +263,7 @@ angular.module('app.directive.widget', [])
 
 			this.resume = function() {
 				$scope.isRunning = true;
+				console.log('resume', $element[0].id)
 			}
 		},
 		link: function(scope, el, attrs, ctrls, transclude) {
@@ -344,48 +344,47 @@ angular.module('app.directive.widget', [])
 			var superSuspend = elc[0].suspend;
 			var superResume = elc[0].resume;
 
-			var queryInst = serviceLogdb.create(2020);
+			var queryInst, interval = 0;
 
 			scope.dataQueryResult = [];
-			function getResultCallback(m) {
-				scope.dataQueryResult = m.body.result;
-				scope.$apply();
-				serviceLogdb.remove(queryInst);
+			function getResultCallback(callback) {
+				return function(m) {
+					scope.dataQueryResult = m.body.result;
+					
+					serviceLogdb.remove(queryInst);
+					queryInst = undefined;
+					if(!!callback){
+						callback();	
+					}
+					
+					scope.$apply();
+				}
 			}
 
-			function onStatusChange(m) {
-				if(m.body.type === 'eof') {
-					queryInst.getResult(0, 100, getResultCallback);	
+			function onStatusChange(callback) {
+				return function(m) {
+					if(m.body.type === 'eof') {
+						queryInst.getResult(0, 100, getResultCallback(callback));
+					}	
 				}
+			}
+
+			elc[0].getInterval = function() {
+				return interval;
 			}
 
 			elc[0].render = function() {
 				var scopec = elc.scope()
 				scope.order = scopec.data.order;
-				// console.widgetLog(scopec, scope)
+				interval = scopec.interval * 500;
+
 				if(ctrl.isLoaded) {
 					superRender();
 					return;
 				}
 
-				queryInst.query(scopec.data.query, 100)
-				.created(function(m) {
-					// scope.progress = { 'width': '20%' };
-					// scope.$apply();
-				})
-				.onStatusChange(onStatusChange)
-				.loaded(onStatusChange)
-				.failed(function(m, raw) {
-					console.widgetLog('failed');
-					serviceLogdb.remove(queryInst);
+				query();
 
-					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
-					scope.isShowError = true;
-
-					scope.$apply();
-				});
-
-				
 				var table = angular.element('<div class="widget-grid-container"><table class="table table-bordered table-condensed widget-grid" data-resizable-columns-id="">\
 					<thead>\
 						<tr><th data-resizable-column-id="{{field}}" ng-repeat="field in order" title="{{field}}">{{field}}</th></tr>\
@@ -405,6 +404,30 @@ angular.module('app.directive.widget', [])
 				superRender();
 			}
 
+			function query(callback) {
+				var scopec = elc.scope();
+				
+				queryInst = serviceLogdb.create(2020);
+				queryInst.query(scopec.data.query, 100)
+				.created(function(m) {
+					// scope.progress = { 'width': '20%' };
+					// scope.$apply();
+				})
+				.onStatusChange(onStatusChange(callback))
+				.loaded(onStatusChange(callback))
+				.failed(function(m, raw) {
+					console.widgetLog('failed');
+					serviceLogdb.remove(queryInst);
+					queryInst = undefined;
+
+					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
+					scope.isShowError = true;
+
+					scope.$apply();
+				});
+			}
+
+			elc[0].query = query;
 		}
 	}
 })
@@ -417,65 +440,85 @@ angular.module('app.directive.widget', [])
 			var elc = el.children('widget');
 			var superRender = elc[0].render;
 
-			var queryInst = serviceLogdb.create(2020);
+			var ctx = { 'data': null };
+			var queryInst, interval = 0, datasrc;
 
-			var ctx = { 'data': null }
-			var datasrc;
+			function getResultCallback(callback) {
+				return function(m) {
+					datasrc = m.body.result;
+					var svg = angular.element('<div class="widget-chart">');
+					var dataLabel = {name: ctx.data.label, type: ctx.data.labelType};
+					// console.log(ctx.data)
 
-			function getResultCallback(m) {
-				datasrc = m.body.result;
-				var svg = angular.element('<div class="widget-chart">');
-				var dataLabel = {name: ctx.data.label, type: ctx.data.labelType};
-				console.log(ctx.data)
+					function render() {
+						var json = serviceChart.buildJSONStructure(angular.copy(ctx.data.series), datasrc, dataLabel);
+						// setTimeout(function() {
+							var renderOptions = {
+								width: $(svg[0]).width(),
+								height: $(svg[0]).parents('.contentbox').height() - 10
+							}
+							if(ctx.data.type == 'line') {
+								serviceChart.lineChart(svg[0], json, renderOptions);
+							}
+							else if(ctx.data.type == 'bar') {
+								serviceChart.multiBarHorizontalChart(svg[0], json, renderOptions);
+							}
+							else if(ctx.data.type == 'pie') {
+								serviceChart.pie(svg[0], json, renderOptions);
+							}	
+						// }, 500);
+					}
 
-				function render() {
-					var json = serviceChart.buildJSONStructure(angular.copy(ctx.data.series), datasrc, dataLabel);
-					// setTimeout(function() {
-						var renderOptions = {
-							width: $(svg[0]).width(),
-							height: $(svg[0]).parents('.contentbox').height() - 10
-						}
-						if(ctx.data.type == 'line') {
-							serviceChart.lineChart(svg[0], json, renderOptions);
-						}
-						else if(ctx.data.type == 'bar') {
-							serviceChart.multiBarHorizontalChart(svg[0], json, renderOptions);
-						}
-						else if(ctx.data.type == 'pie') {
-							serviceChart.pie(svg[0], json, renderOptions);
-						}	
-					// }, 500);
+					elc.find('.widget-chart').remove();
+					elc.append(svg);
+					render();
+					serviceLogdb.remove(queryInst);
+					queryInst = undefined;
+					
+					if(!!callback){
+						callback();	
+					}
 				}
-
-				elc.append(svg);
-				render();
-				serviceLogdb.remove(queryInst);
 			}
 
-			function onStatusChange(m) {
-				if(m.body.type === 'eof') {
-					queryInst.getResult(0, 100, getResultCallback);	
+
+			function onStatusChange(callback) {
+				return function(m) {
+					if(m.body.type === 'eof') {
+						queryInst.getResult(0, 100, getResultCallback(callback));
+					}	
 				}
+			}
+
+			elc[0].getInterval = function() {
+				return interval;
 			}
 			
 			elc[0].render = function() {
 				var scopec = elc.scope()
-				console.log(scopec)
 				ctx.data = scopec.data;
-				// scope.order = scopec.data.order;
-				// console.widgetLog(scopec, scope)
+				interval = scopec.interval * 500;
+
 				if(ctrl.isLoaded) {
 					superRender();
 					return;
 				}
 
+				query();
+				superRender();
+			}
+
+			function query(callback) {
+				var scopec = elc.scope();
+
+				queryInst = serviceLogdb.create(2020);
 				queryInst.query(scopec.data.query, 100)
 				.created(function(m) {
 					// scope.progress = { 'width': '20%' };
 					// scope.$apply();
 				})
-				.onStatusChange(onStatusChange)
-				.loaded(onStatusChange)
+				.onStatusChange(onStatusChange(callback))
+				.loaded(onStatusChange(callback))
 				.failed(function(m, raw) {
 					console.widgetLog('failed');
 					serviceLogdb.remove(queryInst);
@@ -485,9 +528,9 @@ angular.module('app.directive.widget', [])
 
 					scope.$apply();
 				});
-
-				superRender();
 			}
+
+			elc[0].query = query;
 
 		}
 	}

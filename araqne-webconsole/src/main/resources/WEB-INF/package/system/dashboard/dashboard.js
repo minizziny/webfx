@@ -120,18 +120,74 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		// $compile(elWidget)($scope);
 	}
 
+
+	function makeGlobalTimer(freq) {
+		freq = freq || 1000;
+
+		// array of callback functions
+		var callbacks = {};
+
+		// register the global timer
+		var id = setInterval(
+			function() {
+				var idx;
+
+				for (idx in callbacks) {
+					if(Date.now() >= idx) {
+						callbacks[idx]();
+						delete callbacks[idx];
+					}
+				}
+
+				console.log(callbacks)
+			}, freq);
+
+		// return a Global Timer object
+		return {
+			"id": function() { return id; },
+			"registerCallback": function(cb, itv) {
+				var d = Date.now();
+				d += itv;
+				if(d in callbacks) {
+					callbacks[d+1] = cb;
+				}
+				else {
+					callbacks[d] = cb;  
+				}
+			},
+			"cancel": function() {
+				if (id !== null) {
+					clearInterval(id);
+					id = null;
+				}
+			}
+		};
+	}
+
+	var gt = makeGlobalTimer(1000);
+
 	$scope.activeTab = function(tab, e) {
+		// 실행중인건 suspend
 		var elRunning = angular.element('widget.w-running');
 		elRunning.each(function(i, w) {
 			w.suspend();
 		});
 
+		// 활성탭인건 렌더
 		var elWidget = angular.element('.tab-pane.' + tab.guid + ' widget');
 		elWidget.each(function(i, w) {
 			w.render();
-		});
 
-		// console.log($('widget'))
+			var refresh = function() {
+				if( angular.element(w).scope().isRunning ) {
+					w.query(function() {
+						gt.registerCallback(refresh, w.getInterval());
+					});
+				}
+			}
+
+			gt.registerCallback(refresh, w.getInterval());
+		});
 	}
 
 	$scope.addTab = function(tabdata, e) {
