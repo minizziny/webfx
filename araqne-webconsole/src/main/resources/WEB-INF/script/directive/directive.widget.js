@@ -178,7 +178,7 @@ angular.module('app.directive.widget', [])
 				cache();
 				el.empty();
 				console.widgetLog('---render start---')
-				
+
 				var _box = layoutEngine.ui.layout.box.create(layout, false, {
 					'onDragbox': function(box, em, ed) {
 						return scope.onDragbox({
@@ -199,9 +199,11 @@ angular.module('app.directive.widget', [])
 							'$box': box
 						});	
 					}, 200),
-					'onResize': function() {
+					'onResize': function(row, box) {
 						return scope.onResize({
-							'$id': attrs.id
+							'$id': attrs.id,
+							'$row': row,
+							'$box': box
 						});
 					}
 				});
@@ -333,6 +335,104 @@ angular.module('app.directive.widget', [])
 		}
 	}
 })
+.directive('wcloud', function($compile, $timeout, serviceLogdb, serviceChart, $translate) {
+	return {
+		restrict: 'A',
+		require: 'widget',
+		scope: true,
+		link: function(scope, el, attrs, ctrl) {
+			var elc = el.children('widget');
+			var superRender = elc[0].render;
+
+			var ctx = { 'data': null };
+			var queryInst, interval = 0, datasrc;
+
+			function resultCallback(callback) {
+				return function(m) {
+					datasrc = m.body.result;
+					var divcont = angular.element('<div class="widget-wordcloud">');
+
+					function render() {
+						serviceChart.getWordCloud(datasrc, ctx.data.size, ctx.data.text, divcont);
+						divcont[0].onResize();
+					}
+
+					divcont[0].onResize = function() {
+						var w = el.parent().width(), h = el.parent().height(), scale;
+						if(w > h) {
+							scale = h / 560;
+						}
+						else {
+							scale = w / 560;
+						}
+						divcont.css('zoom', scale);
+					}
+
+					elc.find('.widget-wordcloud').remove();
+					elc.append(divcont);
+					render();
+					serviceLogdb.remove(queryInst);
+					
+					if(!!callback){
+						callback();	
+					}
+				}
+			}
+
+
+			function onStatusChange(callback) {
+				return function(m) {
+					if(m.body.type === 'eof') {
+						queryInst.getResult(0, 100, resultCallback(callback));
+					}	
+				}
+			}
+
+			elc[0].getInterval = function() {
+				return interval;
+			}
+			
+			elc[0].render = function() {
+				var scopec = elc.scope()
+				ctx.data = scopec.data;
+				interval = scopec.interval * 500;
+
+				if(ctrl.isLoaded) {
+					superRender();
+					return;
+				}
+
+				query();
+				superRender();
+			}
+
+			function query(callback) {
+				var scopec = elc.scope();
+
+				queryInst = serviceLogdb.create(2020);
+				queryInst.query(scopec.data.query, 100)
+				.created(function(m) {
+					// scope.progress = { 'width': '20%' };
+					// scope.$apply();
+				})
+				.onStatusChange(onStatusChange(callback))
+				.loaded(onStatusChange(callback))
+				.failed(function(m, raw) {
+					console.widgetLog('failed');
+					serviceLogdb.remove(queryInst);
+
+					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
+					scope.isShowError = true;
+
+					scope.$apply();
+				});
+			}
+
+			elc[0].query = query;
+
+		}
+	}
+})
 .directive('grid', function($compile, $timeout, serviceLogdb, $translate) {
 	return {
 		restrict: 'A',
@@ -352,7 +452,6 @@ angular.module('app.directive.widget', [])
 					scope.dataQueryResult = m.body.result;
 					
 					serviceLogdb.remove(queryInst);
-					queryInst = undefined;
 					if(!!callback){
 						callback();	
 					}
@@ -418,7 +517,6 @@ angular.module('app.directive.widget', [])
 				.failed(function(m, raw) {
 					console.widgetLog('failed');
 					serviceLogdb.remove(queryInst);
-					queryInst = undefined;
 
 					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
 					scope.isShowError = true;
@@ -473,7 +571,6 @@ angular.module('app.directive.widget', [])
 					elc.append(svg);
 					render();
 					serviceLogdb.remove(queryInst);
-					queryInst = undefined;
 					
 					if(!!callback){
 						callback();	
@@ -578,9 +675,8 @@ angular.module('app.directive.widget', [])
 				'</widget>';
 		}
 		else if(json.type === 'wordcloud') {
-			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' +
-				'wordcloud' + 
-				'<div>{{hello}} {{1+1}}</div></widget>';
+			return '<widget wcloud id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' +
+				'</widget>';
 		}
 		else {
 			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' +

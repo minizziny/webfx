@@ -130,12 +130,12 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		// register the global timer
 		var id = setInterval(
 			function() {
-				var idx;
+				var obj;
 
-				for (idx in callbacks) {
-					if(Date.now() >= idx) {
-						callbacks[idx]();
-						delete callbacks[idx];
+				for (obj in callbacks) {
+					if(Date.now() >= callbacks[obj].timestamp) {
+						callbacks[obj].callback();
+						delete callbacks[obj];
 					}
 				}
 
@@ -147,14 +147,20 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		// return a Global Timer object
 		return {
 			"id": function() { return id; },
-			"registerCallback": function(cb, itv) {
+			"registerCallback": function(guid, cb, itv) {
+				console.log(guid)
 				var d = Date.now();
 				d += itv;
-				if(d in callbacks) {
-					callbacks[d+1] = cb;
+				if(guid in callbacks) {
+					if(!!~window._logger.current.indexOf('dashboard-widget-timer')) {
+						console.log(guid, 'duplicated');
+					}
 				}
 				else {
-					callbacks[d] = cb;  
+					callbacks[guid] = {
+						'timestamp': d,
+						'callback': cb
+					}
 				}
 			},
 			"cancel": function() {
@@ -181,14 +187,58 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			w.render();
 
 			var refresh = function() {
-				if( angular.element(w).scope().isRunning ) {
-					w.query(function() {
-						gt.registerCallback(refresh, w.getInterval());
-					});
+				if(angular.element(w).scope() != undefined) {
+					if( angular.element(w).scope().isRunning ) {
+						w.query(function() {
+							gt.registerCallback(w.id, refresh, w.getInterval());
+						});
+					}
 				}
 			}
 
-			gt.registerCallback(refresh, w.getInterval());
+			gt.registerCallback(w.id, refresh, w.getInterval());
+		});
+
+		$timeout(function() {
+			resizeWidgets();
+		}, 100);
+	}
+
+	$(window).on('resize', debounce(function() {
+		resizeWidgets();
+	}, 200));
+
+	function resizeWidgets(selector) {
+		if(selector == undefined) {
+			selector = '.tab-pane.active';
+		}
+
+		if(!(selector instanceof jQuery)) {
+			selector = angular.element(selector)
+		}
+
+		resizeChartWidgets(selector);
+		resizeWordCloudWidgets(selector);
+	}
+
+	function resizeChartWidgets(el) {
+		var elChart = el.find('widget[chart] .widget-chart');
+		elChart.each(function(i, c) {
+			if(!!$(c).highcharts) {
+				if(!!$(c).highcharts()) {
+					var parent = $(c).parents('.contentbox');
+					$(c).highcharts().setSize(parent.width(), parent.height() - 10, false);
+				}
+			}
+		});
+	}
+
+	function resizeWordCloudWidgets(el) {
+		var elWordCloud = el.find('widget[wcloud] .widget-wordcloud');
+		elWordCloud.each(function(i, c) {
+			if(!!c.onResize) {
+				c.onResize();
+			}
 		});
 	}
 
@@ -413,8 +463,16 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		$('.dockpanel').empty();
 	}
 
-	$scope.onChangePreset = function(id, box) {
-		console.log('onChangePreset', id);
+	$scope.onChangePreset = function(id, box, row) {
+		if(!!box) {
+			var el = $(box.rows.map(function(row) { return row.el[0]; }));
+			resizeWidgets(el);
+		}
+		if(!!row) {
+			var el = $(row.boxes.map(function(box) { return box.el[0]; }));
+			resizeWidgets(el);
+		}
+
 		if($scope.isLoadedCurrentPreset) {
 			OnPresetChanged(id); // save state	
 		}
@@ -430,8 +488,8 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			'<dockpanel id="' + name + '" ' + 
 			  'on-dragbox="onDragInnerbox($box, $moveevent, $downevent)" ' +
 				'on-dropbox="onDropbox($box, $event)" ' +
-				'on-change="onChangePreset($id, $box)" ' +
-				'on-resize="onChangePreset($id, $box)" ' +
+				'on-change="onChangePreset($id)" ' +
+				'on-resize="onChangePreset($id, $box, $row)" ' +
 				'ng-model="ctxPreset.' + name + '.dataLayout" ' +
 				(no_root ? '' : 'root="true"') + '></dockpanel>');
 
@@ -525,6 +583,8 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 				m.body.preset.state.layout = [ layoutEngine.ui.layout.autoLayout(widgets) ];
 			}
 
+			console.log(m.body.preset.state)
+
 			// root preset
 			if(el == undefined) {
 				console.log('---- Loading Preset',m.body.preset.name, '----');
@@ -536,6 +596,12 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 				if(!hasWidget) {
 					MigrationPreset(m.body.preset);
 					return;
+				}
+				else {
+					m.body.preset.state.layout[0].dragHandler = false;
+					m.body.preset.state.layout[0].droppable = false;
+					m.body.preset.state.layout[0].rows[0].cols[0].dragHandler = false;
+					m.body.preset.state.layout[0].rows[0].cols[0].droppable = false;
 				}
 				//////////////// END MIGRATION //////////////
 
@@ -557,7 +623,6 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			else {
 				getPresetWidgets(guid, m.body.preset.state, el, true);
 			}
-			console.log(m.body.preset.state)
 
 			$scope.$apply();
 		})
@@ -1038,6 +1103,8 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 }
 
 function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility, $translate) {
+	$scope.numCurrentPage = 0;
+	$scope.numPagerPagesize = 100;
 	var dataChart;
 	
 	function getDefaultContext(type) {
@@ -1114,13 +1181,13 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	}
 	
 	$scope.inputOnStatusChange = function(m, instance) {
+		console.log(m)
 		if( (m.body.type === 'eof') || ((m.body.type === 'status_change') && m.body.count > $scope.numPagerPagesize) ) {
 			if(isStopped) return;
 			instance.stop(); // instant search
 			isStopped = true;
 
-			instance.getResult(0, $scope.numPagerPagesize, function() {
-				// console.log('getResult');
+			$('.qi1')[0].offset(0, $scope.numPagerPagesize, function() {
 
 				$('.qr2.qr-select-table')[0].getColumns(function(cols) {
 					// console.log('getColumns')

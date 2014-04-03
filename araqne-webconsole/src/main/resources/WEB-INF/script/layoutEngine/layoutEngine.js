@@ -590,7 +590,7 @@ var layoutEngine = (function() {
 				return can;
 			},
 			"afterResize": function() {
-				return options.onResize()
+				return options.onResize(null, that.box)
 			}
 		});
 
@@ -1674,7 +1674,7 @@ var layoutEngine = (function() {
 				return can;
 			},
 			"afterResize": function() {
-				return options.onResize()
+				return options.onResize(that.row)
 			}
 		});
 
