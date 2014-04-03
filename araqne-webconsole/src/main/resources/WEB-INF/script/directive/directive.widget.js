@@ -1,3 +1,5 @@
+console.widgetLog = function() {}
+
 angular.module('app.directive.widget', [])
 .directive('ngModelOnBlur', function() {
 	return {
@@ -138,25 +140,25 @@ angular.module('app.directive.widget', [])
 				var contentbox = $element.find('[dock-id=' + model.guid + '] > .mybox > .contentbox');
 				// 이때 append되지 않은건 버려짐.
 				if(contentbox.length) {
-					console.logdash('append widget', detached[0].id, model.guid);
+					console.widgetLog('append widget', detached[0].id, model.guid);
 					contentbox.append(detached);	
 				}
 			}
 		},
 		link: function(scope, el, attrs, ctrl) {
-			console.logdash('linking dockpanel');
+			console.widgetLog('linking dockpanel');
 			var cached;
 
 			function cache() {
 				// 이 시점에선 dockpanel 아래의 link된 widget을 캐시하는 것이 아니고,
 				// 이미 append된 widget들을 캐시한다. link됐으나 append되지 않은건 이미 아까 사라짐.
 				cached = el.find('widget').detach();
-				console.logdash('cache', cached.length, 'item cached');
+				console.widgetLog('cache', cached.length, 'item cached');
 			}
 
 			function restore() {
 				if(!cached.length) return;
-				console.logdash('restore');
+				console.widgetLog('restore');
 
 				cached.each(function(i, widget) {
 					var guid = angular.element(widget).attr('guid');
@@ -164,7 +166,7 @@ angular.module('app.directive.widget', [])
 					var contentbox = el.find('[dock-id=' + guid + '] > .mybox > .contentbox');
 					if(contentbox.length) {
 						// 이때 append되지 않은건 버려짐.
-						console.logdash('restore widget', widget.id, guid);
+						console.widgetLog('restore widget', widget.id, guid);
 						contentbox.append(widget);
 					}
 				});
@@ -175,7 +177,7 @@ angular.module('app.directive.widget', [])
 			function render(layout) {
 				cache();
 				el.empty();
-				console.logdash('---render---')
+				console.widgetLog('---render start---')
 				
 				var _box = layoutEngine.ui.layout.box.create(layout, false, {
 					'onDragbox': function(box, em, ed) {
@@ -211,12 +213,11 @@ angular.module('app.directive.widget', [])
 					_box.appendTo(el, true);
 				}
 				
-				
 				restore();
 			}
 
 			var ew = scope.$watch('ngModel', function(val) {
-				console.logdash('ngModel changed', attrs.id);
+				console.widgetLog('ngModel changed', attrs.id);
 				if(angular.isObject(val)) {
 					render(val);
 					ew();
@@ -225,7 +226,7 @@ angular.module('app.directive.widget', [])
 		}
 	}
 })
-.directive('widget', function($timeout) {
+.directive('widget', function($timeout, $compile) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -235,25 +236,74 @@ angular.module('app.directive.widget', [])
 		replace: true,
 		require: ['?^dockpanel', '?ngModel'],
 		template: '<div ng-transclude></div>',
-		link: function(scope, el, attrs, ctrl, transclude) {
+		controller: function($scope, $element) {
+			var self = this;
+			var timer;
+			this.isLoaded = false;
+
+			$scope.$watch('isRunning', function(val) {
+				var $el = $element.children('widget');
+				if(val) {
+					$el.addClass('w-running');
+				}
+				else {
+					$el.removeClass('w-running');
+				}
+				console.log($el)
+			})
+			$scope.isRunning = false;
+
+			this.load = function() {
+				self.isLoaded = true;
+				$scope.isRunning = true;
+			}
+
+			this.suspend = function() {
+				$scope.isRunning = false;
+			}
+
+			this.resume = function() {
+				$scope.isRunning = true;
+			}
+		},
+		link: function(scope, el, attrs, ctrls, transclude) {
 			transclude(scope, function(elc, scopec) {
-				console.logdash('linking widget', attrs.id);
-				var ctlrDockpanel = ctrl[0];
-				var ctlrModel = ctrl[1];
+				console.widgetLog('linking widget', attrs.id);
+				var ctlrDockpanel = ctrls[0];
+				var ctlrModel = ctrls[1];
 
 				if(!!ctlrDockpanel) {
 					// DockPanel 밑에 있는 widget들은 append 보류
 					var detached = el.detach();
 				}
 
-				scope.hello = 'world';
-				// console.logdash(ctlrModel.$modelValue); // 여기엔 모델이 없다.
+				
+				scope.closebox = function() {
+					scope.onClose({
+						'$id': attrs.id,
+						'$target': el.parents('.k-d-col:first')
+					});
+				}
 
+				// console.widgetLog(ctlrModel.$modelValue); // 여기엔 모델이 없다.
 				$timeout(function() {
 					// ngModel이 활성화되는 시점
-					
-					// console.logdash(ctlrModel.$modelValue);
 					angular.extend(scope, ctlrModel.$modelValue);
+
+					if(scope.type != 'tabs') {
+						var template = angular.element([
+						'<span click-to-edit ng-model="name" ng-change="onTitleChange($new, $old)" ng-cancel="onCancel()" ng-toggle="onToggle()" class="pull-left widget-title"></span>',
+						'<span class="pull-right widget-toolbox">',
+							'</button><button class="btn btn-extra-mini b-x" ng-click="closebox()">',
+								'<i class="icon-remove"></i>',
+							'</button>',
+						'</span>'].join(''));
+
+						$compile(template)(scope);
+						elc.append(template);	
+					}
+					
+					// console.widgetLog(ctlrModel.$modelValue);
 					scope.hello = ctlrModel.$modelValue.type + '/' + ctlrModel.$modelValue.guid;
 
 					el.attr('guid', ctlrModel.$modelValue.guid);
@@ -264,15 +314,181 @@ angular.module('app.directive.widget', [])
 
 				el.children('widget').replaceWith(elc);
 
-				var btnX = angular.element('<button style="float:right">x</button>').on('click', function() {
-					scope.onClose({
-						'$id': attrs.id,
-						'$target': el.parents('.k-d-col:first')
-					});
-					// el.parents('.k-d-col:first')[0].obj.close();
-				});
-				btnX.prependTo(el);
+				///////
+				elc[0].render = function() {
+					var ctrl = elc.controller('widget');
+					if(!ctrl.isLoaded) {
+						elc.controller('widget').load();
+					}
+					else {
+						ctrl.resume();
+					}
+				}
+
+				elc[0].suspend = function() {
+					var ctrl = elc.controller('widget');
+					ctrl.suspend();
+				}
 			});
+		}
+	}
+})
+.directive('grid', function($compile, $timeout, serviceLogdb, $translate) {
+	return {
+		restrict: 'A',
+		require: 'widget',
+		scope: true,
+		link: function(scope, el, attrs, ctrl) {
+			var elc = el.children('widget');
+			var superRender = elc[0].render;
+			var superSuspend = elc[0].suspend;
+			var superResume = elc[0].resume;
+
+			var queryInst = serviceLogdb.create(2020);
+
+			scope.dataQueryResult = [];
+			function getResultCallback(m) {
+				scope.dataQueryResult = m.body.result;
+				scope.$apply();
+				serviceLogdb.remove(queryInst);
+			}
+
+			function onStatusChange(m) {
+				if(m.body.type === 'eof') {
+					queryInst.getResult(0, 100, getResultCallback);	
+				}
+			}
+
+			elc[0].render = function() {
+				var scopec = elc.scope()
+				scope.order = scopec.data.order;
+				// console.widgetLog(scopec, scope)
+				if(ctrl.isLoaded) {
+					superRender();
+					return;
+				}
+
+				queryInst.query(scopec.data.query, 100)
+				.created(function(m) {
+					// scope.progress = { 'width': '20%' };
+					// scope.$apply();
+				})
+				.onStatusChange(onStatusChange)
+				.loaded(onStatusChange)
+				.failed(function(m, raw) {
+					console.widgetLog('failed');
+					serviceLogdb.remove(queryInst);
+
+					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
+					scope.isShowError = true;
+
+					scope.$apply();
+				});
+
+				
+				var table = angular.element('<div class="widget-grid-container"><table class="table table-bordered table-condensed widget-grid" data-resizable-columns-id="">\
+					<thead>\
+						<tr><th data-resizable-column-id="{{field}}" ng-repeat="field in order" title="{{field}}">{{field}}</th></tr>\
+					</thead>\
+					<tbody>\
+						<tr ng-repeat="row in dataQueryResult">\
+							<td ng-repeat="field in order" title="{{row[field]}}">\
+								{{row[field]}}\
+							</td>\
+						</tr>\
+					</tbody>\
+				</table></div>');
+
+				$compile(table)(scope);
+				elc.append(table);
+
+				superRender();
+			}
+
+		}
+	}
+})
+.directive('chart', function($compile, $timeout, serviceLogdb, serviceChart, $translate) {
+	return {
+		restrict: 'A',
+		require: 'widget',
+		scope: true,
+		link: function(scope, el, attrs, ctrl) {
+			var elc = el.children('widget');
+			var superRender = elc[0].render;
+
+			var queryInst = serviceLogdb.create(2020);
+
+			var ctx = { 'data': null }
+			var datasrc;
+
+			function getResultCallback(m) {
+				datasrc = m.body.result;
+				var svg = angular.element('<div class="widget-chart">');
+				var dataLabel = {name: ctx.data.label, type: ctx.data.labelType};
+				console.log(ctx.data)
+
+				function render() {
+					var json = serviceChart.buildJSONStructure(angular.copy(ctx.data.series), datasrc, dataLabel);
+					// setTimeout(function() {
+						var renderOptions = {
+							width: $(svg[0]).width(),
+							height: $(svg[0]).parents('.contentbox').height() - 10
+						}
+						if(ctx.data.type == 'line') {
+							serviceChart.lineChart(svg[0], json, renderOptions);
+						}
+						else if(ctx.data.type == 'bar') {
+							serviceChart.multiBarHorizontalChart(svg[0], json, renderOptions);
+						}
+						else if(ctx.data.type == 'pie') {
+							serviceChart.pie(svg[0], json, renderOptions);
+						}	
+					// }, 500);
+				}
+
+				elc.append(svg);
+				render();
+				serviceLogdb.remove(queryInst);
+			}
+
+			function onStatusChange(m) {
+				if(m.body.type === 'eof') {
+					queryInst.getResult(0, 100, getResultCallback);	
+				}
+			}
+			
+			elc[0].render = function() {
+				var scopec = elc.scope()
+				console.log(scopec)
+				ctx.data = scopec.data;
+				// scope.order = scopec.data.order;
+				// console.widgetLog(scopec, scope)
+				if(ctrl.isLoaded) {
+					superRender();
+					return;
+				}
+
+				queryInst.query(scopec.data.query, 100)
+				.created(function(m) {
+					// scope.progress = { 'width': '20%' };
+					// scope.$apply();
+				})
+				.onStatusChange(onStatusChange)
+				.loaded(onStatusChange)
+				.failed(function(m, raw) {
+					console.widgetLog('failed');
+					serviceLogdb.remove(queryInst);
+
+					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
+					scope.isShowError = true;
+
+					scope.$apply();
+				});
+
+				superRender();
+			}
+
 		}
 	}
 })
@@ -310,8 +526,23 @@ angular.module('app.directive.widget', [])
 				'</div>' +
 			'</widget>';
 		}
+		else if(json.type === 'grid') {
+			return '<widget grid id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' +
+				'</widget>';
+		}
+		else if(json.type === 'chart') {
+			return '<widget chart id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' +
+				'</widget>';
+		}
+		else if(json.type === 'wordcloud') {
+			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' +
+				'wordcloud' + 
+				'<div>{{hello}} {{1+1}}</div></widget>';
+		}
 		else {
-			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')"><div>{{hello}} {{1+1}}</div></widget>';	
+			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' +
+				'' + 
+				'<div>{{hello}} {{1+1}}</div></widget>';
 		}
 	}
 	

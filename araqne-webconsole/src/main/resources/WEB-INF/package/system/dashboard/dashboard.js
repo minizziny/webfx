@@ -121,7 +121,17 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	$scope.activeTab = function(tab, e) {
-		console.log('activeTab')
+		var elRunning = angular.element('widget.w-running');
+		elRunning.each(function(i, w) {
+			w.suspend();
+		});
+
+		var elWidget = angular.element('.tab-pane.' + tab.guid + ' widget');
+		elWidget.each(function(i, w) {
+			w.render();
+		});
+
+		// console.log($('widget'))
 	}
 
 	$scope.addTab = function(tabdata, e) {
@@ -162,7 +172,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		}
 		a.click().removeClass('over');
 
-		if($('.k-d-col.virtual').length != 0 && box.el.parents('.tab-pane') > 0) {
+		if($('.k-d-col.virtual').length != 0 && box.el.parents('.tab-pane').length > 0) {
 			var owntab = hasClassIndexOf(box.el.parents('.tab-pane')[0].className, a.attr('tab-id'));
 			if(owntab) {
 				$('.k-d-col.virtual').remove();

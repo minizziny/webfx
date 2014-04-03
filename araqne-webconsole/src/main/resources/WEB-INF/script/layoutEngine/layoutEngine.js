@@ -621,7 +621,7 @@ var layoutEngine = (function() {
 				return o;
 			}
 			else {
-				return {
+				var o = {
 					'guid': this.guid,
 					'rows': (function() {
 						return that.rows.map(function(row) {
@@ -630,6 +630,15 @@ var layoutEngine = (function() {
 					}()),
 					'w': this.obj.w
 				}
+
+				if(this.obj.hasOwnProperty('droppable')) {
+					o['droppable'] = this.obj.droppable;
+				}
+				if(this.obj.hasOwnProperty('dragHandler')) {
+					o['dragHandler'] = this.obj.dragHandler;
+				}
+
+				return o;
 			}
 		}
 
