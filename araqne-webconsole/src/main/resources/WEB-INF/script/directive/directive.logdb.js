@@ -45,9 +45,14 @@ angular.module('app.directive.logdb', [])
 				});
 			}
 
-			function getResultFn(m) {
-				scope.$parent[attrs.ngModel] = m.body.result;
-				scope.$parent.$apply();
+			function getResultFn(callback) {
+				return function(m) {
+					scope.$parent[attrs.ngModel] = m.body.result;
+					scope.$parent.$apply();
+					if(!!callback) {
+						callback();
+					}
+				}
 			}
 
 			function loadedFn(m) {
@@ -127,9 +132,9 @@ angular.module('app.directive.logdb', [])
 				});
 			}
 
-			element[0].offset = function(offset, limit) {
+			element[0].offset = function(offset, limit, callback) {
 				if(z == undefined) return;
-				z.getResult(offset, limit, getResultFn);
+				z.getResult(offset, limit, getResultFn(callback));
 			}
 
 			element[0].run = function() {
