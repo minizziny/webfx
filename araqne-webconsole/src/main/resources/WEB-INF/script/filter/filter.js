@@ -34,19 +34,19 @@ angular.module('app.filter', ['pascalprecht.translate'])
 		return prefix + val;
 	}
 })
-.filter('crlf', function() { 
+.filter('crlf', function($sce) { 
 	return function(val) {
 		if(val === 0) {	return '0'; }
 		if(val === false) {	return 'false'; }
 		if(val === null) return val;
 		
-		if(toString.call(val) == '[object String]') {
-			return val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>');
+		if(Object.prototype.toString.call(val) == '[object String]') {
+			return $sce.trustAsHtml(val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>'));
 		}
-		else if(toString.call(val) == '[object Object]' || toString.call(val) == '[object Array]') {
-			return JSON.stringify(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>');
+		else if(Object.prototype.toString.call(val) == '[object Object]' || Object.prototype.toString.call(val) == '[object Array]') {
+			return $sce.trustAsHtml(JSON.stringify(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>'));
 		}
-		else return val;
+		else return $sce.trustAsHtml(val.toString());
 	}
 })
 .filter('numformat', function() { 
