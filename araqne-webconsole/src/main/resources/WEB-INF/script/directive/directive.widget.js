@@ -248,7 +248,7 @@ angular.module('app.directive.widget', [])
 				else {
 					$el.removeClass('w-running');
 				}
-				console.log($el[0])
+				console.widgetLog($el[0])
 			})
 			$scope.isRunning = false;
 
@@ -347,7 +347,7 @@ angular.module('app.directive.widget', [])
 			var queryInst, interval = 0;
 
 			scope.dataQueryResult = [];
-			function getResultCallback(callback) {
+			function resultCallback(callback) {
 				return function(m) {
 					scope.dataQueryResult = m.body.result;
 					
@@ -364,7 +364,7 @@ angular.module('app.directive.widget', [])
 			function onStatusChange(callback) {
 				return function(m) {
 					if(m.body.type === 'eof') {
-						queryInst.getResult(0, 100, getResultCallback(callback));
+						queryInst.getResult(0, 100, resultCallback(callback));
 					}	
 				}
 			}
@@ -443,7 +443,7 @@ angular.module('app.directive.widget', [])
 			var ctx = { 'data': null };
 			var queryInst, interval = 0, datasrc;
 
-			function getResultCallback(callback) {
+			function resultCallback(callback) {
 				return function(m) {
 					datasrc = m.body.result;
 					var svg = angular.element('<div class="widget-chart">');
@@ -485,7 +485,7 @@ angular.module('app.directive.widget', [])
 			function onStatusChange(callback) {
 				return function(m) {
 					if(m.body.type === 'eof') {
-						queryInst.getResult(0, 100, getResultCallback(callback));
+						queryInst.getResult(0, 100, resultCallback(callback));
 					}	
 				}
 			}

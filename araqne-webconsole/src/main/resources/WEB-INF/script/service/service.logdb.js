@@ -192,7 +192,9 @@ angular.module('app.logdb', [])
 				limit: ((limit == undefined) ? defaultLimit : limit),
 			}, pid)
 			.success(function(m) {
-				console.warn('getResult:', clazz.query)
+				if(!!~window._logger.current.indexOf('logdb-get-result')) {
+					console.warn('getResult:', clazz.query)
+				}
 				applyFn();
 
 				if(!!callback) {

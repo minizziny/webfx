@@ -139,7 +139,9 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 					}
 				}
 
-				console.log(callbacks)
+				if(!!~window._logger.current.indexOf('dashboard-widget-timer')) {
+					console.log(callbacks);
+				}
 			}, freq);
 
 		// return a Global Timer object

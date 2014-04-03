@@ -21,6 +21,20 @@ var logpresso = angular.module('app', [
 ], function() {
 });
 
+window._logger = {
+	'list': ['dashboard-widget-timer', 'logdb-get-result'],
+	'current': [],
+	'on': function(name) {
+		window._logger.current.push(name);
+	},
+	'off': function(name) {
+		var idx = window._logger.current.indexOf(name);
+		if(!!~idx) {
+			window._logger.current.splice(idx, 1);
+		}
+	}
+};
+
 logpresso.run(function($rootScope, $location, $anchorScroll, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
 
 	$rootScope.$on('$translateLoadingError', function() {
