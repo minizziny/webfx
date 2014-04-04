@@ -665,8 +665,11 @@ angular.module('app.directive.widget', [])
 			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' + 
 				'<div class="tab-comp" style="height: 100%">' +
 					'<ul class="nav nav-tabs" style="margin-bottom: 0">' +
-						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}"><a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" ng-click="$parent.$parent.activeTab(tab, $event)" widget-droppable>{{tab.name}}</a></li>' +
-						'<li class="plus"><button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event)"><i class="icon-plus"></i></button></li>' +
+						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}">' +
+							'<a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" ng-click="$parent.$parent.activeTab(tab, data.tabs, $event)" widget-droppable>{{tab.name}}</a>' +
+							'<button ng-show="tab.is_active" class="close tab-close">&times;</button>' +
+						'</li>' +
+						'<li class="plus"><button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event, \'' + preset + '\')"><i class="icon-plus"></i></button></li>' +
 					'</ul>' +
 					'<div class="tab-content">' +
 						'<div ng-repeat="tab in data.tabs"  style="height:100%" ng-class="{\'active\': tab.is_active}" class="tab-pane {{tab.guid}}">' + 

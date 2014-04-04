@@ -244,7 +244,7 @@ widget > .tab-comp > ul.nav-tabs > li.plus > button {
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
-					<li ng-repeat="(i,preset) in dataPresetList | filter:{is_embedded: null}">
+					<li ng-repeat="(i,preset) in dataPresetList | filter:{parent: null}">
 						<a tabindex="-1" ng-click="Load(preset)" style="padding-left:10px">
 							<i ng-class="{ 'icon-ok': preset.guid == currentPreset.guid, 'icon-noncheck': preset.guid != currentPreset.guid }"></i>
 							{{i}} {{preset.name}}

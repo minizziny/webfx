@@ -173,10 +173,20 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 	var gt = makeGlobalTimer(1000);
 
-	$scope.activeTab = function(tab, e) {
+	$scope.activeTab = function(tab, tabs, e) {
+		
+		tabs.forEach(function(t) {
+			if(t === tab) {
+				t.is_active = true;
+			} else {
+				t.is_active = false;
+			}
+		});
+
 		if(e.activateByDroppable) {
 			return;
 		}
+
 		// 실행중인건 suspend
 		var elRunning = angular.element('widget.w-running');
 		elRunning.each(function(i, w) {
@@ -244,7 +254,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		});
 	}
 
-	$scope.addTab = function(tabdata, e) {
+	$scope.addTab = function(tabdata, e, preset) {
 		var newTabName = prompt('Enter tab Name', 'Tab ' + (tabdata.length + 1));
 		if(newTabName == null) return;
 
@@ -258,7 +268,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		tabdata.push(tabctx);
 		$timeout(function() {
 			var pane = angular.element(e.target).parents('.tab-comp').find('.tab-pane.' + tabctx.guid);
-			NewInnerPreset(tabctx.contents, pane);
+			NewInnerPreset(tabctx.contents, pane, preset);
 			angular.element(e.target).parents('li').prev().children('a').click();
 			
 			var presetId = angular.element(e.target).parents('dockpanel:first').attr('id');
@@ -431,7 +441,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		.failed(msgbusFailed);
 	}
 
-	function SavePreset(guid, name, state, reset_layout, is_embedded) {
+	function SavePreset(guid, name, state, reset_layout, parent) {
 		var found = $scope.dataPresetList.filter(function(preset) {
 			return preset.guid === guid;
 		});
@@ -440,8 +450,8 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 		if(found.length > 0) {
 			console.log('update preset');
-			if( !!found.first().is_embedded ) {
-				sendContext['is_embedded'] = found.first().is_embedded;
+			if( !!found.first().parent ) {
+				sendContext['parent'] = found.first().parent;
 			}
 		}
 		else {
@@ -449,11 +459,11 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			var listContext = {
 				'guid': guid,
 				'name': name,
-				'is_embedded': null
+				'parent': null
 			};
-			if(is_embedded) {
-				listContext['is_embedded'] = true;
-				sendContext['is_embedded'] = true;
+			if(!!parent) {
+				listContext['parent'] = parent;
+				sendContext['parent'] = parent;
 			}
 			$scope.dataPresetList.push(listContext);
 		}
@@ -533,7 +543,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 						var pane = el.find('.tab-pane.' + tab.guid);
 						if(!~has) {
 							console.log('innerDockpanel', tab.contents, 'created')
-							NewInnerPreset(tab.contents, pane);
+							NewInnerPreset(tab.contents, pane, name);
 						}
 						else {
 							console.log('innerDockpanel', tab.contents, 'load')
@@ -551,7 +561,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 		var newguid = 'p' + serviceUtility.generateType2();
 
-		SavePreset(newguid, newguid, preset.state, false, true).success(function() {
+		SavePreset(newguid, newguid, preset.state, false, preset.guid).success(function() {
 			var dockId = serviceUtility.generateType2();
 
 			var newstate = {
@@ -703,7 +713,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		})
 	}
 
-	function NewInnerPreset(newguid, el) {
+	function NewInnerPreset(newguid, el, parent) {
 		SavePreset(newguid, newguid, { 
 			'layout': [{
 				'guid': undefined,
@@ -711,7 +721,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 				'blank': true
 			}],
 			'widgets': []
-		}, false, true).success(function() {
+		}, false, parent).success(function() {
 			LoadPreset(newguid, el);
 		})
 	}

@@ -93,7 +93,7 @@ dockpanel {
 }
 
 .dropdown-menu {
-	z-index: 10000;
+	z-index: 15000;
 }
 
 
@@ -110,6 +110,7 @@ widget > .tab-comp > ul.nav-tabs > li {
 	max-width: 175px;
 	min-width: 40px;
 	overflow: hidden;
+	position: relative;
 }
 
 widget > .tab-comp > ul.nav-tabs > li > a {
@@ -133,6 +134,13 @@ widget > .tab-comp > ul.nav-tabs > li.plus {
 widget > .tab-comp > ul.nav-tabs > li.plus > button {
 	line-height: 24px;
 	outline: none;
+}
+
+widget > .tab-comp > ul.nav-tabs > li > button.tab-close {
+	z-index: 10000;
+	position: absolute;
+	right: 6px;
+	top: 1px;
 }
 
 widget[grid] .widget-grid-container {
@@ -191,7 +199,7 @@ widget[grid] .widget-grid-container {
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
-					<li ng-repeat="(i,preset) in dataPresetList | filter:{is_embedded: null}">
+					<li ng-repeat="(i,preset) in dataPresetList | filter:{parent: null}">
 						<a tabindex="-1" ng-click="Load(preset)" style="padding-left:10px">
 							<i ng-class="{ 'icon-ok': preset.guid == currentPreset.guid, 'icon-noncheck': preset.guid != currentPreset.guid }"></i>
 							{{i}} {{preset.name}}
