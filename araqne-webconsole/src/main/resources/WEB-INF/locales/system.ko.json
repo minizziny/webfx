@@ -674,6 +674,7 @@
 	"$S_str_SelectTokenizer": "토크나이저를 선택하십시오.",
 	"$S_str_DefaultValueDescription": "입력을 하지 않을 경우 기본 값으로 설정 됩니다.",
 	"$S_str_NameValidationErrorMsg" : "이름은 영어, 숫자, '_' 로 구성되어야 합니다.",
+	"$S_str_EmailValidationErrorMsg" : "메일 주소는 영어, 숫자, '_' + '@' + 도메인 으로 구성되어야 합니다.",
 	"$S_str_AlreadyExistsMsg": "이미 존재하는 테이블 입니다.",
 
 	"--------index--------": "",
@@ -687,6 +688,7 @@
 	"$S_str_Action": "행위",
 	"$S_str_Success": "성공",
 	"$S_str_Failed": "실패",
+	"$S_str_Details": "세부 내용",
 
 	"--------config-----------": "",
 	"--------parser config-----------": "",
@@ -700,6 +702,7 @@
 	"$S_msg_PleaseSelectParserName" : "파서를 선택 하십시오.",
 
 	"--------transformer config-----------": "",
+	"$S_str_Transformer": "트랜스포머",
 	"$S_str_TransformerSetting": "트랜스포머 설정",
 	"$S_str_TransformerType": "트랜스포머 유형",
 	"$S_str_SelectTransformerType": "트랜스포머 유형 선택",
@@ -710,6 +713,7 @@
 	"$S_msg_RemoveTransformerConfirmPre": "정말 트랜스포머",
 
 	"--------ftp config-----------": "",
+	"$S_str_FtpProfile": "FTP 프로파일",
 	"$S_str_FtpSetting": "FTP 설정",
 	"$S_str_HostAddress": "호스트 주소",
 	"$S_str_NewFtpProfile": "새 FTP 프로파일 만들기",
@@ -723,6 +727,7 @@
 	"$S_msg_RemoveFtpProfileConfirmPre": "정말 FTP 프로파일",
 
 	"--------ssh config-----------": "",
+	"$S_str_SshProfile": "SSH 프로파일",
 	"$S_str_SshSetting": "SSH 설정",
 	"$S_str_SshProfileSetting": "SSH 프로파일 설정",
 	"$S_str_NewSshProfile" : "새 SSH 프로파일 만들기",
@@ -732,6 +737,7 @@
 	"$S_msg_RemoveSshProfileConfirmPre": "정말 SSH 프로파일",	
 
 	"--------jdbc config-----------": "",
+	"$S_str_JdbcProfile": "JDBC 프로파일",
 	"$S_str_JdbcSetting": "JDBC 설정",
 	"$S_str_JdbcProfileSetting": "JDBC 프로파일 설정",
 	"$S_str_ConnectionString": "접속 문자열",
@@ -742,6 +748,7 @@
 	"$S_msg_RemoveJdbcProfileConfirmPre": "정말 JDBC 프로파일",
 
 	"--------hdfs config-----------": "",
+	"$S_str_Hdfs": "HDFS",
 	"$S_str_HdfsSetting": "HDFS 설정",
 	"$S_str_HDFSPath": "HDFS 경로",
 	"$S_str_NewHdfs" : "새 HDFS 만들기",
@@ -750,6 +757,7 @@
 	"$S_msg_RemoveHdfsConfirmPre": "정말 HDFS",
 
 	"--------apikey config-----------": "",
+	"$S_str_ApiKeyProfile": "API 키 프로파일",
 	"$S_str_ApiKeySetting": "API 키 설정",
 	"$S_str_CreateNewAPIKey": "새 API 키 만들기",
 	"$S_str_APIKey": "API 키",
@@ -758,6 +766,7 @@
 	"$S_msg_RemoveApiConfirmPre": "정말 APIKEY",
 
 	"--------crypto config-----------": "",
+	"$S_str_CryptoProfile": "암호화/무결성 프로파일",
 	"$S_str_CryptoSetting": "암호화/무결성 설정",
 	"$S_str_NewCrypto": "새 암호화 프로파일 만들기",
 	"$S_str_Cipher": "암호 알고리즘",
@@ -769,6 +778,7 @@
 	"$S_msg_RemoveCryptoConfirmPre": "정말 암호화",
 
 	"--------index cache config-----------": "",
+	"$S_str_IndexCache": "인덱스 캐시",
 	"$S_str_IndexCacheSetting": "인덱스 캐시 설정",
 	"$S_str_CleanIndexCache": "인덱스 캐시 비우기",
 	"$S_str_Type": "타입",
@@ -780,6 +790,7 @@
 	"$S_msg_RemoveIndexCacheConfirmPre": "정말로 인덱스 캐시",
 
 	"--------federation config-----------": "",
+	"$S_str_Federation": "페데레이션",
 	"$S_str_FederationSetting": "페데레이션 설정",
 	"$S_str_Address": "주소",
 	"$S_str_RegisterFederationNode": "새 노드 등록하기",
@@ -790,6 +801,15 @@
 	"$S_str_RemoveNode": "노드 삭제",
 	"$S_msg_RemoveNodeConfirmPre": "정말로 노드",
 
+	"--------smtp config-----------": "",
+	"$S_str_SmtpProfile": "SMTP 프로파일",
+	"$S_str_SmtpProfileSetting": "SMTP 프로파일 설정",
+	"$S_str_NewSmtpProfile": "SMTP 프로파일 생성",
+	"$S_str_RemoveSmtp": "SMTP 삭제",
+	"$S_str_SmtpPort": "SMTP 포트",
+	"$S_str_SmtpUser": "SMTP 유저",
+	"$S_msg_RemoveSmtpConfirmPre": "정말로 SMTP",	
+
 	"--------common config msg-----------": "",
 	"$S_msg_PleaseEnterProfileName": "프로파일 이름을 입력하세요.",
 	"$S_msg_PleaseEnterSshProfileName": "프로파일 이름을 입력하세요.",	
@@ -799,6 +819,7 @@
 	"$S_msg_PleaseEnterHostAddress" : "호스트 주소를 입력하세요.",
 	"$S_msg_PleaseEnterAddress" : "주소를 입력하세요.",
 	"$S_msg_PleaseEnterUserName" : "사용자를 입력하세요.",
+	"$S_msg_PleaseEnterUserEmail" : "사용자 이메일을 입력하세요.",
 	"$S_msg_PleaseEnterPassword" : "암호를 입력하세요.",
 	"$S_msg_PleaseEnterConnectionString": "커넥션 스트링을 입력하세요.",
 	"$S_msg_RemoveParserConfirmPost": "을 삭제하시겠습니까?",

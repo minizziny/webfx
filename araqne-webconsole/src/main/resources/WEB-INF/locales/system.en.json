@@ -673,6 +673,7 @@
 	"$S_str_SelectTokenizer": "Select Tokenizer",
 	"$S_str_DefaultValueDescription": "if you don't input, this information is set default value",
 	"$S_str_NameValidationErrorMsg" : "Name can only contain alphabets, numbers, '_' characters",
+	"$S_str_EmailValidationErrorMsg" : "Email can only contain alphabets, numbers, '_', '@', domain characters",
 	"$S_str_AlreadyExistsMsg": "table already exists",
 
 	"--------index--------": "",
@@ -686,6 +687,7 @@
 	"$S_str_Action": "Action",
 	"$S_str_Success": "Success",
 	"$S_str_Failed": "Failed",
+	"$S_str_Details": "Details",
 
 	"--------config-----------": "",
 	"--------parser config-----------": "",
@@ -699,6 +701,7 @@
 	"$S_msg_PleaseSelectParserName" : "Please select parser name.",
 
 	"--------transformer config-----------": "",
+	"$S_str_Transformer": "Transformer",
 	"$S_str_TransformerSetting": "Transformer Setting",
 	"$S_str_TransformerType": "Transformer type",
 	"$S_str_SelectTransformerType": "Select Transformer type",
@@ -709,6 +712,7 @@
 	"$S_msg_RemoveTransformerConfirmPre": "Do you really want to delete Transformer",
 
 	"--------ftp config-----------": "",
+	"$S_str_FtpProfile": "FTP Profile",
 	"$S_str_FtpSetting": "FTP Setting",
 	"$S_str_HostAddress": "Host address",
 	"$S_str_NewFtpProfile": "Create FTP profile",
@@ -722,6 +726,7 @@
 	"$S_msg_RemoveFtpProfileConfirmPre": "Do you really want to delete FTP profile",
 
 	"--------ssh config-----------": "",
+	"$S_str_SshProfile": "SSH Profile",
 	"$S_str_SshSetting": "SSH Setting",
 	"$S_str_SshProfileSetting": "SSH profile Setting",
 	"$S_str_NewSshProfile" : "Create SSH profile",
@@ -731,6 +736,7 @@
 	"$S_msg_RemoveSshProfileConfirmPre": "Do you really want to delete SSH profile",	
 
 	"--------jdbc config-----------": "",
+	"$S_str_JdbcProfile": "JDBC Profile",
 	"$S_str_JdbcSetting": "JDBC Setting",
 	"$S_str_JdbcProfileSetting": "JDBC profile Setting",
 	"$S_str_ConnectionString": "Connection String",
@@ -741,6 +747,7 @@
 	"$S_msg_RemoveJdbcProfileConfirmPre": "Do you really want to delete JDBC profile",
 
 	"--------hdfs config-----------": "",
+	"$S_str_Hdfs": "HDFS",
 	"$S_str_HdfsSetting": "HDFS Setting",
 	"$S_str_HDFSPath": "HDFS Path",
 	"$S_str_NewHdfs" : "Create HDFS",
@@ -749,6 +756,7 @@
 	"$S_msg_RemoveHdfsConfirmPre": "Do you really want to delete HDFS",
 
 	"--------apikey config-----------": "",
+	"$S_str_ApiKeyProfile": "APIKEY Profile",
 	"$S_str_ApiKeySetting": "APIKEY Setting",
 	"$S_str_CreateNewAPIKey": "Create APIKEY",
 	"$S_str_APIKey": "APIKEY",
@@ -757,6 +765,7 @@
 	"$S_msg_RemoveApiConfirmPre": "Do you really want to delete APIKEY",
 
 	"--------crypto config-----------": "",
+	"$S_str_CryptoProfile": "Crypto/Integrity Profile",
 	"$S_str_CryptoSetting": "Crypto/Integrity Setting",
 	"$S_str_NewCrypto": "Create Crypto profile",
 	"$S_str_Cipher": "Cipher algorithm",
@@ -768,6 +777,7 @@
 	"$S_msg_RemoveCryptoConfirmPre": "Do you really want to delete Crypto profile",
 
 	"--------index cache config-----------": "",
+	"$S_str_IndexCache": "Index Cache",
 	"$S_str_IndexCacheSetting": "Index Cache Setting",
 	"$S_str_CleanIndexCache": "Remove Index Cache",
 	"$S_str_Type": "Type",
@@ -779,6 +789,7 @@
 	"$S_msg_RemoveIndexCacheConfirmPre": "Do you really want to delete Index Cache",
 
 	"--------federation config-----------": "",
+	"$S_str_Federation": "Federation",
 	"$S_str_FederationSetting": "Federation Setting",
 	"$S_str_Address": "Address",
 	"$S_str_RegisterFederationNode": "Register Node",
@@ -789,6 +800,15 @@
 	"$S_str_RemoveNode": "Unregister node",
 	"$S_msg_RemoveNodeConfirmPre": "Do you really want to delete Node",	
 
+	"--------smtp config-----------": "",
+	"$S_str_SmtpProfile": "SMTP Profile",	
+	"$S_str_RemoveSmtp": "Unregister SMTP",
+	"$S_str_SmtpProfileSetting": "SMTP Profile Setting",
+	"$S_str_NewSmtpProfile": "Register SMTP",	
+	"$S_str_SmtpPort": "SMTP Port",
+	"$S_str_SmtpUser": "SMTP User",
+	"$S_msg_RemoveSmtpConfirmPre": "Do you really want to delete SMTP",
+
 	"--------common config msg-----------": "",
 	"$S_msg_PleaseEnterProfileName": "Please enter profile name.",
 	"$S_msg_PleaseEnterSshProfileName": "Please enter profile name.",	
@@ -798,6 +818,7 @@
 	"$S_msg_PleaseEnterHostAddress" : "Please enter host address.",
 	"$S_msg_PleaseEnterAddress" : "Please enter address.",
 	"$S_msg_PleaseEnterUserName" : "Please enter user name.",
+	"$S_msg_PleaseEnterUserEmail" : "Please enter user E-mail.",
 	"$S_msg_PleaseEnterPassword" : "please enter password.",
 	"$S_msg_PleaseEnterConnectionString": "Please enter connection string.",
 	"$S_msg_RemoveParserConfirmPost": "?",

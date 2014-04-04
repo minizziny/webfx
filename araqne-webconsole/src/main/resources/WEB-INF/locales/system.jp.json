@@ -669,6 +669,7 @@
 	"$S_str_SelectTokenizer": "トークナイザを選んでください",
 	"$S_str_DefaultValueDescription": "入力をしない場合、基本値で設定されます",
 	"$S_str_NameValidationErrorMsg" : "名前はアルファベット、数字、'_'で作成してください",
+	"$S_str_EmailValidationErrorMsg" : "名前はアルファベット、数字、'_'、'@'、DOMAINで作成してください",
 	"$S_str_AlreadyExistsMsg": "すでに存在するテーブルです",
 
 	"--------index--------": "",
@@ -682,6 +683,7 @@
 	"$S_str_Action": "行為",
 	"$S_str_Success": "成功",
 	"$S_str_Failed": "失敗",
+	"$S_str_Details": "内容",
 
 	"--------config-----------": "",
 	"--------parser config-----------": "",
@@ -695,6 +697,7 @@
 	"$S_msg_PleaseSelectParserName" : "パーサーを選んでください",
 
 	"--------transformer config-----------": "",
+	"$S_str_Transformer": "トランスフォーマー",
 	"$S_str_TransformerSetting": "トランスフォーマー設定",
 	"$S_str_TransformerType": "トランスフォーマータイプ",
 	"$S_str_SelectTransformerType": "トランスフォーマータイプ選択",
@@ -705,6 +708,7 @@
 	"$S_msg_RemoveTransformerConfirmPre": "本当にトランスフォーマー ",
 
 	"--------ftp config-----------": "",
+	"$S_str_FtpProfile": "FTPプロファイル",
 	"$S_str_FtpSetting": "FTP設定",
 	"$S_str_HostAddress": "ホストアドレス",
 	"$S_str_NewFtpProfile": "新しいFTPプロファイルを作る",
@@ -716,6 +720,7 @@
 	"$S_msg_RemoveFtpProfileConfirmPre": "本当にFTPプロファイル ",
 
 	"--------ssh config-----------": "",
+	"$S_str_SshProfile": "SSHプロファイル",
 	"$S_str_SshSetting": "SSH設定",
 	"$S_str_SshProfileSetting": "SSHプロファイル設定",
 	"$S_str_NewSshProfile" : "新しいSSHプロファイルを作る",
@@ -725,6 +730,7 @@
 	"$S_msg_RemoveSshProfileConfirmPre": "本当にSSHプロファイル ",
 
 	"--------jdbc config-----------": "",
+	"$S_str_JdbcProfile": "JDBCプロファイル",
 	"$S_str_JdbcSetting": "JDBC設定",
 	"$S_str_JdbcProfileSetting": "JDBCプロファイル設定",
 	"$S_str_ConnectionString": "接続文字列",
@@ -735,6 +741,7 @@
 	"$S_msg_RemoveJdbcProfileConfirmPre": "本当にJDBCプロファイル ",
 
 	"--------hdfs config-----------": "",
+	"$S_str_Hdfs": "HDFS",
 	"$S_str_HdfsSetting": "HDFS設定",
 	"$S_str_HDFSPath": "HDFS経路",
 	"$S_str_NewHdfs" : "新しいHDFSを作る",
@@ -742,7 +749,8 @@
 	"$S_str_RemoveHdfs": "HDFS削除",
 	"$S_msg_RemoveHdfsConfirmPre": "本当にHDFS ",
 
-	"--------apikey config-----------": "",
+	"--------apikey config-----------": "",	
+	"$S_str_ApiKeyProfile": "APIKEYプロファイル",
 	"$S_str_ApiKeySetting": "APIキー設定",
 	"$S_str_CreateNewAPIKey": "新しいAPIキーを作る",
 	"$S_str_APIKey": "APIキー",
@@ -751,6 +759,7 @@
 	"$S_msg_RemoveApiConfirmPre": "本当にAPIキー ",
 
 	"--------crypto config-----------": "",
+	"$S_str_CryptoProfile": "Crypto/Integrityプロファイル",
 	"$S_str_CryptoSetting": "暗号化/無結成設定",
 	"$S_str_NewCrypto": "新しい暗号化プロファイルを作る",
 	"$S_str_Cipher": "暗号アルゴリズム",
@@ -762,6 +771,7 @@
 	"$S_msg_RemoveCryptoConfirmPre": "本当に暗号化 ",
 
 	"--------index cache config-----------": "",
+	"$S_str_IndexCache": "インデックスキャッシュ",
 	"$S_str_IndexCacheSetting": "インデックスキャッシュ設定",
 	"$S_str_CleanIndexCache": "インデックスキャッシュ削除",
 	"$S_str_Type": "タイプ",
@@ -773,6 +783,7 @@
 	"$S_msg_RemoveIndexCacheConfirmPre": "本当にインデックスキャッシュ ",
 
 	"--------federation config-----------": "",
+	"$S_str_Federation": "フェデレーション",
 	"$S_str_FederationSetting": "フェデレーション設定",
 	"$S_str_Address": "アドレス",
 	"$S_str_RegisterFederationNode": "新しいノードを登録する",
@@ -783,6 +794,15 @@
 	"$S_str_RemoveNode": "ノード削除",
 	"$S_msg_RemoveNodeConfirmPre": "本当にノード ",
 
+	"--------smtp config-----------": "",
+	"$S_str_SmtpProfile": "SMTPプロファイル",	
+	"$S_str_RemoveSmtp": "ノード SMTP",
+	"$S_str_SmtpProfileSetting": "SMTP プロファイル 設定",
+	"$S_str_NewSmtpProfile": "新しい SMTP プロファイルを作る",		
+	"$S_str_SmtpPort": "SMTPポート",
+	"$S_str_SmtpUser": "SMTPしいユーザー",
+	"$S_msg_RemoveSmtpConfirmPre": "本当にノード",
+
 	"--------common config msg-----------": "",
 	"$S_msg_PleaseEnterProfileName": "プロファイル名を入力してください",
 	"$S_msg_PleaseEnterSshProfileName": "プロファイル名を入力してください",
@@ -792,6 +812,7 @@
 	"$S_msg_PleaseEnterHostAddress" : "ホストアドレスを入力してください",
 	"$S_msg_PleaseEnterAddress" : "アドレスを入力してください",
 	"$S_msg_PleaseEnterUserName" : "ユーザーを入力してください",
+	"$S_msg_PleaseEnterUserEmail" : "E-mailを入力してください",
 	"$S_msg_PleaseEnterPassword" : "パスワードを入力してください",
 	"$S_msg_PleaseEnterConnectionString": "接続文字列を入力してください",
 	"$S_msg_RemoveParserConfirmPost": " を削除しますか？",
