@@ -86,15 +86,37 @@ dockpanel {
 [widget-droppable] > .widget-drop-zone {
 	z-index: 9989;
 	position: absolute;
-	color: transparent;
 	top: 0;
 	left: 0;
 	right: 0;
+	bottom: 0;
+	padding: 2px 4px;
 }
+
+
+/* click-to-edit inner tab */ 
+
+[widget-droppable] > .widget-drop-zone * {
+	display: none;
+}
+
+.nav-tabs>li.active [widget-droppable] > .widget-drop-zone * {
+	display: block;
+}
+
+.nav-tabs>li.active [widget-droppable] > .widget-drop-zone > input[type=text] {
+	padding: 2px 6px;
+	box-sizing: border-box;
+	width: calc(100% - 20px);
+	margin: 2px;
+}
+
+/* click-to-edit inner tab end */ 
 
 .dropdown-menu {
 	z-index: 15000;
 }
+
 
 
 widget > .tab-comp {
@@ -118,11 +140,13 @@ widget > .tab-comp > ul.nav-tabs > li > a {
 	font-size: 0.9em;
 	margin-right: 0;
 	border-radius: 0;
+	/*color: transparent;*/
 }
 
 widget > .tab-comp > ul.nav-tabs > li.active > a {
 	background-image: linear-gradient(to bottom, #c00 0px, #c00 2px, #fff 2.1px);
 	background-repeat: no-repeat;
+	color: transparent;
 }
 
 widget > .tab-comp > ul.nav-tabs > li.plus {

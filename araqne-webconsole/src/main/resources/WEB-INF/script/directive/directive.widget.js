@@ -96,6 +96,9 @@ angular.module('app.directive.widget', [])
 				if(elA.is(':hidden')) {
 					elInput.focus();
 				}
+				else {
+					elA.css('display','');
+				}
 
 				scope.onToggle({});
 			}
@@ -632,12 +635,9 @@ angular.module('app.directive.widget', [])
 	return {
 		restrict: 'A',
 		link: function(scope, el, attrs) {
-			// el.css('border', '1px solid red');
 			el.addClass('drop-tab');
 
-			var padding = el.css('padding');
 			var dropzone = angular.element('<div class="widget-drop-zone" click-to-edit ng-model="tab.name" ng-change="$parent.$parent.onTabTitleChange($new, $old)">' + el[0].innerText + '</div>');
-			dropzone.css('padding', padding);
 			$compile(dropzone)(scope);
 			el.append(dropzone);
 
