@@ -6,7 +6,7 @@ angular.module('app.directive.widget', [])
 		restrict: 'A',
 		require: 'ngModel',
 		scope: {
-			'onChange': '&ngChange',
+			'onChange': '&',
 			'onCancel': '&ngCancel',
 			'ngModelOnBlur': '&',
 			'val': '=ngModel'
@@ -14,54 +14,41 @@ angular.module('app.directive.widget', [])
 		link: function(scope, element, attrs, ngModelCtrl) {
 			if (attrs.type === 'radio' || attrs.type === 'checkbox') return;
 			var cancel = false;
+			var oldval;
 
-			element.unbind('input').unbind('keydown.onBlur').unbind('change');
-			element.bind('blur.onBlur', function(e) {
+			element.unbind('input').unbind('keydown.onBlur').unbind('change').unbind('focus.onFocus');
+			element.bind('focus.onFocus', function(e) {
+				oldval = element.val();
+			})
+			.bind('blur.onBlur', function(e) {
+				var newval = ngModelCtrl.$viewValue;
+
 				if(!cancel) {
-					var oldval = ngModelCtrl.$modelValue;
-					if(element.attr('type') == 'number') {
-						if((element[0].validity) && (!element[0].validity.valid)) {
-							// not number
-							element.val(oldval)
-						}
-						else {
-							var newval = element.val();
-							ngModelCtrl.$setViewValue(newval);
-							scope.onChange({
-								'$event': e,
-								'$new': newval,
-								'$old': oldval
-							});
-						}
-					}
-					else {
-						var newval = element.val();
-						if(newval != oldval) {
-							ngModelCtrl.$setViewValue(newval);
-							scope.onChange({
-								'$event': e,
-								'$new': newval,
-								'$old': oldval
-							});
-						}	
+					if(newval != oldval) {
+						scope.onChange({
+							'$event': e,
+							'$new': newval,
+							'$old': oldval
+						});
+						oldval = newval;
 					}
 				}
-
+				
 				scope.ngModelOnBlur({
 
 				});
-
-				setTimeout(function() {
-					scope.$apply();
-					cancel = false;
-				}, 100);
-			}).bind('keydown.onBlur', function(e) {
+				cancel = false;
+			})
+			.bind('keydown.onBlur', function(e) {
 				if(e.keyCode == 13) {
 					this.blur();
 				}
 				else if(e.keyCode == 27) {
 					cancel = true;
-					element.val(scope.val)
+
+					ngModelCtrl.$setViewValue(oldval);
+					element.val(oldval);
+					scope.$apply();
 
 					scope.onCancel({
 
@@ -82,7 +69,7 @@ angular.module('app.directive.widget', [])
 			'onToggle': '&ngToggle',
 			'type': '='
 		},
-		template: '<input type="text" ng-model="val" style="display:none" ng-model-on-blur="onBlur()" ng-change="onValueChange($event, $new, $old)" ng-cancel="onCancel()"></input><a ng-click="toggle()">{{val}}</a>',
+		template: '<input type="text" ng-model="val" style="display:none" ng-model-on-blur="onBlur()" on-change="onValueChange($event, $new, $old)" ng-cancel="onCancel()"></input><a ng-click="toggle()">{{val}}</a>',
 		link: function(scope, element, attrs) {
 			var elInput = element.find('input');
 			var elA = element.find('a');
@@ -303,7 +290,7 @@ angular.module('app.directive.widget', [])
 
 					if(scope.type != 'tabs') {
 						var template = angular.element([
-						'<span click-to-edit ng-model="name" ng-change="onTitleChange($new, $old)" ng-cancel="onCancel()" ng-toggle="onToggle()" class="pull-left widget-title"></span>',
+						'<span click-to-edit ng-model="name" ng-change="$parent.$parent.onWidgetTitleChange($new, $old)" class="pull-left widget-title"></span>',
 						'<span class="pull-right widget-toolbox">',
 							'</button><button class="btn btn-extra-mini b-x" ng-click="closebox()">',
 								'<i class="icon-remove"></i>',
@@ -649,7 +636,7 @@ angular.module('app.directive.widget', [])
 			el.addClass('drop-tab');
 
 			var padding = el.css('padding');
-			var dropzone = angular.element('<div class="widget-drop-zone">' + el[0].innerHTML + '</div>');
+			var dropzone = angular.element('<div class="widget-drop-zone" click-to-edit ng-model="tab.name" ng-change="$parent.$parent.onTabTitleChange($new, $old)">' + el[0].innerText + '</div>');
 			dropzone.css('padding', padding);
 			$compile(dropzone)(scope);
 			el.append(dropzone);
@@ -667,7 +654,7 @@ angular.module('app.directive.widget', [])
 					'<ul class="nav nav-tabs" style="margin-bottom: 0">' +
 						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}">' +
 							'<a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" ng-click="$parent.$parent.activeTab(tab, data.tabs, $event)" widget-droppable>{{tab.name}}</a>' +
-							'<button ng-show="tab.is_active" class="close tab-close">&times;</button>' +
+							'<button ng-show="tab.is_active && (data.tabs.length > 1)" class="close tab-close" ng-click="$parent.$parent.closeTab(tab, \'' + preset + '\' ,\'' + json.guid + '\', $event)">&times;</button>' +
 						'</li>' +
 						'<li class="plus"><button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event, \'' + preset + '\')"><i class="icon-plus"></i></button></li>' +
 					'</ul>' +

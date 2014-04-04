@@ -276,6 +276,30 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		});
 	}
 
+	$scope.closeTab = function(tab, preset, widget, e) {
+		var sure = confirm('이 탭을 삭제하면 탭 안의 위젯도 삭제됩니다. 계속하시겠습니까?');
+		if(!sure) return;
+
+		var tabs = $scope.ctxPreset[preset].ctxWidget[widget].data.tabs;
+
+		var idx = tabs.indexOf(tab);
+		tabs.splice(idx, 1);
+
+		if(idx == 0) idx = 1;
+		tabs[--idx].is_active = true;
+		RemovePresets(tab.contents);
+		OnPresetChanged(preset); // save state
+
+	}
+
+	$scope.onTabTitleChange = function(oldval, newval) {
+		console.log('tab title changed', oldval, newval)
+	}
+
+	$scope.onWidgetTitleChange = function(oldval, newval) {
+		console.log('widget title changed', oldval, newval)
+	}
+
 	// 위젯 드래그 & 탭 드롭 위한 변수
 	var isEnter = false, timer, a;
 
@@ -502,9 +526,8 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			resizeWidgets(el);
 		}
 
-		console.log('onChangePreset')
-
 		if($scope.isLoadedCurrentPreset) {
+			console.log('onChangePreset')
 			OnPresetChanged(id); // save state	
 		}
 	}
