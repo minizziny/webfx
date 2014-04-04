@@ -139,7 +139,7 @@ public class InitialSchema {
 
 		Program home = createProgram(context, programApi, "Home", "Home", "홈", "ホーム", "starter", 1);
 		Program dashBoard = createProgram(context, programApi, "Dashboard", "Dashboard", "대시보드", "ダッシュボード", "dashboard", 2);
-		Program account = createProgram(context, programApi, "Account", "Account", "계정관리", "アカウント管理", "orgchart", 3);
+		Program account = createProgram(context, programApi, "Account", "Accounts", "계정관리", "アカウント管理", "orgchart", 3);
 		Program auditLog = createProgram(context, programApi, "Audit Log", "Audit Log", "감사로그", "監査ログ", "auditlog", 4);
 
 		List<Program> allPrograms = new ArrayList<Program>();
