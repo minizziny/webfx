@@ -130,8 +130,9 @@ angular.module('app.directive.widget', [])
 		require: 'ngModel',
 		scope: {
 			'ngModel': '=',
-			'onDragbox': '&',
-			'onDropbox': '&',
+			'onDrag': '&',
+			'onDrop': '&',
+			'onAppend': '&',
 			'onChange': '&',
 			'onResize': '&'
 		},
@@ -180,17 +181,25 @@ angular.module('app.directive.widget', [])
 				console.widgetLog('---render start---')
 
 				var _box = layoutEngine.ui.layout.box.create(layout, false, {
-					'onDragbox': function(box, em, ed) {
-						return scope.onDragbox({
+					'onDrag': function(box, em, ed) {
+						return scope.onDrag({
 							'$box': box,
 							'$moveevent': em,
 							'$downevent': ed
 						});
 					},
-					'onDropbox': function(box, event) {
-						return scope.onDropbox({
+					'onDrop': function(box, event) {
+						return scope.onDrop({
 							'$box': box,
-							'$event': event
+							'$event': event,
+							'$id': attrs.id
+						});
+					},
+					'onAppend': function(box, event) {
+						return scope.onAppend({
+							'$box': box,
+							'$event': event,
+							'$id': attrs.id
 						});
 					},
 					'onModify': debounce(function(box) {

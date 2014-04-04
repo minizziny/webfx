@@ -148,7 +148,6 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		return {
 			"id": function() { return id; },
 			"registerCallback": function(guid, cb, itv) {
-				console.log(guid)
 				var d = Date.now();
 				d += itv;
 				if(guid in callbacks) {
@@ -175,6 +174,9 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	var gt = makeGlobalTimer(1000);
 
 	$scope.activeTab = function(tab, e) {
+		if(e.activateByDroppable) {
+			return;
+		}
 		// 실행중인건 suspend
 		var elRunning = angular.element('widget.w-running');
 		elRunning.each(function(i, w) {
@@ -201,7 +203,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 		$timeout(function() {
 			resizeWidgets();
-		}, 100);
+		}, 200);
 	}
 
 	$(window).on('resize', debounce(function() {
@@ -243,8 +245,11 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	$scope.addTab = function(tabdata, e) {
+		var newTabName = prompt('Enter tab Name', 'Tab ' + (tabdata.length + 1));
+		if(newTabName == null) return;
+
 		var tabctx = {
-			'name': 'hello',
+			'name': newTabName,
 			'guid': 't' + serviceUtility.generateType2(),
 			'type': 'dockpanel',
 			"contents": 'p' + serviceUtility.generateType2()
@@ -271,14 +276,16 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 				.addClass('virtual')
 				.width(w)
 				.height(h)
-				.css('top', e.pageY - ed.offsetY)
+				.css('top', e.pageY - ed.offsetY - 40)
 				.css('left', e.pageX - ed.offsetX)
-				.appendTo('body');
+				.appendTo('#view-dashboard');
 		}
 		else {
 			
 		}
-		a.click().removeClass('over');
+		var event = jQuery.Event("click");
+		event.activateByDroppable = true;
+		a.trigger(event).removeClass('over');
 
 		if($('.k-d-col.virtual').length != 0 && box.el.parents('.tab-pane').length > 0) {
 			var owntab = hasClassIndexOf(box.el.parents('.tab-pane')[0].className, a.attr('tab-id'));
@@ -326,12 +333,24 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			$('[widget-droppable].over').removeClass('over');
 		}
 
-		$('.k-d-col.virtual').css('top', e.pageY - ed.offsetY).css('left', e.pageX - ed.offsetX)
+		$('.k-d-col.virtual').css('top', e.pageY - ed.offsetY - 40).css('left', e.pageX - ed.offsetX)
 	}
 
-	$scope.onDropbox = function(box, e) {
-		// console.log('dropped!')
+	$scope.onDropbox = function(box, e, id) {
 		$('.k-d-col.virtual').remove();
+	}
+
+	$scope.onAppendbox = function(box, e, id) {
+		var dropPanelId = $(e.target).parents('dockpanel').attr('id');
+		if(id === dropPanelId) return;
+
+		
+
+		var ctx = angular.extend({}, $scope.ctxPreset[id].ctxWidget[box.guid]);
+		delete $scope.ctxPreset[id].ctxWidget[box.guid];
+		$scope.ctxPreset[dropPanelId].ctxWidget[box.guid] = ctx;
+		
+		console.log('append!', id, dropPanelId);
 	}
 
 	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
@@ -473,6 +492,8 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			resizeWidgets(el);
 		}
 
+		console.log('onChangePreset')
+
 		if($scope.isLoadedCurrentPreset) {
 			OnPresetChanged(id); // save state	
 		}
@@ -486,8 +507,9 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		}
 		var el = angular.element(
 			'<dockpanel id="' + name + '" ' + 
-			  'on-dragbox="onDragInnerbox($box, $moveevent, $downevent)" ' +
-				'on-dropbox="onDropbox($box, $event)" ' +
+			  'on-drag="onDragInnerbox($box, $moveevent, $downevent)" ' +
+				'on-drop="onDropbox($box, $event, $id)" ' +
+				'on-append="onAppendbox($box, $event, $id)" ' +
 				'on-change="onChangePreset($id)" ' +
 				'on-resize="onChangePreset($id, $box, $row)" ' +
 				'ng-model="ctxPreset.' + name + '.dataLayout" ' +

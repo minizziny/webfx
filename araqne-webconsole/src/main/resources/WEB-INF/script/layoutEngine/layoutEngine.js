@@ -1367,7 +1367,7 @@ var layoutEngine = (function() {
 			});
 		}
 		
-		function drop(box) {
+		function drop(box, e) {
 			
 			if(!!layoutEngine.ui.layout.box.target) {
 				var t = layoutEngine.ui.layout.box.target;
@@ -1377,6 +1377,11 @@ var layoutEngine = (function() {
 				t.splitInsert(box, target);
 				
 				layoutEngine.ui.layout.box.target = null;
+
+			
+				if((!!options) && !!options.onAppend) {
+					options.onAppend(box, e);
+				}
 			}
 			else {
 				box.el.css("position", "")
@@ -1416,8 +1421,8 @@ var layoutEngine = (function() {
 					
 					if( Math.abs(initp.x - e.pageX) < 20 && Math.abs(initp.y - e.pageY) < 20 ) return;
 
-					if((!!options) && !!options.onDragbox) {
-						options.onDragbox(box, e, ee);
+					if((!!options) && !!options.onDrag) {
+						options.onDrag(box, e, ee);
 					}
 					
 					if(!isDraggable) {
@@ -1468,10 +1473,10 @@ var layoutEngine = (function() {
 						scaf.remove();
 					}
 					
-					drop(box);
+					drop(box, e);
 
-					if((!!options) && !!options.onDropbox) {
-						options.onDropbox(box, e);
+					if((!!options) && !!options.onDrop) {
+						options.onDrop(box, e);
 					}
 
 				})
