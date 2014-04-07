@@ -54,8 +54,27 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			target[0].obj.close();
 
 			$timeout(function() {
-				OnPresetChanged(presetId); // save state	
+				OnPresetChanged(presetId); // save state
 			}, 200);
+		}
+	}
+
+	$scope.onChangeWidget = function(id, presetId, field, oldval, newval) {
+		if(id in $scope.ctxPreset[presetId].ctxWidget) {
+			$scope.ctxPreset[presetId].ctxWidget[id][field] = newval;
+			OnPresetChanged(presetId); // save state
+		}
+	}
+
+	eventSender.dashboard.updateWidgetProperty = function(options) {
+		// console.log(options.presetId, options.widgetId, options.widgetId in $scope.ctxPreset[options.presetId].ctxWidget )
+		if(options.widgetId in $scope.ctxPreset[options.presetId].ctxWidget) {
+			$scope.ctxPreset[options.presetId].ctxWidget[options.widgetId].interval = options.interval;
+			OnPresetChanged(options.presetId); // save state
+		}
+		
+		if(!!options.callback) {
+			options.callback();
 		}
 	}
 
@@ -162,6 +181,12 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 					}
 				}
 			},
+			"unregisterCallback": function(guid) {
+				delete callbacks[guid];
+				if(!!~window._logger.current.indexOf('dashboard-widget-timer')) {
+					console.log(guid, 'unregistered');
+				}
+			},
 			"cancel": function() {
 				if (id !== null) {
 					clearInterval(id);
@@ -172,6 +197,19 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	var gt = makeGlobalTimer(1000);
+	var ONE_SECOND = 1000;
+
+	function refresh(w) {
+		return function() {
+			if(angular.element(w).scope() != undefined) {
+				if( angular.element(w).scope().isRunning ) {
+					w.query(function() {
+						gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+					});
+				}
+			}
+		}
+	}
 
 	$scope.activeTab = function(tab, tabs, e) {
 		
@@ -191,29 +229,47 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		var elRunning = angular.element('widget.w-running');
 		elRunning.each(function(i, w) {
 			w.suspend();
+			gt.unregisterCallback(w.id);
 		});
 
 		// 활성탭인건 렌더
 		var elWidget = angular.element('.tab-pane.' + tab.guid + ' widget');
 		elWidget.each(function(i, w) {
 			w.render();
-
-			var refresh = function() {
-				if(angular.element(w).scope() != undefined) {
-					if( angular.element(w).scope().isRunning ) {
-						w.query(function() {
-							gt.registerCallback(w.id, refresh, w.getInterval());
-						});
-					}
-				}
-			}
-
-			gt.registerCallback(w.id, refresh, w.getInterval());
+			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
 		});
 
 		$timeout(function() {
 			resizeWidgets();
 		}, 200);
+	}
+
+	$scope.pauseWidget = function(e) {
+		var w = $(e.target).parents('widget:first')[0];
+		w.suspend();
+		gt.unregisterCallback(w.id);
+	}
+
+	$scope.runWidget = function(e) {
+		var w = $(e.target).parents('widget:first')[0];
+		w.render();
+		gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+	}
+
+	$scope.displayWidgetProperty = function(e) {
+		var w = $(e.target).parents('widget:first')[0];
+		var dockpanel = $(e.target).parents('dockpanel:first')[0];
+
+		eventSender.dashboard.setWidgetProperty(w, dockpanel.id);
+		$('.propertyWidget')[0].showDialog();
+	}
+
+	$scope.refreshWidget = function(e) {
+		var w = $(e.target).parents('widget:first')[0];
+		gt.unregisterCallback(w.id);
+		w.query(function() {
+			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+		});
 	}
 
 	$(window).on('resize', debounce(function() {
@@ -293,11 +349,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	$scope.onTabTitleChange = function(oldval, newval) {
-		console.log('tab title changed', oldval, newval)
-	}
-
-	$scope.onWidgetTitleChange = function(oldval, newval) {
-		console.log('widget title changed', oldval, newval)
+		OnPresetChanged($scope.currentPreset.guid); // save state
 	}
 
 	// 위젯 드래그 & 탭 드롭 위한 변수
@@ -641,10 +693,9 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			console.log(m.body.preset.state)
 
 			// root preset
+			//////////////// FOR MIGRATION /////////////
 			if(el == undefined) {
 				console.log('---- Loading Preset',m.body.preset.name, '----');
-
-				//////////////// FOR MIGRATION /////////////
 				var hasWidget = m.body.preset.state.widgets.some(function(widget) {
 					return widget.type === 'tabs';
 				});
@@ -658,10 +709,10 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 					m.body.preset.state.layout[0].rows[0].cols[0].dragHandler = false;
 					m.body.preset.state.layout[0].rows[0].cols[0].droppable = false;
 				}
-				//////////////// END MIGRATION //////////////
-
 			}
+			//////////////// END MIGRATION //////////////
 			
+
 			// root preset
 			if(el == undefined) {
 				$scope.isLoadedCurrentPreset = false;
@@ -672,6 +723,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 				$timeout(function() {
 					$scope.isLoadedCurrentPreset = true;
+					$('.nav.nav-tabs li.active > a').click();
 				}, 1000);
 			}
 			// inner preset
@@ -1471,5 +1523,36 @@ function WordCloudController($scope, socket, eventSender, serviceChart) {
 		var colNameNumber = cols.filter(function(col) { return col.type === 'number' }).first().name;
 
 		serviceChart.getWordCloud(result, colNameNumber, colNameString, '.cloud-preview');
+	}
+}
+
+function WidgetPropertyController($scope, eventSender) {
+	var presetId, widgetId;
+	var w;
+
+	eventSender.dashboard.setWidgetProperty = function(_w, _presetId) {
+		w = _w;
+		$scope.query = w.getQuery();
+		$scope.interval = w.getInterval();
+		$scope.name = w.getName();
+
+		presetId = _presetId;
+		widgetId = w.id;
+	}
+
+	$scope.updateWidgetProperty = function() {
+		w.setInterval($scope.interval);
+		eventSender.dashboard.updateWidgetProperty({
+			'presetId': presetId,
+			'widgetId': widgetId,
+			'interval': $scope.interval,
+			'callback': function() {
+				$('.propertyWidget')[0].hideDialog();		
+			}
+		});
+	}
+
+	$scope.cancelUpdateWidgetProperty = function() {
+		$('.propertyWidget')[0].hideDialog();
 	}
 }

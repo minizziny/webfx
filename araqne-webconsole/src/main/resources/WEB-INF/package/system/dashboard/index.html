@@ -544,4 +544,30 @@ widget[grid] .widget-grid-container {
 			</li>
 		</ol>
 	</div>
+
+	<div class="modal propertyWidget" modal ng-controller="WidgetPropertyController">
+		<a class="modal-close close" style="margin-bottom: -30px">&times;</a>
+		<legend>{{name}} 속성</legend>
+		<div style="margin-bottom: 20px">
+			위젯 속성을 확인하고 변경할 수 있습니다.
+		</div>
+		<form class="form-horizontal">
+			<div class="control-group">
+				<label class="control-label" for="dashboardWidgetPropertyInterval">새로고침 주기</label>
+				<div class="controls">
+					<input type="number" ng-model="interval" id="dashboardWidgetPropertyInterval">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" >쿼리</label>
+				<div class="controls">
+					<code style="display:inline-block; max-height:200px; overflow:auto">{{query}}</code>
+				</div>
+			</div>
+		</form>
+		<div class="control-group submit-group">
+			<button class="btn" ng-click="updateWidgetProperty()">{{'$S_str_Done' | translate}}</button>
+			<button class="btn" ng-click="cancelUpdateWidgetProperty()">{{'$S_str_Cancel' | translate}}</button>
+		</div>
+	</div>
 </div>

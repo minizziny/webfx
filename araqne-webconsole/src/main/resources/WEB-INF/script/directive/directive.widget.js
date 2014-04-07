@@ -231,7 +231,8 @@ angular.module('app.directive.widget', [])
 	return {
 		restrict: 'E',
 		scope: {
-			'onClose': '&'
+			'onClose': '&',
+			'onChange': '&'
 		},
 		transclude: 'element',
 		replace: true,
@@ -256,6 +257,7 @@ angular.module('app.directive.widget', [])
 			this.load = function() {
 				self.isLoaded = true;
 				$scope.isRunning = true;
+				console.log($scope)
 			}
 
 			this.suspend = function() {
@@ -264,7 +266,6 @@ angular.module('app.directive.widget', [])
 
 			this.resume = function() {
 				$scope.isRunning = true;
-				console.log('resume', $element[0].id)
 			}
 		},
 		link: function(scope, el, attrs, ctrls, transclude) {
@@ -286,6 +287,16 @@ angular.module('app.directive.widget', [])
 					});
 				}
 
+				scope.onWidgetTitleChange = function(newval, oldval, e) {
+					scope.onChange({
+						'$id': attrs.id,
+						'$field': 'name',
+						'$old': oldval,
+						'$new': newval
+					});
+				}
+
+
 				// console.widgetLog(ctlrModel.$modelValue); // 여기엔 모델이 없다.
 				$timeout(function() {
 					// ngModel이 활성화되는 시점
@@ -293,8 +304,16 @@ angular.module('app.directive.widget', [])
 
 					if(scope.type != 'tabs') {
 						var template = angular.element([
-						'<span click-to-edit ng-model="name" ng-change="$parent.$parent.onWidgetTitleChange($new, $old)" class="pull-left widget-title"></span>',
+						'<span click-to-edit ng-model="name" ng-change="onWidgetTitleChange($new, $old, $event)" class="pull-left widget-title"></span>',
 						'<span class="pull-right widget-toolbox">',
+							'<button class="btn btn-extra-mini b-pause" ng-show="isRunning" ng-click="$parent.$parent.pauseWidget($event)">',
+								'<i class="icon-pause"></i>',
+							'</button><button class="btn btn-extra-mini b-play" ng-hide="isRunning" ng-click="$parent.$parent.runWidget($event)">',
+								'<i class="icon-play"></i>',
+							'</button><button class="btn btn-extra-mini b-refresh" ng-click="$parent.$parent.refreshWidget($event)">',
+								'<i class="icon-refresh"></i>',
+							'</button><button class="btn btn-extra-mini b-p" ng-click="$parent.$parent.displayWidgetProperty($event)">',
+								'<i class="icon-info-sign"></i>',
 							'</button><button class="btn btn-extra-mini b-x" ng-click="closebox()">',
 								'<i class="icon-remove"></i>',
 							'</button>',
@@ -305,7 +324,6 @@ angular.module('app.directive.widget', [])
 					}
 					
 					// console.widgetLog(ctlrModel.$modelValue);
-					scope.hello = ctlrModel.$modelValue.type + '/' + ctlrModel.$modelValue.guid;
 
 					el.attr('guid', ctlrModel.$modelValue.guid);
 					if(!!ctlrDockpanel) {
@@ -329,6 +347,10 @@ angular.module('app.directive.widget', [])
 				elc[0].suspend = function() {
 					var ctrl = elc.controller('widget');
 					ctrl.suspend();
+				}
+
+				elc[0].getName = function() {
+					return scope.name;
 				}
 			});
 		}
@@ -401,11 +423,20 @@ angular.module('app.directive.widget', [])
 			elc[0].getInterval = function() {
 				return interval;
 			}
+
+			elc[0].setInterval = function(itv) {
+				elc.scope().data.interval = itv;
+				interval = itv;
+			}
+
+			elc[0].getQuery = function() {
+				return ctx.data.query;
+			}
 			
 			elc[0].render = function() {
 				var scopec = elc.scope()
 				ctx.data = scopec.data;
-				interval = scopec.interval * 500;
+				interval = scopec.interval;
 
 				if(ctrl.isLoaded) {
 					superRender();
@@ -461,6 +492,7 @@ angular.module('app.directive.widget', [])
 			var superSuspend = elc[0].suspend;
 			var superResume = elc[0].resume;
 
+			var ctx = { 'data': null };
 			var queryInst, interval = 0;
 
 			scope.progress = { 'width': '0%' };
@@ -497,10 +529,20 @@ angular.module('app.directive.widget', [])
 				return interval;
 			}
 
+			elc[0].setInterval = function(itv) {
+				elc.scope().data.interval = itv;
+				interval = itv;
+			}
+
+			elc[0].getQuery = function() {
+				return ctx.data.query;
+			}
+
 			elc[0].render = function() {
 				var scopec = elc.scope()
+				ctx.data = scopec.data;
 				scope.order = scopec.data.order;
-				interval = scopec.interval * 500;
+				interval = scopec.interval;
 
 				if(ctrl.isLoaded) {
 					superRender();
@@ -517,9 +559,7 @@ angular.module('app.directive.widget', [])
 					</thead>\
 					<tbody>\
 						<tr ng-repeat="row in dataQueryResult">\
-							<td ng-repeat="field in order" title="{{row[field]}}">\
-								{{row[field]}}\
-							</td>\
+							<td ng-repeat="field in order" title="{{row[field]}}" ng-bind-html="row[field] | crlf"></td>\
 						</tr>\
 					</tbody>\
 				</table></div>');
@@ -633,11 +673,20 @@ angular.module('app.directive.widget', [])
 			elc[0].getInterval = function() {
 				return interval;
 			}
+
+			elc[0].setInterval = function(itv) {
+				elc.scope().data.interval = itv;
+				interval = itv;
+			}
+
+			elc[0].getQuery = function() {
+				return ctx.data.query;
+			}
 			
 			elc[0].render = function() {
 				var scopec = elc.scope()
 				ctx.data = scopec.data;
-				interval = scopec.interval * 500;
+				interval = scopec.interval;
 
 				if(ctrl.isLoaded) {
 					superRender();
@@ -700,10 +749,10 @@ angular.module('app.directive.widget', [])
 	
 	function buildWidget(preset, json) {
 		if(json.type === 'tabs') {
-			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' + 
+			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '">' + 
 				'<div class="tab-comp" style="height: 100%">' +
 					'<ul class="nav nav-tabs" style="margin-bottom: 0">' +
-						'<li ng-repeat="tab in data.tabs" ng-class="{\'active\': tab.is_active}">' +
+						'<li ng-repeat="(i, tab) in data.tabs" ng-class="{\'active\': tab.is_active}">' +
 							'<a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" ng-click="$parent.$parent.activeTab(tab, data.tabs, $event)" widget-droppable>{{tab.name}}</a>' +
 							'<button ng-show="tab.is_active && (data.tabs.length > 1)" class="close tab-close" ng-click="$parent.$parent.closeTab(tab, \'' + preset + '\' ,\'' + json.guid + '\', $event)">&times;</button>' +
 						'</li>' +
@@ -717,19 +766,19 @@ angular.module('app.directive.widget', [])
 			'</widget>';
 		}
 		else if(json.type === 'grid') {
-			return '<widget grid id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' +
+			return '<widget grid id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
 				'</widget>';
 		}
 		else if(json.type === 'chart') {
-			return '<widget chart id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' +
+			return '<widget chart id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
 				'</widget>';
 		}
 		else if(json.type === 'wordcloud') {
-			return '<widget wcloud id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' +
+			return '<widget wcloud id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
 				'</widget>';
 		}
 		else {
-			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')">' +
+			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
 				'' + 
 				'<div>{{hello}} {{1+1}}</div></widget>';
 		}
