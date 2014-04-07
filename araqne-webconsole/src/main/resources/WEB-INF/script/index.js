@@ -17,7 +17,8 @@ var logpresso = angular.module('app', [
 	'app.logdb.management',
 	'pascalprecht.translate',
 	'ui.sortable',
-	'resettableForm'
+	'resettableForm',
+	'ngAnimate'
 ], function() {
 });
 

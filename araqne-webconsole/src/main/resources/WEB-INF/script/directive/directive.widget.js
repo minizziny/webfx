@@ -343,6 +343,9 @@ angular.module('app.directive.widget', [])
 			var elc = el.children('widget');
 			var superRender = elc[0].render;
 
+			scope.progress = { 'width': '0%' };
+			scope.isLoaded = true;
+
 			var ctx = { 'data': null };
 			var queryInst, interval = 0, datasrc;
 
@@ -375,6 +378,14 @@ angular.module('app.directive.widget', [])
 					if(!!callback){
 						callback();	
 					}
+
+					// $timeout(function(){
+						scope.progress = { 'width': '100%' };
+					// }, 300);
+					// $timeout(function(){
+						scope.isLoaded = true;
+					// }, 1000)
+					scope.$apply();
 				}
 			}
 
@@ -402,17 +413,24 @@ angular.module('app.directive.widget', [])
 				}
 
 				query();
+
+				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
+				$compile(progress)(scope);
+				elc.append(progress);
+
 				superRender();
 			}
 
 			function query(callback) {
+				scope.isLoaded = false;
+				scope.progress = { 'width': '0%' };	
 				var scopec = elc.scope();
-
+				
 				queryInst = serviceLogdb.create(2020);
 				queryInst.query(scopec.data.query, 100)
 				.created(function(m) {
-					// scope.progress = { 'width': '20%' };
-					// scope.$apply();
+					scope.progress = { 'width': '20%' };
+					scope.$apply();
 				})
 				.onStatusChange(onStatusChange(callback))
 				.loaded(onStatusChange(callback))
@@ -445,6 +463,8 @@ angular.module('app.directive.widget', [])
 
 			var queryInst, interval = 0;
 
+			scope.progress = { 'width': '0%' };
+			scope.isLoaded = true;
 			scope.dataQueryResult = [];
 			function resultCallback(callback) {
 				return function(m) {
@@ -455,6 +475,12 @@ angular.module('app.directive.widget', [])
 						callback();	
 					}
 					
+					// $timeout(function(){
+						scope.progress = { 'width': '100%' };
+					// }, 300);
+					// $timeout(function(){
+						scope.isLoaded = true;
+					// }, 1000)
 					scope.$apply();
 				}
 			}
@@ -483,6 +509,8 @@ angular.module('app.directive.widget', [])
 
 				query();
 
+				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
+
 				var table = angular.element('<div class="widget-grid-container"><table class="table table-bordered table-condensed widget-grid" data-resizable-columns-id="">\
 					<thead>\
 						<tr><th data-resizable-column-id="{{field}}" ng-repeat="field in order" title="{{field}}">{{field}}</th></tr>\
@@ -496,20 +524,25 @@ angular.module('app.directive.widget', [])
 					</tbody>\
 				</table></div>');
 
+				$compile(progress)(scope);
 				$compile(table)(scope);
+
+				elc.append(progress);
 				elc.append(table);
 
 				superRender();
 			}
 
 			function query(callback) {
+				scope.isLoaded = false;
+				scope.progress = { 'width': '0%' };	
 				var scopec = elc.scope();
 				
 				queryInst = serviceLogdb.create(2020);
 				queryInst.query(scopec.data.query, 100)
 				.created(function(m) {
-					// scope.progress = { 'width': '20%' };
-					// scope.$apply();
+					scope.progress = { 'width': '20%' };
+					scope.$apply();
 				})
 				.onStatusChange(onStatusChange(callback))
 				.loaded(onStatusChange(callback))
@@ -536,6 +569,9 @@ angular.module('app.directive.widget', [])
 		link: function(scope, el, attrs, ctrl) {
 			var elc = el.children('widget');
 			var superRender = elc[0].render;
+
+			scope.isLoaded = true;
+			scope.progress = { 'width': '0%' };
 
 			var ctx = { 'data': null };
 			var queryInst, interval = 0, datasrc;
@@ -574,6 +610,14 @@ angular.module('app.directive.widget', [])
 					if(!!callback){
 						callback();	
 					}
+
+					// $timeout(function(){
+						scope.progress = { 'width': '100%' };
+					// }, 300);
+					// $timeout(function(){
+						scope.isLoaded = true;
+					// }, 1000)
+					scope.$apply();
 				}
 			}
 
@@ -601,17 +645,24 @@ angular.module('app.directive.widget', [])
 				}
 
 				query();
+
+				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
+				$compile(progress)(scope);
+				elc.append(progress);
+
 				superRender();
 			}
 
 			function query(callback) {
+				scope.isLoaded = false;
+				scope.progress = { 'width': '0%' };	
 				var scopec = elc.scope();
-
+				
 				queryInst = serviceLogdb.create(2020);
 				queryInst.query(scopec.data.query, 100)
 				.created(function(m) {
-					// scope.progress = { 'width': '20%' };
-					// scope.$apply();
+					scope.progress = { 'width': '20%' };
+					scope.$apply();
 				})
 				.onStatusChange(onStatusChange(callback))
 				.loaded(onStatusChange(callback))
