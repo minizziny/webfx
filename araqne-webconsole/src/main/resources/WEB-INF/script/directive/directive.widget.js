@@ -758,7 +758,7 @@ angular.module('app.directive.widget', [])
 							'<a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" ng-click="$parent.$parent.activeTab(tab, data.tabs, $event)" widget-droppable>{{tab.name}}</a>' +
 							'<button ng-show="tab.is_active && (data.tabs.length > 1)" class="close tab-close" ng-click="$parent.$parent.closeTab(tab, \'' + preset + '\' ,\'' + json.guid + '\', $event)">&times;</button>' +
 						'</li>' +
-						'<li class="plus"><button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event, \'' + preset + '\')"><i class="icon-plus"></i></button></li>' +
+						'<button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event, \'' + preset + '\')"><i class="icon-plus"></i></button>' +
 					'</ul>' +
 					'<div class="tab-content">' +
 						'<div ng-repeat="tab in data.tabs"  style="height:100%" ng-class="{\'active\': tab.is_active}" class="tab-pane {{tab.guid}}" tab-id="{{tab.guid}}">' + 
