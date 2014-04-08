@@ -39,6 +39,7 @@ angular.module('app.filter', ['pascalprecht.translate'])
 		if(val === 0) {	return '0'; }
 		if(val === false) {	return 'false'; }
 		if(val === null) return val;
+		if(val === undefined) return val;
 
 		var urlRegex = /(https?:\/\/[^\s]+)/g;
 		
