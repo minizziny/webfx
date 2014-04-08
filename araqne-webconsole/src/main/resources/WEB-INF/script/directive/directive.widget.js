@@ -178,11 +178,12 @@ angular.module('app.directive.widget', [])
 							'$downevent': ed
 						});
 					},
-					'onDrop': function(box, event) {
+					'onDrop': function(box, event, targetDockId) {
 						return scope.onDrop({
 							'$box': box,
 							'$event': event,
-							'$id': attrs.id
+							'$id': attrs.id,
+							'$targetId': targetDockId
 						});
 					},
 					'onAppend': function(box, event, targetDockId) {
@@ -760,7 +761,7 @@ angular.module('app.directive.widget', [])
 						'<li class="plus"><button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event, \'' + preset + '\')"><i class="icon-plus"></i></button></li>' +
 					'</ul>' +
 					'<div class="tab-content">' +
-						'<div ng-repeat="tab in data.tabs"  style="height:100%" ng-class="{\'active\': tab.is_active}" class="tab-pane {{tab.guid}}">' + 
+						'<div ng-repeat="tab in data.tabs"  style="height:100%" ng-class="{\'active\': tab.is_active}" class="tab-pane {{tab.guid}}" tab-id="{{tab.guid}}">' + 
 						'</div>' +
 					'</div>' +
 				'</div>' +

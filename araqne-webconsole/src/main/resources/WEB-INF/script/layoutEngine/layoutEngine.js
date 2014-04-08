@@ -1367,10 +1367,9 @@ var layoutEngine = (function() {
 			});
 		}
 		
-		function drop(box, e) {
+		function drop(box, e, targetDockId) {
 			
 			if(!!layoutEngine.ui.layout.box.target) {
-				var targetDockId = $(e.target).parents('dockpanel').attr('id');
 				var t = layoutEngine.ui.layout.box.target;
 				var target = t.splitTarget;
 				delete t.splitTarget;
@@ -1464,6 +1463,8 @@ var layoutEngine = (function() {
 					$(document).off("mousemove.activeDroppable").off("mouseup.activeDroppable").off("selectstart");
 					dragHandler.off("mousemove");
 
+					var targetDockId = $(e.target).parents('dockpanel:first').attr('id');
+
 					box.el.addClass("ani").removeClass("grabbed");
 					//detached.addClass("ani").removeClass("grabbed");
 					//scaf.parent().append(detached);
@@ -1473,10 +1474,10 @@ var layoutEngine = (function() {
 					if(!!scaf) {
 						scaf.remove();
 					}
-					drop(box, e);
-
+					drop(box, e, targetDockId);
+					
 					if((!!options) && !!options.onDrop) {
-						options.onDrop(box, e);
+						options.onDrop(box, e, targetDockId);
 					}
 
 				})

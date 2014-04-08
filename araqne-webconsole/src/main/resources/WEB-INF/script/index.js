@@ -140,8 +140,6 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 
 	$location.path('/');
 
-	$scope.isShowStarter = false;
-	$scope.isShowDashboard = false;
 	$scope.timeout = 1000 * 60 * 1;
 
 	$scope.src = {};
@@ -255,18 +253,6 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 			}
 		}
 		
-
-		if($('#view-starter').css('display') == "block") {
-			$scope.isShowStarter = true;
-		} else {
-			$scope.isShowStarter = false;
-		}
-
-		if($('#view-dashboard').css('display') == "block") {
-			$scope.isShowDashboard = true;
-		} else {
-			$scope.isShowDashboard = false;
-		}
 	}
 
 	eventSender.root.loggedIn = function() {
@@ -468,7 +454,7 @@ function LoginController($scope, socket, serviceSession, eventSender, $location)
 		.success(function(m) {
 
 			serviceSession.login($scope.txtLoginName, $scope.txtPassword, m.body.nonce, function(m) {
-				$location.path('/system/dashboard');
+				$location.path('/system/starter');
 
 				eventSender.root.loggedIn();
 				eventSender.root.startTimeout();

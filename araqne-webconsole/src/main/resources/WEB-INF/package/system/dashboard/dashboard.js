@@ -382,6 +382,8 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	$scope.onDragInnerbox = function(box, e, ed) {
+		$('[widget-droppable] > .widget-drop-zone').css('z-index', 9989);
+
 		console.log('onDragInnerbox')
 		var found = findElementsByCoordinate(["droppable", "widget-drop-zone"], e);
 		if(found.length) {
@@ -422,8 +424,13 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		$('.k-d-col.virtual').css('top', e.pageY - ed.offsetY - 40).css('left', e.pageX - ed.offsetX)
 	}
 
-	$scope.onDropbox = function(box, e, id) {
+	$scope.onDropbox = function(box, e, id, targetId) {
+		$('[widget-droppable] > .widget-drop-zone').css('z-index', '');
+		console.log(id, targetId)
+		if(id === targetId) return;
+
 		$('.k-d-col.virtual').remove();
+		$('.nav.nav-tabs > li.active > a').click();
 	}
 
 	$scope.onAppendbox = function(box, e, id, targetId) {
@@ -643,7 +650,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		var el = angular.element(
 			'<dockpanel id="' + name + '" ' + 
 			  'on-drag="onDragInnerbox($box, $moveevent, $downevent)" ' +
-				'on-drop="onDropbox($box, $event, $id)" ' +
+				'on-drop="onDropbox($box, $event, $id, $targetId)" ' +
 				'on-append="onAppendbox($box, $event, $id, $targetId)" ' +
 				'on-change="onChangePreset($id)" ' +
 				'on-resize="onChangePreset($id, $box, $row)" ' +

@@ -107,13 +107,9 @@
 		color: #ccc;
 		padding-top: 100px;
 	}
-
-	.bg-change {
-		background-color: #eee !important;
-	}
 	</style>
 </head>
-<body ng-controller="Controller" ng-class="{'bg-change': isShowStarter || isShowDashboard }">	
+<body ng-controller="Controller">	
 	<div id="view-menu" ng-include src="src.menu"></div>
 	<div class="view" id="view-login" ng-include src="src.login"></div>
 	<div class="view" id="view-starter" ng-include src="src.starter"></div>
@@ -137,5 +133,7 @@
 		<button type="button" class="close">&times;</button>
 		<span class="msg"></span>
 	</div>
+
+	{{isShowStarter}} {{isShowDashboard}}
 </body>
 </html>
