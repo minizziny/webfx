@@ -426,77 +426,123 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		$('.k-d-col.virtual').remove();
 	}
 
-	$scope.onAppendbox = function(box, e, id) {
-		var dropPanelId = $(e.target).parents('dockpanel').attr('id');
-		if(id === dropPanelId) return;
-
-		
+	$scope.onAppendbox = function(box, e, id, targetId) {
+		if(id === targetId) return;
 
 		var ctx = angular.extend({}, $scope.ctxPreset[id].ctxWidget[box.guid]);
 		delete $scope.ctxPreset[id].ctxWidget[box.guid];
-		$scope.ctxPreset[dropPanelId].ctxWidget[box.guid] = ctx;
+		$scope.ctxPreset[targetId].ctxWidget[box.guid] = ctx;
 		
-		console.log('append!', id, dropPanelId);
+		console.log('append!', id, targetId);
+	}
+
+	$scope.dddWidget = function() {
+		var ctx = {"data": {"series": [{"color": "#AFD8F8", "key": "count", "name": "count"}], "label": "table", "type": "pie", "interval": "23", "query": "logdb count | stats c by table", "labelType": "string"}, "guid": 'w' + serviceUtility.generateType2(), "type": "chart", "interval": "23", "name": "count pie"};
+		eventSender.dashboard.onCreateNewWidgetAndSavePreset(ctx);
+	}
+
+	$scope.cancelAddWidget = function() {
+		$('.arrangeWidget')[0].hideDialog();
+		angular.element('.newbie').remove();
 	}
 
 	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
-		
+		var currentPresetId = '_temp';
+		if( $('dockpanel:last > .k-d-col.blank').length ) {
+			currentPresetId = $('dockpanel:last').attr('id');
+
+			console.log('blank')
+		}
+	
+		$scope.ctxPreset['_temp'] = {
+			ctxWidget: {}
+		}
+		$scope.ctxPreset['_temp'].ctxWidget[ctx.guid] = ctx;
+
+		console.log(ctx);
+
 		var newbie = layoutEngine.ui.layout.box.create({
 			'w': 100,
 			'guid': ctx.guid
 		});
 
-		var newdiv = $('<div class="newbie" ng-controller="NewWidgetController"></div>').appendTo('.dashboard-container');
-		var isSplitInsert = false;
-		newbie.on('splitInsert', function() {
-			newbie.el.find('.handler').off('mousedown.help');
-			isSplitInsert = true;
-		});
 
-		newbie.el.find('.handler').on('mousedown.help', function() {
-			$('.arrangeWidget')[0].hideDialog();
+		if(currentPresetId === '_temp') {
 
-			$(document).on('mouseup.help', function(eu) {
-				if(isSplitInsert) {
-					$('.arrangeWidget')[0].hideDialog();
-					newdiv.remove();
+			var newdiv = $('<div class="newbie" ng-controller="NewWidgetController"></div>').appendTo('.dashboard-container');
+			var isSplitInsert = false;
+			newbie.on('splitInsert', function() {
+				newbie.el.find('.handler').off('mousedown.help');
+				isSplitInsert = true;
+			});
 
-					
-					var target = document.elementFromPoint(eu.clientX, eu.clientY);
-					var presetId = angular.element(target).parents('dockpanel:first').attr('id');
-					$scope.ctxPreset[presetId].ctxWidget[ctx.guid] = ctx;
-					OnPresetChanged(presetId); // save state
+			newbie.el.find('.handler').on('mousedown.help', function() {
+				$('.arrangeWidget')[0].hideDialog();
 
-					widget.find('.widget-toolbox').show();
-				}
-				else {
-					$('.arrangeWidget')[0].showDialog();
-				}
-				$(document).off('mouseup.help');
-			})
-		});
+				$(document).on('mouseup.help', function(eu) {
+					if(isSplitInsert) {
+						$('.arrangeWidget')[0].hideDialog();
+						newdiv.remove();
 
-		newbie.resizerH.hide();
-		newbie.appendTo(newdiv, true);
+						
+						var target = document.elementFromPoint(eu.clientX, eu.clientY);
+						var presetId = angular.element(target).parents('dockpanel:first').attr('id');
+						$scope.ctxPreset[presetId].ctxWidget[ctx.guid] = ctx;
+						OnPresetChanged(presetId); // save state
 
-		$('.arrangeWidget')[0].showDialog();
+						widget.find('.widget-toolbox').show();
+					}
+					else {
+						$('.arrangeWidget')[0].showDialog();
+					}
+					$(document).off('mouseup.help');
+				})
+			});
 
-		var widget = eventSender.dashboard.onCreateNewWidget(ctx);
-		widget.find('.widget-toolbox').hide();
+			newbie.resizerH.hide();
+			newbie.appendTo(newdiv, true);
+
+			$('.arrangeWidget')[0].showDialog();
+
+			var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
+			var widget = angular.element(serviceWidget.buildWidget('_temp', ctx));
+			$compile(widget)($scope);
+			
+			widget.appendTo(el.find('.contentbox'));
+			$timeout(function() {
+				var w = widget.find('widget')[0];
+				w.render();
+
+				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+			}, 500)
+			
+
+			widget.find('.widget-toolbox').hide();
+
+		}
+		else {
+			var bbox = $('dockpanel#' + currentPresetId).find('.k-d-col.blank')[0].obj;
+
+			bbox.splitInsert(newbie, 'top');
+
+			var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
+			var widget = angular.element(serviceWidget.buildWidget('_temp', ctx));
+			$compile(widget)($scope);
+			
+			widget.appendTo(el.find('.contentbox'));
+			$timeout(function() {
+				var w = widget.find('widget')[0];
+				w.render();
+
+				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+
+				$scope.ctxPreset[currentPresetId].ctxWidget[ctx.guid] = ctx;
+				OnPresetChanged(currentPresetId); // save state
+			}, 500)
+		}
+
+		
 	}
-
-	eventSender.dashboard.onCreateNewWidget = function(ctx) {
-		var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
-
-		// var widget = angular.element('<widget ng-pid="getPid" guid="' + ctx.guid + '" on-change="onChangeWidgetProperty($new, $old, \'' + ctx.guid + '\', $key)" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
-		var widget = angular.element('<widget id="' + ctx.guid + '"  on-close="onCloseWidget($id, $target)"><div>{{hello}} {{1+1}}</div></widget>');
-		// $compile(widget)($scope);
-		// widget[0].setContext(ctx);
-
-		widget.appendTo(el.find('.contentbox'));
-		return widget;
-	}
-
 
 	function GetPresetList(callback) {
 		socket.send('com.logpresso.core.msgbus.WallPlugin.getPresetNames', {}, eventSender.dashboard.pid)
@@ -569,6 +615,10 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	$scope.onChangePreset = function(id, box, row) {
+		if(!box && !row) {
+			var el = $('dockpanel#' + id).find('.k-d-col');
+			resizeWidgets(el);
+		}
 		if(!!box) {
 			var el = $(box.rows.map(function(row) { return row.el[0]; }));
 			resizeWidgets(el);
@@ -594,7 +644,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			'<dockpanel id="' + name + '" ' + 
 			  'on-drag="onDragInnerbox($box, $moveevent, $downevent)" ' +
 				'on-drop="onDropbox($box, $event, $id)" ' +
-				'on-append="onAppendbox($box, $event, $id)" ' +
+				'on-append="onAppendbox($box, $event, $id, $targetId)" ' +
 				'on-change="onChangePreset($id)" ' +
 				'on-resize="onChangePreset($id, $box, $row)" ' +
 				'ng-model="ctxPreset.' + name + '.dataLayout" ' +

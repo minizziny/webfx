@@ -1370,9 +1370,10 @@ var layoutEngine = (function() {
 		function drop(box, e) {
 			
 			if(!!layoutEngine.ui.layout.box.target) {
+				var targetDockId = $(e.target).parents('dockpanel').attr('id');
 				var t = layoutEngine.ui.layout.box.target;
 				var target = t.splitTarget;
-				delete t.splsplitTarget;
+				delete t.splitTarget;
 				
 				t.splitInsert(box, target);
 				
@@ -1380,7 +1381,7 @@ var layoutEngine = (function() {
 
 			
 				if((!!options) && !!options.onAppend) {
-					options.onAppend(box, e);
+					options.onAppend(box, e, targetDockId);
 				}
 			}
 			else {
@@ -1472,7 +1473,6 @@ var layoutEngine = (function() {
 					if(!!scaf) {
 						scaf.remove();
 					}
-					
 					drop(box, e);
 
 					if((!!options) && !!options.onDrop) {

@@ -185,11 +185,12 @@ angular.module('app.directive.widget', [])
 							'$id': attrs.id
 						});
 					},
-					'onAppend': function(box, event) {
+					'onAppend': function(box, event, targetDockId) {
 						return scope.onAppend({
 							'$box': box,
 							'$event': event,
-							'$id': attrs.id
+							'$id': attrs.id,
+							'$targetId': targetDockId
 						});
 					},
 					'onModify': debounce(function(box) {
