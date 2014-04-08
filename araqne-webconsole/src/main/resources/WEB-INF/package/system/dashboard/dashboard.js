@@ -329,7 +329,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	$scope.addTab = function(tabdata, e, preset) {
-		var newTabName = prompt('Enter tab Name', 'Tab ' + (tabdata.length + 1));
+		var newTabName = prompt('탭 이름을 입력하세요.', 'Tab ' + (tabdata.length + 1));
 		if(newTabName == null) return;
 
 		var tabctx = {
@@ -363,6 +363,16 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		tabs[--idx].is_active = true;
 		RemovePresets(tab.contents);
 		OnPresetChanged(preset); // save state
+
+	}
+
+	$scope.setTabToHome = function(tab, preset, widget, e) {
+		var tabs = $scope.ctxPreset[preset].ctxWidget[widget].data.tabs;
+		var idx = tabs.indexOf(tab);
+		
+		tabs[idx].is_active = true;
+		OnPresetChanged(preset); // save state
+		notify('success', '탭 ' + tab.name + '(이)가 시작 탭으로 설정되었습니다.' , true);
 
 	}
 

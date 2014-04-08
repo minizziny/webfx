@@ -789,6 +789,7 @@ angular.module('app.directive.widget', [])
 					'<ul class="nav nav-tabs" style="margin-bottom: 0">' +
 						'<li ng-repeat="(i, tab) in data.tabs" ng-class="{\'active\': tab.is_active}">' +
 							'<a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" ng-click="$parent.$parent.activeTab(tab, data.tabs, $event)" widget-droppable>{{tab.name}}</a>' +
+							'<button ng-show="tab.is_active" class="close tab-home" ng-click="$parent.$parent.setTabToHome(tab, \'' + preset + '\' ,\'' + json.guid + '\', $event)"><i class="icon-home"></i></button>' +
 							'<button ng-show="tab.is_active && (data.tabs.length > 1)" class="close tab-close" ng-click="$parent.$parent.closeTab(tab, \'' + preset + '\' ,\'' + json.guid + '\', $event)">&times;</button>' +
 						'</li>' +
 						'<button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event, \'' + preset + '\')"><i class="icon-plus"></i></button>' +
