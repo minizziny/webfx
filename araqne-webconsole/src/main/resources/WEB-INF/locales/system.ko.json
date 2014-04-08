@@ -355,7 +355,6 @@
 	"$S_msg_Nov": "11월",
 	"$S_msg_Dec": "12월",
 
-
 	"--------logsource--------": "",
 	"$S_str_Logger": "로거",
 	"$S_str_LoggerTree": "로컬 수집 설정",
@@ -503,9 +502,39 @@
 	"$S_msg_runAsPrimary": "로거 {{p0}}의 백업 로거로 {{p1}}이 지정되었습니다.",
 	"$S_msg_runAsBackup": "로거 {{p0}}의 프라이머리 로거로 {{p1}}이 지정되었습니다.",
 
-    "$S_str_Primary": "프라이머리",
-    "$S_str_Backup": "백업",
-    "$S_str_Standalone": "독립 실행형",
+	"$S_str_Primary": "프라이머리",
+	"$S_str_Backup": "백업",
+	"$S_str_Standalone": "독립 실행형",
+
+	"$S_str_PrimaryLogger": "프라이머리 로거",
+	"$S_str_BackupLogger": "백업 로거",
+	"$S_str_StandaloneLogger": "독립 실행형 로거",
+	"$S_str_StandaloneOrPrimaryLogger": "독립 실행형/프라이머리 로거",
+
+	"$S_str_BackupLoggerSetting": "백업 로거 설정",
+	"$S_str_PrimaryLoggerSetting": "프라이머리 로거 설정",
+	"$S_msg_EnterLoggerName": "로거 이름을 입력하세요.",
+
+	"$S_msg_PrimaryLoggerSetting": "백업 로거를 선택하세요. 프라이머리 로거의 노드가 일정 시간동안 무응답 시 백업 로거가 시작됩니다. 반대로, 백업 로거가 동작하는 상태에서 프라이머리 로거가 복원되면 백업 로거가 즉시 정지하고 프라이머리 로거가 다시 시작합니다.",
+	"$S_msg_BackupLoggerSetting": "프라이머리 로거를 선택하세요. 백업 로거는 초 단위로 프라이머리 로거의 마지막 상태 정보를 복제합니다. 또한 프라이머리 로거가 복구될 때에 백업 로거의 마지막 상태를 복제하여 동작을 재개합니다.",
+
+	"$S_str_HASetting": "HA 설정",
+	"$S_msg_HASettingSetPrimaryOnWizard": "이 로거의 백업 로거를 만듭니다.",
+
+	"$S_str_SetHAToPrimary": "프라이머리 로거로 설정",
+	"$S_str_SetHAToBackup": "백업 로거로 설정",
+	"$S_str_SetHAToStandalone": "HA 구성 해제",
+	"$S_str_SetHAToStandalone2": "HA 구성 해제",
+
+	"$S_str_SelectNode": "노드 선택",
+	"$S_msg_SelectedNodePre": "노드 ",
+	"$S_msg_SelectedNodePost": " 선택됨",
+	"$S_str_SelectLogger": "로거 선택",
+	"$S_str_NoLoggerOnList": "목록에 없는 로거...",
+	"$S_msg_SelectedLoggerPre": "로거 ",
+	"$S_msg_SelectedLoggerPost": " 선택됨",
+
+	"$S_str_Skip": "건너뛰기",
 
 	"--------license--------": "",
 	"$S_msg_InvalidVolumnLicense": "볼륨 라이센스가 초과 되었습니다.",
