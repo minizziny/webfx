@@ -25,7 +25,9 @@
 	<script src="lib/jquery/jquery.ui.sortable.js"></script>
 	<script src="lib/jquery/scrollsync.js"></script>
 	<script src="lib/jquery/dragscrollable.js"></script>
-	<script src="lib/angular/angular.js"></script>
+	<script src="/lib/angular/angular-1.2.16.js"></script>
+	<script src="/lib/angular/angular-route.js"></script>
+	<script src="/lib/angular/angular-animate.js"></script>
 	<script src="lib/angular/angular-translate.js"></script>
 	<script src="lib/angular/angular-translate-loader-static-files.js"></script>
 	<script src="lib/cryptojs/sha1.js"></script>
@@ -105,13 +107,9 @@
 		color: #ccc;
 		padding-top: 100px;
 	}
-
-	.bg-change {
-		background-color: #eee !important;
-	}
 	</style>
 </head>
-<body ng-controller="Controller" ng-class="{true: 'bg-change'}[isShowStarter || isShowDashboard]">	
+<body ng-controller="Controller">	
 	<div id="view-menu" ng-include src="src.menu"></div>
 	<div class="view" id="view-login" ng-include src="src.login"></div>
 	<div class="view" id="view-starter" ng-include src="src.starter"></div>
@@ -135,5 +133,7 @@
 		<button type="button" class="close">&times;</button>
 		<span class="msg"></span>
 	</div>
+
+	{{isShowStarter}} {{isShowDashboard}}
 </body>
 </html>

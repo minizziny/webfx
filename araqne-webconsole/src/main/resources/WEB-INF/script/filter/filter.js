@@ -34,19 +34,21 @@ angular.module('app.filter', ['pascalprecht.translate'])
 		return prefix + val;
 	}
 })
-.filter('crlf', function() { 
+.filter('crlf', function($sce) { 
 	return function(val) {
 		if(val === 0) {	return '0'; }
 		if(val === false) {	return 'false'; }
 		if(val === null) return val;
+
+		var urlRegex = /(https?:\/\/[^\s]+)/g;
 		
-		if(toString.call(val) == '[object String]') {
-			return val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>');
+		if(Object.prototype.toString.call(val) == '[object String]') {
+			return $sce.trustAsHtml(val.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>').replace(urlRegex, '<a href="$1" target="_blank">$1</a>'));
 		}
-		else if(toString.call(val) == '[object Object]' || toString.call(val) == '[object Array]') {
-			return JSON.stringify(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>');
+		else if(Object.prototype.toString.call(val) == '[object Object]' || Object.prototype.toString.call(val) == '[object Array]') {
+			return $sce.trustAsHtml(JSON.stringify(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/gi, '<br>').replace(urlRegex, '<a href="$1" target="_blank">$1</a>'));
 		}
-		else return val;
+		else return $sce.trustAsHtml(val.toString().replace(urlRegex, '<a href="$1" target="_blank">$1</a>'));
 	}
 })
 .filter('numformat', function() { 
@@ -81,11 +83,6 @@ angular.module('app.filter', ['pascalprecht.translate'])
 		}
 	}
 })
-.filter('suppresstable', function() {
-	return function(t) {
-		return (t.substring(0,5) === 'table') ? t.substring(6) : t;
-	}
-})
 .filter('suppressTimezone', function() {
 	return function(t) {
 		var regex = /\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/;
@@ -93,7 +90,7 @@ angular.module('app.filter', ['pascalprecht.translate'])
 	}
 })
 .filter('capitalizeFirstLetter', function() {
-    return function(t) {
-    	return t.charAt(0).toUpperCase() + t.slice(1);
-    }
+	return function(t) {
+		return t.charAt(0).toUpperCase() + t.slice(1);
+	}
 });

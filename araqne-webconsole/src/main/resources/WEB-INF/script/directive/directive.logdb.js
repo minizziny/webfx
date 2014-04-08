@@ -45,9 +45,14 @@ angular.module('app.directive.logdb', [])
 				});
 			}
 
-			function getResultFn(m) {
-				scope.$parent[attrs.ngModel] = m.body.result;
-				scope.$parent.$apply();
+			function getResultFn(callback) {
+				return function(m) {
+					scope.$parent[attrs.ngModel] = m.body.result;
+					scope.$parent.$apply();
+					if(!!callback) {
+						callback();
+					}
+				}
 			}
 
 			function loadedFn(m) {
@@ -109,7 +114,6 @@ angular.module('app.directive.logdb', [])
 				z.query(scope.ngQueryString.replace(/\n/gi, ' '), limit)
 				.created(createdFn)
 				.started(startedFn)
-				.getResult(getResultFn)
 				.loaded(loadedFn)
 				.onStatusChange(onStatusChangeFn)
 				.failed(failedFn)
@@ -128,9 +132,9 @@ angular.module('app.directive.logdb', [])
 				});
 			}
 
-			element[0].offset = function(offset, limit) {
+			element[0].offset = function(offset, limit, callback) {
 				if(z == undefined) return;
-				z.getResult(offset, limit);
+				z.getResult(offset, limit, getResultFn(callback));
 			}
 
 			element[0].run = function() {
@@ -151,7 +155,6 @@ angular.module('app.directive.logdb', [])
 				})
 				.created(createdFn)
 				.started(startedFn)
-				.getResult(getResultFn)
 				.loaded(loadedFn)
 				.onStatusChange(onStatusChangeFn)
 				.failed(failedFn);
@@ -224,7 +227,7 @@ angular.module('app.directive.logdb', [])
 						ng-hide="!col.is_visible"\
 						ng-repeat="col in ngCols | limitTo: numLimitColumn"\
 						ng-click="toggleCheck(col)"\
-						ng-bind-html-unsafe="d[col.name] | crlf"></td>\
+						ng-bind-html="d[col.name] | crlf"></td>\
 				</tr>\
 			</tbody>\
 		</table>\
