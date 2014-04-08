@@ -68,12 +68,6 @@ logpresso.run(function($rootScope, $location, $anchorScroll, $compile, eventSend
 				eventSender.root.go(newHashSplit, oldHashSplit);
 				if(!!eventSender.menu.onOpen) {
 					eventSender.menu.onOpen(hashSplit[2]);
-					if(hashSplit[2] === 'starter') {
-						$rootScope.grayBackground = true;
-					}
-					else {
-						$rootScope.grayBackground = false;
-					}
 				}
 			}
 			else {
