@@ -1204,7 +1204,8 @@ var layoutEngine = (function() {
 						makeDraggable(that);	
 					}
 					else {
-						handler.css('opacity', 0)
+						handler.hide();
+						contentbox.css('height', 'calc(100% + 2px)');
 					}
 					
 				}

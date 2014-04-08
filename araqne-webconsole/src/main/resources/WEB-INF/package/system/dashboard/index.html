@@ -86,7 +86,7 @@ dockpanel {
 [widget-droppable] > .widget-drop-zone {
 	/*z-index: 9989;*/
 	position: absolute;
-	top: 0;
+	top: -1px;
 	left: 0;
 	right: 0;
 	bottom: 0;
@@ -108,7 +108,7 @@ dockpanel {
 	padding: 2px 6px;
 	box-sizing: border-box;
 	width: calc(100% - 20px);
-	margin: 2px;
+	margin: 0 1px;
 }
 
 /* click-to-edit inner tab end */ 
@@ -131,7 +131,7 @@ widget > .tab-comp > ul.nav-tabs {
 	widget > .tab-comp > ul.nav-tabs > li.active:before, widget > .tab-comp > ul.nav-tabs > li.active {
 		/*background: #f0f0f0;*/
 		border-top: 1px solid #c00;
-		height: 27px;
+		height: 21px;
 		box-shadow: none;
 		background-image: linear-gradient(to bottom, #c00 0px, #c00 1px, #fff 1.1px);
 		background-repeat: no-repeat;
@@ -142,7 +142,7 @@ widget > .tab-comp > ul.nav-tabs {
 		position: absolute;
 		top: -1px;
 		left: -16px;
-		height: 26px;
+		height: 20px;
 		width: 30px;
 		border-top-left-radius: 3px;
 		border-left: 1px solid #b9b9b9;
@@ -162,8 +162,8 @@ widget > .tab-comp > ul.nav-tabs {
 	
 		position: relative;
 		top: 3px;
-		height: 26px;
-		line-height: 26px;
+		height: 20px;
+		line-height: 20px;
 		color: #444444;
 		padding-left: 0;
 		margin-left: 15px;
@@ -184,6 +184,7 @@ widget > .tab-comp > ul.nav-tabs {
 		border-radius: 0;
 		background-color: transparent;
 		border: 0;
+		padding-top: 1px;
 	
 		/*-webkit-transform: skewX(-30deg);*/
 		overflow: hidden;
@@ -228,7 +229,7 @@ widget > .tab-comp > ul.nav-tabs > li > button.tab-close {
 	/*z-index: 10000;*/
 	position: absolute;
 	right: 6px;
-	top: 1px;
+	top: -1px;
 }
 
 widget[grid] .widget-grid-container {

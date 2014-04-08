@@ -59,6 +59,8 @@
 		margin: -2px;
 		padding: 0px 4px;
 		font-size: 9pt;
+		height: 15px;
+		margin-top: -3px;
 	}
 
 	.widget-title {
