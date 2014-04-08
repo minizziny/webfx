@@ -59,6 +59,8 @@
 		margin: -2px;
 		padding: 0px 4px;
 		font-size: 9pt;
+		height: 15px;
+		margin-top: -3px;
 	}
 
 	.widget-title {
@@ -96,6 +98,20 @@
 		clear: both;
 	}
 
+	widget .progress > .bar {
+		-webkit-transition:all linear 0.5s;
+		opacity:1;
+	}
+
+	widget .progress > .bar.ng-hide-add,
+	widget .progress > .bar.ng-hide-remove {
+		display: block !important;
+	}
+
+	widget .progress > .bar.ng-hide {
+		opacity: 0;
+	}
+
 	.widget-content, .widget-error {
 		height: calc(100% - 3px);
 		overflow: auto;
@@ -107,7 +123,7 @@
 		color: silver;
 	}
 
-	widget.grid table td, widget.grid table th {
+	widget[grid] table td, widget[grid] table th {
 		font-size: .85em;
 		padding: 1px 5px;
 	}

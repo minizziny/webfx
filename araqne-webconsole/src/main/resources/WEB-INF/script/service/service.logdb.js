@@ -67,9 +67,9 @@ angular.module('app.logdb', [])
 				//console.log("eof unregistered")
 				unregisterTrap();
 
-				if(m.body.total_count < defaultLimit) {
-					getResult(id, 0)
-				}
+				// if(m.body.total_count < defaultLimit) {
+				// 	getResult(id, 0)
+				// }
 
 				clazz.status = 'End';
 				asyncQuery.done('loaded', m);
@@ -97,9 +97,6 @@ angular.module('app.logdb', [])
 			}
 		}
 
-		function onTimeline(resp) {
-			asyncQuery.done('onTimeline', resp[0]);
-		}
 
 		var defaultLimit = 15;
 
@@ -152,30 +149,19 @@ angular.module('app.logdb', [])
 			}
 			
 			var name = 'logdb-query-' + clazz.id;
-			var tname = 'logdb-query-timeline-' + clazz.id;
-
 			socket.register(name, pid, onTrap, function(resp) {
-
-				socket.register(tname, pid, onTimeline, function(resp) {
-					if(callback != undefined) {
-						callback();	
-					}
-				});
-				
+				if(callback != undefined) {
+					callback();	
+				}
 			});
 		}
 
 		function unregisterTrap(callback) {
 			var name = 'logdb-query-' + clazz.id;
-			var tname = 'logdb-query-timeline-' + clazz.id;
-
 			socket.unregister(name, pid, function(resp) {
-
-				socket.unregister(tname, pid, function(resp) {
-					if(callback != undefined) {
-						callback();	
-					}
-				});
+				if(callback != undefined) {
+					callback();	
+				}
 			});
 		}
 
@@ -206,7 +192,9 @@ angular.module('app.logdb', [])
 				limit: ((limit == undefined) ? defaultLimit : limit),
 			}, pid)
 			.success(function(m) {
-				asyncQuery.done('getResult', m);
+				if(!!~window._logger.current.indexOf('logdb-get-result')) {
+					console.warn('getResult:', clazz.query)
+				}
 				applyFn();
 
 				if(!!callback) {

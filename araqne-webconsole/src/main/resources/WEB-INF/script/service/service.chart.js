@@ -212,7 +212,7 @@ angular.module('app.chart', [])
 		}
 
 		if(m.isString) {
-			console.log(categories, m.type)
+			// console.log(categories, m.type)
 			c1.xAxis.categories = categories;
 		}
 		if(m.isDateTime) {

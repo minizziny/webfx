@@ -73,7 +73,8 @@ angular.module('resettableForm', []).
 					element.removeClass(DIRTY_CLASS).addClass(PRISTINE_CLASS);
 
 					// added following code by gotoweb
-					element.val('');
+					//element.val('');
+
 					control.$setViewValue(undefined);
 				}
 			},

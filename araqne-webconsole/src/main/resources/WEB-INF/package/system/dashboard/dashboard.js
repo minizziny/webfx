@@ -1,20 +1,23 @@
-function DashboardController($scope, $filter, $element, $translate, eventSender) {
+
+function DashboardController($scope, $http, $compile, $translate, $timeout, eventSender, $filter, socket, serviceUtility, serviceSession, serviceWidget) {
 	$scope.getPid = eventSender.dashboard.pid;
+	
+	eventSender.dashboard.$event.on('resume', function() {
+		gt = makeGlobalTimer(1000);
+		var elWidget = angular.element('.tab-pane.active widget');
+		elWidget.each(function(i, w) {
+			w.render();
+			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+		});
+	});
+	
 	eventSender.dashboard.$event.on('unload', function() {
-		console.log('--- unload 2 dashboard!');
-		var widgets = angular.element($element.find('widget'));
-		for(var i = 0; i < widgets.length; i++) {
-			console.log( angular.element( widgets[i] ).scope() );
+		gt.cancel();
+	});
 
-			angular.element( widgets[i] )[0].$dispose();
-
-		}
-		
-	})
-
-	$scope.openNewWidget = function() {
-		eventSender.dashboard.onOpenNewWidget();
-	}
+	eventSender.dashboard.$event.on('suspend', function() {
+		gt.cancel();
+	});
 
 	$scope.formSecond = {
 		'0': $translate('$S_str_Seconds'),
@@ -22,15 +25,455 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 		'other': $translate('$S_str_Seconds')
 	}
 
-	$scope.numCurrentPage = 0;
-	$scope.numPagerPagesize = 100;
+	$scope.ctxPreset = {};
+	$scope.dataPresetList = [];
+	$scope.currentPreset;
+	$scope.isLoadedCurrentPreset = false;
 
-	$scope.onRemoveWidget = function(guid) {
-		eventSender.dashboard.onRemoveSingleWidget(guid);
+	window._recovery = {
+		resetCurrentLayout: function() {
+			OnPresetChanged($scope.currentPreset.guid, true);
+		},
+		resetSpecificLayout: function(guid) {
+			OnPresetChanged(guid, true);
+		}
+	};
+
+	function OnPresetChanged(guid, reset_layout) {
+		var specific = $scope.dataPresetList.filter(function(p) {
+			return p.guid === guid;
+		}).first();
+
+		var stateLayoutObject = angular.element('dockpanel#' + guid + ' > .k-d-col')[0].obj.getObject();
+		// console.log(specific, stateLayoutObject);
+
+		var widgets = [];
+		for(wguid in $scope.ctxPreset[guid].ctxWidget) {
+			widgets.push($scope.ctxPreset[guid].ctxWidget[wguid]);
+		}
+
+		var stateObject = {
+			'layout': [stateLayoutObject],
+			'widgets': widgets
+		}
+
+		console.log(stateObject)
+		return SavePreset(guid, specific.name, stateObject, reset_layout);
 	}
 
-	$scope.onChangeWidgetProperty = function(newval, oldval, guid, key) {
-		eventSender.dashboard.onChangeWidgetProperty(newval, oldval, guid, key);
+	$scope.onCloseWidget = function(id, target, presetId) {
+		if(id in $scope.ctxPreset[presetId].ctxWidget) {
+			$scope.ctxPreset[presetId].ctxWidget[id] = undefined;
+			delete $scope.ctxPreset[presetId].ctxWidget[id];
+			target[0].obj.close();
+
+			$timeout(function() {
+				OnPresetChanged(presetId); // save state
+			}, 200);
+		}
+	}
+
+	$scope.onChangeWidget = function(id, presetId, field, oldval, newval) {
+		if(field == 'data.width') {
+			$scope.ctxPreset[presetId].ctxWidget[id].data.width = newval
+			OnPresetChanged(presetId); // save state
+		}
+		if(id in $scope.ctxPreset[presetId].ctxWidget) {
+			$scope.ctxPreset[presetId].ctxWidget[id][field] = newval;
+			OnPresetChanged(presetId); // save state
+		}
+	}
+
+	eventSender.dashboard.updateWidgetProperty = function(options) {
+		// console.log(options.presetId, options.widgetId, options.widgetId in $scope.ctxPreset[options.presetId].ctxWidget )
+		if(options.widgetId in $scope.ctxPreset[options.presetId].ctxWidget) {
+			$scope.ctxPreset[options.presetId].ctxWidget[options.widgetId].interval = options.interval;
+			OnPresetChanged(options.presetId); // save state
+		}
+		
+		if(!!options.callback) {
+			options.callback();
+		}
+	}
+
+	$scope.openNewWidget = function() {
+		eventSender.dashboard.onOpenNewWidget();
+	}
+
+	$scope.addTabWidget = function() {
+		// var newguid = 'b' + serviceUtility.generateType2();
+		// var newbie = layoutEngine.ui.layout.box.create({
+		// 	'w': 100,
+		// 	"droppable": false,
+		// 	'guid': newguid
+		// });
+
+		// var newdiv = $('<div class="newbie"></div>').appendTo('.dashboard-container');
+		// var isSplitInsert = false;
+		// newbie.on('splitInsert', function() {
+		// 	newbie.el.find('.handler').off('mousedown.help');
+		// 	isSplitInsert = true;
+		// });
+
+		// newbie.el.find('.handler').on('mousedown.help', function() {
+
+		// 	$(document).on('mouseup.help', function() {
+		// 		if(isSplitInsert) {
+		// 			newdiv.remove();
+		// 		}
+				
+		// 		$(document).off('mouseup.help');
+		// 	})
+		// });
+
+		// newbie.resizerH.hide();
+		// newbie.appendTo(newdiv, true);
+
+
+		// var ctxTabWidget = {
+		// 	"guid": newguid,
+		// 	"name": "Tab" + (z++).toString(),
+		// 	"data": {
+		// 		"tabs": [
+		// 			{
+		// 				"name": "헬로",
+		// 				"is_active": true,
+		// 				"guid": 't' + serviceUtility.generateType2(),
+		// 				"type": "dockpanel",
+		// 				"contents": 'p' + serviceUtility.generateType2()
+		// 			}
+		// 		]
+		// 	},
+		// 	"type": "tabs"
+		// }
+
+		// ---------------- need to fix
+		// var elWidget = angular.element(serviceWidget.buildWidget($scope.currentPreset.guid, ctxTabWidget));
+		
+		// $scope.ctxPreset[$scope.currentPreset.guid].ctxWidget[ctxTabWidget.guid] = ctxTabWidget;
+		// $scope.currentPreset.state.widgets.push(ctxTabWidget);
+		
+		// elWidget.appendTo(angular.element('[dock-id=' + newguid + '] .contentbox'));
+		// $compile(elWidget)($scope);
+	}
+
+
+	function makeGlobalTimer(freq) {
+		freq = freq || 1000;
+
+		// array of callback functions
+		var callbacks = {};
+
+		// register the global timer
+		var id = setInterval(
+			function() {
+				var obj;
+
+				for (obj in callbacks) {
+					if(Date.now() >= callbacks[obj].timestamp) {
+						callbacks[obj].callback();
+						delete callbacks[obj];
+					}
+				}
+
+				if(!!~window._logger.current.indexOf('dashboard-widget-timer')) {
+					console.log(callbacks);
+				}
+			}, freq);
+
+		// return a Global Timer object
+		return {
+			"id": function() { return id; },
+			"registerCallback": function(guid, cb, itv) {
+				var d = Date.now();
+				d += itv;
+				if(guid in callbacks) {
+					if(!!~window._logger.current.indexOf('dashboard-widget-timer')) {
+						console.log(guid, 'duplicated');
+					}
+				}
+				else {
+					callbacks[guid] = {
+						'timestamp': d,
+						'callback': cb
+					}
+				}
+			},
+			"unregisterCallback": function(guid) {
+				delete callbacks[guid];
+				if(!!~window._logger.current.indexOf('dashboard-widget-timer')) {
+					console.log(guid, 'unregistered');
+				}
+			},
+			"cancel": function() {
+				if (id !== null) {
+					clearInterval(id);
+					id = null;
+				}
+			}
+		};
+	}
+
+	var gt = makeGlobalTimer(1000);
+	var ONE_SECOND = 1000;
+
+	function refresh(w) {
+		return function() {
+			if(angular.element(w).scope() != undefined) {
+				if( angular.element(w).scope().isRunning ) {
+					w.query(function() {
+						gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+					});
+				}
+			}
+		}
+	}
+
+	$scope.activeTab = function(tab, tabs, e) {
+		
+		tabs.forEach(function(t) {
+			if(t === tab) {
+				t.is_active = true;
+			} else {
+				t.is_active = false;
+			}
+		});
+
+		if(e.activateByDroppable) {
+			return;
+		}
+
+		// 실행중인건 suspend
+		var elRunning = angular.element('widget.w-running');
+		elRunning.each(function(i, w) {
+			w.suspend();
+			gt.unregisterCallback(w.id);
+		});
+
+		// 활성탭인건 렌더
+		var elWidget = angular.element('.tab-pane.' + tab.guid + ' widget');
+		elWidget.each(function(i, w) {
+			w.render();
+			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+		});
+
+		$timeout(function() {
+			resizeWidgets();
+		}, 200);
+	}
+
+	$scope.pauseWidget = function(e) {
+		var w = $(e.target).parents('widget:first')[0];
+		w.suspend();
+		gt.unregisterCallback(w.id);
+	}
+
+	$scope.runWidget = function(e) {
+		var w = $(e.target).parents('widget:first')[0];
+		w.render();
+		gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+	}
+
+	$scope.displayWidgetProperty = function(e) {
+		var w = $(e.target).parents('widget:first')[0];
+		var dockpanel = $(e.target).parents('dockpanel:first')[0];
+
+		eventSender.dashboard.setWidgetProperty(w, dockpanel.id);
+		$('.propertyWidget')[0].showDialog();
+	}
+
+	$scope.refreshWidget = function(e) {
+		var w = $(e.target).parents('widget:first')[0];
+		gt.unregisterCallback(w.id);
+		w.query(function() {
+			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+		});
+	}
+
+	$(window).on('resize', debounce(function() {
+		resizeWidgets();
+	}, 200));
+
+	function resizeWidgets(selector) {
+		if(selector == undefined) {
+			selector = '.tab-pane.active';
+		}
+
+		if(!(selector instanceof jQuery)) {
+			selector = angular.element(selector)
+		}
+
+		resizeChartWidgets(selector);
+		resizeWordCloudWidgets(selector);
+	}
+
+	function resizeChartWidgets(el) {
+		var elChart = el.find('widget[chart] .widget-chart');
+		elChart.each(function(i, c) {
+			if(!!$(c).highcharts) {
+				if(!!$(c).highcharts()) {
+					var parent = $(c).parents('.contentbox');
+					$(c).highcharts().setSize(parent.width(), parent.height() - 10, false);
+				}
+			}
+		});
+	}
+
+	function resizeWordCloudWidgets(el) {
+		var elWordCloud = el.find('widget[wcloud] .widget-wordcloud');
+		elWordCloud.each(function(i, c) {
+			if(!!c.onResize) {
+				c.onResize();
+			}
+		});
+	}
+
+	$scope.addTab = function(tabdata, e, preset) {
+		var newTabName = prompt('탭 이름을 입력하세요.', 'Tab ' + (tabdata.length + 1));
+		if(newTabName == null) return;
+
+		var tabctx = {
+			'name': newTabName,
+			'guid': 't' + serviceUtility.generateType2(),
+			'type': 'dockpanel',
+			"contents": 'p' + serviceUtility.generateType2()
+		}
+		
+		tabdata.push(tabctx);
+		$timeout(function() {
+			var pane = angular.element(e.target).parents('.tab-comp').find('.tab-pane.' + tabctx.guid);
+			NewInnerPreset(tabctx.contents, pane, preset);
+			angular.element(e.target).parents('li').prev().children('a').click();
+			
+			var presetId = angular.element(e.target).parents('dockpanel:first').attr('id');
+			OnPresetChanged(presetId); // save state
+		});
+	}
+
+	$scope.closeTab = function(tab, preset, widget, e) {
+		var sure = confirm('이 탭을 삭제하면 탭 안의 위젯도 삭제됩니다. 계속하시겠습니까?');
+		if(!sure) return;
+
+		var tabs = $scope.ctxPreset[preset].ctxWidget[widget].data.tabs;
+
+		var idx = tabs.indexOf(tab);
+		tabs.splice(idx, 1);
+
+		if(idx == 0) idx = 1;
+		tabs[--idx].is_active = true;
+		RemovePresets(tab.contents);
+		OnPresetChanged(preset); // save state
+
+	}
+
+	$scope.setTabToHome = function(tab, preset, widget, e) {
+		var tabs = $scope.ctxPreset[preset].ctxWidget[widget].data.tabs;
+		var idx = tabs.indexOf(tab);
+		
+		tabs[idx].is_active = true;
+		OnPresetChanged(preset); // save state
+		notify('success', '탭 ' + tab.name + '(이)가 시작 탭으로 설정되었습니다.' , true);
+
+	}
+
+	$scope.onTabTitleChange = function(oldval, newval) {
+		OnPresetChanged($scope.currentPreset.guid); // save state
+	}
+
+	// 위젯 드래그 & 탭 드롭 위한 변수
+	var isEnter = false, timer, a;
+
+	function onEnterDroppableTab(a, box, e, ed) {
+		if($('.k-d-col.virtual').length == 0) {
+			var w = box.el.width(), h = box.el.height();
+			box.el.clone()
+				.addClass('virtual')
+				.width(w)
+				.height(h)
+				.css('top', e.pageY - ed.offsetY - 40)
+				.css('left', e.pageX - ed.offsetX)
+				.appendTo('#view-dashboard');
+		}
+		else {
+			
+		}
+		var event = jQuery.Event("click");
+		event.activateByDroppable = true;
+		a.trigger(event).removeClass('over');
+
+		if($('.k-d-col.virtual').length != 0 && box.el.parents('.tab-pane').length > 0) {
+			var owntab = hasClassIndexOf(box.el.parents('.tab-pane')[0].className, a.attr('tab-id'));
+			if(owntab) {
+				$('.k-d-col.virtual').remove();
+			}
+		}
+	}
+
+	$scope.onDragInnerbox = function(box, e, ed) {
+		$('[widget-droppable] > .widget-drop-zone').css('z-index', 9989);
+
+		console.log('onDragInnerbox')
+		var found = findElementsByCoordinate(["droppable", "widget-drop-zone"], e);
+		if(found.length) {
+			if(!!a) {
+				// console.log(a.attr('tab-id'), $(found[0]).parent().attr('tab-id'))	
+			}
+			
+			if((a == undefined) || a.attr('tab-id') != $(found[0]).parent().attr('tab-id')) {
+				$('[widget-droppable].over').removeClass('over');
+				isEnter = false;
+				a = $(found[0]).parent();
+				a.addClass('over');
+			}
+
+			if(a.attr('tab-id') === $(found[0]).parent().attr('tab-id')) {
+				a.addClass('over');
+			}
+
+			if(!isEnter) {
+				isEnter = true;
+				timer = setTimeout(function() {
+					return onEnterDroppableTab(a,box,e,ed);
+				}, 600);
+			}
+
+		}
+		else {
+			isEnter = false;
+			clearTimeout(timer);
+			timer = undefined;
+			if(!!a) {
+				a.removeClass('over')
+			}
+
+			$('[widget-droppable].over').removeClass('over');
+		}
+
+		$('.k-d-col.virtual').css('top', e.pageY - ed.offsetY - 40).css('left', e.pageX - ed.offsetX)
+	}
+
+	$scope.onDropbox = function(box, e, id, targetId) {
+		$('[widget-droppable] > .widget-drop-zone').css('z-index', '');
+		console.log(id, targetId)
+		if(id === targetId) return;
+
+		$('.k-d-col.virtual').remove();
+		$('.nav.nav-tabs > li.active > a').click();
+	}
+
+	$scope.onAppendbox = function(box, e, id, targetId) {
+		if(id === targetId) return;
+
+		var ctx = angular.extend({}, $scope.ctxPreset[id].ctxWidget[box.guid]);
+		delete $scope.ctxPreset[id].ctxWidget[box.guid];
+		$scope.ctxPreset[targetId].ctxWidget[box.guid] = ctx;
+		
+		console.log('append!', id, targetId);
+	}
+
+	$scope.dddWidget = function() {
+		var ctx = {"data": {"series": [{"color": "#AFD8F8", "key": "count", "name": "count"}], "label": "table", "type": "pie", "interval": "23", "query": "logdb count | stats c by table", "labelType": "string"}, "guid": 'w' + serviceUtility.generateType2(), "type": "chart", "interval": "23", "name": "count pie"};
+		eventSender.dashboard.onCreateNewWidgetAndSavePreset(ctx);
 	}
 
 	$scope.cancelAddWidget = function() {
@@ -38,162 +481,102 @@ function DashboardController($scope, $filter, $element, $translate, eventSender)
 		angular.element('.newbie').remove();
 	}
 
-	function redraw() {
-		layoutEngine.ui.layout.box.allboxes.forEach(function(box) {
-
-			if(box.rows.length > 0) return;
-
-			function resizeCharts(i, widget) {
-				if(!!$(widget).highcharts) {
-					if(!!$(widget).highcharts()) {
-						var parent = $(widget).parents('.contentbox');
-						$(widget).highcharts().setSize(parent.width(), parent.height() - 10, false);
-					}
-				}
-			}
-
-			function resizeWordCloud(i, wc) {
-				if(!!wc.onResize) {
-					wc.onResize();
-				}
-			}
-
-			box.el.find('.widget-chart').each(resizeCharts);
-			box.el.find('.widget-wordcloud').each(resizeWordCloud);
-		});
-	}
-	eventSender.dashboard.$event.on('resume', redraw);
-
-	$(window).on('resize', debounce(redraw, 200));
-}
-
-function PresetController($scope, $compile, $filter, $translate, socket, eventSender, $timeout, serviceUtility, serviceSession) {
-	function setObjectValue(object, ns, value) {
-		function retObject(object, keys, value) {
-			if(keys.length == 1) {
-				object[keys[0]] = value;
-				return object;
-			}
-			
-			var first = keys.shift();
-			var o = object[first];
-			if(o == undefined) {
-				object[first] = {};
-			}
-			return retObject(object[first], keys, value);
-		}
-		var keys = ns.split('.');
-		retObject(object, keys, value);
-	}
-
-	eventSender.dashboard.onChangeWidgetProperty = function(newval, oldval, guid, key) {
-		var found = $scope.currentPreset.state.widgets.filter(function(widget) {
-			return widget.guid == guid;
-		});
-		if(found.length > 0) {
-			setObjectValue(found[0], key, newval);
-			// console.log(found[0])
-			eventSender.dashboard.onCurrentPresetChanged(); // save state
-		}
-	}
-
-	eventSender.dashboard.onCurrentPresetChanged = function(reset_layout) {
-		// console.log('currentPreset changed')
-		// console.trace();
-		console.log($scope.currentPreset);
-		return SavePreset($scope.currentPreset.guid, $scope.currentPreset.name, $scope.currentPreset.state, reset_layout);
-	}
-
-	eventSender.dashboard.onRemoveSingleWidget = function(guid) {
-		console.log('onRemoveSingleWidget', guid);
-		var el = angular.element('.k-d-col[dock-id=' + guid + ']');
-		el[0].obj.close();
-
-		var widgets = $scope.currentPreset.state.widgets;
-		for (var i = widgets.length - 1; i >= 0; i--) {
-			if(widgets[i].guid == guid) {
-				widgets.splice(i, 1);
-				break;
-			}
-		};
-
-		eventSender.dashboard.onCurrentPresetChanged(); // save state
-	}
-
 	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
-		
+		var currentPresetId = '_temp';
+		if( $('dockpanel:last > .k-d-col.blank').length ) {
+			currentPresetId = $('dockpanel:last').attr('id');
+
+			console.log('blank')
+		}
+	
+		$scope.ctxPreset['_temp'] = {
+			ctxWidget: {}
+		}
+		$scope.ctxPreset['_temp'].ctxWidget[ctx.guid] = ctx;
+
+		console.log(ctx);
+
 		var newbie = layoutEngine.ui.layout.box.create({
 			'w': 100,
 			'guid': ctx.guid
 		});
 
-		var newdiv = $('<div class="newbie"></div>').appendTo('.dashboard-container');
-		var isSplitInsert = false;
-		newbie.on('splitInsert', function() {
-			newbie.el.find('.handler').off('mousedown.help');
-			isSplitInsert = true;
-		});
 
-		newbie.el.find('.handler').on('mousedown.help', function() {
-			$('.arrangeWidget')[0].hideDialog();
+		if(currentPresetId === '_temp') {
 
-			$(document).on('mouseup.help', function() {
-				if(isSplitInsert) {
-					$('.arrangeWidget')[0].hideDialog();
-					newdiv.remove();
+			var newdiv = $('<div class="newbie" ng-controller="NewWidgetController"></div>').appendTo('.dashboard-container');
+			var isSplitInsert = false;
+			newbie.on('splitInsert', function() {
+				newbie.el.find('.handler').off('mousedown.help');
+				isSplitInsert = true;
+			});
 
-					// no exist widgets array
-					if(!$scope.currentPreset.state.widgets) {
-						$scope.currentPreset.state["widgets"] = [];
+			newbie.el.find('.handler').on('mousedown.help', function() {
+				$('.arrangeWidget')[0].hideDialog();
+
+				$(document).on('mouseup.help', function(eu) {
+					if(isSplitInsert) {
+						$('.arrangeWidget')[0].hideDialog();
+						newdiv.remove();
+
+						
+						var target = document.elementFromPoint(eu.clientX, eu.clientY);
+						var presetId = angular.element(target).parents('dockpanel:first').attr('id');
+						$scope.ctxPreset[presetId].ctxWidget[ctx.guid] = ctx;
+						OnPresetChanged(presetId); // save state
+
+						widget.find('.widget-toolbox').show();
 					}
+					else {
+						$('.arrangeWidget')[0].showDialog();
+					}
+					$(document).off('mouseup.help');
+				})
+			});
 
-					$scope.currentPreset.state.widgets.push(ctx);
-					widget.find('.widget-toolbox').show();
-					eventSender.dashboard.onCurrentPresetChanged(); // save state
-				}
-				else {
-					$('.arrangeWidget')[0].showDialog();
-				}
-				$(document).off('mouseup.help');
-			})
-		});
+			newbie.resizerH.hide();
+			newbie.appendTo(newdiv, true);
 
-		newbie.resizerH.hide();
-		newbie.appendTo(newdiv, true);
+			$('.arrangeWidget')[0].showDialog();
 
-		$('.arrangeWidget')[0].showDialog();
+			var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
+			var widget = angular.element(serviceWidget.buildWidget('_temp', ctx));
+			$compile(widget)($scope);
+			
+			widget.appendTo(el.find('.contentbox'));
+			$timeout(function() {
+				var w = widget.find('widget')[0];
+				w.render();
 
-		var widget = eventSender.dashboard.onCreateNewWidget(ctx);
-		widget.find('.widget-toolbox').hide();
-	}
+				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+			}, 500)
+			
 
-	eventSender.dashboard.onCreateNewWidget = function(ctx) {
-		var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
+			widget.find('.widget-toolbox').hide();
 
-		var widget = angular.element('<widget ng-pid="getPid" guid="' + ctx.guid + '" on-change="onChangeWidgetProperty($new, $old, \'' + ctx.guid + '\', $key)" on-remove="onRemoveWidget(\'' + ctx.guid + '\')"></widget>');
-		$compile(widget)($scope);
-		widget[0].setContext(ctx);
+		}
+		else {
+			var bbox = $('dockpanel#' + currentPresetId).find('.k-d-col.blank')[0].obj;
 
-		widget.appendTo(el.find('.contentbox'));
-		return widget;
-	}
+			bbox.splitInsert(newbie, 'top');
 
-	$scope.dataPresetList = [];
-	$scope.currentPreset;
+			var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
+			var widget = angular.element(serviceWidget.buildWidget('_temp', ctx));
+			$compile(widget)($scope);
+			
+			widget.appendTo(el.find('.contentbox'));
+			$timeout(function() {
+				var w = widget.find('widget')[0];
+				w.render();
 
-	function displayBlankInfo() {
-		var el = angular.element('<div class="blank-info">\
-			<div class="blank-contents">\
-				<div style="font-size: 16px;line-height: 4;">{{"$S_msg_NoWidget" | translate}}</div>\
-				<button ng-click="openNewWidget();" class="btn btn-primary btn-large">{{"$S_str_AddWidget" | translate}}</button>\
-			</div>\
-		</div>');
-		$compile(el)($scope);
-		el.appendTo('.dockpanel .k-d-col');
-		$timeout(function() {
-			$('.droppable').addClass('max');	
-		}, 300);
-		$scope.$apply();
+				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+
+				$scope.ctxPreset[currentPresetId].ctxWidget[ctx.guid] = ctx;
+				OnPresetChanged(currentPresetId); // save state
+			}, 500)
+		}
+
+		
 	}
 
 	function GetPresetList(callback) {
@@ -215,30 +598,41 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		.failed(msgbusFailed);
 	}
 
-	function SavePreset(guid, name, state, reset_layout) {
-		var isExist = false;
-		for (var i = $scope.dataPresetList.length - 1; i >= 0; i--) {
-			if($scope.dataPresetList[i].guid == guid) {
-				isExist = true;
-				break;
+	function SavePreset(guid, name, state, reset_layout, parent) {
+		var found = $scope.dataPresetList.filter(function(preset) {
+			return preset.guid === guid;
+		});
+
+		var sendContext = { 'guid': guid, 'name': name, 'state': state };
+
+		if(found.length > 0) {
+			console.log('update preset');
+			if( !!found.first().parent ) {
+				sendContext['parent'] = found.first().parent;
 			}
-		};
-
-		if(!isExist) {
-			$scope.dataPresetList.push({
-				'guid': guid,
-				'name': name
-			});
 		}
-
+		else {
+			console.log('new preset');
+			var listContext = {
+				'guid': guid,
+				'name': name,
+				'parent': null
+			};
+			if(!!parent) {
+				listContext['parent'] = parent;
+				sendContext['parent'] = parent;
+			}
+			$scope.dataPresetList.push(listContext);
+		}
+		
 		if(reset_layout === true) {
 			console.warn('reset layout!');
 			delete state.layout; // <-----------------
 		}
 
-		return socket.send("com.logpresso.core.msgbus.WallPlugin.setPreset", 
-			{ 'guid': guid, 'name': name, 'state': state }
-		, eventSender.dashboard.pid);
+		console.log(sendContext)
+
+		return socket.send("com.logpresso.core.msgbus.WallPlugin.setPreset", sendContext, eventSender.dashboard.pid);
 	}
 
 	function InitAutosave() {
@@ -249,17 +643,128 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	function ClearPreset() {
-		$('.dockpanel widget').each(function(i, obj) {
-
-			obj.$dispose();
-
-		});
-
+		layoutEngine.ui.layout.box.allboxes = [];
+		layoutEngine.ui.layout.box.root = undefined;
+		$scope.ctxPreset = {};
 		$('.dockpanel').empty();
-
 	}
 
-	function LoadPreset(guid) {
+	$scope.onChangePreset = function(id, box, row) {
+		if(!box && !row) {
+			var el = $('dockpanel#' + id).find('.k-d-col');
+			resizeWidgets(el);
+		}
+		if(!!box) {
+			var el = $(box.rows.map(function(row) { return row.el[0]; }));
+			resizeWidgets(el);
+		}
+		if(!!row) {
+			var el = $(row.boxes.map(function(box) { return box.el[0]; }));
+			resizeWidgets(el);
+		}
+
+		if($scope.isLoadedCurrentPreset) {
+			console.log('onChangePreset')
+			OnPresetChanged(id); // save state	
+		}
+	}
+
+	function getPresetWidgets(name, data, target, no_root) {
+
+		$scope.ctxPreset[name] = {
+			ctxWidget: {},
+			dataLayout: data.layout[0]
+		}
+		var el = angular.element(
+			'<dockpanel id="' + name + '" ' + 
+			  'on-drag="onDragInnerbox($box, $moveevent, $downevent)" ' +
+				'on-drop="onDropbox($box, $event, $id, $targetId)" ' +
+				'on-append="onAppendbox($box, $event, $id, $targetId)" ' +
+				'on-change="onChangePreset($id)" ' +
+				'on-resize="onChangePreset($id, $box, $row)" ' +
+				'ng-model="ctxPreset.' + name + '.dataLayout" ' +
+				(no_root ? '' : 'root="true"') + '></dockpanel>');
+
+		var widgets = data.widgets;
+
+		widgets.forEach(function(widget) {
+			var elWidget = angular.element(serviceWidget.buildWidget(name, widget));
+			$scope.ctxPreset[name].ctxWidget[widget.guid] = widget;
+			elWidget.appendTo(el);
+		});
+
+		$compile(el)($scope);
+
+		$timeout(function() {
+			widgets.forEach(function(widget) {
+				if(widget.type === 'tabs') {
+					widget.data.tabs.forEach(function(tab) {
+						var has = $scope.dataPresetList.map(function(p) { return p.guid }).indexOf(tab.contents);
+						var pane = el.find('.tab-pane.' + tab.guid);
+						if(!~has) {
+							console.log('innerDockpanel', tab.contents, 'created')
+							NewInnerPreset(tab.contents, pane, name);
+						}
+						else {
+							console.log('innerDockpanel', tab.contents, 'load')
+							LoadPreset(tab.contents, pane);
+						}
+					});
+				}
+			});
+			el.appendTo(target);
+		});
+	}
+
+	function MigrationPreset(preset) {	
+		console.log('===== Migration this preset =====')
+
+		var newguid = 'p' + serviceUtility.generateType2();
+
+		SavePreset(newguid, newguid, preset.state, false, preset.guid).success(function() {
+			var dockId = serviceUtility.generateType2();
+
+			var newstate = {
+				'layout': [{
+					'rows': [{
+						'cols': [{
+							'droppable': false,
+							'dragHandler': false,
+							'guid': dockId,
+							'w': 100
+						}],
+						'h': 100
+					}],
+					'w': 100,
+					'droppable': false,
+					'dragHandler': false
+				}],
+				'widgets': [{
+					'data': {
+						'tabs': [
+							{
+								'name': preset.name,
+								'guid': serviceUtility.generateType2(),
+								'is_active': true,
+								'type': 'dockpanel',
+								'contents': newguid
+							}
+						]
+					},
+					'guid': dockId,
+					'name': preset.name,
+					'type': 'tabs'
+				}]
+			};
+			SavePreset(preset.guid, preset.name, newstate).success(function() {
+				LoadPreset(preset.guid);
+
+				console.log('===== Migration ended =====')
+			});
+		});
+	}
+
+	function LoadPreset(guid, el) {
 
 		socket.send('com.logpresso.core.msgbus.WallPlugin.getPreset',
 			{ 'guid': guid }
@@ -271,103 +776,44 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 			}
 
 			console.log(m.body.preset.state)
-			
-			
-			$scope.currentPreset = m.body.preset;
 
-			ClearPreset();
-
-			var layout = m.body.preset.state.layout;
-			function getRoot(resizable) {
-				// console.warn('getRoot')
-				// console.log(resizable);
-				// console.trace()
-				$('.blank-info').remove();
-				$('.droppable.max').removeClass('max');
-
-				
-				if(!!layoutEngine.ui.layout.box.root) {
-					
+			// root preset
+			//////////////// FOR MIGRATION /////////////
+			if(el == undefined) {
+				console.log('---- Loading Preset',m.body.preset.name, '----');
+				var hasWidget = m.body.preset.state.widgets.some(function(widget) {
+					return widget.type === 'tabs';
+				});
+				if(!hasWidget) {
+					MigrationPreset(m.body.preset);
+					return;
 				}
-				if(typeof resizable == 'object') {
-
-					var curr = resizable.el;
-					var effsp;
-					if(curr.hasClass('k-d-col')) {
-						effsp = curr.prevAll('.k-d-col:first');
-						effsn = curr.nextAll('.k-d-col:first');
-					}
-					else {
-						effsp = curr.prevAll('.k-d-row:first');
-						effsn = curr.nextAll('.k-d-row:first');
-					}
-					// console.log(curr.hasClass('k-d-col'), curr.hasClass('k-d-row')) //  이거에 따라서 .nextAll('.k-d-row:first') 할거냐 .nextAll('.k-d-col:first') 할거냐 정하면 될듯!!
-					// var effsp = curr.prev();
-					// var effsn = curr.next();
-
-					function resizeCharts(i, widget) {
-						if(!!$(widget).highcharts) {
-							if(!!$(widget).highcharts()) {
-								var parent = $(widget).parents('.contentbox');
-								$(widget).highcharts().setSize(parent.width(), parent.height() - 10, false);
-							}
-						}
-					}
-
-					curr.find('.widget-chart').each(resizeCharts);
-					effsn.find('.widget-chart').each(resizeCharts);
-					effsp.find('.widget-chart').each(resizeCharts);
-
-					function syncHandle(i, table) {
-						var objResizableColumns = $(table).data('resizableColumns');
-						if(!!objResizableColumns) {
-							objResizableColumns.syncHandleWidths();
-						}
-					}
-
-					curr.find('.widget-grid').each(syncHandle);
-					effsn.find('.widget-grid').each(syncHandle);
-					effsp.find('.widget-grid').each(syncHandle);
-
-					function resizeWordCloud(i, wc) {
-						if(!!wc.onResize) {
-							wc.onResize();
-						}
-					}
-
-					curr.find('.widget-wordcloud').each(resizeWordCloud);
-					effsn.find('.widget-wordcloud').each(resizeWordCloud);
-					effsp.find('.widget-wordcloud').each(resizeWordCloud);
-				}
-
-				var rootobj = layoutEngine.ui.layout.box.root.getObject();
-				if(!!rootobj) {
-					$scope.currentPreset.state.layout[0] = layoutEngine.ui.layout.box.root.getObject();	
-				}
-				eventSender.dashboard.onCurrentPresetChanged(); // save state
-
-				if($scope.currentPreset.state.widgets.length == 0) {
-					displayBlankInfo();
+				else {
+					m.body.preset.state.layout[0].dragHandler = false;
+					m.body.preset.state.layout[0].droppable = false;
+					m.body.preset.state.layout[0].rows[0].cols[0].dragHandler = false;
+					m.body.preset.state.layout[0].rows[0].cols[0].droppable = false;
 				}
 			}
+			//////////////// END MIGRATION //////////////
+			
 
-			var boxe = new CustomEvent(layoutEngine.ui.layout.box.event);
-			boxe.on('modify', debounce(getRoot, 200));
-			boxe.on('resize', getRoot);
+			// root preset
+			if(el == undefined) {
+				$scope.isLoadedCurrentPreset = false;
+				$scope.currentPreset = m.body.preset;
+				ClearPreset();
+				el = angular.element('.dockpanel');
+				getPresetWidgets(guid, m.body.preset.state, el);
 
-			var box = layoutEngine.ui.layout.box.create(layout[0], true);
-			box.appendTo(".dockpanel");
-
-
-			var widgets = m.body.preset.state.widgets;
-			for (var i = 0; i < widgets.length; i++) {
-				
-				eventSender.dashboard.onCreateNewWidget(widgets[i]);
-
-			};
-
-			if(widgets.length == 0) {
-				$('.dockpanel .mybox').remove();
+				$timeout(function() {
+					$scope.isLoadedCurrentPreset = true;
+					$('.nav.nav-tabs li.active > a').click();
+				}, 1000);
+			}
+			// inner preset
+			else {
+				getPresetWidgets(guid, m.body.preset.state, el, true);
 			}
 
 			$scope.$apply();
@@ -395,10 +841,10 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 		var newname = prompt($translate('$S_msg_SavePresetAs'));
 		if(newname == undefined || newname === '') return;
 
-		var newguid = serviceUtility.generateType2();
+		var newguid = 'p' + serviceUtility.generateType2();
 		SavePreset(newguid, newname, $scope.currentPreset.state).success(function() {
 			LoadPreset(newguid);
-		})
+		});
 	}
 
 	$scope.RenamePreset = function(newval) {
@@ -411,18 +857,32 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	$scope.New = function() {
-		var newname = prompt($translate('$S_msg_NewPresetName'));
-		if(newname == undefined || newname === '') return;
-
+		var name = prompt($translate('$S_msg_NewPresetName'));
+		if(name == undefined || name === '') return;
+		
 		var newguid = serviceUtility.generateType2();
-		SavePreset(newguid, newname, { 
+		SavePreset(newguid, name, { 
 			'layout': [{
+				'blank': true,
 				'guid': undefined,
 				'w': 100
 			}],
 			'widgets': []
 		}).success(function() {
 			LoadPreset(newguid);
+		})
+	}
+
+	function NewInnerPreset(newguid, el, parent) {
+		SavePreset(newguid, newguid, { 
+			'layout': [{
+				'guid': undefined,
+				'w': 100,
+				'blank': true
+			}],
+			'widgets': []
+		}, false, parent).success(function() {
+			LoadPreset(newguid, el);
 		})
 	}
 
@@ -460,22 +920,22 @@ function PresetController($scope, $compile, $filter, $translate, socket, eventSe
 	}
 
 	$scope.Load = function(preset) {
-		console.log(preset)
 		LoadPreset(preset.guid);
 	}
 
 	function Init() {
+		var hasAutosave = false;
 
 		GetPresetList(function() {
 			for (var i = $scope.dataPresetList.length - 1; i >= 0; i--) {
 				if($scope.dataPresetList[i].guid.indexOf("autosave") === 0) {
-					$scope.currentPreset = $scope.dataPresetList[i];
+					hasAutosave = true;
 					LoadPreset($scope.dataPresetList[i].guid);
 					break;
 				}
 			};
 
-			if($scope.currentPreset == undefined) {
+			if(!hasAutosave) {
 				console.log("InitAutosave");
 				InitAutosave().success(Init);
 			}
@@ -570,11 +1030,6 @@ function SelectColumnController($scope, $filter, $translate, eventSender) {
 
 	}
 
-	window._recovery = {
-		resetCurrentLayout: function() {
-			eventSender.dashboard.onCurrentPresetChanged(true); // save state
-		}
-	};
 }
 
 function ChartBindingController($scope, $filter, $translate, eventSender, serviceUtility, serviceChart) {
@@ -840,6 +1295,8 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 }
 
 function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility, $translate) {
+	$scope.numCurrentPage = 0;
+	$scope.numPagerPagesize = 100;
 	var dataChart;
 	
 	function getDefaultContext(type) {
@@ -916,13 +1373,13 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	}
 	
 	$scope.inputOnStatusChange = function(m, instance) {
+		console.log(m)
 		if( (m.body.type === 'eof') || ((m.body.type === 'status_change') && m.body.count > $scope.numPagerPagesize) ) {
 			if(isStopped) return;
 			instance.stop(); // instant search
 			isStopped = true;
 
-			instance.getResult(0, $scope.numPagerPagesize, function() {
-				// console.log('getResult');
+			$('.qi1')[0].offset(0, $scope.numPagerPagesize, function() {
 
 				$('.qr2.qr-select-table')[0].getColumns(function(cols) {
 					// console.log('getColumns')
@@ -1151,5 +1608,36 @@ function WordCloudController($scope, socket, eventSender, serviceChart) {
 		var colNameNumber = cols.filter(function(col) { return col.type === 'number' }).first().name;
 
 		serviceChart.getWordCloud(result, colNameNumber, colNameString, '.cloud-preview');
+	}
+}
+
+function WidgetPropertyController($scope, eventSender) {
+	var presetId, widgetId;
+	var w;
+
+	eventSender.dashboard.setWidgetProperty = function(_w, _presetId) {
+		w = _w;
+		$scope.query = w.getQuery();
+		$scope.interval = w.getInterval();
+		$scope.name = w.getName();
+
+		presetId = _presetId;
+		widgetId = w.id;
+	}
+
+	$scope.updateWidgetProperty = function() {
+		w.setInterval($scope.interval);
+		eventSender.dashboard.updateWidgetProperty({
+			'presetId': presetId,
+			'widgetId': widgetId,
+			'interval': $scope.interval,
+			'callback': function() {
+				$('.propertyWidget')[0].hideDialog();		
+			}
+		});
+	}
+
+	$scope.cancelUpdateWidgetProperty = function() {
+		$('.propertyWidget')[0].hideDialog();
 	}
 }

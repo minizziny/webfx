@@ -1,0 +1,244 @@
+<!doctype html>
+<html ng-app="app">
+<head>
+	<title>Logpresso</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="/lib/bootstrap2/css/bootstrap.min.css" rel="stylesheet" media="screen">
+
+	<link href="/css/app.css" rel="stylesheet" media="screen">
+	<link rel="stylesheet" href="/css/toggle-switch.css" />
+
+	<link rel="stylesheet" type="text/css" href="/css/base.css" />
+	<link rel="stylesheet" type="text/css" href="/css/menu.css" />
+	<link rel="stylesheet" type="text/css" href="/css/logo.css" />
+	<link rel="stylesheet" type="text/css" href="/lib/jquery/jquery.resizableColumns.css" />
+	<link rel="stylesheet" href="/package/logpresso/logquery/logquery2.css"/> 
+
+	<script src="/lib/jquery/jquery-2.0.3.js"></script>
+	<script src="/lib/jquery/jquery.ui.core.js"></script>
+	<script src="/lib/jquery/jquery.ui.widget.js"></script>
+	<script src="/lib/jquery/jquery.ui.mouse.js"></script>
+	<script src="/lib/jquery/jquery.ui.draggable.js"></script>
+	<script src="/lib/jquery/jquery.ui.droppable.js"></script>
+	<script src="/lib/jquery/jquery.ui.datepicker.js"></script>
+	<script src="/lib/jquery/jquery.ui.sortable.js"></script>
+	<script src="/lib/jquery/scrollsync.js"></script>
+	<script src="/lib/jquery/dragscrollable.js"></script>
+	<script src="/lib/angular/angular-1.2.16.js"></script>
+	<script src="/lib/angular/angular-route.js"></script>
+	<script src="/lib/angular/angular-translate.js"></script>
+	<script src="/lib/angular/angular-translate-loader-static-files.js"></script>
+	<script src="/lib/cryptojs/sha1.js"></script>
+	<script src="/lib/d3/d3.js"></script>
+	<script src="/lib/bootstrap2/js/bootstrap.min.js"></script>
+	<script src="/lib/highcharts/highcharts.js"></script>
+
+	<script type="text/javascript" src="/lib/jquery/jquery.resizableColumns.js"></script>
+
+	<script src="/script/service/service.connection.js"></script>
+	<script src="/script/service/service.connection.session.js"></script>
+	<script src="/script/service/service.program.js"></script>
+	<script src="/script/service/service.dom.js"></script>
+	<script src="/script/service/service.logdb.js"></script>
+	<script src="/script/service/service.logdb.management.js"></script>
+	<script src="/script/service/service.utility.js"></script>
+	<script src="/script/service/service.chart.js"></script>
+	<script src="/script/directive/directive.js"></script>
+	<script src="/script/directive/directive.logdb.js"></script>
+	<script src="/script/directive/directive.orgunit.js"></script>
+	<script src="/script/directive/directive.widget.js"></script>
+	<script src="/script/directive/directive.validation.js"></script>
+	<script src="/script/directive/sortable.js"></script>
+
+	<script src="/script/filter/filter.js"></script>
+
+	<script src="/script/layoutEngine/observableArray.js"></script>
+	<script src="/script/layoutEngine/layoutEngine.js"></script>
+
+	<link href="/script/layoutEngine/layoutEngine.css" rel="stylesheet" media="screen">
+	<link href="/css/dashboard.css" rel="stylesheet" media="screen">
+
+	<style>
+	body {
+		padding: 10px;
+		background-color: #eee;
+	}
+
+	dockpanel, widget {
+		display: block;
+	}
+
+	dockpanel {
+		/*border: 1px solid blue;*/
+	}
+
+	/* widget */
+
+	widget {
+		/*border: 1px dotted silver;*/
+		margin: 0px;
+		height: calc(100% - 26px);
+	}
+
+	.contentbox > [ng-transclude] {
+		height: 100%;
+	}
+
+	/* widget end */
+
+	.box {
+		float: left;
+		width: 180px;
+		height: 180px;
+		background-color: #eee;
+		margin: 10px;
+		border: 1px solid gray;
+
+	}
+
+	dockpanel {
+		width: 100%;
+		height: 100%;
+	}
+
+	.contentbox .tab-content {
+		overflow: visible;
+		height: calc(100% - 4px);
+		border-bottom: 1px solid #ddd;
+		border-left: 1px solid #ddd;
+		border-right: 1px solid #ddd;
+	}
+
+
+	/* widget-droppable */
+
+	@-webkit-keyframes blinker {
+		from {
+			background-color: #08c;
+			color: white;
+		}
+		to {
+			background-color: white;
+			color: #08c;
+		}
+	}
+
+	[widget-droppable] {
+		position: relative;
+	}
+
+	.nav-tabs>li [widget-droppable].over {
+		/*background-color: yellow;*/
+		-webkit-animation-name: blinker;
+		-webkit-animation-iteration-count: infinite;
+		-webkit-animation-timing-function: cubic-bezier(1.0,0,0,1.0);
+		-webkit-animation-duration: 0.2s;
+	}
+
+	.nav-tabs>li.active [widget-droppable].over {
+		/*background-color: #fff;*/
+		-webkit-animation: none;
+	}
+
+	[widget-droppable] > .widget-drop-zone {
+		z-index: 9989;
+		position: absolute;
+		color: transparent;
+		top: 0;
+		left: 0;
+		right: 0;
+	}
+
+	
+
+	widget > .tab-comp {
+
+	}
+
+	widget > .tab-comp > ul.nav-tabs {
+		display: flex;
+	}
+
+	widget > .tab-comp > ul.nav-tabs > li {
+		flex: 1;
+		overflow: hidden;
+	}
+
+	widget > .tab-comp > ul.nav-tabs > li > a {
+		padding: 2px 4px;
+		font-size: 0.9em;
+		margin-right: 0;
+		border-radius: 0;
+	}
+
+	widget > .tab-comp > ul.nav-tabs > li.active > a {
+		background-image: linear-gradient(to bottom, #c00 0px, #c00 2px, #fff 2.1px);
+		background-repeat: no-repeat;
+	}
+
+	widget > .tab-comp > ul.nav-tabs > li.plus {
+		flex: none;
+		width: 28px;
+		cursor: pointer;
+	}
+
+	widget > .tab-comp > ul.nav-tabs > li.plus > button {
+		line-height: 24px;
+		outline: none;
+	}
+
+
+	/* */
+
+	#dp {
+		/*width: 1024px;*/
+		height: 800px;
+	}
+
+/*	.mybox {
+		border: 1px dotted transparent;
+		
+	}
+
+	.mybox .handler {
+		background-image: none;
+		width: 20px;
+		height: 20px;
+		border-radius: 0;
+	}
+
+	.mybox:hover {
+		border: 1px solid #ddd;
+	}
+
+	.mybox:hover .handler {
+		background-color: #eee;
+	}
+*/
+	</style>
+
+</head>
+<body>
+<div id="lelen">0</div>
+
+
+<div class="dashboard-container" ng-controller="DashboardController">
+	<!-- <dockpanel class="clearfix" id="dp" ng-model="dataLayout">
+		<widget id="w1" ng-model="blank">{{hello}}</widget>
+		<widget id="w2" ng-model="blank2">
+			<dockpanel class="clearfix" id="dp2" ng-model="dataLayout2">
+				<widget id="w4" ng-model="blank4">{{hello}}</widget>
+			</dockpanel>
+		</widget>
+		<widget id="w3" ng-model="blank3">{{hello}}</widget>
+	</dockpanel>
+-->
+	<widget ng-model="blank">{{hello}}</widget>
+
+	<script src="nested.js"></script>
+	{{isEnter}}
+</div>
+
+</body>
+</html>
