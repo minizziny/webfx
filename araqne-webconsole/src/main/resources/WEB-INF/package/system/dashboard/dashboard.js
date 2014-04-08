@@ -1,8 +1,22 @@
 
 function DashboardController($scope, $http, $compile, $translate, $timeout, eventSender, $filter, socket, serviceUtility, serviceSession, serviceWidget) {
 	$scope.getPid = eventSender.dashboard.pid;
+	
+	eventSender.dashboard.$event.on('resume', function() {
+		gt = makeGlobalTimer(1000);
+		var elWidget = angular.element('.tab-pane.active widget');
+		elWidget.each(function(i, w) {
+			w.render();
+			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+		});
+	});
+	
 	eventSender.dashboard.$event.on('unload', function() {
-		console.log('--- unload 2 dashboard!');
+		gt.cancel();
+	});
+
+	eventSender.dashboard.$event.on('suspend', function() {
+		gt.cancel();
 	});
 
 	$scope.formSecond = {
