@@ -10,6 +10,11 @@ dockpanel {
 	/*border: 1px solid blue;*/
 }
 
+[modal].propertyWidget {
+	width: 600px;
+	margin-left: -300px;
+}
+
 /* widget */
 
 widget {
@@ -229,6 +234,10 @@ widget > .tab-comp > ul.nav-tabs > li > button.tab-close {
 widget[grid] .widget-grid-container {
 	overflow: auto;
 	height: 100%;
+}
+
+widget[chart] .widget-chart, widget[wcloud] .widget-wordcloud  {
+	overflow: hidden;
 }
 
 widget {

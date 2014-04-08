@@ -121,7 +121,7 @@
 		color: silver;
 	}
 
-	widget.grid table td, widget.grid table th {
+	widget[grid] table td, widget[grid] table th {
 		font-size: .85em;
 		padding: 1px 5px;
 	}

@@ -495,7 +495,30 @@ angular.module('app.directive.widget', [])
 			var superResume = elc[0].resume;
 
 			var ctx = { 'data': null };
-			var queryInst, interval = 0;
+			var queryInst, interval = 0, widthInit = true;
+
+			scope.gridWidths = {};
+			scope.getStore = function() {
+				return {
+					get: function(key) {
+						return scope.gridWidths[key.substring(1)];
+					},
+					set: function(key, val) {
+						scope.gridWidths[key.substring(1)] = val;
+						scope.$apply();
+					}
+				}
+			}
+
+			scope.$watch('gridWidths', debounce(function(val) {
+				if(!widthInit) {
+					elc.scope().onChange({
+						'$id': elc.attr('id'),
+						'$field': 'data.width',
+						'$new': val
+					});
+				}
+			}, 100), true);
 
 			scope.progress = { 'width': '0%' };
 			scope.isLoaded = true;
@@ -543,6 +566,9 @@ angular.module('app.directive.widget', [])
 			elc[0].render = function() {
 				var scopec = elc.scope()
 				ctx.data = scopec.data;
+				if(angular.isObject(ctx.data.width)) {
+					scope.gridWidths = ctx.data.width;
+				}
 				scope.order = scopec.data.order;
 				interval = scopec.interval;
 
@@ -571,6 +597,13 @@ angular.module('app.directive.widget', [])
 
 				elc.append(progress);
 				elc.append(table);
+
+				$timeout(function() {
+					$(table).find('table').resizableColumns({
+						store: scope.getStore()
+					});
+					widthInit = false;
+				}, 500);
 
 				superRender();
 			}
