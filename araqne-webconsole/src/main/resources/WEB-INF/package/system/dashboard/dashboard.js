@@ -1447,7 +1447,9 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 					return $scope.isPageLoaded;
 				}
 			},
-			's3prev': 2
+			's3prev': function() {
+				return 2;
+			}
 		},
 		{
 			'name': 'graph',
