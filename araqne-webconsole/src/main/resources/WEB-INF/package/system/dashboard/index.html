@@ -254,6 +254,19 @@ widget.w-running {
 	background-color: white;
 }
 
+widget.w-before-loading:before {
+	content: 'Loading...';
+	color: #aaa; 
+	left: 50%;
+	position: absolute;
+	margin-left: -20px;
+	top: 50%;
+	margin-top: -10px;
+	font-size: 13pt;
+	text-shadow: 1px 1px 2px #ddd;
+	letter-spacing: 1px;
+}
+
 </style>
 
 <div class="dashboard-container" ng-controller="DashboardController">
