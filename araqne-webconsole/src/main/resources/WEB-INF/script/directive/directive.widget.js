@@ -469,7 +469,7 @@ angular.module('app.directive.widget', [])
 			}
 
 			function query(callback) {
-				console.log('query')
+				
 				ctrl.resume();
 				scope.isLoaded = false;
 				scope.progress = { 'width': '0%' };	
@@ -486,11 +486,6 @@ angular.module('app.directive.widget', [])
 				.failed(function(m, raw) {
 					console.widgetLog('failed');
 					serviceLogdb.remove(queryInst);
-
-					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
-					scope.isShowError = true;
-
-					scope.$apply();
 				});
 			}
 
@@ -556,7 +551,9 @@ angular.module('app.directive.widget', [])
 					// }, 1000)
 					scope.$apply();
 
-					t.data('resizableColumns').syncHandleWidths();
+					if(t != undefined) {
+						t.data('resizableColumns').syncHandleWidths();	
+					}
 				}
 			}
 
@@ -628,7 +625,9 @@ angular.module('app.directive.widget', [])
 					});
 
 					$timeout(function() {
-						t.data('resizableColumns').syncHandleWidths();
+						if(t != undefined) {
+							t.data('resizableColumns').syncHandleWidths();
+						}
 					},500)
 					widthInit = false;
 				}, 500);
@@ -637,7 +636,7 @@ angular.module('app.directive.widget', [])
 			}
 
 			function query(callback) {
-				console.log('query')
+				
 				ctrl.resume();
 				scope.isLoaded = false;
 				scope.progress = { 'width': '0%' };	
@@ -654,11 +653,6 @@ angular.module('app.directive.widget', [])
 				.failed(function(m, raw) {
 					console.widgetLog('failed');
 					serviceLogdb.remove(queryInst);
-
-					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
-					scope.isShowError = true;
-
-					scope.$apply();
 				});
 			}
 
@@ -773,7 +767,7 @@ angular.module('app.directive.widget', [])
 			}
 
 			function query(callback) {
-				console.log('query')
+				
 				ctrl.resume();
 				scope.isLoaded = false;
 				scope.progress = { 'width': '0%' };	
@@ -790,11 +784,6 @@ angular.module('app.directive.widget', [])
 				.failed(function(m, raw) {
 					console.widgetLog('failed');
 					serviceLogdb.remove(queryInst);
-
-					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
-					scope.isShowError = true;
-
-					scope.$apply();
 				});
 			}
 
