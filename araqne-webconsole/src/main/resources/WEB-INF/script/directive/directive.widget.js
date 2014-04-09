@@ -83,6 +83,12 @@ angular.module('app.directive.widget', [])
 			}
 
 			scope.onValueChange = function(e, newval, oldval) {
+				if(newval === '' || newval == null) {
+					scope.val = oldval;
+					scope.$apply();
+					return;
+				}
+
 				scope.onChange({
 					'$event': e,
 					'$new': newval,

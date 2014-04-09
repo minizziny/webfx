@@ -360,10 +360,13 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		tabs.splice(idx, 1);
 
 		if(idx == 0) idx = 1;
-		tabs[--idx].is_active = true;
 		RemovePresets(tab.contents);
-		OnPresetChanged(preset); // save state
 
+		$timeout(function() {
+			$('.nav.nav-tabs a[tab-id=' +tabs[--idx].guid + ']').click();	
+			tabs[idx].is_active = true;
+			OnPresetChanged(preset); // save state
+		});
 	}
 
 	$scope.setTabToHome = function(tab, preset, widget, e) {
@@ -376,7 +379,8 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 	}
 
-	$scope.onTabTitleChange = function(oldval, newval) {
+	$scope.onTabTitleChange = function(newval, oldval) {
+		if(newval == '' || newval == null) return;
 		OnPresetChanged($scope.currentPreset.guid); // save state
 	}
 
