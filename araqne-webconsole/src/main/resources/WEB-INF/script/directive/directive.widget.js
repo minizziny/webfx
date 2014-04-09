@@ -374,6 +374,7 @@ angular.module('app.directive.widget', [])
 		link: function(scope, el, attrs, ctrl) {
 			var elc = el.children('widget');
 			var superRender = elc[0].render;
+			var superSuspend = elc[0].suspend;
 
 			scope.progress = { 'width': '0%' };
 			scope.isLoaded = true;
@@ -442,18 +443,23 @@ angular.module('app.directive.widget', [])
 			elc[0].getQuery = function() {
 				return ctx.data.query;
 			}
+
+			elc[0].suspend = function() {
+				serviceLogdb.remove(queryInst);
+				ctrl.suspend();
+			}
 			
-			elc[0].render = function() {
+			elc[0].render = function(callback) {
 				var scopec = elc.scope()
 				ctx.data = scopec.data;
 				interval = scopec.interval;
+
+				query(callback);
 
 				if(ctrl.isLoaded) {
 					superRender();
 					return;
 				}
-
-				query();
 
 				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
 				$compile(progress)(scope);
@@ -463,6 +469,8 @@ angular.module('app.directive.widget', [])
 			}
 
 			function query(callback) {
+				console.log('query')
+				ctrl.resume();
 				scope.isLoaded = false;
 				scope.progress = { 'width': '0%' };	
 				var scopec = elc.scope();
@@ -534,7 +542,6 @@ angular.module('app.directive.widget', [])
 			function resultCallback(callback) {
 				return function(m) {
 					scope.dataQueryResult = m.body.result;
-					
 					serviceLogdb.remove(queryInst);
 					if(!!callback){
 						callback();	
@@ -571,7 +578,12 @@ angular.module('app.directive.widget', [])
 				return ctx.data.query;
 			}
 
-			elc[0].render = function() {
+			elc[0].suspend = function() {
+				serviceLogdb.remove(queryInst);
+				ctrl.suspend();
+			}
+
+			elc[0].render = function(callback) {
 				var scopec = elc.scope()
 				ctx.data = scopec.data;
 				if(angular.isObject(ctx.data.width)) {
@@ -580,12 +592,12 @@ angular.module('app.directive.widget', [])
 				scope.order = scopec.data.order;
 				interval = scopec.interval;
 
+				query(callback);
+
 				if(ctrl.isLoaded) {
 					superRender();
 					return;
 				}
-
-				query();
 
 				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
 
@@ -617,6 +629,8 @@ angular.module('app.directive.widget', [])
 			}
 
 			function query(callback) {
+				console.log('query')
+				ctrl.resume();
 				scope.isLoaded = false;
 				scope.progress = { 'width': '0%' };	
 				var scopec = elc.scope();
@@ -725,18 +739,23 @@ angular.module('app.directive.widget', [])
 			elc[0].getQuery = function() {
 				return ctx.data.query;
 			}
+
+			elc[0].suspend = function() {
+				serviceLogdb.remove(queryInst);
+				ctrl.suspend();
+			}
 			
-			elc[0].render = function() {
+			elc[0].render = function(callback) {
 				var scopec = elc.scope()
 				ctx.data = scopec.data;
 				interval = scopec.interval;
+
+				query(callback);
 
 				if(ctrl.isLoaded) {
 					superRender();
 					return;
 				}
-
-				query();
 
 				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
 				$compile(progress)(scope);
@@ -746,6 +765,8 @@ angular.module('app.directive.widget', [])
 			}
 
 			function query(callback) {
+				console.log('query')
+				ctrl.resume();
 				scope.isLoaded = false;
 				scope.progress = { 'width': '0%' };	
 				var scopec = elc.scope();
