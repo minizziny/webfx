@@ -318,6 +318,17 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 		resizeChartWidgets(selector);
 		resizeWordCloudWidgets(selector);
+		resizeGridWidgets(selector)
+	}
+
+	function resizeGridWidgets(el) {
+		var elGrid = el.find('widget[grid] table');
+		elGrid.each(function(i, table) {
+			var objResizableColumns = $(table).data('resizableColumns');
+			if(!!objResizableColumns) {
+				objResizableColumns.syncHandleWidths();
+			}
+		});
 	}
 
 	function resizeChartWidgets(el) {
@@ -356,7 +367,8 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		$timeout(function() {
 			var pane = angular.element(e.target).parents('.tab-comp').find('.tab-pane.' + tabctx.guid);
 			NewInnerPreset(tabctx.contents, pane, preset);
-			angular.element(e.target).parents('li').prev().children('a').click();
+			
+			$('.nav.nav-tabs a[tab-id=' +tabctx.guid + ']').click();
 			
 			var presetId = angular.element(e.target).parents('dockpanel:first').attr('id');
 			OnPresetChanged(presetId); // save state
@@ -500,8 +512,8 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
 		var currentPresetId = '_temp';
-		if( $('dockpanel:last > .k-d-col.blank').length ) {
-			currentPresetId = $('dockpanel:last').attr('id');
+		if( $('dockpanel:visible:last > .k-d-col.blank').length ) {
+			currentPresetId = $('dockpanel:visible:last').attr('id');
 
 			console.log('blank')
 		}
@@ -573,6 +585,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 		}
 		else {
+			console.log(currentPresetId)
 			var bbox = $('dockpanel#' + currentPresetId).find('.k-d-col.blank')[0].obj;
 
 			bbox.splitInsert(newbie, 'top');
