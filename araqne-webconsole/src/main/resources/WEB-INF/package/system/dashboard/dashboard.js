@@ -318,6 +318,17 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 		resizeChartWidgets(selector);
 		resizeWordCloudWidgets(selector);
+		resizeGridWidgets(selector)
+	}
+
+	function resizeGridWidgets(el) {
+		var elGrid = el.find('widget[grid] table');
+		elGrid.each(function(i, table) {
+			var objResizableColumns = $(table).data('resizableColumns');
+			if(!!objResizableColumns) {
+				objResizableColumns.syncHandleWidths();
+			}
+		});
 	}
 
 	function resizeChartWidgets(el) {
