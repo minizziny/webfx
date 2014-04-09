@@ -239,8 +239,13 @@ widget > .tab-comp > ul.nav-tabs > li > button.tab-home {
 }
 
 widget[grid] .widget-grid-container {
-	overflow: auto;
+	overflow-y: auto;
+	overflow-x: hidden;
 	height: 100%;
+}
+
+widget[grid] .widget-grid-container table {
+	margin: 0;
 }
 
 widget[chart] .widget-chart, widget[wcloud] .widget-wordcloud  {

@@ -509,6 +509,7 @@ angular.module('app.directive.widget', [])
 			var superRender = elc[0].render;
 			var superSuspend = elc[0].suspend;
 			var superResume = elc[0].resume;
+			var t;
 
 			var ctx = { 'data': null };
 			var queryInst, interval = 0, widthInit = true;
@@ -554,6 +555,8 @@ angular.module('app.directive.widget', [])
 						scope.isLoaded = true;
 					// }, 1000)
 					scope.$apply();
+
+					t.data('resizableColumns').syncHandleWidths();
 				}
 			}
 
@@ -619,9 +622,14 @@ angular.module('app.directive.widget', [])
 				elc.append(table);
 
 				$timeout(function() {
-					$(table).find('table').resizableColumns({
+					t = $(table).find('table');
+					t.resizableColumns({
 						store: scope.getStore()
 					});
+
+					$timeout(function() {
+						t.data('resizableColumns').syncHandleWidths();
+					},500)
 					widthInit = false;
 				}, 500);
 

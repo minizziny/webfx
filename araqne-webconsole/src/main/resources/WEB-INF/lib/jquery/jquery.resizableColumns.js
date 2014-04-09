@@ -19,7 +19,7 @@ var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments)
   ResizableColumns = (function() {
     ResizableColumns.prototype.defaults = {
       store: window.store,
-      rigidSizing: false,
+      syncHandlers: true,
       resizeFromBody: true
     };
 
@@ -82,7 +82,6 @@ var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments)
 
     ResizableColumns.prototype.syncHandleWidths = function() {
       var _this = this;
-      this.setHeaders();
       return this.$handleContainer.width(this.$table.width()).find('.rc-handle').each(function(_, el) {
         var $el;
         $el = $(el);
@@ -139,15 +138,19 @@ var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments)
         left: parseWidth($leftColumn[0]),
         right: parseWidth($rightColumn[0])
       };
+      this.$handleContainer.addClass('rc-table-resizing');
       this.$table.addClass('rc-table-resizing');
       $(document).on('mousemove.rc touchmove.rc', function(e) {
         var difference;
         difference = (pointerX(e) - startPosition) / _this.$table.width() * 100;
         setWidth($rightColumn[0], widths.right - difference);
+        if (_this.options.syncHandlers)
+          _this.syncHandleWidths();
         return setWidth($leftColumn[0], widths.left + difference);
       });
       return $(document).one('mouseup touchend', function() {
         $(document).off('mousemove.rc touchmove.rc');
+        _this.$handleContainer.removeClass('rc-table-resizing');
         _this.$table.removeClass('rc-table-resizing');
         _this.syncHandleWidths();
         return _this.saveColumnWidths();
