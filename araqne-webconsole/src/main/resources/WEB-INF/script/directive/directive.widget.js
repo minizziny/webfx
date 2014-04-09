@@ -257,6 +257,8 @@ angular.module('app.directive.widget', [])
 			$scope.isRunning = false;
 
 			this.load = function() {
+				$element.removeClass('w-before-loading');
+				$element.children('widget').removeClass('w-before-loading');
 				self.isLoaded = true;
 				$scope.isRunning = true;
 				console.log($scope)
@@ -802,15 +804,15 @@ angular.module('app.directive.widget', [])
 			'</widget>';
 		}
 		else if(json.type === 'grid') {
-			return '<widget grid id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
+			return '<widget grid class="w-before-loading" id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
 				'</widget>';
 		}
 		else if(json.type === 'chart') {
-			return '<widget chart id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
+			return '<widget chart class="w-before-loading" id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
 				'</widget>';
 		}
 		else if(json.type === 'wordcloud') {
-			return '<widget wcloud id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
+			return '<widget wcloud class="w-before-loading" id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
 				'</widget>';
 		}
 		else {
