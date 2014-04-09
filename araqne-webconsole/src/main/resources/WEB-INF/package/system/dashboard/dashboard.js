@@ -6,16 +6,25 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		gt = makeGlobalTimer(1000);
 		var elWidget = angular.element('.tab-pane.active widget');
 		elWidget.each(function(i, w) {
-			w.render();
-			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+			w.query(function() {
+				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+			});
 		});
 	});
 	
 	eventSender.dashboard.$event.on('unload', function() {
+		var elWidget = angular.element('.tab-pane.active widget');
+		elWidget.each(function(i, w) {
+			w.suspend();
+		});
 		gt.cancel();
 	});
 
 	eventSender.dashboard.$event.on('suspend', function() {
+		var elWidget = angular.element('.tab-pane.active widget');
+		elWidget.each(function(i, w) {
+			w.suspend();
+		});
 		gt.cancel();
 	});
 
@@ -253,8 +262,10 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		// 활성탭인건 렌더
 		var elWidget = angular.element('.tab-pane.' + tab.guid + ' widget');
 		elWidget.each(function(i, w) {
-			w.render();
-			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+			w.render(function() {
+				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
+			});
+			
 		});
 
 		$timeout(function() {
@@ -270,8 +281,9 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 	$scope.runWidget = function(e) {
 		var w = $(e.target).parents('widget:first')[0];
-		w.render();
-		gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+		w.query(function() {
+			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
+		});
 	}
 
 	$scope.displayWidgetProperty = function(e) {
@@ -284,9 +296,10 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 	$scope.refreshWidget = function(e) {
 		var w = $(e.target).parents('widget:first')[0];
+		w.suspend();
 		gt.unregisterCallback(w.id);
 		w.query(function() {
-			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
 		});
 	}
 
@@ -550,9 +563,9 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			widget.appendTo(el.find('.contentbox'));
 			$timeout(function() {
 				var w = widget.find('widget')[0];
-				w.render();
-
-				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+				w.render(function() {
+					gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+				});
 			}, 500)
 			
 
@@ -571,9 +584,9 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			widget.appendTo(el.find('.contentbox'));
 			$timeout(function() {
 				var w = widget.find('widget')[0];
-				w.render();
-
-				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+				w.render(function() {
+					gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+				});
 
 				$scope.ctxPreset[currentPresetId].ctxWidget[ctx.guid] = ctx;
 				OnPresetChanged(currentPresetId); // save state
