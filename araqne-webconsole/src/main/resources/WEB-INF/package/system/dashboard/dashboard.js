@@ -86,6 +86,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		if(field == 'data.width') {
 			$scope.ctxPreset[presetId].ctxWidget[id].data.width = newval
 			OnPresetChanged(presetId); // save state
+			return;
 		}
 		if(id in $scope.ctxPreset[presetId].ctxWidget) {
 			$scope.ctxPreset[presetId].ctxWidget[id][field] = newval;
