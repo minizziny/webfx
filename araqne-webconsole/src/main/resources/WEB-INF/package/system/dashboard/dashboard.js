@@ -499,6 +499,21 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		$scope.ctxPreset[targetId].ctxWidget[box.guid] = ctx;
 		
 		console.log('append!', id, targetId);
+
+		$timeout(function() {
+			var pane = $('.tab-pane.active');
+			console.log(pane, targetId)
+			LoadPreset(targetId, pane);
+
+			$timeout(function() {
+				var w = $('.tab-pane.active widget');
+				w.each(function(i, w) {
+					w.render(function() {
+						gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
+					});
+				})
+			}, 1000);
+		}, 500);
 	}
 
 	$scope.dddWidget = function() {
@@ -512,17 +527,20 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
-		var currentPresetId = '_temp';
+		var currentPresetId = $('dockpanel:visible:last').attr('id');
+		var isBlank = false;
 		if( $('dockpanel:visible:last > .k-d-col.blank').length ) {
 			currentPresetId = $('dockpanel:visible:last').attr('id');
+			isBlank = true;
+
+			$scope.ctxPreset[currentPresetId] = {
+				ctxWidget: {}
+			}
 
 			console.log('blank')
 		}
-	
-		$scope.ctxPreset['_temp'] = {
-			ctxWidget: {}
-		}
-		$scope.ctxPreset['_temp'].ctxWidget[ctx.guid] = ctx;
+		
+		$scope.ctxPreset[currentPresetId].ctxWidget[ctx.guid] = ctx;
 
 		console.log(ctx);
 
@@ -532,7 +550,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		});
 
 
-		if(currentPresetId === '_temp') {
+		if(!isBlank) {
 
 			var newdiv = $('<div class="newbie" ng-controller="NewWidgetController"></div>').appendTo('.dashboard-container');
 			var isSplitInsert = false;
@@ -570,7 +588,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			$('.arrangeWidget')[0].showDialog();
 
 			var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
-			var widget = angular.element(serviceWidget.buildWidget('_temp', ctx));
+			var widget = angular.element(serviceWidget.buildWidget(currentPresetId, ctx));
 			$compile(widget)($scope);
 			
 			widget.appendTo(el.find('.contentbox'));
@@ -592,7 +610,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			bbox.splitInsert(newbie, 'top');
 
 			var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
-			var widget = angular.element(serviceWidget.buildWidget('_temp', ctx));
+			var widget = angular.element(serviceWidget.buildWidget(currentPresetId, ctx));
 			$compile(widget)($scope);
 			
 			widget.appendTo(el.find('.contentbox'));
@@ -701,6 +719,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	function getPresetWidgets(name, data, target, no_root) {
+		target.empty();
 
 		$scope.ctxPreset[name] = {
 			ctxWidget: {},
@@ -840,7 +859,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 				$timeout(function() {
 					$scope.isLoadedCurrentPreset = true;
 					$('.nav.nav-tabs li.active > a').click();
-				}, 1000);
+				}, 4000);
 			}
 			// inner preset
 			else {
