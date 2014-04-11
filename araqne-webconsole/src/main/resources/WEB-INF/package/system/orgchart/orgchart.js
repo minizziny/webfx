@@ -1019,6 +1019,6 @@ function OrgUnitTreeController($scope, $compile, $filter, socket, eventSender) {
 
 
 function openError(m, raw) {
-	$('.errorWin')[0].showDialog();
-	$('.errorWin .raw').text(JSON.stringify(raw[0]));
+	$('.orgchart-container .errorWin')[0].showDialog();
+	$('.orgchart-container .errorWin .raw').text(JSON.stringify(raw[0]));
 }

@@ -10,6 +10,11 @@ dockpanel {
 	/*border: 1px solid blue;*/
 }
 
+[modal].propertyWidget {
+	width: 600px;
+	margin-left: -300px;
+}
+
 /* widget */
 
 widget {
@@ -81,7 +86,7 @@ dockpanel {
 [widget-droppable] > .widget-drop-zone {
 	/*z-index: 9989;*/
 	position: absolute;
-	top: 0;
+	top: -1px;
 	left: 0;
 	right: 0;
 	bottom: 0;
@@ -103,7 +108,7 @@ dockpanel {
 	padding: 2px 6px;
 	box-sizing: border-box;
 	width: calc(100% - 20px);
-	margin: 2px;
+	margin: 0 1px;
 }
 
 /* click-to-edit inner tab end */ 
@@ -126,7 +131,7 @@ widget > .tab-comp > ul.nav-tabs {
 	widget > .tab-comp > ul.nav-tabs > li.active:before, widget > .tab-comp > ul.nav-tabs > li.active {
 		/*background: #f0f0f0;*/
 		border-top: 1px solid #c00;
-		height: 27px;
+		height: 21px;
 		box-shadow: none;
 		background-image: linear-gradient(to bottom, #c00 0px, #c00 1px, #fff 1.1px);
 		background-repeat: no-repeat;
@@ -137,7 +142,7 @@ widget > .tab-comp > ul.nav-tabs {
 		position: absolute;
 		top: -1px;
 		left: -16px;
-		height: 26px;
+		height: 20px;
 		width: 30px;
 		border-top-left-radius: 3px;
 		border-left: 1px solid #b9b9b9;
@@ -157,8 +162,8 @@ widget > .tab-comp > ul.nav-tabs {
 	
 		position: relative;
 		top: 3px;
-		height: 26px;
-		line-height: 26px;
+		height: 20px;
+		line-height: 20px;
 		color: #444444;
 		padding-left: 0;
 		margin-left: 15px;
@@ -179,11 +184,13 @@ widget > .tab-comp > ul.nav-tabs {
 		border-radius: 0;
 		background-color: transparent;
 		border: 0;
+		padding-top: 1px;
 	
 		/*-webkit-transform: skewX(-30deg);*/
 		overflow: hidden;
 		white-space: nowrap;
 		text-overflow: ellipsis;
+		height: 18px;
 	}
 	
 	widget > .tab-comp > ul.nav-tabs > li > a:hover {
@@ -220,15 +227,29 @@ widget > .tab-comp > ul.nav-tabs > li.plus > button {
 }
 
 widget > .tab-comp > ul.nav-tabs > li > button.tab-close {
-	/*z-index: 10000;*/
 	position: absolute;
 	right: 6px;
-	top: 1px;
+	top: -1px;
+}
+
+widget > .tab-comp > ul.nav-tabs > li > button.tab-home {
+	position: absolute;
+	right: 24px;
+	top: 3px;
 }
 
 widget[grid] .widget-grid-container {
-	overflow: auto;
+	overflow-y: auto;
+	overflow-x: hidden;
 	height: 100%;
+}
+
+widget[grid] .widget-grid-container table {
+	margin: 0;
+}
+
+widget[chart] .widget-chart, widget[wcloud] .widget-wordcloud  {
+	overflow: hidden;
 }
 
 widget {
@@ -237,6 +258,19 @@ widget {
 
 widget.w-running {
 	background-color: white;
+}
+
+widget.w-before-loading:before {
+	content: 'Loading...';
+	color: #aaa; 
+	left: 50%;
+	position: absolute;
+	margin-left: -20px;
+	top: 50%;
+	margin-top: -10px;
+	font-size: 13pt;
+	text-shadow: 1px 1px 2px #ddd;
+	letter-spacing: 1px;
 }
 
 </style>

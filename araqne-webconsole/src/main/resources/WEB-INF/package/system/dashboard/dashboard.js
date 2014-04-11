@@ -1,8 +1,31 @@
 
 function DashboardController($scope, $http, $compile, $translate, $timeout, eventSender, $filter, socket, serviceUtility, serviceSession, serviceWidget) {
 	$scope.getPid = eventSender.dashboard.pid;
+	
+	eventSender.dashboard.$event.on('resume', function() {
+		gt = makeGlobalTimer(1000);
+		var elWidget = angular.element('.tab-pane.active widget');
+		elWidget.each(function(i, w) {
+			w.query(function() {
+				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+			});
+		});
+	});
+	
 	eventSender.dashboard.$event.on('unload', function() {
-		console.log('--- unload 2 dashboard!');
+		var elWidget = angular.element('.tab-pane.active widget');
+		elWidget.each(function(i, w) {
+			w.suspend();
+		});
+		gt.cancel();
+	});
+
+	eventSender.dashboard.$event.on('suspend', function() {
+		var elWidget = angular.element('.tab-pane.active widget');
+		elWidget.each(function(i, w) {
+			w.suspend();
+		});
+		gt.cancel();
 	});
 
 	$scope.formSecond = {
@@ -60,6 +83,11 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	$scope.onChangeWidget = function(id, presetId, field, oldval, newval) {
+		if(field == 'data.width') {
+			$scope.ctxPreset[presetId].ctxWidget[id].data.width = newval
+			OnPresetChanged(presetId); // save state
+			return;
+		}
 		if(id in $scope.ctxPreset[presetId].ctxWidget) {
 			$scope.ctxPreset[presetId].ctxWidget[id][field] = newval;
 			OnPresetChanged(presetId); // save state
@@ -235,8 +263,10 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		// 활성탭인건 렌더
 		var elWidget = angular.element('.tab-pane.' + tab.guid + ' widget');
 		elWidget.each(function(i, w) {
-			w.render();
-			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+			w.render(function() {
+				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
+			});
+			
 		});
 
 		$timeout(function() {
@@ -252,8 +282,9 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 	$scope.runWidget = function(e) {
 		var w = $(e.target).parents('widget:first')[0];
-		w.render();
-		gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+		w.query(function() {
+			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
+		});
 	}
 
 	$scope.displayWidgetProperty = function(e) {
@@ -266,9 +297,10 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 	$scope.refreshWidget = function(e) {
 		var w = $(e.target).parents('widget:first')[0];
+		w.suspend();
 		gt.unregisterCallback(w.id);
 		w.query(function() {
-			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+			gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
 		});
 	}
 
@@ -287,6 +319,17 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 		resizeChartWidgets(selector);
 		resizeWordCloudWidgets(selector);
+		resizeGridWidgets(selector)
+	}
+
+	function resizeGridWidgets(el) {
+		var elGrid = el.find('widget[grid] table');
+		elGrid.each(function(i, table) {
+			var objResizableColumns = $(table).data('resizableColumns');
+			if(!!objResizableColumns) {
+				objResizableColumns.syncHandleWidths();
+			}
+		});
 	}
 
 	function resizeChartWidgets(el) {
@@ -311,7 +354,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	$scope.addTab = function(tabdata, e, preset) {
-		var newTabName = prompt('Enter tab Name', 'Tab ' + (tabdata.length + 1));
+		var newTabName = prompt('탭 이름을 입력하세요.', 'Tab ' + (tabdata.length + 1));
 		if(newTabName == null) return;
 
 		var tabctx = {
@@ -325,7 +368,8 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		$timeout(function() {
 			var pane = angular.element(e.target).parents('.tab-comp').find('.tab-pane.' + tabctx.guid);
 			NewInnerPreset(tabctx.contents, pane, preset);
-			angular.element(e.target).parents('li').prev().children('a').click();
+			
+			$('.nav.nav-tabs a[tab-id=' +tabctx.guid + ']').click();
 			
 			var presetId = angular.element(e.target).parents('dockpanel:first').attr('id');
 			OnPresetChanged(presetId); // save state
@@ -342,13 +386,27 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		tabs.splice(idx, 1);
 
 		if(idx == 0) idx = 1;
-		tabs[--idx].is_active = true;
 		RemovePresets(tab.contents);
+
+		$timeout(function() {
+			$('.nav.nav-tabs a[tab-id=' +tabs[--idx].guid + ']').click();	
+			tabs[idx].is_active = true;
+			OnPresetChanged(preset); // save state
+		});
+	}
+
+	$scope.setTabToHome = function(tab, preset, widget, e) {
+		var tabs = $scope.ctxPreset[preset].ctxWidget[widget].data.tabs;
+		var idx = tabs.indexOf(tab);
+		
+		tabs[idx].is_active = true;
 		OnPresetChanged(preset); // save state
+		notify('success', '탭 ' + tab.name + '(이)가 시작 탭으로 설정되었습니다.' , true);
 
 	}
 
-	$scope.onTabTitleChange = function(oldval, newval) {
+	$scope.onTabTitleChange = function(newval, oldval) {
+		if(newval == '' || newval == null) return;
 		OnPresetChanged($scope.currentPreset.guid); // save state
 	}
 
@@ -441,6 +499,21 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		$scope.ctxPreset[targetId].ctxWidget[box.guid] = ctx;
 		
 		console.log('append!', id, targetId);
+
+		$timeout(function() {
+			var pane = $('.tab-pane.active');
+			console.log(pane, targetId)
+			LoadPreset(targetId, pane);
+
+			$timeout(function() {
+				var w = $('.tab-pane.active widget');
+				w.each(function(i, w) {
+					w.render(function() {
+						gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
+					});
+				})
+			}, 1000);
+		}, 500);
 	}
 
 	$scope.dddWidget = function() {
@@ -454,17 +527,20 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
-		var currentPresetId = '_temp';
-		if( $('dockpanel:last > .k-d-col.blank').length ) {
-			currentPresetId = $('dockpanel:last').attr('id');
+		var currentPresetId = $('dockpanel:visible:last').attr('id');
+		var isBlank = false;
+		if( $('dockpanel:visible:last > .k-d-col.blank').length ) {
+			currentPresetId = $('dockpanel:visible:last').attr('id');
+			isBlank = true;
+
+			$scope.ctxPreset[currentPresetId] = {
+				ctxWidget: {}
+			}
 
 			console.log('blank')
 		}
-	
-		$scope.ctxPreset['_temp'] = {
-			ctxWidget: {}
-		}
-		$scope.ctxPreset['_temp'].ctxWidget[ctx.guid] = ctx;
+		
+		$scope.ctxPreset[currentPresetId].ctxWidget[ctx.guid] = ctx;
 
 		console.log(ctx);
 
@@ -474,7 +550,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 		});
 
 
-		if(currentPresetId === '_temp') {
+		if(!isBlank) {
 
 			var newdiv = $('<div class="newbie" ng-controller="NewWidgetController"></div>').appendTo('.dashboard-container');
 			var isSplitInsert = false;
@@ -512,15 +588,15 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			$('.arrangeWidget')[0].showDialog();
 
 			var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
-			var widget = angular.element(serviceWidget.buildWidget('_temp', ctx));
+			var widget = angular.element(serviceWidget.buildWidget(currentPresetId, ctx));
 			$compile(widget)($scope);
 			
 			widget.appendTo(el.find('.contentbox'));
 			$timeout(function() {
 				var w = widget.find('widget')[0];
-				w.render();
-
-				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+				w.render(function() {
+					gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+				});
 			}, 500)
 			
 
@@ -528,20 +604,21 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 
 		}
 		else {
+			console.log(currentPresetId)
 			var bbox = $('dockpanel#' + currentPresetId).find('.k-d-col.blank')[0].obj;
 
 			bbox.splitInsert(newbie, 'top');
 
 			var el = angular.element('.k-d-col[dock-id=' + ctx.guid + ']');
-			var widget = angular.element(serviceWidget.buildWidget('_temp', ctx));
+			var widget = angular.element(serviceWidget.buildWidget(currentPresetId, ctx));
 			$compile(widget)($scope);
 			
 			widget.appendTo(el.find('.contentbox'));
 			$timeout(function() {
 				var w = widget.find('widget')[0];
-				w.render();
-
-				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+				w.render(function() {
+					gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+				});
 
 				$scope.ctxPreset[currentPresetId].ctxWidget[ctx.guid] = ctx;
 				OnPresetChanged(currentPresetId); // save state
@@ -642,6 +719,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 	}
 
 	function getPresetWidgets(name, data, target, no_root) {
+		target.empty();
 
 		$scope.ctxPreset[name] = {
 			ctxWidget: {},
@@ -781,7 +859,7 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 				$timeout(function() {
 					$scope.isLoadedCurrentPreset = true;
 					$('.nav.nav-tabs li.active > a').click();
-				}, 1000);
+				}, 4000);
 			}
 			// inner preset
 			else {
@@ -1388,7 +1466,9 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 					return $scope.isPageLoaded;
 				}
 			},
-			's3prev': 2
+			's3prev': function() {
+				return 2;
+			}
 		},
 		{
 			'name': 'graph',

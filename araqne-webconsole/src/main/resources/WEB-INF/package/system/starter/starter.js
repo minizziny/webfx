@@ -1,4 +1,17 @@
-function StarterController($scope, socket, eventSender) {
+function StarterController($scope, socket, eventSender, $rootScope) {
+	function setGrayBackground(b, apply) {
+		return function() {
+			$rootScope.grayBackground = b;
+			if(apply) {
+				$rootScope.$apply();
+			}
+		}
+	}
+	eventSender.starter.$event.on('load', setGrayBackground(true, true));
+	eventSender.starter.$event.on('resume', setGrayBackground(true));
+	eventSender.starter.$event.on('unload', setGrayBackground(false));
+	eventSender.starter.$event.on('suspend', setGrayBackground(false));
+	
 	$scope.getPid = eventSender.starter.pid;
 	$scope.partitions = [];
 

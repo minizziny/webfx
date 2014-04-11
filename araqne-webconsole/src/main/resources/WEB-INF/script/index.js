@@ -17,7 +17,6 @@ var logpresso = angular.module('app', [
 	'app.logdb.management',
 	'pascalprecht.translate',
 	'ui.sortable',
-	'resettableForm',
 	'ngAnimate'
 ], function() {
 });
@@ -557,6 +556,10 @@ function deferScroller(fn, interval, callback) {
 
 var timerNofity;
 function notify(type, msg, autohide) {
+	$('#alert-fix-side').off('click.notify').on('click.notify', function() {
+		$('#alert-fix-side.show').removeClass('show');
+	});
+	
 	function makeRemoveClassHandler(regex) {
 		return function (index, classes) {
 			return classes.split(/\s+/).filter(function (el) { return regex.test(el);}).join(' ');

@@ -36,9 +36,10 @@ angular.module('app.filter', ['pascalprecht.translate'])
 })
 .filter('crlf', function($sce) { 
 	return function(val) {
-		if(val === 0) {	return '0'; }
-		if(val === false) {	return 'false'; }
+		if(val === 0) {	return $sce.trustAsHtml('0'); }
+		if(val === false) {	return $sce.trustAsHtml('false'); }
 		if(val === null) return val;
+		if(val === undefined) return val;
 
 		var urlRegex = /(https?:\/\/[^\s]+)/g;
 		

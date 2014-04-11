@@ -83,6 +83,12 @@ angular.module('app.directive.widget', [])
 			}
 
 			scope.onValueChange = function(e, newval, oldval) {
+				if(newval === '' || newval == null) {
+					scope.val = oldval;
+					scope.$apply();
+					return;
+				}
+
 				scope.onChange({
 					'$event': e,
 					'$new': newval,
@@ -257,6 +263,8 @@ angular.module('app.directive.widget', [])
 			$scope.isRunning = false;
 
 			this.load = function() {
+				$element.removeClass('w-before-loading');
+				$element.children('widget').removeClass('w-before-loading');
 				self.isLoaded = true;
 				$scope.isRunning = true;
 				console.log($scope)
@@ -366,6 +374,7 @@ angular.module('app.directive.widget', [])
 		link: function(scope, el, attrs, ctrl) {
 			var elc = el.children('widget');
 			var superRender = elc[0].render;
+			var superSuspend = elc[0].suspend;
 
 			scope.progress = { 'width': '0%' };
 			scope.isLoaded = true;
@@ -434,18 +443,23 @@ angular.module('app.directive.widget', [])
 			elc[0].getQuery = function() {
 				return ctx.data.query;
 			}
+
+			elc[0].suspend = function() {
+				serviceLogdb.remove(queryInst);
+				ctrl.suspend();
+			}
 			
-			elc[0].render = function() {
+			elc[0].render = function(callback) {
 				var scopec = elc.scope()
 				ctx.data = scopec.data;
 				interval = scopec.interval;
+
+				query(callback);
 
 				if(ctrl.isLoaded) {
 					superRender();
 					return;
 				}
-
-				query();
 
 				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
 				$compile(progress)(scope);
@@ -455,6 +469,8 @@ angular.module('app.directive.widget', [])
 			}
 
 			function query(callback) {
+				
+				ctrl.resume();
 				scope.isLoaded = false;
 				scope.progress = { 'width': '0%' };	
 				var scopec = elc.scope();
@@ -470,11 +486,6 @@ angular.module('app.directive.widget', [])
 				.failed(function(m, raw) {
 					console.widgetLog('failed');
 					serviceLogdb.remove(queryInst);
-
-					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
-					scope.isShowError = true;
-
-					scope.$apply();
 				});
 			}
 
@@ -493,9 +504,33 @@ angular.module('app.directive.widget', [])
 			var superRender = elc[0].render;
 			var superSuspend = elc[0].suspend;
 			var superResume = elc[0].resume;
+			var t;
 
 			var ctx = { 'data': null };
-			var queryInst, interval = 0;
+			var queryInst, interval = 0, widthInit = true;
+
+			scope.gridWidths = {};
+			scope.getStore = function() {
+				return {
+					get: function(key) {
+						return scope.gridWidths[key.substring(1)];
+					},
+					set: function(key, val) {
+						scope.gridWidths[key.substring(1)] = val;
+						scope.$apply();
+					}
+				}
+			}
+
+			scope.$watch('gridWidths', debounce(function(val) {
+				if(!widthInit) {
+					elc.scope().onChange({
+						'$id': elc.attr('id'),
+						'$field': 'data.width',
+						'$new': val
+					});
+				}
+			}, 100), true);
 
 			scope.progress = { 'width': '0%' };
 			scope.isLoaded = true;
@@ -503,7 +538,6 @@ angular.module('app.directive.widget', [])
 			function resultCallback(callback) {
 				return function(m) {
 					scope.dataQueryResult = m.body.result;
-					
 					serviceLogdb.remove(queryInst);
 					if(!!callback){
 						callback();	
@@ -516,6 +550,10 @@ angular.module('app.directive.widget', [])
 						scope.isLoaded = true;
 					// }, 1000)
 					scope.$apply();
+
+					if(t != undefined) {
+						t.data('resizableColumns').syncHandleWidths();	
+					}
 				}
 			}
 
@@ -540,18 +578,26 @@ angular.module('app.directive.widget', [])
 				return ctx.data.query;
 			}
 
-			elc[0].render = function() {
+			elc[0].suspend = function() {
+				serviceLogdb.remove(queryInst);
+				ctrl.suspend();
+			}
+
+			elc[0].render = function(callback) {
 				var scopec = elc.scope()
 				ctx.data = scopec.data;
+				if(angular.isObject(ctx.data.width)) {
+					scope.gridWidths = ctx.data.width;
+				}
 				scope.order = scopec.data.order;
 				interval = scopec.interval;
+
+				query(callback);
 
 				if(ctrl.isLoaded) {
 					superRender();
 					return;
 				}
-
-				query();
 
 				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
 
@@ -572,10 +618,26 @@ angular.module('app.directive.widget', [])
 				elc.append(progress);
 				elc.append(table);
 
+				$timeout(function() {
+					t = $(table).find('table');
+					t.resizableColumns({
+						store: scope.getStore()
+					});
+
+					$timeout(function() {
+						if(t != undefined) {
+							t.data('resizableColumns').syncHandleWidths();
+						}
+					},500)
+					widthInit = false;
+				}, 500);
+
 				superRender();
 			}
 
 			function query(callback) {
+				
+				ctrl.resume();
 				scope.isLoaded = false;
 				scope.progress = { 'width': '0%' };	
 				var scopec = elc.scope();
@@ -591,11 +653,6 @@ angular.module('app.directive.widget', [])
 				.failed(function(m, raw) {
 					console.widgetLog('failed');
 					serviceLogdb.remove(queryInst);
-
-					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
-					scope.isShowError = true;
-
-					scope.$apply();
 				});
 			}
 
@@ -684,18 +741,23 @@ angular.module('app.directive.widget', [])
 			elc[0].getQuery = function() {
 				return ctx.data.query;
 			}
+
+			elc[0].suspend = function() {
+				serviceLogdb.remove(queryInst);
+				ctrl.suspend();
+			}
 			
-			elc[0].render = function() {
+			elc[0].render = function(callback) {
 				var scopec = elc.scope()
 				ctx.data = scopec.data;
 				interval = scopec.interval;
+
+				query(callback);
 
 				if(ctrl.isLoaded) {
 					superRender();
 					return;
 				}
-
-				query();
 
 				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
 				$compile(progress)(scope);
@@ -705,6 +767,8 @@ angular.module('app.directive.widget', [])
 			}
 
 			function query(callback) {
+				
+				ctrl.resume();
 				scope.isLoaded = false;
 				scope.progress = { 'width': '0%' };	
 				var scopec = elc.scope();
@@ -720,11 +784,6 @@ angular.module('app.directive.widget', [])
 				.failed(function(m, raw) {
 					console.widgetLog('failed');
 					serviceLogdb.remove(queryInst);
-
-					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
-					scope.isShowError = true;
-
-					scope.$apply();
 				});
 			}
 
@@ -756,6 +815,7 @@ angular.module('app.directive.widget', [])
 					'<ul class="nav nav-tabs" style="margin-bottom: 0">' +
 						'<li ng-repeat="(i, tab) in data.tabs" ng-class="{\'active\': tab.is_active}">' +
 							'<a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" ng-click="$parent.$parent.activeTab(tab, data.tabs, $event)" widget-droppable>{{tab.name}}</a>' +
+							'<button ng-show="tab.is_active" class="close tab-home" ng-click="$parent.$parent.setTabToHome(tab, \'' + preset + '\' ,\'' + json.guid + '\', $event)"><i class="icon-home"></i></button>' +
 							'<button ng-show="tab.is_active && (data.tabs.length > 1)" class="close tab-close" ng-click="$parent.$parent.closeTab(tab, \'' + preset + '\' ,\'' + json.guid + '\', $event)">&times;</button>' +
 						'</li>' +
 						'<button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event, \'' + preset + '\')"><i class="icon-plus"></i></button>' +
@@ -768,15 +828,15 @@ angular.module('app.directive.widget', [])
 			'</widget>';
 		}
 		else if(json.type === 'grid') {
-			return '<widget grid id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
+			return '<widget grid class="w-before-loading" id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
 				'</widget>';
 		}
 		else if(json.type === 'chart') {
-			return '<widget chart id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
+			return '<widget chart class="w-before-loading" id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
 				'</widget>';
 		}
 		else if(json.type === 'wordcloud') {
-			return '<widget wcloud id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
+			return '<widget wcloud class="w-before-loading" id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
 				'</widget>';
 		}
 		else {
