@@ -453,6 +453,7 @@
 	"$S_msg_IsClosed" : "セントリーが繋がっていません",
 	"$S_msg_RpcTimeout" : "RPCが応答しません",
 	"$S_msg_IntervalCannotBeZero" : "周期は0になれません",
+	"$S_msg_SameSyslogMapping": "Same syslog mapping already exists.",
 
 	"$S_str_Category": "カテゴリ",
 	"$S_str_MacAddress": "MACアドレス",

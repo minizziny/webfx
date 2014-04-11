@@ -458,6 +458,7 @@
 	"$S_msg_IsClosed" : "센트리가 연결 되어 있지 않습니다.",
 	"$S_msg_RpcTimeout" : "원격 프로시져 호출 연결이 자동적으로 중단되었습니다.",
 	"$S_msg_IntervalCannotBeZero" : "인터벌은 0 이 될수 없습니다.",
+	"$S_msg_SameSyslogMapping": "Same syslog mapping already exists.",
 
 	"$S_str_Category": "항목",
 	"$S_str_MacAddress": "MAC 주소",

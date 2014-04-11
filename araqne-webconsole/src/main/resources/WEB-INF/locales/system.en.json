@@ -458,6 +458,7 @@
 	"$S_msg_IsClosed" : "Connection is Closed.",
 	"$S_msg_RpcTimeout" : "Rpc timeout.",
 	"$S_msg_IntervalCannotBeZero" : "Interval cannot be zero.",
+	"$S_msg_SameSyslogMapping": "Same syslog mapping already exists.",
 	
 	"$S_str_Category": "Category",
 	"$S_str_MacAddress": "MAC Address",
