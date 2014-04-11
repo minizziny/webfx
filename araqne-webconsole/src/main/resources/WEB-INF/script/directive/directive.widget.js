@@ -1,10 +1,12 @@
+console.widgetLog = function() {}
+
 angular.module('app.directive.widget', [])
 .directive('ngModelOnBlur', function() {
 	return {
 		restrict: 'A',
 		require: 'ngModel',
 		scope: {
-			'onChange': '&ngChange',
+			'onChange': '&',
 			'onCancel': '&ngCancel',
 			'ngModelOnBlur': '&',
 			'val': '=ngModel'
@@ -12,54 +14,41 @@ angular.module('app.directive.widget', [])
 		link: function(scope, element, attrs, ngModelCtrl) {
 			if (attrs.type === 'radio' || attrs.type === 'checkbox') return;
 			var cancel = false;
+			var oldval;
 
-			element.unbind('input').unbind('keydown.onBlur').unbind('change');
-			element.bind('blur.onBlur', function(e) {
+			element.unbind('input').unbind('keydown.onBlur').unbind('change').unbind('focus.onFocus');
+			element.bind('focus.onFocus', function(e) {
+				oldval = element.val();
+			})
+			.bind('blur.onBlur', function(e) {
+				var newval = ngModelCtrl.$viewValue;
+
 				if(!cancel) {
-					var oldval = ngModelCtrl.$modelValue;
-					if(element.attr('type') == 'number') {
-						if((element[0].validity) && (!element[0].validity.valid)) {
-							// not number
-							element.val(oldval)
-						}
-						else {
-							var newval = element.val();
-							ngModelCtrl.$setViewValue(newval);
-							scope.onChange({
-								'$event': e,
-								'$new': newval,
-								'$old': oldval
-							});
-						}
-					}
-					else {
-						var newval = element.val();
-						if(newval != oldval) {
-							ngModelCtrl.$setViewValue(newval);
-							scope.onChange({
-								'$event': e,
-								'$new': newval,
-								'$old': oldval
-							});
-						}	
+					if(newval != oldval) {
+						scope.onChange({
+							'$event': e,
+							'$new': newval,
+							'$old': oldval
+						});
+						oldval = newval;
 					}
 				}
-
+				
 				scope.ngModelOnBlur({
 
 				});
-
-				setTimeout(function() {
-					scope.$apply();
-					cancel = false;
-				}, 100);
-			}).bind('keydown.onBlur', function(e) {
+				cancel = false;
+			})
+			.bind('keydown.onBlur', function(e) {
 				if(e.keyCode == 13) {
 					this.blur();
 				}
 				else if(e.keyCode == 27) {
 					cancel = true;
-					element.val(scope.val)
+
+					ngModelCtrl.$setViewValue(oldval);
+					element.val(oldval);
+					scope.$apply();
 
 					scope.onCancel({
 
@@ -80,7 +69,7 @@ angular.module('app.directive.widget', [])
 			'onToggle': '&ngToggle',
 			'type': '='
 		},
-		template: '<input type="text" ng-model="val" style="display:none" ng-model-on-blur="onBlur()" ng-change="onValueChange($event, $new, $old)" ng-cancel="onCancel()"></input><a ng-click="toggle()">{{val}}</a>',
+		template: '<input type="text" ng-model="val" style="display:none" ng-model-on-blur="onBlur()" on-change="onValueChange($event, $new, $old)" ng-cancel="onCancel()"></input><a ng-click="toggle()">{{val}}</a>',
 		link: function(scope, element, attrs) {
 			var elInput = element.find('input');
 			var elA = element.find('a');
@@ -94,6 +83,12 @@ angular.module('app.directive.widget', [])
 			}
 
 			scope.onValueChange = function(e, newval, oldval) {
+				if(newval === '' || newval == null) {
+					scope.val = oldval;
+					scope.$apply();
+					return;
+				}
+
 				scope.onChange({
 					'$event': e,
 					'$new': newval,
@@ -107,86 +102,412 @@ angular.module('app.directive.widget', [])
 				if(elA.is(':hidden')) {
 					elInput.focus();
 				}
+				else {
+					elA.css('display','');
+				}
 
 				scope.onToggle({});
 			}
 		}
 	}
 })
-.directive('widget', function($compile, $timeout, $parse, $translate, serviceLogdb, serviceChart) {
+.directive('widgetTarget', function() {
+	return {
+		restrict: 'A',
+		require: ['ngModel'],
+		link: function(scope, el, attrs, ctrl) {
+			
+		}
+	}
+})
+.directive('dockpanel', function() {
+	return {
+		restrict: 'E',
+		require: 'ngModel',
+		scope: {
+			'ngModel': '=',
+			'onDrag': '&',
+			'onDrop': '&',
+			'onAppend': '&',
+			'onChange': '&',
+			'onResize': '&'
+		},
+		controller: function($scope, $element) {
+			this.append = function(model, detached) {
+				var contentbox = $element.find('[dock-id=' + model.guid + '] > .mybox > .contentbox');
+				// 이때 append되지 않은건 버려짐.
+				if(contentbox.length) {
+					console.widgetLog('append widget', detached[0].id, model.guid);
+					contentbox.append(detached);	
+				}
+			}
+		},
+		link: function(scope, el, attrs, ctrl) {
+			console.widgetLog('linking dockpanel');
+			var cached;
+
+			function cache() {
+				// 이 시점에선 dockpanel 아래의 link된 widget을 캐시하는 것이 아니고,
+				// 이미 append된 widget들을 캐시한다. link됐으나 append되지 않은건 이미 아까 사라짐.
+				cached = el.find('widget').detach();
+				console.widgetLog('cache', cached.length, 'item cached');
+			}
+
+			function restore() {
+				if(!cached.length) return;
+				console.widgetLog('restore');
+
+				cached.each(function(i, widget) {
+					var guid = angular.element(widget).attr('guid');
+
+					var contentbox = el.find('[dock-id=' + guid + '] > .mybox > .contentbox');
+					if(contentbox.length) {
+						// 이때 append되지 않은건 버려짐.
+						console.widgetLog('restore widget', widget.id, guid);
+						contentbox.append(widget);
+					}
+				});
+
+				cached = undefined;
+			}
+
+			function render(layout) {
+				cache();
+				el.empty();
+				console.widgetLog('---render start---')
+
+				var _box = layoutEngine.ui.layout.box.create(layout, false, {
+					'onDrag': function(box, em, ed) {
+						return scope.onDrag({
+							'$box': box,
+							'$moveevent': em,
+							'$downevent': ed
+						});
+					},
+					'onDrop': function(box, event, targetDockId) {
+						return scope.onDrop({
+							'$box': box,
+							'$event': event,
+							'$id': attrs.id,
+							'$targetId': targetDockId
+						});
+					},
+					'onAppend': function(box, event, targetDockId) {
+						return scope.onAppend({
+							'$box': box,
+							'$event': event,
+							'$id': attrs.id,
+							'$targetId': targetDockId
+						});
+					},
+					'onModify': debounce(function(box) {
+						return scope.onChange({
+							'$id': attrs.id,
+							'$box': box
+						});	
+					}, 200),
+					'onResize': function(row, box) {
+						return scope.onResize({
+							'$id': attrs.id,
+							'$row': row,
+							'$box': box
+						});
+					}
+				});
+
+				if(attrs.root === 'true') {
+					_box.appendTo(el);
+				}
+				else {
+					_box.appendTo(el, true);
+				}
+				
+				restore();
+			}
+
+			var ew = scope.$watch('ngModel', function(val) {
+				console.widgetLog('ngModel changed', attrs.id);
+				if(angular.isObject(val)) {
+					render(val);
+					ew();
+				}
+			});
+		}
+	}
+})
+.directive('widget', function($timeout, $compile) {
 	return {
 		restrict: 'E',
 		scope: {
-			'onRemove': '&',
-			'ngPid': '=',
+			'onClose': '&',
 			'onChange': '&'
 		},
-		template: 
-			'<span click-to-edit ng-model="name" ng-change="onTitleChange($new, $old)" ng-cancel="onCancel()" ng-toggle="onToggle()" class="pull-left widget-title"></span>\
-			<span class="pull-right widget-toolbox">\
-				<button class="btn btn-extra-mini b-pause" ng-hide="isPaused" ng-click="isPaused = true">\
-					<i class="icon-pause"></i>\
-				</button><button class="btn btn-extra-mini b-play" ng-show="isPaused" ng-click="isPaused = false">\
-					<i class="icon-play"></i>\
-				</button><button class="btn btn-extra-mini b-refresh" ng-click="refresh();">\
-					<i class="icon-refresh"></i>\
-				</button><button class="btn btn-extra-mini b-p" ng-click="isShowProperty = !isShowProperty">\
-					<i class="icon-info-sign"></i>\
-				</button><button class="btn btn-extra-mini b-x" ng-click="removeWidget()">\
-					<i class="icon-remove"></i>\
-				</button>\
-			</span>\
-			<div class="progress">\
-				<div class="bar" ng-hide="isLoaded" ng-style="progress"></div>\
-			</div>\
-			<div class="widget-content" ng-hide="isShowError">\
-				<span class="widget-status pull-left" ng-show="isPaused">일시 정지됨</span>\
-				<span class="widget-lastupdate pull-right">{{lastUpdate}}</span>\
-			</div>\
-			<div class="widget-error" ng-show="isShowError">\
-				<div class="alert alert-error">{{errorMessage}}</div>\
-			</div>\
-			<div class="property" ng-show="isShowProperty" ng-click="isShowProperty = !isShowProperty">\
-				<div class="property-inner" ng-click="stopPropagation($event)">\
-					<code style="display:inline-block; max-height:200px; overflow:auto">{{query}}</code><br/>\
-					{{"$S_msg_QueryRunCount" | translate:paramQueryRunCount()}}<br/>\
-					<span click-to-edit type="number" ng-model="interval" ng-change="onIntervalChange($event, $new, $old)" ng-cancel="onCancel()"></span>\
-					{{"$S_msg_QueryRunInterval" | translate}}\
-				</div>\
-			</div>',
-		link: function(scope, el, attrs) {
-			var timer;
-			scope.isShowProperty = false;
-			scope.isShowError = false;
-			scope.isPaused = false;
-			scope.errorMessage = $translate('$S_msg_UnknownError');
-			scope.guid;
+		transclude: 'element',
+		replace: true,
+		require: ['?^dockpanel', '?ngModel'],
+		template: '<div ng-transclude></div>',
+		controller: function($scope, $element) {
+			var self = this;
+			this.isLoaded = false;
 
-			scope.onCancel = function() {
-				console.log('onCancel');
+			$scope.$watch('isRunning', function(val) {
+				var $el = $element.children('widget');
+				if(val) {
+					$el.addClass('w-running');
+				}
+				else {
+					$el.removeClass('w-running');
+				}
+				console.widgetLog($el[0])
+			})
+			$scope.isRunning = false;
+
+			this.load = function() {
+				$element.removeClass('w-before-loading');
+				$element.children('widget').removeClass('w-before-loading');
+				self.isLoaded = true;
+				$scope.isRunning = true;
+				console.log($scope)
 			}
 
-			scope.onTitleChange = function(newval, oldval) {
-				scope.onChange({
-					'$new': newval,
-					'$old': oldval,
-					'$key': 'name'
+			this.suspend = function() {
+				$scope.isRunning = false;
+			}
+
+			this.resume = function() {
+				$scope.isRunning = true;
+			}
+		},
+		link: function(scope, el, attrs, ctrls, transclude) {
+			transclude(scope, function(elc, scopec) {
+				console.widgetLog('linking widget', attrs.id);
+				var ctlrDockpanel = ctrls[0];
+				var ctlrModel = ctrls[1];
+
+				if(!!ctlrDockpanel) {
+					// DockPanel 밑에 있는 widget들은 append 보류
+					var detached = el.detach();
+				}
+
+				
+				scope.closebox = function() {
+					scope.onClose({
+						'$id': attrs.id,
+						'$target': el.parents('.k-d-col:first')
+					});
+				}
+
+				scope.onWidgetTitleChange = function(newval, oldval, e) {
+					scope.onChange({
+						'$id': attrs.id,
+						'$field': 'name',
+						'$old': oldval,
+						'$new': newval
+					});
+				}
+
+
+				// console.widgetLog(ctlrModel.$modelValue); // 여기엔 모델이 없다.
+				$timeout(function() {
+					// ngModel이 활성화되는 시점
+					angular.extend(scope, ctlrModel.$modelValue);
+
+					if(scope.type != 'tabs') {
+						var template = angular.element([
+						'<span click-to-edit ng-model="name" ng-change="onWidgetTitleChange($new, $old, $event)" class="pull-left widget-title"></span>',
+						'<span class="pull-right widget-toolbox">',
+							'<button class="btn btn-extra-mini b-pause" ng-show="isRunning" ng-click="$parent.$parent.pauseWidget($event)">',
+								'<i class="icon-pause"></i>',
+							'</button><button class="btn btn-extra-mini b-play" ng-hide="isRunning" ng-click="$parent.$parent.runWidget($event)">',
+								'<i class="icon-play"></i>',
+							'</button><button class="btn btn-extra-mini b-refresh" ng-click="$parent.$parent.refreshWidget($event)">',
+								'<i class="icon-refresh"></i>',
+							'</button><button class="btn btn-extra-mini b-p" ng-click="$parent.$parent.displayWidgetProperty($event)">',
+								'<i class="icon-info-sign"></i>',
+							'</button><button class="btn btn-extra-mini b-x" ng-click="closebox()">',
+								'<i class="icon-remove"></i>',
+							'</button>',
+						'</span>'].join(''));
+
+						$compile(template)(scope);
+						elc.append(template);	
+					}
+					
+					// console.widgetLog(ctlrModel.$modelValue);
+
+					el.attr('guid', ctlrModel.$modelValue.guid);
+					if(!!ctlrDockpanel) {
+						ctlrDockpanel.append(ctlrModel.$modelValue, detached);
+					}
+				});
+
+				el.children('widget').replaceWith(elc);
+
+				///////
+				elc[0].render = function() {
+					var ctrl = elc.controller('widget');
+					if(!ctrl.isLoaded) {
+						elc.controller('widget').load();
+					}
+					else {
+						ctrl.resume();
+					}
+				}
+
+				elc[0].suspend = function() {
+					var ctrl = elc.controller('widget');
+					ctrl.suspend();
+				}
+
+				elc[0].getName = function() {
+					return scope.name;
+				}
+			});
+		}
+	}
+})
+.directive('wcloud', function($compile, $timeout, serviceLogdb, serviceChart, $translate) {
+	return {
+		restrict: 'A',
+		require: 'widget',
+		scope: true,
+		link: function(scope, el, attrs, ctrl) {
+			var elc = el.children('widget');
+			var superRender = elc[0].render;
+			var superSuspend = elc[0].suspend;
+
+			scope.progress = { 'width': '0%' };
+			scope.isLoaded = true;
+
+			var ctx = { 'data': null };
+			var queryInst, interval = 0, datasrc;
+
+			function resultCallback(callback) {
+				return function(m) {
+					datasrc = m.body.result;
+					var divcont = angular.element('<div class="widget-wordcloud">');
+
+					function render() {
+						serviceChart.getWordCloud(datasrc, ctx.data.size, ctx.data.text, divcont);
+						divcont[0].onResize();
+					}
+
+					divcont[0].onResize = function() {
+						var w = el.parent().width(), h = el.parent().height(), scale;
+						if(w > h) {
+							scale = h / 560;
+						}
+						else {
+							scale = w / 560;
+						}
+						divcont.css('zoom', scale);
+					}
+
+					elc.find('.widget-wordcloud').remove();
+					elc.append(divcont);
+					render();
+					serviceLogdb.remove(queryInst);
+					
+					if(!!callback){
+						callback();	
+					}
+
+					// $timeout(function(){
+						scope.progress = { 'width': '100%' };
+					// }, 300);
+					// $timeout(function(){
+						scope.isLoaded = true;
+					// }, 1000)
+					scope.$apply();
+				}
+			}
+
+
+			function onStatusChange(callback) {
+				return function(m) {
+					if(m.body.type === 'eof') {
+						queryInst.getResult(0, 100, resultCallback(callback));
+					}	
+				}
+			}
+
+			elc[0].getInterval = function() {
+				return interval;
+			}
+
+			elc[0].setInterval = function(itv) {
+				elc.scope().data.interval = itv;
+				interval = itv;
+			}
+
+			elc[0].getQuery = function() {
+				return ctx.data.query;
+			}
+
+			elc[0].suspend = function() {
+				serviceLogdb.remove(queryInst);
+				ctrl.suspend();
+			}
+			
+			elc[0].render = function(callback) {
+				var scopec = elc.scope()
+				ctx.data = scopec.data;
+				interval = scopec.interval;
+
+				query(callback);
+
+				if(ctrl.isLoaded) {
+					superRender();
+					return;
+				}
+
+				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
+				$compile(progress)(scope);
+				elc.append(progress);
+
+				superRender();
+			}
+
+			function query(callback) {
+				
+				ctrl.resume();
+				scope.isLoaded = false;
+				scope.progress = { 'width': '0%' };	
+				var scopec = elc.scope();
+				
+				queryInst = serviceLogdb.create(2020);
+				queryInst.query(scopec.data.query, 100)
+				.created(function(m) {
+					scope.progress = { 'width': '20%' };
+					scope.$apply();
+				})
+				.onStatusChange(onStatusChange(callback))
+				.loaded(onStatusChange(callback))
+				.failed(function(m, raw) {
+					console.widgetLog('failed');
+					serviceLogdb.remove(queryInst);
 				});
 			}
 
-			scope.onIntervalChange = function(e, newval, oldval) {
-				scope.onChange({
-					'$event': e,
-					'$new': parseInt(newval),
-					'$old': parseInt(oldval),
-					'$key': 'interval'
-				});
-			}
+			elc[0].query = query;
 
-			scope.onToggle = function() {
-				el.parents('.contentbox').prev().toggleClass('bold');
-				el.toggleClass('bold');
-			}
+		}
+	}
+})
+.directive('grid', function($compile, $timeout, serviceLogdb, $translate) {
+	return {
+		restrict: 'A',
+		require: 'widget',
+		scope: true,
+		link: function(scope, el, attrs, ctrl) {
+			var elc = el.children('widget');
+			var superRender = elc[0].render;
+			var superSuspend = elc[0].suspend;
+			var superResume = elc[0].resume;
+			var t;
+
+			var ctx = { 'data': null };
+			var queryInst, interval = 0, widthInit = true;
 
 			scope.gridWidths = {};
 			scope.getStore = function() {
@@ -201,131 +522,168 @@ angular.module('app.directive.widget', [])
 				}
 			}
 
-			var init = true;
-			scope.$watch('isPaused', function(val) {
-				if(!val) {
-					if(!init) {
-						$timeout(run, 250);
-					}
-					else {
-						init = false;
-					}
+			scope.$watch('gridWidths', debounce(function(val) {
+				if(!widthInit) {
+					elc.scope().onChange({
+						'$id': elc.attr('id'),
+						'$field': 'data.width',
+						'$new': val
+					});
 				}
-				else {
-					// console.log(timer);
-					$timeout.cancel(timer);
-				}
-			});
-
-			scope.stopPropagation = function(e) {
-				e.stopPropagation();
-			}
-
-			scope.removeWidget = function() {
-				scope.onRemove();
-				el[0].$dispose();
-			}
-
-			scope.refresh = function() {
-				console.log(timer);
-				$timeout.cancel(timer);
-
-				// scope.isPaused = false;
-
-				$timeout(run, 250);
-			}
-
-			var options;
-			scope.dataQueryResult = [];
-			scope.count = 0;
-			scope.paramQueryRunCount = function() { return {'p0': scope.count} };
-			scope.isLoaded = false;
+			}, 100), true);
 
 			scope.progress = { 'width': '0%' };
-
-			var elContent = el.find('.widget-content');
-
-			function htmlEscape(str) {
-				if(str == undefined){
-					return "unnamed";
-				}
-				return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-			}
-
-			el[0].setContext = function(ctx, _options) {
-				scope.guid = ctx.guid;
-				scope.name = htmlEscape(ctx.name);
-				scope.type = ctx.type;
-				scope.query = ctx.data.query;
-				scope.interval = ctx.interval;
-				scope.paramQueryRunInterval = function() { return {'p0': scope.interval} };
-				
-				options = $.extend({
-					pageLoaded: null,
-					loaded: null,
-					failed: null,
-				}, _options);
-
-				initFn[ctx.type](ctx);
-				// scope.$apply();
-			}
-
-			var initFn = {
-				'grid': function(ctx) {
-					scope.order = ctx.data.order;
-					if(angular.isObject(ctx.data.width)) {
-						scope.gridWidths = ctx.data.width;
+			scope.isLoaded = true;
+			scope.dataQueryResult = [];
+			function resultCallback(callback) {
+				return function(m) {
+					scope.dataQueryResult = m.body.result;
+					serviceLogdb.remove(queryInst);
+					if(!!callback){
+						callback();	
 					}
-					run();
-					el.addClass('grid');
+					
+					// $timeout(function(){
+						scope.progress = { 'width': '100%' };
+					// }, 300);
+					// $timeout(function(){
+						scope.isLoaded = true;
+					// }, 1000)
+					scope.$apply();
 
-					var table = angular.element('<table class="table table-bordered table-condensed widget-grid" data-resizable-columns-id="">\
-						<thead>\
-							<tr><th data-resizable-column-id="{{field}}" ng-repeat="field in order" title="{{field}}">{{field}}</th></tr>\
-						</thead>\
-						<tbody>\
-							<tr ng-repeat="row in dataQueryResult">\
-								<td ng-repeat="field in order" title="{{row[field]}}">\
-									{{row[field]}}\
-								</td>\
-							</tr>\
-						</tbody>\
-					</table>');
+					if(t != undefined) {
+						t.data('resizableColumns').syncHandleWidths();	
+					}
+				}
+			}
 
-					$compile(table)(scope);
-					elContent.prepend(table);
-					elContent.css('opacity', '0');
-					setTimeout(function() {
-						var recol = $(table).resizableColumns({
-							store: scope.getStore()
-						});
-						elContent.css('opacity','');
+			function onStatusChange(callback) {
+				return function(m) {
+					if(m.body.type === 'eof') {
+						queryInst.getResult(0, 100, resultCallback(callback));
+					}	
+				}
+			}
 
-						var init = true;
-						scope.$watch('gridWidths', debounce(function(val) {
-							if(!init) {
-								scope.onChange({
-									'$new': val,
-									'$key': 'data.width'
-								});	
-							} else {
-								init = false;
-							}
-							
-						}, 100), true);
+			elc[0].getInterval = function() {
+				return interval;
+			}
 
-					}, 500);
-				},
-				'chart': function(ctx) {
+			elc[0].setInterval = function(itv) {
+				elc.scope().data.interval = itv;
+				interval = itv;
+			}
 
-					run();
-					el.addClass('chart');
+			elc[0].getQuery = function() {
+				return ctx.data.query;
+			}
+
+			elc[0].suspend = function() {
+				serviceLogdb.remove(queryInst);
+				ctrl.suspend();
+			}
+
+			elc[0].render = function(callback) {
+				var scopec = elc.scope()
+				ctx.data = scopec.data;
+				if(angular.isObject(ctx.data.width)) {
+					scope.gridWidths = ctx.data.width;
+				}
+				scope.order = scopec.data.order;
+				interval = scopec.interval;
+
+				query(callback);
+
+				if(ctrl.isLoaded) {
+					superRender();
+					return;
+				}
+
+				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
+
+				var table = angular.element('<div class="widget-grid-container"><table class="table table-bordered table-condensed widget-grid" data-resizable-columns-id="">\
+					<thead>\
+						<tr><th data-resizable-column-id="{{field}}" ng-repeat="field in order" title="{{field}}">{{field}}</th></tr>\
+					</thead>\
+					<tbody>\
+						<tr ng-repeat="row in dataQueryResult">\
+							<td ng-repeat="field in order" title="{{row[field]}}" ng-bind-html="row[field] | crlf"></td>\
+						</tr>\
+					</tbody>\
+				</table></div>');
+
+				$compile(progress)(scope);
+				$compile(table)(scope);
+
+				elc.append(progress);
+				elc.append(table);
+
+				$timeout(function() {
+					t = $(table).find('table');
+					t.resizableColumns({
+						store: scope.getStore()
+					});
+
+					$timeout(function() {
+						if(t != undefined) {
+							t.data('resizableColumns').syncHandleWidths();
+						}
+					},500)
+					widthInit = false;
+				}, 500);
+
+				superRender();
+			}
+
+			function query(callback) {
+				
+				ctrl.resume();
+				scope.isLoaded = false;
+				scope.progress = { 'width': '0%' };	
+				var scopec = elc.scope();
+				
+				queryInst = serviceLogdb.create(2020);
+				queryInst.query(scopec.data.query, 100)
+				.created(function(m) {
+					scope.progress = { 'width': '20%' };
+					scope.$apply();
+				})
+				.onStatusChange(onStatusChange(callback))
+				.loaded(onStatusChange(callback))
+				.failed(function(m, raw) {
+					console.widgetLog('failed');
+					serviceLogdb.remove(queryInst);
+				});
+			}
+
+			elc[0].query = query;
+		}
+	}
+})
+.directive('chart', function($compile, $timeout, serviceLogdb, serviceChart, $translate) {
+	return {
+		restrict: 'A',
+		require: 'widget',
+		scope: true,
+		link: function(scope, el, attrs, ctrl) {
+			var elc = el.children('widget');
+			var superRender = elc[0].render;
+
+			scope.isLoaded = true;
+			scope.progress = { 'width': '0%' };
+
+			var ctx = { 'data': null };
+			var queryInst, interval = 0, datasrc;
+
+			function resultCallback(callback) {
+				return function(m) {
+					datasrc = m.body.result;
 					var svg = angular.element('<div class="widget-chart">');
-
 					var dataLabel = {name: ctx.data.label, type: ctx.data.labelType};
+					// console.log(ctx.data)
 
 					function render() {
-						var json = serviceChart.buildJSONStructure(angular.copy(ctx.data.series), scope.dataQueryResult, dataLabel);
+						var json = serviceChart.buildJSONStructure(angular.copy(ctx.data.series), datasrc, dataLabel);
 						// setTimeout(function() {
 							var renderOptions = {
 								width: $(svg[0]).width(),
@@ -343,125 +701,153 @@ angular.module('app.directive.widget', [])
 						// }, 500);
 					}
 
-					options.pageLoaded = render;
-					// options.loaded = render;
-
-					elContent.prepend(svg);
-
+					elc.find('.widget-chart').remove();
+					elc.append(svg);
+					render();
+					serviceLogdb.remove(queryInst);
 					
-				},
-				'wordcloud': function(ctx) {
-					run();
-					el.addClass('wordcloud');
-					var divcont = angular.element('<div class="widget-wordcloud">');
-
-					function render() {
-						serviceChart.getWordCloud(scope.dataQueryResult, ctx.data.size, ctx.data.text, divcont);
+					if(!!callback){
+						callback();	
 					}
 
-					options.pageLoaded = render;
-
-					divcont[0].onResize = function() {
-						var w = el.parent().width(), h = el.parent().height(), scale;
-						if(w > h) {
-							scale = h / 560;
-						}
-						else {
-							scale = w / 560;
-						}
-						divcont.css('zoom', scale);
-					}
-
-					elContent.prepend(divcont);
+					// $timeout(function(){
+						scope.progress = { 'width': '100%' };
+					// }, 300);
+					// $timeout(function(){
+						scope.isLoaded = true;
+					// }, 1000)
+					scope.$apply();
 				}
 			}
 
-			var elProgressBar = el.find('.progress .bar');
-			var timeFormat = d3.time.format('%Y-%m-%d %H:%M:%S');
 
-			function run() {
-				scope.isLoaded = false;
-				// elProgressBar.removeClass('ani');
-				scope.progress = { 'width': '0%' };
-				//scope.$apply();
-
-				var queryInst = serviceLogdb.create(scope.ngPid);
-
-				function getResult(m) {
-					var result = m.body.result;
-					console.log(m)
-					scope.dataQueryResult.splice(0, scope.dataQueryResult.length); // array 비워주기
-		
-					for (var i = 0; i < result.length; i++) {
-						scope.dataQueryResult.push(result[i]);
-					};
-					
-					scope.$apply();
-
-					if(!!options.pageLoaded) {
-						options.pageLoaded(m);
-					}
-
-					console.logdb('loaded', queryInst.getId(), scope.guid, scope.query);
-					serviceLogdb.remove(queryInst);
-
-					scope.progress = { 'width': '100%' };
-					var time = timeFormat(new Date());
-					$timeout(function() {
-						scope.isLoaded = true;
-						scope.lastUpdate = time;
-						scope.count++;
-					}, 600);
-
-					if(!scope.isPaused) {
-						timer = $timeout(run, scope.interval * 1000);// 3000);
-					}
+			function onStatusChange(callback) {
+				return function(m) {
+					if(m.body.type === 'eof') {
+						queryInst.getResult(0, 100, resultCallback(callback));
+					}	
 				}
-		
-				queryInst.query(scope.query, 100)
+			}
+
+			elc[0].getInterval = function() {
+				return interval;
+			}
+
+			elc[0].setInterval = function(itv) {
+				elc.scope().data.interval = itv;
+				interval = itv;
+			}
+
+			elc[0].getQuery = function() {
+				return ctx.data.query;
+			}
+
+			elc[0].suspend = function() {
+				serviceLogdb.remove(queryInst);
+				ctrl.suspend();
+			}
+			
+			elc[0].render = function(callback) {
+				var scopec = elc.scope()
+				ctx.data = scopec.data;
+				interval = scopec.interval;
+
+				query(callback);
+
+				if(ctrl.isLoaded) {
+					superRender();
+					return;
+				}
+
+				var progress = angular.element('<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>');
+				$compile(progress)(scope);
+				elc.append(progress);
+
+				superRender();
+			}
+
+			function query(callback) {
+				
+				ctrl.resume();
+				scope.isLoaded = false;
+				scope.progress = { 'width': '0%' };	
+				var scopec = elc.scope();
+				
+				queryInst = serviceLogdb.create(2020);
+				queryInst.query(scopec.data.query, 100)
 				.created(function(m) {
-					//console.log('created')
-					// elProgressBar.addClass('ani');
 					scope.progress = { 'width': '20%' };
 					scope.$apply();
 				})
-				.onStatusChange(function(m) {
-					// console.log(m.body)
-					if(m.body.type === 'eof') {
-						queryInst.getResult(0, 100, getResult);	
-					}
-				})
-				.loaded(function(m) {
-					// console.log(m.body)
-					if(m.body.type === 'eof') {
-						queryInst.getResult(0, 100, getResult);	
-					}
-					if(!!options.loaded) {
-						options.loaded(m);
-					}
-				})
+				.onStatusChange(onStatusChange(callback))
+				.loaded(onStatusChange(callback))
 				.failed(function(m, raw) {
-					console.log('failed');
+					console.widgetLog('failed');
 					serviceLogdb.remove(queryInst);
-
-					scope.errorMessage = $translate('$S_msg_OccurError') + raw[0].errorCode;
-					scope.isShowError = true;
-
-					scope.$apply();
-
-					if(!!options.failed) {
-						options.failed(m);
-					}
 				});
-
-				el[0].$dispose = function() {
-					console.log('$dispose', queryInst.getId(), scope.guid, scope.query);
-					$timeout.cancel(timer);
-					scope.isPaused = true;
-					serviceLogdb.remove(queryInst);
-					el.remove();
-				}
 			}
+
+			elc[0].query = query;
+
 		}
 	}
 })
+.directive('widgetDroppable', function($compile) {
+	return {
+		restrict: 'A',
+		link: function(scope, el, attrs) {
+			el.addClass('drop-tab');
+
+			var dropzone = angular.element('<div class="widget-drop-zone" click-to-edit ng-model="tab.name" ng-change="$parent.$parent.onTabTitleChange($new, $old)">' + el[0].innerText + '</div>');
+			$compile(dropzone)(scope);
+			el.append(dropzone);
+
+		}
+	}
+})
+.factory('serviceWidget', function() {
+	var widgets = [];
+	
+	function buildWidget(preset, json) {
+		if(json.type === 'tabs') {
+			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '">' + 
+				'<div class="tab-comp" style="height: 100%">' +
+					'<ul class="nav nav-tabs" style="margin-bottom: 0">' +
+						'<li ng-repeat="(i, tab) in data.tabs" ng-class="{\'active\': tab.is_active}">' +
+							'<a tab-id="{{tab.guid}}" href=".tab-content .{{tab.guid}}" data-toggle="tab" ng-click="$parent.$parent.activeTab(tab, data.tabs, $event)" widget-droppable>{{tab.name}}</a>' +
+							'<button ng-show="tab.is_active" class="close tab-home" ng-click="$parent.$parent.setTabToHome(tab, \'' + preset + '\' ,\'' + json.guid + '\', $event)"><i class="icon-home"></i></button>' +
+							'<button ng-show="tab.is_active && (data.tabs.length > 1)" class="close tab-close" ng-click="$parent.$parent.closeTab(tab, \'' + preset + '\' ,\'' + json.guid + '\', $event)">&times;</button>' +
+						'</li>' +
+						'<button class="btn btn-mini" ng-click="$parent.addTab(data.tabs, $event, \'' + preset + '\')"><i class="icon-plus"></i></button>' +
+					'</ul>' +
+					'<div class="tab-content">' +
+						'<div ng-repeat="tab in data.tabs"  style="height:100%" ng-class="{\'active\': tab.is_active}" class="tab-pane {{tab.guid}}" tab-id="{{tab.guid}}">' + 
+						'</div>' +
+					'</div>' +
+				'</div>' +
+			'</widget>';
+		}
+		else if(json.type === 'grid') {
+			return '<widget grid class="w-before-loading" id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
+				'</widget>';
+		}
+		else if(json.type === 'chart') {
+			return '<widget chart class="w-before-loading" id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
+				'</widget>';
+		}
+		else if(json.type === 'wordcloud') {
+			return '<widget wcloud class="w-before-loading" id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
+				'</widget>';
+		}
+		else {
+			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
+				'' + 
+				'<div>{{hello}} {{1+1}}</div></widget>';
+		}
+	}
+	
+	return {
+		buildWidget: buildWidget
+	}
+})
+;

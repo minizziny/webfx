@@ -22,18 +22,8 @@ function Async(fn) {
 		return this;
 	}
 
-	this.getResult = function(fn) {
-		callback.getResult = fn;
-		return this;
-	}
-
 	this.loaded = function(fn) {
 		callback.loaded = fn;
-		return this;
-	}
-
-	this.onTimeline = function(fn) {
-		callback.onTimeline = fn;
 		return this;
 	}
 
@@ -52,7 +42,7 @@ function Async(fn) {
 			callback[fname].apply(this, args);	
 		}
 		else {
-			if(fname != 'created' && fname != 'onTimeline' && fname != 'onStatusChange' && fname != 'started') {
+			if(fname != 'created' && fname != 'onStatusChange' && fname != 'started') {
 				console.warn(name + '.' + fname + ', but do nothing.', (args.length > 1) ? (args[1][0].method) : '');
 			}
 			//console.trace();

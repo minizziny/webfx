@@ -1,7 +1,282 @@
 <link href="script/layoutEngine/layoutEngine.css" rel="stylesheet" media="screen">
 <link href="css/dashboard.css" rel="stylesheet" media="screen">
+
+<style>
+dockpanel, widget {
+	display: block;
+}
+
+dockpanel {
+	/*border: 1px solid blue;*/
+}
+
+[modal].propertyWidget {
+	width: 600px;
+	margin-left: -300px;
+}
+
+/* widget */
+
+widget {
+	/*border: 1px dotted red;*/
+	margin: 0px;
+	height: calc(100% - 4px);
+}
+
+.contentbox > [ng-transclude] {
+	height: 100%;
+}
+
+/* widget end */
+
+.box {
+	float: left;
+	width: 180px;
+	height: 180px;
+	background-color: #eee;
+	margin: 10px;
+	border: 1px solid gray;
+
+}
+
+dockpanel {
+	width: 100%;
+	height: calc(100% - 4px);
+}
+
+.contentbox .tab-content {
+	overflow: visible;
+	height: calc(100% - 20px);
+	border-bottom: 1px solid #ddd;
+	border-left: 1px solid #ddd;
+	border-right: 1px solid #ddd;
+}
+
+
+/* widget-droppable */
+
+@-webkit-keyframes blinker {
+	from {
+		background-color: #08c;
+		color: white;
+	}
+	to {
+		background-color: white;
+		color: #08c;
+	}
+}
+
+[widget-droppable] {
+	position: relative;
+}
+
+.nav-tabs>li [widget-droppable].over {
+	/*background-color: yellow;*/
+	-webkit-animation-name: blinker;
+	-webkit-animation-iteration-count: infinite;
+	-webkit-animation-timing-function: cubic-bezier(1.0,0,0,1.0);
+	-webkit-animation-duration: 0.2s;
+}
+
+.nav-tabs>li.active [widget-droppable].over {
+	/*background-color: #fff;*/
+	-webkit-animation: none;
+}
+
+[widget-droppable] > .widget-drop-zone {
+	/*z-index: 9989;*/
+	position: absolute;
+	top: -1px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 2px 4px;
+}
+
+
+/* click-to-edit inner tab */ 
+
+[widget-droppable] > .widget-drop-zone * {
+	display: none;
+}
+
+.nav-tabs>li.active [widget-droppable] > .widget-drop-zone * {
+	display: block;
+}
+
+.nav-tabs>li.active [widget-droppable] > .widget-drop-zone > input[type=text] {
+	padding: 2px 6px;
+	box-sizing: border-box;
+	width: calc(100% - 20px);
+	margin: 0 1px;
+}
+
+/* click-to-edit inner tab end */ 
+
+
+
+widget > .tab-comp {
+
+}
+
+widget > .tab-comp > ul.nav-tabs {
+	display: flex;
+}
+
+	widget > .tab-comp > ul.nav-tabs > li:before, widget > .tab-comp > ul.nav-tabs > li {
+		background-image: -webkit-linear-gradient(top, #e8e8e8, #d9d9d9);
+		border-top: 1px solid #b9b9b9;
+	}
+	
+	widget > .tab-comp > ul.nav-tabs > li.active:before, widget > .tab-comp > ul.nav-tabs > li.active {
+		/*background: #f0f0f0;*/
+		border-top: 1px solid #c00;
+		height: 21px;
+		box-shadow: none;
+		background-image: linear-gradient(to bottom, #c00 0px, #c00 1px, #fff 1.1px);
+		background-repeat: no-repeat;
+	}
+	
+	widget > .tab-comp > ul.nav-tabs > li:before {
+		content: '';
+		position: absolute;
+		top: -1px;
+		left: -16px;
+		height: 20px;
+		width: 30px;
+		border-top-left-radius: 3px;
+		border-left: 1px solid #b9b9b9;
+		box-shadow: inset 1px -1px 1px rgba(0, 0, 0, 0.05);
+		-webkit-transform: skewX(133deg);
+	}
+
+	widget > .tab-comp > ul.nav-tabs > li:first-child {
+		margin-left: 30px;
+	}
+	
+	widget > .tab-comp > ul.nav-tabs > li {
+		flex: 1;
+		max-width: 175px;
+		min-width: 40px;
+		padding-right: 24px;
+	
+		position: relative;
+		top: 3px;
+		height: 20px;
+		line-height: 20px;
+		color: #444444;
+		padding-left: 0;
+		margin-left: 15px;
+		border-top-right-radius: 3px;
+		border-right: 1px solid #b9b9b9;
+		box-shadow: inset -1px -1px 1px rgba(0, 0, 0, 0.05);
+		/*-webkit-transform: skewX(30deg);*/
+		transition: color 0.1s ease-in;
+	
+		display: inline-block;
+	}
+	
+	
+	widget > .tab-comp > ul.nav-tabs > li > a {
+		padding: 2px 4px;
+		font-size: 0.9em;
+		margin-right: 0;
+		border-radius: 0;
+		background-color: transparent;
+		border: 0;
+		padding-top: 1px;
+	
+		/*-webkit-transform: skewX(-30deg);*/
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		height: 18px;
+	}
+	
+	widget > .tab-comp > ul.nav-tabs > li > a:hover {
+		background-color: transparent;
+		border: 0;
+	}
+	
+	widget > .tab-comp > ul.nav-tabs > li.active {
+		z-index: 10;
+		line-height: 24px;
+		color: #000000;
+	}
+	
+	widget > .tab-comp > ul.nav-tabs > li.active > a {
+		color: transparent;
+	}
+
+
+widget > .tab-comp > ul.nav-tabs > button {
+	margin-bottom: -4px;
+	margin-top: 3px;
+	z-index: 2;
+}
+
+widget > .tab-comp > ul.nav-tabs > li.plus {
+	flex: none;
+	width: 28px;
+	cursor: pointer;
+}
+
+widget > .tab-comp > ul.nav-tabs > li.plus > button {
+	line-height: 24px;
+	outline: none;
+}
+
+widget > .tab-comp > ul.nav-tabs > li > button.tab-close {
+	position: absolute;
+	right: 6px;
+	top: -1px;
+}
+
+widget > .tab-comp > ul.nav-tabs > li > button.tab-home {
+	position: absolute;
+	right: 24px;
+	top: 3px;
+}
+
+widget[grid] .widget-grid-container {
+	overflow-y: auto;
+	overflow-x: hidden;
+	height: 100%;
+}
+
+widget[grid] .widget-grid-container table {
+	margin: 0;
+}
+
+widget[chart] .widget-chart, widget[wcloud] .widget-wordcloud  {
+	overflow: hidden;
+}
+
+widget {
+	background-color: #fff;
+}
+
+widget.w-running {
+	background-color: white;
+}
+
+widget.w-before-loading:before {
+	content: 'Loading...';
+	color: #aaa; 
+	left: 50%;
+	position: absolute;
+	margin-left: -20px;
+	top: 50%;
+	margin-top: -10px;
+	font-size: 13pt;
+	text-shadow: 1px 1px 2px #ddd;
+	letter-spacing: 1px;
+}
+
+</style>
+
 <div class="dashboard-container" ng-controller="DashboardController">
-	<div ng-controller="PresetController" class="toolbar navbar navbar-top" style="margin-bottom: 0px">
+	<div class="toolbar navbar navbar-top" style="margin-bottom: 0px">
 		<div class="navbar-inner">
 			<!--<select style="float: left; margin-top: 5px; margin-bottom: 0; margin-left: 5px" ng-model="selectedPreset" ng-options="preset.name for preset in dataPresetList"></select>
 			-->
@@ -21,7 +296,7 @@
 					<span class="caret"></span>
 				</button>
 				<ul class="dropdown-menu">
-					<li ng-repeat="preset in dataPresetList">
+					<li ng-repeat="(i,preset) in dataPresetList | filter:{parent: null}">
 						<a tabindex="-1" ng-click="Load(preset)" style="padding-left:10px">
 							<i ng-class="{ 'icon-ok': preset.guid == currentPreset.guid, 'icon-noncheck': preset.guid != currentPreset.guid }"></i>
 							{{preset.name}}
@@ -67,6 +342,9 @@
 				<button class="btn" ng-click="CancelRemove()">{{'$S_str_Cancel' | translate}}</button>
 			</div>
 		</div>
+		<!--{{ctxPreset}}
+		<hr>
+		{{currentPreset}}-->
 	</div>
 
 	<div class="preset-container">
@@ -114,6 +392,7 @@
 					<div class="fieldset-description">{{'$S_msg_QueryData' | translate}}</div>
 					<div>
 						<query-input
+							class="qi1"
 							ng-model="qresult"
 							ng-page-size="numPagerPagesize"
 							ng-query-string="ctxWidget.data.query"
@@ -337,5 +616,31 @@
 				</div>
 			</li>
 		</ol>
+	</div>
+
+	<div class="modal propertyWidget" modal ng-controller="WidgetPropertyController">
+		<a class="modal-close close" style="margin-bottom: -30px">&times;</a>
+		<legend>{{name}} 속성</legend>
+		<div style="margin-bottom: 20px">
+			위젯 속성을 확인하고 변경할 수 있습니다.
+		</div>
+		<form class="form-horizontal">
+			<div class="control-group">
+				<label class="control-label" for="dashboardWidgetPropertyInterval">새로고침 주기</label>
+				<div class="controls">
+					<input type="number" ng-model="interval" id="dashboardWidgetPropertyInterval">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" >쿼리</label>
+				<div class="controls">
+					<code style="display:inline-block; max-height:200px; overflow:auto">{{query}}</code>
+				</div>
+			</div>
+		</form>
+		<div class="control-group submit-group">
+			<button class="btn" ng-click="updateWidgetProperty()">{{'$S_str_Done' | translate}}</button>
+			<button class="btn" ng-click="cancelUpdateWidgetProperty()">{{'$S_str_Cancel' | translate}}</button>
+		</div>
 	</div>
 </div>

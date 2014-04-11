@@ -17,11 +17,25 @@ var logpresso = angular.module('app', [
 	'app.logdb.management',
 	'pascalprecht.translate',
 	'ui.sortable',
-	'resettableForm'
-], function($routeProvider) {
+	'ngAnimate'
+], function() {
 });
 
-logpresso.run(function($rootScope, $location, $anchorScroll, $routeParams, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
+window._logger = {
+	'list': ['dashboard-widget-timer', 'logdb-get-result'],
+	'current': [],
+	'on': function(name) {
+		window._logger.current.push(name);
+	},
+	'off': function(name) {
+		var idx = window._logger.current.indexOf(name);
+		if(!!~idx) {
+			window._logger.current.splice(idx, 1);
+		}
+	}
+};
+
+logpresso.run(function($rootScope, $location, $anchorScroll, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
 
 	$rootScope.$on('$translateLoadingError', function() {
 		$translate.uses('en');
@@ -125,8 +139,6 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 
 	$location.path('/');
 
-	$scope.isShowStarter = false;
-	$scope.isShowDashboard = false;
 	$scope.timeout = 1000 * 60 * 1;
 
 	$scope.src = {};
@@ -240,18 +252,6 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 			}
 		}
 		
-
-		if($('#view-starter').css('display') == "block") {
-			$scope.isShowStarter = true;
-		} else {
-			$scope.isShowStarter = false;
-		}
-
-		if($('#view-dashboard').css('display') == "block") {
-			$scope.isShowDashboard = true;
-		} else {
-			$scope.isShowDashboard = false;
-		}
 	}
 
 	eventSender.root.loggedIn = function() {

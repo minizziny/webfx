@@ -18,10 +18,13 @@ function hasClassIndexOf(s, klass) {
 	return ("" + s).split(" ").indexOf(klass) >= 0;
 }
 
+console.logdash = function() {}
+
 function findElementsByCoordinate(classArr, e, els) {
 	if(els === undefined) els = [];
 	
 	var found_el = document.elementFromPoint(e.clientX, e.clientY);
+	if(found_el == null) return els;
 	
 	if(els.indexOf(found_el) >= 0) return els;
 	
@@ -42,7 +45,6 @@ function findElementsByCoordinate(classArr, e, els) {
 			gotcha = true;
 		}
 	});
-	
 	
 	if(gotcha) {
 		findElementsByCoordinate(classArr, e, els);
@@ -223,8 +225,8 @@ var layoutEngine = (function() {
 					$(el).css("height", perc.toString() + "%");
 
 					el.obj.obj.h = perc;
-					//console.log(el.obj);
-					//console.log(perc + "%\t" + i + "/" + rows.length);
+					//console.logdash(el.obj);
+					//console.logdash(perc + "%\t" + i + "/" + rows.length);
 				});
 				// end
 
@@ -247,6 +249,7 @@ var layoutEngine = (function() {
 
 			// dock panel로 옮겨야함
 			var parent = sender.el.parent();
+			parent.width(parent.width());
 			var rows = parent.children(".k-d-col");
 			var totalpx = 0;
 			$.each(rows, function(i, el) {
@@ -285,15 +288,16 @@ var layoutEngine = (function() {
 					$(el).css("width", perc.toString() + "%");
 
 					el.obj.obj.w = perc;
-					//console.log(el.obj);
-					console.log(perc + "%\t" + i + "/" + rows.length)
+					//console.logdash(el.obj);
+					console.logdash(perc + "%\t" + i + "/" + rows.length)
 					totalwper = totalwper + perc;
 
 					if(totalwper < 100 && i == rows.length - 1) {
-						console.log(totalwper, 'arranged!');
+						console.logdash(totalwper, 'arranged!');
 					}
 				});
-				console.log(totalwper)
+				console.logdash(totalwper)
+				parent.css('width', '');
 				// end
 
 				if(e.delegateTarget.releaseCapture) { e.delegateTarget.releaseCapture(); }
@@ -321,12 +325,8 @@ var layoutEngine = (function() {
 	var _box = layoutEngine.namespace("ui.layout.box");
 
 	_box.allboxes = [];
-	_box.event = {
-		modify: function() {},
-		resize: function() {}
-	};
-
-	function Row(prop) {
+	
+	function Row(prop, options) {
 		var that = this;
 		var el = this.el = $("<div>").addClass("k-d-row");
 		var obj = this.obj = $.extend({}, prop); // object copy
@@ -346,11 +346,11 @@ var layoutEngine = (function() {
 		}
 
 		this.boxes.onItemAdded = function() {
-			_box.event.modify(that)
+			options.onModify(that);
 		} 
 		// this.boxes.onItemSet = _box.event.modify;
 		this.boxes.onItemRemoved = function() {
-			_box.event.modify(that)
+			options.onModify(that);
 		} 
 
 		this.getMinHeight = function() {
@@ -529,7 +529,7 @@ var layoutEngine = (function() {
 			var allidx = layoutEngine.ui.layout.box.allboxes.indexOf(box);
 			layoutEngine.ui.layout.box.allboxes.removeAt(allidx);
 			
-			// console.log('deleteBox',box)
+			// console.logdash('deleteBox',box)
 			if(box.row.boxes.length === 0) {
 				box.row.close();
 				
@@ -548,7 +548,7 @@ var layoutEngine = (function() {
 		}
 
 		function unwrapBox(box) {
-			console.log('unwrapBox');
+			console.logdash('unwrapBox');
 			
 			var prow = box.row;
 			var prowh = box.row.obj.h;
@@ -580,7 +580,7 @@ var layoutEngine = (function() {
 				var nextrow = nextel[0].obj;
 				var originh = nextel.height();
 				var dy = newy - oldy;
-				// console.log(that.getMinHeight(), newy, nextrow.getMinHeight(), originh - dy, originh )
+				// console.logdash(that.getMinHeight(), newy, nextrow.getMinHeight(), originh - dy, originh )
 				var can = (that.getMinHeight() < newy) && (nextrow.getMinHeight() < originh - dy);
 				if(can) {
 					if(nextel.length > 0) {
@@ -589,13 +589,15 @@ var layoutEngine = (function() {
 				}
 				return can;
 			},
-			"afterResize": _box.event.resize
+			"afterResize": function() {
+				return options.onResize(null, that.box)
+			}
 		});
 
 		this.resizerV = $(el.find('.k-rs-b')[0]);
 	}
 
-	function Box(prop) {
+	function Box(prop, options) {
 		var that = this;
 		var el = this.el = $("<div>").addClass("k-d-col");
 		var obj = this.obj = $.extend({}, prop); // object copy
@@ -605,13 +607,21 @@ var layoutEngine = (function() {
 
 		this.getObject = function() {
 			if(this.rows.length == 0) {
-				return {
+				var o = {
 					'guid': this.guid,
-					'w': this.obj.w
+					'w': this.obj.w,
 				}
+				if(this.obj.hasOwnProperty('droppable')) {
+					o['droppable'] = this.obj.droppable;
+				}
+				if(this.obj.hasOwnProperty('dragHandler')) {
+					o['dragHandler'] = this.obj.dragHandler;
+				}
+
+				return o;
 			}
 			else {
-				return {
+				var o = {
 					'guid': this.guid,
 					'rows': (function() {
 						return that.rows.map(function(row) {
@@ -620,17 +630,26 @@ var layoutEngine = (function() {
 					}()),
 					'w': this.obj.w
 				}
+
+				if(this.obj.hasOwnProperty('droppable')) {
+					o['droppable'] = this.obj.droppable;
+				}
+				if(this.obj.hasOwnProperty('dragHandler')) {
+					o['dragHandler'] = this.obj.dragHandler;
+				}
+
+				return o;
 			}
 		}
 
 		this.rows = new ObservableArray([]);
 
 		this.rows.onItemAdded = function() {
-			_box.event.modify(that)
+			options.onModify(that);
 		}
 		// this.rows.onItemSet = _box.event.modify;
 		this.rows.onItemRemoved = function() {
-			_box.event.modify(that)
+			options.onModify(that);
 		}
 		
 		this.getMinWidth = function() {
@@ -709,10 +728,11 @@ var layoutEngine = (function() {
 				$(selector).empty();
 				el.appendTo(selector);
 				
+				// clear all settings
 				if(!no_root) {
-					console.log('set root')
+					console.log('set root');
 					layoutEngine.ui.layout.box.root = that;	
-					_box.event.modify(that);
+					// _box.event.modify(that);
 				}
 			}
 			else {
@@ -745,7 +765,7 @@ var layoutEngine = (function() {
 		}
 
 		this.addRow = function(idx) {
-			var row = new Row([]);
+			var row = new Row([], options);
 			if(idx !== undefined) {
 				row.obj.h = Math.floor(100 / (this.rows.length + 1));
 				this.insert(row, idx);
@@ -770,13 +790,13 @@ var layoutEngine = (function() {
 			if(direction === "bottom") {
 				
 				if(this.row === undefined) {
-					console.log("bottom case1: add to root");
+					console.logdash("bottom case1: add to root");
 					
 					newrow = this.addRow();
 					
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 					box.close();
-					var boxn = _box.create(box.obj);
+					var boxn = _box.create(box.obj, false, options);
 					
 					delete box.obj.w;
 					newrow.append(boxn);
@@ -800,14 +820,14 @@ var layoutEngine = (function() {
 					var multi_line = (this.rows.length !== 0) // absolutely multi line
 
 					box.obj.w = this.obj.w;
-					var boxn = _box.create(box.obj);
+					var boxn = _box.create(box.obj, false, options);
 
 					if(multi_line || single_row_box) {
 
 						var original_idx = this.row.box.rows.indexOf(this.row);
 						
 						if(multi_line) {
-							console.log("bottom case3: append to last");
+							console.logdash("bottom case3: append to last");
 							
 							box.close();
 							var newrow = this.addRow();
@@ -816,11 +836,11 @@ var layoutEngine = (function() {
 						}
 						else {
 							function case5bottom() {
-								console.log("bottom case5: insert row");
+								console.logdash("bottom case5: insert row");
 
-								var contents = box.el.find('.contentbox').detach();
+								var contents = box.el.find('.contentbox:first').detach();
 								box.close();
-//								console.log(box.row.box.rows)
+								// console.logdash(box.row.box.rows)
 								var newrow = that.row.box.addRow(original_idx + 1);
 								newrow.append(boxn);
 								boxn.row = newrow;
@@ -839,9 +859,9 @@ var layoutEngine = (function() {
 							}
 							else {
 								if(this.row.box === box.row.box) {
-									console.log("bottom case4: reorder");
+									console.logdash("bottom case4: reorder");
 
-									var contents = box.el.find('.contentbox').detach();
+									var contents = box.el.find('.contentbox:first').detach();
 									
 									var newrow = this.row.box.addRow(original_idx + 1);
 									newrow.append(boxn);
@@ -861,10 +881,10 @@ var layoutEngine = (function() {
 						}
 					}
 					else {
-						console.log("bottom case2: add to single box");
+						console.logdash("bottom case2: add to single box");
 						
-						var contentsTop = box.el.find('.contentbox').detach();
-						var contentsBottom = this.el.find('.contentbox').detach();
+						var contentsTop = box.el.find('.contentbox:first').detach();
+						var contentsBottom = this.el.find('.contentbox:first').detach();
 						box.close();
 						var child = wrapRow(this); // <-- it is child
 						// "this" is parent box
@@ -892,13 +912,13 @@ var layoutEngine = (function() {
 			else if(direction === "top") {
 				
 				if(this.row === undefined) {
-					console.log("top case1: add to root");
+					console.logdash("top case1: add to root");
 					
 					newrow = this.addRow(0);
 					
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 					box.close();
-					var boxn = _box.create(box.obj);
+					var boxn = _box.create(box.obj, false, options);
 					
 					delete box.obj.w;
 					newrow.append(boxn);
@@ -907,6 +927,9 @@ var layoutEngine = (function() {
 					boxn.resizerH.hide();
 					boxn.el.find('.contentbox').remove();
 					contents.appendTo(boxn.el.find('.mybox'));
+
+					this.el.removeClass('blank');
+					// this.droppable.removeClass('max');
 					
 					delete this.guid;
 					delete this.obj.guid;
@@ -917,14 +940,14 @@ var layoutEngine = (function() {
 					var multi_line = (this.rows.length !== 0) // absolutely multi line
 
 					box.obj.w = this.obj.w;
-					var boxn = _box.create(box.obj);
+					var boxn = _box.create(box.obj, false, options);
 
 					if(multi_line || single_row_box) {
 
 						var original_idx = this.row.box.rows.indexOf(this.row);
 						
 						if(multi_line) {
-							console.log("top case3: append to first");
+							console.logdash("top case3: append to first");
 							
 							box.close();
 							var newrow = this.addRow(0);
@@ -933,9 +956,9 @@ var layoutEngine = (function() {
 						}
 						else {
 							function case5top() {
-								console.log("top case5: insert row");
+								console.logdash("top case5: insert row");
 								
-								var contents = box.el.find('.contentbox').detach();
+								var contents = box.el.find('.contentbox:first').detach();
 								box.close();
 								var newrow = that.row.box.addRow(original_idx);
 								newrow.append(boxn);
@@ -949,9 +972,9 @@ var layoutEngine = (function() {
 							}
 							else {
 								if(this.row.box === box.row.box) {
-									console.log("top case4: reorder");
+									console.logdash("top case4: reorder");
 									
-									var contents = box.el.find('.contentbox').detach();
+									var contents = box.el.find('.contentbox:first').detach();
 									var newrow = this.row.box.addRow(original_idx);
 									newrow.append(boxn);
 									boxn.row = newrow;
@@ -969,10 +992,10 @@ var layoutEngine = (function() {
 						}
 					}
 					else {
-						console.log("top case2: add to single box");
+						console.logdash("top case2: add to single box");
 						
-						var contentsTop = box.el.find('.contentbox').detach();
-						var contentsBottom = this.el.find('.contentbox').detach();
+						var contentsTop = box.el.find('.contentbox:first').detach();
+						var contentsBottom = this.el.find('.contentbox:first').detach();
 						box.close();
 						var child = wrapRow(this); // <-- it is child
 						// "this" is parent box
@@ -998,13 +1021,13 @@ var layoutEngine = (function() {
 			}
 			else if(direction === "left") {
 				if(this.row === undefined) {
-					console.log("left case: root");
+					console.logdash("left case: root");
 
 					var p = this.el.parent();
 					var boxobj = $.extend({}, box.obj); // object copy
 					boxobj.w = 50;
 
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 
 					var contb = _box.create({
 						"rows": [
@@ -1016,7 +1039,7 @@ var layoutEngine = (function() {
 							}
 						],
 						"w": 100
-					});
+					}, false, options);
 
 					unmakeDroppable(this);
 
@@ -1035,12 +1058,12 @@ var layoutEngine = (function() {
 					boxn.resizerH.show();
 				}
 				else {
-					console.log("left case: basic");
+					console.logdash("left case: basic");
 					var original_idx = this.row.boxes.indexOf(this);
 					
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 					box.obj.w = this.obj.w / 2;
-					var boxn = _box.create(box.obj)
+					var boxn = _box.create(box.obj, false, options)
 					
 					this.row.insertAt(boxn, original_idx);
 					this.row.boxes[original_idx + 1].resize(boxn.obj.w, false);
@@ -1052,13 +1075,13 @@ var layoutEngine = (function() {
 			}
 			else if(direction === "right") {
 				if(this.row === undefined) {
-					console.log("right case: root");
+					console.logdash("right case: root");
 
 					var p = this.el.parent();
 					var boxobj = $.extend({}, box.obj); // object copy
 					boxobj.w = 50;
 
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 
 					var contb = _box.create({
 						"rows": [
@@ -1070,7 +1093,7 @@ var layoutEngine = (function() {
 							}
 						],
 						"w": 100
-					});
+					}, false, options);
 
 					unmakeDroppable(this);
 
@@ -1090,12 +1113,12 @@ var layoutEngine = (function() {
 					contb.rows[0].boxes[0].resizerH.show();
 				}
 				else {
-					console.log("right case: basic");
+					console.logdash("right case: basic");
 					var original_idx = this.row.boxes.indexOf(this);
 
-					var contents = box.el.find('.contentbox').detach();
+					var contents = box.el.find('.contentbox:first').detach();
 					box.obj.w = this.obj.w / 2;
-					var boxn = _box.create(box.obj)
+					var boxn = _box.create(box.obj, false, options)
 					
 					this.row.insertAt(boxn, original_idx + 1);
 
@@ -1126,7 +1149,7 @@ var layoutEngine = (function() {
 			delete boxobj.w;
 			var boxel = box.el.children(".mybox").remove();
 			
-			var boxn = _box.create(boxobj);
+			var boxn = _box.create(boxobj, false, options);
 			newrow.append(boxn);
 			
 			delete box.guid;
@@ -1143,13 +1166,13 @@ var layoutEngine = (function() {
 			for(var i = 0; i < obj.rows.length; i++) {
 				// making row
 				var objRow = obj.rows[i];
-				var row = new Row(objRow);
+				var row = new Row(objRow, options);
 				row.appendTo(that);
 
 				for(var j = 0; j < objRow.cols.length; j++) {
 					// making box
 					var objBox = objRow.cols[j];
-					var box = new Box(objBox);
+					var box = new Box(objBox, options);
 					box.appendTo(row);
 				}
 			}
@@ -1158,30 +1181,47 @@ var layoutEngine = (function() {
 		function draw() {
 
 			if(prop.rows == undefined) {
-				el.attr('dock-id', that.guid)
-				var closebtn = $("<button>").addClass("btn").addClass("internal-close")
-											.text("x")
-											.on("click",function() {
-												that.close();
-											});
-				var mybox = $("<div>").addClass("mybox")
-						  .append(closebtn)
-						  .appendTo(el);
-				
-				$("<div>&nbsp;</div>").addClass("handler").appendTo(mybox);
+				if(prop.blank) {
+					el.addClass('blank');
+					el.find('.k-rs-r').hide();
+				}
+				else {
+					el.attr('dock-id', that.guid)
+					var closebtn = $("<button>").addClass("btn").addClass("internal-close")
+												.text("x")
+												.on("click",function() {
+													that.close();
+												});
+					var mybox = $("<div>").addClass("mybox")
+							  .append(closebtn)
+							  .appendTo(el);
+					
+					var handler = $("<div>&nbsp;</div>").addClass("handler").appendTo(mybox);
 
-				var contentbox = $('<div>').addClass('contentbox').appendTo(mybox);
-				
-				makeDraggable(that);
-				
-				makeDroppable(that, false);
+					var contentbox = $('<div>').addClass('contentbox').appendTo(mybox);
+					
+					if(prop.dragHandler != false) {
+						makeDraggable(that);	
+					}
+					else {
+						handler.hide();
+						contentbox.css('height', 'calc(100% + 2px)');
+					}
+					
+				}
+
+				if(prop.droppable != false) {
+					makeDroppable(that, false);
+				}
 			}
 			else {
 				
 				setTimeout(function() {
-					// console.log(that.row, that.guid)
+					// console.logdash(that.row, that.guid)
 					if(that.row == undefined) {
-						makeDroppable(that, true);
+						if(prop.droppable != false) {
+							makeDroppable(that, true);
+						}
 
 						that.resizerH.hide();
 					}
@@ -1196,7 +1236,7 @@ var layoutEngine = (function() {
 			el.css("width", prop.w + "%");
 			el.css("height", "100%");
 			
-			//console.log(that.guid); // this shows rendering order
+			//console.logdash(that.guid); // this shows rendering order
 		}
 
 
@@ -1227,7 +1267,7 @@ var layoutEngine = (function() {
 						else {
 							box.resize(addboxw, false);
 						}
-						//console.log(i + " " + box.obj.h);
+						//console.logdash(i + " " + box.obj.h);
 					}
 
 					totalper = totalper + box.obj.h;
@@ -1299,7 +1339,7 @@ var layoutEngine = (function() {
 				if(!!b.row.box) {
 					checkZ(b.row.box)
 					var pz = parseInt( b.row.box.droppable.css("z-index") ) ;
-					//console.log("has parent: " + b.row.box.droppable.css("z-index") );
+					//console.logdash("has parent: " + b.row.box.droppable.css("z-index") );
 					
 					b.droppable.css("z-index", pz + 1);
 					b.dropCompass.css("z-index", pz + 101);
@@ -1328,16 +1368,21 @@ var layoutEngine = (function() {
 			});
 		}
 		
-		function drop(box) {
+		function drop(box, e, targetDockId) {
 			
 			if(!!layoutEngine.ui.layout.box.target) {
 				var t = layoutEngine.ui.layout.box.target;
 				var target = t.splitTarget;
-				delete t.splsplitTarget;
+				delete t.splitTarget;
 				
 				t.splitInsert(box, target);
 				
 				layoutEngine.ui.layout.box.target = null;
+
+			
+				if((!!options) && !!options.onAppend) {
+					options.onAppend(box, e, targetDockId);
+				}
 			}
 			else {
 				box.el.css("position", "")
@@ -1376,8 +1421,10 @@ var layoutEngine = (function() {
 				$(document).on("mousemove.activeDroppable", function(e) {
 					
 					if( Math.abs(initp.x - e.pageX) < 20 && Math.abs(initp.y - e.pageY) < 20 ) return;
-					
-					//console.log(e);
+
+					if((!!options) && !!options.onDrag) {
+						options.onDrag(box, e, ee);
+					}
 					
 					if(!isDraggable) {
 						
@@ -1385,7 +1432,8 @@ var layoutEngine = (function() {
 						
 						scaf = $("<div>").addClass("k-d-col").css("width", box.obj.w + "%"); //.css("background-color", "rgba(0,0,0,.1)");
 						
-						box.el.css("position", "absolute").css("z-index", "8000");
+						box.el.css("position", "absolute").css("z-index", "8000")
+							.css("top", (e.pageY - initp.y) + "px").css("left", (e.pageX - boxp.x - poffset.left) + "px");
 						box.el.after(scaf);
 						box.el.removeClass("ani");
 						/*
@@ -1411,10 +1459,12 @@ var layoutEngine = (function() {
 						
 					}
 				}).
-				on("mouseup.activeDroppable", function() {
+				on("mouseup.activeDroppable", function(e) {
 					
 					$(document).off("mousemove.activeDroppable").off("mouseup.activeDroppable").off("selectstart");
 					dragHandler.off("mousemove");
+
+					var targetDockId = $(e.target).parents('dockpanel:first').attr('id');
 
 					box.el.addClass("ani").removeClass("grabbed");
 					//detached.addClass("ani").removeClass("grabbed");
@@ -1425,8 +1475,11 @@ var layoutEngine = (function() {
 					if(!!scaf) {
 						scaf.remove();
 					}
+					drop(box, e, targetDockId);
 					
-					drop(box);
+					if((!!options) && !!options.onDrop) {
+						options.onDrop(box, e, targetDockId);
+					}
 
 				})
 			});
@@ -1515,7 +1568,6 @@ var layoutEngine = (function() {
 				isEnter = true;
 			})
 			.on("mousemove", function(e) {
-				
 				if(!isEnter) return;
 				
 				var all = $(".drop-compass");
@@ -1537,6 +1589,7 @@ var layoutEngine = (function() {
 				$.each(found, function(i, cont) {
 					$(cont).mouseover();
 				});
+
 			})
 			.on("mouseout", function() {
 				if(!isContainer) {
@@ -1554,7 +1607,9 @@ var layoutEngine = (function() {
 		
 		this.close = function() {
 			if(this.row == undefined) {
-				// this.el.remove();
+				console.log('close last one box');
+				this.el.addClass('blank');
+				// this.droppable.addClass('max');
 			}
 			else {
 				this.row.deleteBox(this);
@@ -1582,7 +1637,7 @@ var layoutEngine = (function() {
 
 		function unwrapRow(row) {
 			if(row == undefined) return;
-			console.log('unwrapRow');
+			console.logdash('unwrapRow');
 
 			var pbox = row.box;
 			var pobjw = row.box.obj.w;
@@ -1616,7 +1671,7 @@ var layoutEngine = (function() {
 				var nextbox = nextel[0].obj;
 				var originw = nextel.width();
 				var dx = newx - oldx;
-				// console.log(that, nextbox, that.getMinWidth(), nextbox.getMinWidth(), oldx, newx, originw - dx, originw )
+				// console.logdash(that, nextbox, that.getMinWidth(), nextbox.getMinWidth(), oldx, newx, originw - dx, originw )
 				var can = (that.getMinWidth() < newx) && (nextbox.getMinWidth() < originw - dx);
 				if(can) {
 					if(nextel.length > 0) {
@@ -1625,11 +1680,16 @@ var layoutEngine = (function() {
 				}
 				return can;
 			},
-			"afterResize": _box.event.resize
+			"afterResize": function() {
+				return options.onResize(that.row)
+			}
 		});
 
 
 		// drawing row
+		if(!prop.hasOwnProperty('rows') && !prop.hasOwnProperty('guid')) {
+			prop.blank = true;
+		}
 		traverse(prop);
 
 		draw();
@@ -1640,13 +1700,13 @@ var layoutEngine = (function() {
 		layoutEngine.ui.layout.box.allboxes.push(this);
 	}
 
-	_box.create = function(prop, isreset) {
+	_box.create = function(prop, isreset, options) {
 		if(isreset != undefined) {
 			if(isreset) {
 				layoutEngine.ui.layout.box.allboxes = [];
 			}
 		}
-		return new Box(prop);
+		return new Box(prop, options);
 	}
 
 	layoutEngine.ui.layout.box.create({'w': 100,'guid': 'zz'}); // Box
@@ -1657,7 +1717,7 @@ var layoutEngine = (function() {
 
 (function() {
 	function AutoLayout(widgets) {
-		var layout = { 'rows':[], 'w':100, 'guid':'root' };
+		var layout = { 'rows':[], 'w':100 };
 		var h = 100 / Math.ceil(widgets.length / 4);
 		if(h < 25) h = 25;
 
