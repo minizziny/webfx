@@ -288,7 +288,7 @@ angular.module('app.directive.logdb', [])
 
 				// 컬럼 순서 추출
 				// TEST HERE: http://plnkr.co/edit/qrgTBjE1hnsplJS8Nwsx
-				var fieldsLine = q1
+				var fieldsLine = scope.ngQuery
 					.replace(/\[(.*?)\]/, "")
 					.replace(/\"(.*?)\"/, "")
 					.replace(/\'(.*?)\'/, "")
