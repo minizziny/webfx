@@ -287,12 +287,21 @@ angular.module('app.directive.logdb', [])
 				if(scope.isCheckType == undefined) scope.isCheckType = false;
 
 				// 컬럼 순서 추출
-				var fieldsLine = scope.ngQuery.split("|");
+				// TEST HERE: http://plnkr.co/edit/qrgTBjE1hnsplJS8Nwsx
+				var fieldsLine = q1
+					.replace(/\[(.*?)\]/, "")
+					.replace(/\"(.*?)\"/, "")
+					.replace(/\'(.*?)\'/, "")
+					.split("|");
 				var fields = [];
 				fieldsLine.forEach(function(obj) {
 					if(!obj.match(/fields -/) && obj.match(/fields/)) {
 						obj = obj.replace(/ /gi, "");
+						if(obj.indexOf('fields') !== 0) return;
 						obj = obj.replace("fields", "");
+						if(fields.length) {
+							fields = [];
+						}
 						var tmp = obj.split(",");
 						tmp.forEach(function(f) {							
 							fields.push(f);					
