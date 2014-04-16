@@ -122,8 +122,13 @@ public class WebSocketFrame {
 			bos.write(len);
 		} else {
 			bos.write(maskBit(127));
-			for (int i = 7; i >= 0; i--)
+			bos.write(0);
+			bos.write(0);
+			bos.write(0);
+			bos.write(0);
+			for (int i = 3; i >= 0; i--) {
 				bos.write(len >> (i * 8));
+			}
 		}
 
 		try {
