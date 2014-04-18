@@ -1,5 +1,4 @@
-
-function DashboardController($scope, $http, $compile, $translate, $timeout, eventSender, $filter, socket, serviceUtility, serviceSession, serviceWidget) {
+function DashboardController($scope, $http, $element, $compile, $q, $translate, $timeout, eventSender, $filter, socket, serviceUtility, serviceSession, serviceWidget, serviceExtension) {
 	$scope.getPid = eventSender.dashboard.pid;
 	
 	eventSender.dashboard.$event.on('resume', function() {
@@ -26,6 +25,36 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			w.suspend();
 		});
 		gt.cancel();
+	});
+
+	$scope.dataAssetTypes = [];
+
+	extension.dashboard.factory('eventSender', function() {
+		return {
+			'addAssetType': function(obj) {
+				$scope.dataAssetTypes.push(obj);			
+			},
+			'event': {
+				'on': function() {}
+			}
+		}
+	});
+	
+	var appid = 'bf1564e4-abab-94ec-1149-f52ff4a054fc';
+	serviceExtension.load(appid)
+	.done(function(manifest) {
+		var prefix = 'apps/' + appid + '/';
+
+		$.getScript(prefix + manifest['dashboard-assets'].script)
+		.done(function(script) {
+			var ct = angular.element('<div class="dashboard-extension-container" ng-include src="\'' + prefix + manifest['dashboard-assets'].html + '\'"></div>');
+			$compile(ct)($scope);
+			$element.append(ct);
+		})
+		.fail(function(a,b,c) {
+			console.log(a,b,c);
+		});
+
 	});
 
 	$scope.formSecond = {
@@ -1347,6 +1376,7 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility, $translate) {
 	$scope.numCurrentPage = 0;
 	$scope.numPagerPagesize = 100;
+
 	var dataChart;
 	
 	function getDefaultContext(type) {

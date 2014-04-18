@@ -17,7 +17,10 @@ var logpresso = angular.module('app', [
 	'app.logdb.management',
 	'pascalprecht.translate',
 	'ui.sortable',
-	'ngAnimate'
+	'ngAnimate',
+	'app.events',
+	'app.extension',
+	'logpresso.extension'
 ], function() {
 });
 
@@ -110,7 +113,8 @@ logpresso.config(['$translateProvider', function ($translateProvider) {
 	$translateProvider.fallbackLanguage('en');
 }]);
 
-logpresso.factory('eventSender', function() {
+angular.module('app.events', [])
+.factory('eventSender', function() {
 	var e = {
 		'root': {},
 		'menu': {},
@@ -132,6 +136,11 @@ logpresso.factory('eventSender', function() {
 	}
 	return e;
 });
+
+var extension = {
+	dashboard: angular.module('logpresso.extension.dashboard', [])
+}
+angular.module('logpresso.extension', ['logpresso.extension.dashboard']);
 
 
 function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSession, serviceDom, $location, $translate) {
