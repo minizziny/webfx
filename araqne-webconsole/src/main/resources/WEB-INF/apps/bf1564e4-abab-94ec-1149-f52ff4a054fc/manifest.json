@@ -1,0 +1,10 @@
+{
+	"name": "Timeseries Charts",
+	"version": "1.0",
+	"description": "best timeseries charts",
+	"manifest_version": 0.1,
+	"dashboard-assets": {
+		"script": "timeseries-chart.js",
+		"html": "timeseries-chart.html"
+	}
+}

@@ -2,6 +2,15 @@
 <link href="css/dashboard.css" rel="stylesheet" media="screen">
 
 <style>
+.dashboard-extension-container {
+	position: fixed;
+	top: 30px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(255,255,255,.3)
+}
+
 dockpanel, widget {
 	display: block;
 }
@@ -376,6 +385,13 @@ widget.w-before-loading:before {
 						<li>
 							<input type="radio" ng-model="widgetTypeName" value="graph" ng-change="selectType(1)" id="radioGraph">
 							<label class="radio" for="radioGraph">{{'$S_str_Chart' | translate}}</label>
+						</li>
+					</ul>
+					<ul class="radio">
+						<li ng-repeat="assetType in dataAssetTypes">
+							<label>
+								<input type="radio" name="assetTypes"> {{assetType.name}}
+							</label>
 						</li>
 					</ul>
 					<div style="margin-bottom: 20px" ng-bind="selectedParserFactory.description"></div>
