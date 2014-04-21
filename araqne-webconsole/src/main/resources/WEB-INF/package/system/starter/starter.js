@@ -1,4 +1,25 @@
-function StarterController($scope, socket, eventSender, $rootScope) {
+function StarterController($scope, socket, eventSender, $rootScope, serviceExtension) {
+
+	var apps = ['bf1564e4-abab-94ec-1149-f52ff4a054fc'];
+	apps.forEach(function(appid) {
+
+		serviceExtension.load(appid)
+		.done(function(manifest) {
+			var prefix = 'apps/' + appid + '/';
+			if(!manifest['starter']) return;
+
+			$.getScript(prefix + manifest['starter'].script)
+			.done(function(script) {
+				console.log('loaded')
+			})
+			.fail(function(a,b,c) {
+				console.log(a,b,c);
+			});
+
+		});
+
+	});
+
 	function setGrayBackground(b, apply) {
 		return function() {
 			$rootScope.grayBackground = b;

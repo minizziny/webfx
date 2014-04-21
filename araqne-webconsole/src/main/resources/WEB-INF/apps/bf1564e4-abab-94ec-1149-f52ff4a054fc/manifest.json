@@ -5,6 +5,11 @@
 	"manifest_version": 0.1,
 	"dashboard-assets": {
 		"script": "timeseries-chart.js",
-		"html": "timeseries-chart.html"
+		"step": {
+			"html": "timeseries-chart.html"
+		}
+	},
+	"starter": {
+		"script": "starter-addon.js"
 	}
 }
