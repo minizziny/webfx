@@ -1,6 +1,6 @@
 function StarterController($scope, socket, eventSender, $rootScope, serviceExtension) {
 
-	var apps = ['bf1564e4-abab-94ec-1149-f52ff4a054fc'];
+	var apps = ['app0'];
 	apps.forEach(function(appid) {
 
 		serviceExtension.load(appid)
