@@ -3,12 +3,12 @@
 
 <style>
 .dashboard-extension-container {
-	position: fixed;
+	/*position: fixed;
 	top: 30px;
 	left: 0;
 	right: 0;
 	bottom: 0;
-	background-color: rgba(255,255,255,.3)
+	background-color: rgba(255,255,255,.3)*/
 }
 
 dockpanel, widget {
@@ -390,13 +390,15 @@ widget.w-before-loading:before {
 					<ul class="radio">
 						<li ng-repeat="assetType in dataAssetTypes">
 							<label>
-								<input type="radio" name="assetTypes"> {{assetType.name}}
+								<input type="radio" name="assetTypes" ng-model="$parent.selectedAsset" ng-value="assetType">{{i}} {{assetType.name}}
 							</label>
 						</li>
 					</ul>
+					{{selectedAsset}}
 					<div style="margin-bottom: 20px" ng-bind="selectedParserFactory.description"></div>
 					<div class="control-group submit-group">
 						<button class="wiz-next btn" ng-click="go(1, widgetType.s0nextCallback())">{{'$S_str_Next' | translate}}</button>
+						<button class="wiz-next btn" ng-click="onNextSelectAsset()">{{'$S_str_Next' | translate}}</button>
 					</div>
 				</fieldset>
 			</li>

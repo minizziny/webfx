@@ -27,32 +27,41 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		gt.cancel();
 	});
 
-	$scope.dataAssetTypes = [];
 
+	eventSender.dashboard.eventHandler = {};
 	extension.dashboard.factory('eventSender', function() {
-		return {
+		var ret = {
 			'addAssetType': function(obj) {
-				$scope.dataAssetTypes.push(obj);			
+				eventSender.dashboard.addAssetType(obj);
 			},
-			'event': {
-				'on': function() {}
-			}
+			'closeWizard': function() {
+				$('.newWidget')[0].hideDialog();
+			},
+			'event': new CustomEvent(eventSender.dashboard.eventHandler)
 		}
+		return ret;
 	});
 	
-	var appid = 'bf1564e4-abab-94ec-1149-f52ff4a054fc';
-	serviceExtension.load(appid)
-	.done(function(manifest) {
-		var prefix = 'apps/' + appid + '/';
+	var apps = ['app0', 'app1'];
+	apps.forEach(function(appid) {
 
-		$.getScript(prefix + manifest['dashboard-assets'].script)
-		.done(function(script) {
-			var ct = angular.element('<div class="dashboard-extension-container" ng-include src="\'' + prefix + manifest['dashboard-assets'].html + '\'"></div>');
-			$compile(ct)($scope);
-			$element.append(ct);
-		})
-		.fail(function(a,b,c) {
-			console.log(a,b,c);
+		serviceExtension.load(appid)
+		.done(function(manifest) {
+			var prefix = 'apps/' + appid + '/';
+			if(!manifest['dashboard-assets']) return;
+
+			$.getScript(prefix + manifest['dashboard-assets'].script)
+			.done(function(script) {
+
+
+				var ct = angular.element('<div class="dashboard-extension-container" ng-include src="\'' + prefix + manifest['dashboard-assets'].step.html + '\'"></div>');
+				$compile(ct)($scope);
+				$element.append(ct);
+			})
+			.fail(function(a,b,c) {
+				console.log(a,b,c);
+			});
+
 		});
 
 	});
@@ -1559,6 +1568,19 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	}
 
 	$scope.ctxWidget;
+
+	/** new **/
+	eventSender.dashboard.addAssetType = function(obj) {
+		$scope.dataAssetTypes.push(obj);
+		$scope.selectedAsset = obj;
+	}
+	$scope.dataAssetTypes = [];
+	$scope.selectedAsset;
+	$scope.onNextSelectAsset = function() {
+		$scope.selectedAsset.event.onNextStep();
+	}
+
+	/** end new **/
 
 	$scope.go = function(page, callback, event) {
 		window.scrollTo(0, 0);
