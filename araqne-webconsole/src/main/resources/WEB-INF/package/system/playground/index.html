@@ -1,0 +1,129 @@
+<!-- space 말고 tab 써주세요 -->
+
+<div class="playground-container" ng-controller="PlaygroundController">
+
+	<div class="paneFtpConfig" ng-controller="MyFtpProfileConfigController">
+		<ul class="tab well1 tab-ftp">
+			<li class="section well1">
+				<legend>
+					{{'$S_str_FtpSetting' | translate}}
+					<button class="btn btn-reload pull-right" style="margin-left:5px" ng-click="init($event)"><i class="icon-refresh"></i></button>
+					<button ng-disabled="ftpProfileDeletable()" class="btn pull-right" style="margin-left:5px" ng-click="openDropFtpProfileModal()">{{'$S_str_Remove' | translate}}</button>
+					<button class="btn btn-primary pull-right" ng-click="openCreateFtpProfileModal()">{{'$S_str_NewFtpProfile' | translate}}</button>				
+				</legend>
+				<table class="table table-bordered table-striped">
+					<thead>
+						<tr>
+							<th class="check">
+								<select-all-checkbox checkboxes="dataFtpProfiles" master="checkAll" class="select-all-cb"></select-all-checkbox>
+							</th>
+							<th>{{'$S_str_Name' | translate}}</th>
+							<th>{{'$S_str_HostAddress' | translate}}</th>	
+							<th>{{'$S_str_FtpPort' | translate}}</th>	
+							<th>{{'$S_str_Timeout' | translate}}</th>
+							<th>{{'$S_str_User' | translate}}</th>	
+							<th>{{'$S_str_ActiveMode' | translate}}</th>
+							<th>{{'$S_str_ExtendedPAssiveMode' | translate}}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-class="{'tr-selected': ftp.is_checked}" tr-multi-selectable="ftp" ng-repeat="ftp in dataFtpProfiles">
+							<td class="checks"><input type="checkbox" ng-model="ftp.is_checked" ng-checked="ftp.is_checked"/></td>
+							<td>{{ftp.name}}</td>
+							<td>{{ftp.host}}</td>
+							<td>{{ftp.port}}</td>
+							<td>{{ftp.timeout}}{{'$S_str_Second' | translate}}</td>
+							<td>{{ftp.username}}</td>
+							<td>{{ftp.active_mode}}</td>
+							<td>{{ftp.use_epsv}}</td>		
+						</tr>
+					</tbody>
+				</table>							
+			</li>
+		</ul>
+
+		<!-- create ftp profile modal window -->
+		<form name="FormFtpProfile" novalidate ng-submit="createFtpProfile()">
+			<div class="modal createFtpProfile" ng-controller="MyFtpProfileWizardController" modal ng-class="{'error': FormFtpProfile.$invalid && isOnSubmit}">
+				<a class="modal-close close" style="margin-bottom: -30px">&times;</a>
+				<legend>{{'$S_str_NewFtpProfile' | translate}}</legend>
+				<fieldset class="form-horizontal">
+					<div class="control-group" ng-class="{'error': (FormFtpProfile.name.$error.required && isOnSubmit) || FormFtpProfile.name.$error.pattern}">
+						<label class="control-label">{{'$S_str_Name' | translate}}</label>
+						<div class="controls">
+							<input type="text" name="name" ng-model="dataFtpProfile.name" ng-pattern="dataNamePattern" required/>
+							<span class="help-block" ng-show="FormFtpProfile.name.$error.required && isOnSubmit">{{'$S_msg_PleaseEnterFtpProfileName' | translate}}</span>
+							<span class="help-block" ng-show="FormFtpProfile.name.$error.pattern">{{'$S_str_NameValidationErrorMsg' | translate}}</span>
+						</div>
+					</div>
+					<div class="control-group" ng-class="{'error': FormFtpProfile.host.$error.required && isOnSubmit}">
+						<label class="control-label">{{'$S_str_HostAddress' | translate}}</label>
+						<div class="controls">
+							<input type="text" name="host" ng-model="dataFtpProfile.host" required/>
+							<span class="help-block" ng-show="FormFtpProfile.host.$error.required && isOnSubmit">{{'$S_msg_PleaseEnterHostAddress' | translate}}</span>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">{{'$S_str_FtpPort' | translate}}</label>
+						<div class="controls">
+							<input type="text" name="port" ng-model="dataFtpProfile.port" maxlength="5" only-number />
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">{{'$S_str_Timeout' | translate}}</label>
+						<div class="controls">
+							<input type="text" name="timeout" ng-model="dataFtpProfile.timeout" maxlength="5" only-number/>
+						</div>
+					</div>
+					<div class="control-group" ng-class="{'error': (FormFtpProfile.user.$error.required && isOnSubmit) || FormFtpProfile.user.$error.pattern}">
+						<label class="control-label">{{'$S_str_User' | translate}}</label>
+						<div class="controls">
+							<input type="text" name="user" ng-model="dataFtpProfile.user" ng-pattern="dataNamePattern" required/>
+							<span class="help-block" ng-show="FormFtpProfile.user.$error.required && isOnSubmit">{{'$S_msg_PleaseEnterUserName' | translate}}</span>
+							<span class="help-block" ng-show="FormFtpProfile.user.$error.pattern">{{'$S_str_NameValidationErrorMsg' | translate}}</span>
+						</div>
+					</div>
+					<div class="control-group" ng-class="{'error': FormFtpProfile.password.$error.required && isOnSubmit}">
+						<label class="control-label" for="inputName">{{'$S_str_Password' | translate}}</label>
+						<div class="controls">
+							<input type="password" name="password" ng-model="dataFtpProfile.password" required/>
+							<span class="help-block" ng-show="FormFtpProfile.password.$error.required && isOnSubmit">{{'$S_msg_PleaseEnterPassword' | translate}}</span>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">{{'$S_str_ActiveMode' | translate}}</label>
+						<div class="controls">
+							<label class="radio">
+								<input type="checkbox" name="active" ng-model="dataFtpProfile.active"/>
+							</label>
+						</div>
+					</div>
+					<div class="control-group" ng-show="!dataFtpProfile.active">
+						<label class="control-label">{{'$S_str_ExtendedPAssiveMode' | translate}}</label>
+						<div class="controls">
+							<label class="radio">
+								<input type="checkbox" name="extend-passive" ng-model="dataFtpProfile.extend_passive"/>
+							</label>
+						</div>
+					</div>					
+					<div class="control-group submit-group">
+						<input type="submit" class="btn btn-primary" ng-click="validCreatingFtpProfile()" value="{{'$S_str_Create' | translate}}">
+					</div>
+				</fieldset>
+			</div>
+		</form>
+
+		<!-- drop ftp profile modal window -->
+		<div class="modal dropFtpProfile" modal>
+			<a  class="modal-close close" style="margin-bottom: -30px">&times;</a>
+			<legend>{{'$S_str_RemoveFtpProfile' | translate}}</legend>
+			<div style="margin-bottom: 20px">
+				{{'$S_msg_RemoveFtpProfileConfirmPre' | translate}} <code>{{dataFtpProfiles | isSelected: 'is_checked' | namemap: 'name'}}</code>{{'$S_msg_RemoveConfirmPost' | translate}}
+			</div>
+			<div class="control-group submit-group">
+				<button class="btn btn-danger" ng-click="dropFtpProfile()">{{'$S_str_Remove' | translate}}</button>
+				<button class="btn" ng-click="cancelDropFtpProfile()">{{'$S_str_Cancel' | translate}}</button>
+			</div>
+		</div>
+	</div>
+</div>

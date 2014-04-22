@@ -115,6 +115,7 @@ logpresso.factory('eventSender', function() {
 		'root': {},
 		'menu': {},
 		'starter': { pid: 11 },
+		'playground': { pid: 1010 },
 		'dashboard': { pid: 22 },
 		'orgchart': { pid: 33 },
 		'auditlog': { pid: 88 },
@@ -383,6 +384,11 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 	function initialize() {
 		serviceProgram.getAvailablePrograms()
 		.success(function(m) {
+
+			//
+			var programPlayground = {"visible":true,"updated":"2014-03-10 17:24:46+0900","created":"2014-03-10 17:24:46+0900","description":null,"display_names":{"jp":"Playground","ko":"놀이터","en":"Playground"},"name":"Playground","seq":1,"path":"playground","pack":"System"} ;
+			m.body.programs.insert(programPlayground, 1);
+			//
 			$scope.programs.splice(0, $scope.programs.length);
 
 			m.body.programs.forEach(function(p) {
