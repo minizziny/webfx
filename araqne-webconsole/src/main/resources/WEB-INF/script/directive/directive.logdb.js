@@ -317,8 +317,17 @@ angular.module('app.directive.logdb', [])
 				}
 				
 				if(fields.length <= 0 || fields == null) {
-					cols.sort(function(a, b) {
-						if(a.indexOf('_') == 0) { return -1; }
+					cols.sort().sort(function(a, b) {
+						if(a.indexOf('_') === 0 && b.indexOf('_') === 0) { 
+							if(a > b) {
+								return 1;
+							}
+							if(b > a) {
+								return -1;
+							}
+						}
+						else if(a.indexOf('_') === 0) { return -1; }
+						else if(b.indexOf('_') === 0) { return 1; }
 						else { 
 							if(a > b) {
 								return 1;
