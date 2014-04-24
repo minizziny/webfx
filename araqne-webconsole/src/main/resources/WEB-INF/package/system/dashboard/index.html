@@ -387,18 +387,18 @@ widget.w-before-loading:before {
 							<label class="radio" for="radioGraph">{{'$S_str_Chart' | translate}}</label>
 						</li>
 					</ul>
-					<ul class="radio">
+					<!-- <ul class="radio">
 						<li ng-repeat="assetType in dataAssetTypes">
 							<label>
 								<input type="radio" name="assetTypes" ng-model="$parent.selectedAsset" ng-value="assetType">{{i}} {{assetType.name}}
 							</label>
 						</li>
 					</ul>
-					{{selectedAsset}}
+					{{selectedAsset}} -->
 					<div style="margin-bottom: 20px" ng-bind="selectedParserFactory.description"></div>
 					<div class="control-group submit-group">
 						<button class="wiz-next btn" ng-click="go(1, widgetType.s0nextCallback())">{{'$S_str_Next' | translate}}</button>
-						<button class="wiz-next btn" ng-click="onNextSelectAsset()">{{'$S_str_Next' | translate}}</button>
+						<!-- <button class="wiz-next btn" ng-click="onNextSelectAsset()">{{'$S_str_Next' | translate}}</button> -->
 					</div>
 				</fieldset>
 			</li>
