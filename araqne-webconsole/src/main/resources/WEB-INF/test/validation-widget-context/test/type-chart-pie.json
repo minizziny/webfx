@@ -1,0 +1,22 @@
+[
+    {
+        "guid": "wwb110926047be09ce",
+        "interval": "23",
+        "name": "count pie",
+        "data": {
+            "series": [
+                {
+                    "color": "#AFD8F8",
+                    "name": "count",
+                    "key": "count"
+                }
+            ],
+            "interval": "23",
+            "labelType": "string",
+            "query": "logdb count | stats c by table",
+            "label": "table",
+            "type": "pie"
+        },
+        "type": "chart"
+    }
+]

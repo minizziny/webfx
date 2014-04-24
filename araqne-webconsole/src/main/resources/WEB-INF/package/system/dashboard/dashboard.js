@@ -37,6 +37,9 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 			'closeWizard': function() {
 				$('.newWidget')[0].hideDialog();
 			},
+			'onCreateNewWidgetAndSavePreset': function(ctx) {
+				eventSender.dashboard.onCreateNewWidgetAndSavePreset(ctx);
+			},
 			'event': new CustomEvent(eventSender.dashboard.eventHandler)
 		}
 		return ret;
@@ -568,7 +571,59 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		angular.element('.newbie').remove();
 	}
 
+	function ValidateWidgetContext(ctx) {
+		if(angular.isUndefined(ctx)) {
+			return false;
+		}
+
+		if(!angular.isString(ctx.guid)) {
+			return false;
+		}
+
+		if(!angular.isString(ctx.name)) {
+			return false;
+		}
+
+		if(!/^(grid|chart|wordcloud|tabs)$/.test(ctx.type)) {
+			return false;
+		}
+
+		if(/^(grid|chart|wordcloud)$/.test(ctx.type)) {
+			if(!angular.isNumber(ctx.interval)) {
+				throw new TypeError('interval is not number');
+			}
+
+			if(angular.isUndefined(ctx.data))	{
+				return false;
+			}
+
+			if(!angular.isString(ctx.data.query)) {
+				return false;
+			}
+		}
+
+		if(/^grid$/.test(ctx.type)) {
+			if(!angular.isArray(ctx.data.order)) {
+				return false;
+			}
+		}
+
+		if(/^chart$/.test(ctx.type)) {
+			if(!/^(line|pie|bar)$/.test(ctx.data.type)) {
+				return false;
+			}
+
+			if(!angular.isArray(ctx.data.series)) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+
+
 	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
+		if(!ValidateWidgetContext(ctx)) return;
 		var currentPresetId = $('dockpanel:visible:last').attr('id');
 		var isBlank = false;
 		if( $('dockpanel:visible:last > .k-d-col.blank').length ) {
@@ -581,7 +636,7 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 			console.log('blank')
 		}
-		
+
 		$scope.ctxPreset[currentPresetId].ctxWidget[ctx.guid] = ctx;
 
 		console.log(ctx);
@@ -780,6 +835,7 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		var widgets = data.widgets;
 
 		widgets.forEach(function(widget) {
+			if(!ValidateWidgetContext(widget)) return;
 			var elWidget = angular.element(serviceWidget.buildWidget(name, widget));
 			$scope.ctxPreset[name].ctxWidget[widget.guid] = widget;
 			elWidget.appendTo(el);
@@ -1637,7 +1693,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		console.log($scope.ctxWidget);
 
 		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
-		$('.newWidget')[0].hideDialog();	
+		$('.newWidget')[0].hideDialog();
 	}
 
 	// chart options

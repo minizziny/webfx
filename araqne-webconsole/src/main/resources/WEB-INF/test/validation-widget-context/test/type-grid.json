@@ -1,0 +1,30 @@
+[
+    {
+        "guid": "wf10f920788dd4f74",
+        "interval": 30,
+        "name": "wc44555",
+        "data.width": {
+            "_id": 4.74,
+            "_table": 8.72,
+            "line": 67.83,
+            "_time": 18.71
+        },
+        "data": {
+            "order": [
+                "_id",
+                "_table",
+                "_time",
+                "line"
+            ],
+            "interval": 30,
+            "query": "table limit=5000000 wc44",
+            "width": {
+                "_id": 10.47,
+                "_table": 12.02,
+                "line": 116.62,
+                "_time": 20.37
+            }
+        },
+        "type": "grid"
+    }
+]
