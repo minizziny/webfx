@@ -1,5 +1,4 @@
-
-function DashboardController($scope, $http, $compile, $translate, $timeout, eventSender, $filter, socket, serviceUtility, serviceSession, serviceWidget) {
+function DashboardController($scope, $http, $element, $compile, $q, $translate, $timeout, eventSender, $filter, socket, serviceUtility, serviceSession, serviceWidget, serviceExtension) {
 	$scope.getPid = eventSender.dashboard.pid;
 	
 	eventSender.dashboard.$event.on('resume', function() {
@@ -26,6 +25,49 @@ function DashboardController($scope, $http, $compile, $translate, $timeout, even
 			w.suspend();
 		});
 		gt.cancel();
+	});
+
+
+	eventSender.dashboard.eventHandler = {};
+	extension.dashboard.factory('serviceDashboard', function() {
+		var ret = {
+			'addAssetType': function(obj) {
+				eventSender.dashboard.addAssetType(obj);
+			},
+			'closeWizard': function() {
+				$('.newWidget')[0].hideDialog();
+			},
+			'event': new CustomEvent(eventSender.dashboard.eventHandler)
+		}
+		return ret;
+	});
+
+
+	var apps = ['app0', 'app1'];
+
+	apps.forEach(function(appid) {
+
+		serviceExtension.load(appid)
+		.done(function(manifest) {
+			var prefix = 'apps/' + appid + '/';
+			if(!manifest['dashboard-assets']) return;
+
+			serviceExtension.register(appid, 'dashboard', manifest);
+
+			$.getScript(prefix + manifest['dashboard-assets'].script)
+			.done(function(script) {
+
+
+				var ct = angular.element('<div class="dashboard-extension-container" ng-include src="\'' + prefix + manifest['dashboard-assets'].step.html + '\'"></div>');
+				$compile(ct)($scope);
+				$element.append(ct);
+			})
+			.fail(function(a,b,c) {
+				console.log(a,b,c);
+			});
+
+		});
+
 	});
 
 	$scope.formSecond = {
@@ -1347,6 +1389,7 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility, $translate) {
 	$scope.numCurrentPage = 0;
 	$scope.numPagerPagesize = 100;
+
 	var dataChart;
 	
 	function getDefaultContext(type) {
@@ -1529,6 +1572,21 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	}
 
 	$scope.ctxWidget;
+
+	/** new **/
+	eventSender.dashboard.addAssetType = function(obj) {
+		$scope.dataAssetTypes.push(obj);
+		if($scope.selectedAsset === undefined) {
+			$scope.selectedAsset = obj;	
+		}
+	}
+	$scope.dataAssetTypes = [];
+	$scope.selectedAsset;
+	$scope.onNextSelectAsset = function() {
+		$scope.selectedAsset.event.onNextStep();
+	}
+
+	/** end new **/
 
 	$scope.go = function(page, callback, event) {
 		window.scrollTo(0, 0);
