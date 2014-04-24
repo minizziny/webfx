@@ -1,4 +1,4 @@
-function DashboardController($scope, $http, $element, $compile, $q, $translate, $timeout, eventSender, $filter, socket, serviceUtility, serviceSession, serviceWidget, serviceExtension) {
+function DashboardController($scope, $http, $element, $compile, $q, $translate, $timeout, eventSender, $filter, socket, serviceUtility, serviceSession, serviceWidget, serviceExtension, WidgetService) {
 	$scope.getPid = eventSender.dashboard.pid;
 	
 	eventSender.dashboard.$event.on('resume', function() {
@@ -572,10 +572,10 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 	}
 
 	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
-		if(!eventSender.dashboard.validateWidgetContext(ctx)) {
+		if(!WidgetService.validateWidgetContext(ctx)) {
 			return;
 		}
-		if(!eventSender.dashboard.isValidContext(ctx)) {
+		if(!WidgetService.isValidContext(ctx)) {
 			return;
 		}
 		var currentPresetId = $('dockpanel:visible:last').attr('id');
@@ -789,13 +789,14 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		var widgets = data.widgets;
 
 		widgets.forEach(function(ctx) {
-			if(!eventSender.dashboard.validateWidgetContext(ctx)) {
+			if(!WidgetService.validateWidgetContext(ctx)) {
 				return;
 			}
-			if(!eventSender.dashboard.isValidContext(ctx)) {
+			if(!WidgetService.isValidContext(ctx)) {
 				return;
 			}
 			var elWidget = angular.element(serviceWidget.buildWidget(name, ctx));
+			// var elWidget = angular.element(ctx.templa)
 			$scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;
 			elWidget.appendTo(el);
 		});
@@ -1401,7 +1402,7 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 
 }
 
-function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility, $translate) {
+function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility, $translate, WidgetService) {
 	$scope.numCurrentPage = 0;
 	$scope.numPagerPagesize = 100;
 
@@ -1590,152 +1591,14 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 
 	/** new **/
 	eventSender.dashboard.addAssetType = function(obj) {
-		$scope.dataAssetTypes.push(obj);
-		if($scope.selectedAsset === undefined) {
-			$scope.selectedAsset = obj;	
-		}
+		$scope.selectedAsset = WidgetService.addAssetType(obj);
 	}
-
-	$scope.dataAssetTypes = [
-		{
-			name: 'Grid',
-			id: 'grid',
-			event: {
-				onNextStep: function() {
-					throw new TypeError('not implement');
-				}
-			},
-			validator: function(ctx) {
-				if(!angular.isNumber(ctx.interval)) {
-					throw new TypeError('interval-is-not-number');
-				}
-
-				if(angular.isUndefined(ctx.data))	{
-					return false;
-				}
-
-				if(!angular.isString(ctx.data.query)) {
-					return false;
-				}
-
-				// grid only
-				if(!angular.isArray(ctx.data.order)) {
-					return false;
-				}
-				return true;
-			},
-			template: '<div class="e-grid">GridDDD!!</div>'
-		},
-		{
-			name: 'Chart',
-			id: 'chart',
-			event: {
-				onNextStep: function() {
-					throw new TypeError('not implement');
-				}
-			},
-			validator: function(ctx) {
-				if(!angular.isNumber(ctx.interval)) {
-					throw new TypeError('interval-is-not-number');
-				}
-
-				if(angular.isUndefined(ctx.data))	{
-					return false;
-				}
-
-				if(!angular.isString(ctx.data.query)) {
-					return false;
-				}
-
-				// chart only
-				if(!/^(line|pie|bar)$/.test(ctx.data.type)) {
-					return false;
-				}
-
-				if(!angular.isArray(ctx.data.series)) {
-					return false;
-				}
-				return true;
-			}	
-		},
-		{
-			name: 'Wordcloud',
-			id: 'wordcloud',
-			event: {
-				onNextStep: function() {
-					throw new TypeError('not implement');
-				}
-			},
-			validator: function(ctx) {
-				if(!angular.isNumber(ctx.interval)) {
-					throw new TypeError('interval-is-not-number');
-				}
-
-				if(angular.isUndefined(ctx.data))	{
-					return false;
-				}
-
-				if(!angular.isString(ctx.data.query)) {
-					return false;
-				}
-				return true;
-			}	
-		},
-		{
-			name: 'Tabs',
-			id: 'tabs',
-			event: {
-				onNextStep: function() {
-					throw new TypeError('not implement');
-				}
-			},
-			validator: function() {
-				return true;
-			}
-		}
-	];
 	$scope.selectedAsset;
-	
 	$scope.onNextSelectAsset = function() {
 		$scope.selectedAsset.event.onNextStep();
 	}
 
-	eventSender.dashboard.validateWidgetContext = function(ctx) {
-		if(angular.isUndefined(ctx)) {
-			return false;
-		}
-
-		if(!angular.isString(ctx.guid)) {
-			return false;
-		}
-
-		if(!angular.isString(ctx.name)) {
-			return false;
-		}
-
-		if(!~$scope.dataAssetTypes.map(function(d) { return d.id; }).indexOf(ctx.type)) {
-			return false;
-		}
-
-		return true;
-	}
-
-	eventSender.dashboard.isValidContext = function(ctx) {
-		var f = $scope.dataAssetTypes.filter(function(assetDefinition) {
-			return assetDefinition.id === ctx.type;
-		});
-		if(f.length === 1) {
-			if(angular.isFunction(f[0].validator)) {
-				return f[0].validator(ctx);
-			}
-			else {
-				return false;
-			}
-		}
-		else {
-			throw new TypeError('no-definition');
-		}
-	}
+	$scope.dataAssetTypes = WidgetService.list();
 
 	/** end new **/
 
@@ -1902,3 +1765,150 @@ function WidgetPropertyController($scope, eventSender) {
 		$('.propertyWidget')[0].hideDialog();
 	}
 }
+
+logpresso.service('WidgetService', ['serviceUtility', function(serviceUtility){
+	var dataAssetTypes = [
+		{
+			name: 'Grid',
+			id: 'grid',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function(ctx) {
+				if(!angular.isNumber(ctx.interval)) {
+					throw new TypeError('interval-is-not-number');
+				}
+
+				if(angular.isUndefined(ctx.data))	{
+					return false;
+				}
+
+				if(!angular.isString(ctx.data.query)) {
+					return false;
+				}
+
+				// grid only
+				if(!angular.isArray(ctx.data.order)) {
+					return false;
+				}
+				return true;
+			},
+			template: '<div class="e-grid">GridDDD!!</div>'
+		},
+		{
+			name: 'Chart',
+			id: 'chart',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function(ctx) {
+				if(!angular.isNumber(ctx.interval)) {
+					throw new TypeError('interval-is-not-number');
+				}
+
+				if(angular.isUndefined(ctx.data))	{
+					return false;
+				}
+
+				if(!angular.isString(ctx.data.query)) {
+					return false;
+				}
+
+				// chart only
+				if(!/^(line|pie|bar)$/.test(ctx.data.type)) {
+					return false;
+				}
+
+				if(!angular.isArray(ctx.data.series)) {
+					return false;
+				}
+				return true;
+			}	
+		},
+		{
+			name: 'Wordcloud',
+			id: 'wordcloud',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function(ctx) {
+				if(!angular.isNumber(ctx.interval)) {
+					throw new TypeError('interval-is-not-number');
+				}
+
+				if(angular.isUndefined(ctx.data))	{
+					return false;
+				}
+
+				if(!angular.isString(ctx.data.query)) {
+					return false;
+				}
+				return true;
+			}	
+		},
+		{
+			name: 'Tabs',
+			id: 'tabs',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function() {
+				return true;
+			}
+		}
+	];
+
+	this.addAssetType = function(obj) {
+		dataAssetTypes.push(obj);
+		return obj;
+	}
+
+	this.validateWidgetContext = function(ctx) {
+		if(angular.isUndefined(ctx)) {
+			return false;
+		}
+
+		if(!angular.isString(ctx.guid)) {
+			return false;
+		}
+
+		if(!angular.isString(ctx.name)) {
+			return false;
+		}
+
+		if(!~dataAssetTypes.map(function(d) { return d.id; }).indexOf(ctx.type)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	this.isValidContext = function(ctx) {
+		var f = dataAssetTypes.filter(function(assetDefinition) {
+			return assetDefinition.id === ctx.type;
+		});
+		if(f.length === 1) {
+			if(angular.isFunction(f[0].validator)) {
+				return f[0].validator(ctx);
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			throw new TypeError('no-definition');
+		}
+	}
+
+	this.list = function() {
+		return dataAssetTypes;
+	}
+}]);
