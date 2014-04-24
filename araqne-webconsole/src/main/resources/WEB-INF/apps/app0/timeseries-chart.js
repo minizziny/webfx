@@ -17,9 +17,9 @@
 			}
 		},
 		validator: function(ctx) {
-			
 			return true;
-		}
+		},
+		template: '<div class="timeseries">Time Series</div>'
 	});
 
 	function ParseTimeWithTimezone(timeStr) {
