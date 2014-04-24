@@ -87,7 +87,7 @@ angular.module('app.logdb', [])
 
 				asyncQuery.done('onTail', {
 					'getResult': function(fn) {
-						return getResult(id, m.body.total_count - defaultLimit, defaultLimit, fn);
+						return getResult(id, (m.body.total_count - defaultLimit < 0) ? 0 : (m.body.total_count - defaultLimit), defaultLimit, fn);
 					},
 					'message': m
 				});
