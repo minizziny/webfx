@@ -2,6 +2,31 @@
 
 <div class="playground-container" ng-controller="PlaygroundController">
 
+	<div ng-controller="LogQuerySampleController">
+	</div>
+
+	<div class="well" style="margin:20px; box-sizing:border-box" ng-controller="LogQuery2SampleController">
+		<query-input
+			id="playground-qi-1"
+			ng-model="queryResult"
+			ng-query-string="queryString"
+			ng-page-size="numPageSize"
+			ng-pid="numPid"
+			on-head="onHead($helper)"
+			on-tail="onTail($helper)">
+		</query-input>
+
+		<div>
+			<label><input type="radio" ng-model="optionResultCursor" value="head"> 처음</label>
+			<label><input type="radio" ng-model="optionResultCursor" value="tail"> 마지막</label>
+			<input type="number" ng-model="numPageSize" max="500" min="1"/> 건의 결과
+			{{optionResultCursor}}
+		</div>
+
+		<table table-view ng-model="modelTable" class="table table-bordered table-condensed">
+		</table>
+	</div>
+
 	<div class="paneFtpConfig" ng-controller="MyFtpProfileConfigController">
 		<ul class="tab well1 tab-ftp">
 			<li class="section well1">
