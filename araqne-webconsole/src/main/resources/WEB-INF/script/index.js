@@ -17,7 +17,10 @@ var logpresso = angular.module('app', [
 	'app.logdb.management',
 	'pascalprecht.translate',
 	'ui.sortable',
-	'ngAnimate'
+	'ngAnimate',
+	'app.events',
+	'app.extension',
+	'logpresso.extension'
 ], function() {
 });
 
@@ -34,6 +37,23 @@ window._logger = {
 		}
 	}
 };
+
+Object.defineProperty(Array.prototype, 'unique', {
+	enumerable: false,
+	configurable: false,
+	writable: false,
+	value: function() {
+		var a = this.concat();
+		for(var i=0; i<a.length; ++i) {
+				for(var j=i+1; j<a.length; ++j) {
+						if(a[i] === a[j])
+								a.splice(j--, 1);
+				}
+		}
+
+		return a;
+	}
+});
 
 logpresso.run(function($rootScope, $location, $anchorScroll, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
 
@@ -110,7 +130,8 @@ logpresso.config(['$translateProvider', function ($translateProvider) {
 	$translateProvider.fallbackLanguage('en');
 }]);
 
-logpresso.factory('eventSender', function() {
+angular.module('app.events', [])
+.factory('eventSender', function() {
 	var e = {
 		'root': {},
 		'menu': {},
@@ -133,6 +154,30 @@ logpresso.factory('eventSender', function() {
 	return e;
 });
 
+var extension = {
+	dashboard: angular.module('logpresso.extension.dashboard', []),
+	global: {
+		addController: function(fn) {
+			var controllers = [];
+			for(var z in window) {
+				if(/Controller/.test(z) ) {
+					controllers.push(z);
+				}
+			}
+			if(!~controllers.indexOf(fn.name)) {
+				window[fn.name] = fn;
+			}
+			else {
+				throw new TypeError("controller is exists.");
+			}
+		}
+	},
+	apps: {
+		dashboard: [],
+		starter: []
+	}
+}
+angular.module('logpresso.extension', ['logpresso.extension.dashboard']);
 
 function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSession, serviceDom, $location, $translate) {
 	console.log('Controller init');
