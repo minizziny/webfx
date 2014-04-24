@@ -42,7 +42,7 @@
 	test('passed?', function() {
 		expect(1);
 		var angular = window.angular;
-		window.dataAssetTypes = [];
+		window._clearAssetType();
 		window.addAssetType({
 			name: 'Grid',
 			id: 'grid',
@@ -88,7 +88,7 @@
 	test('passed?', function() {
 		expect(1);
 		var angular = window.angular;
-		window.dataAssetTypes = [];
+		window._clearAssetType();
 		window.addAssetType({
 			name: 'Grid',
 			id: 'grid',

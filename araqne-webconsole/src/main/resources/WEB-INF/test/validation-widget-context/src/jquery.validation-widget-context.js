@@ -27,11 +27,12 @@ angular.isDefined = function isDefined(value){
 angular.isFunction = function isFunction(value){return typeof value === 'function';};
 
 window.angular = angular;
-
-window.dataAssetTypes = [];
+var $scope = {
+	dataAssetTypes: []
+};
 
 function isValidContext(ctx) {
-	var f = window.dataAssetTypes.filter(function(assetDefinition) {
+	var f = $scope.dataAssetTypes.filter(function(assetDefinition) {
 		return assetDefinition.id === ctx.type;
 	});
 	if(f.length === 1) {
@@ -43,7 +44,7 @@ function isValidContext(ctx) {
 		}
 	}
 	else {
-		throw new window.CustomError('no-definition');
+		throw new TypeError('no-definition');
 	}
 }
 
@@ -58,7 +59,7 @@ function onCreateNewWidgetAndSavePreset(ctx) {
 }
 
 function addAssetType(obj) {
-	window.dataAssetTypes.push(obj);	
+	$scope.dataAssetTypes.push(obj);	
 }
 
 function validateWidgetContext(ctx) {
@@ -74,7 +75,7 @@ function validateWidgetContext(ctx) {
 		return false;
 	}
 
-	if(!~window.dataAssetTypes.map(function(d) { return d.id; }).indexOf(ctx.type)) {
+	if(!~$scope.dataAssetTypes.map(function(d) { return d.id; }).indexOf(ctx.type)) {
 		return false;
 	}
 
@@ -82,6 +83,9 @@ function validateWidgetContext(ctx) {
 }
 
 window.addAssetType = addAssetType;
+window._clearAssetType = function() {
+	$scope.dataAssetTypes = [];
+};
 window.onCreateNewWidgetAndSavePreset = onCreateNewWidgetAndSavePreset;
 
 }());

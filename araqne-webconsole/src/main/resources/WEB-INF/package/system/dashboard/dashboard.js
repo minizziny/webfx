@@ -1623,7 +1623,8 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 					return false;
 				}
 				return true;
-			}	
+			},
+			template: '<div class="e-grid">GridDDD!!</div>'
 		},
 		{
 			name: 'Chart',
