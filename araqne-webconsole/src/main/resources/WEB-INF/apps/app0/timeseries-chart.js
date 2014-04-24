@@ -8,12 +8,17 @@
 
 	serviceDashboard.addAssetType({
 		name: 'Time Series',
+		id: 'timeseries',
 		event: {
 			onNextStep: function() {
 				serviceDashboard.closeWizard();
 				$('.mdlTimeSeriesWizard query-input')[0].setPristine();
 				$('.mdlTimeSeriesWizard')[0].showDialog();
 			}
+		},
+		validator: function(ctx) {
+			
+			return true;
 		}
 	});
 
