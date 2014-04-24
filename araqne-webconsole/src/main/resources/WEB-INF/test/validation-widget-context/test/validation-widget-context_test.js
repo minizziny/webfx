@@ -25,7 +25,7 @@
 
 	test('has function', function() {
 		expect(1);
-		strictEqual(typeof window.ValidateWidgetContext, 'function', 'function exist');
+		strictEqual(typeof window.onCreateNewWidgetAndSavePreset, 'function', 'function exist');
 	});
 
 	module('grid type', {
@@ -41,7 +41,83 @@
 
 	test('passed?', function() {
 		expect(1);
-		ok(window.ValidateWidgetContext(this.json[0]), 'passed');
+		var angular = window.angular;
+		window.dataAssetTypes = [];
+		window.addAssetType({
+			name: 'Grid',
+			id: 'grid',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function(ctx) {
+				if(!angular.isNumber(ctx.interval)) {
+					throw new TypeError('interval-is-not-number');
+				}
+
+				if(angular.isUndefined(ctx.data))	{
+					return false;
+				}
+
+				if(!angular.isString(ctx.data.query)) {
+					return false;
+				}
+
+				// grid only
+				if(!angular.isArray(ctx.data.order)) {
+					return false;
+				}
+				return true;
+			}	
+		});
+		deepEqual(window.onCreateNewWidgetAndSavePreset(this.json[0]), 'added');
+	});
+
+	module('grid2 type', {
+		setup: function() {
+			var self = this;
+			$.getJSON('type-grid2.json', function(resp) {
+				self.json = resp;
+				QUnit.start();
+			});
+			QUnit.stop();
+		}
+	});
+
+	test('passed?', function() {
+		expect(1);
+		var angular = window.angular;
+		window.dataAssetTypes = [];
+		window.addAssetType({
+			name: 'Grid',
+			id: 'grid',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function(ctx) {
+				if(!angular.isNumber(ctx.interval)) {
+					throw new TypeError('interval-is-not-number');
+				}
+
+				if(angular.isUndefined(ctx.data))	{
+					return false;
+				}
+
+				if(!angular.isString(ctx.data.query)) {
+					return false;
+				}
+
+				// grid only
+				if(!angular.isArray(ctx.data.order)) {
+					return false;
+				}
+				return true;
+			}	
+		});
+		deepEqual(window.onCreateNewWidgetAndSavePreset(this.json[0]), 'added');
 	});
 
 	module('chart line type', {
@@ -57,7 +133,40 @@
 
 	test('passed?', function() {
 		expect(1);
-		ok(window.ValidateWidgetContext(this.json[0]), 'passed');
+		var angular = window.angular;
+		window.addAssetType({
+			name: 'Chart',
+			id: 'chart',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function(ctx) {
+				if(!angular.isNumber(ctx.interval)) {
+					throw new TypeError('interval-is-not-number');
+				}
+
+				if(angular.isUndefined(ctx.data))	{
+					return false;
+				}
+
+				if(!angular.isString(ctx.data.query)) {
+					return false;
+				}
+
+				// chart only
+				if(!/^(line|pie|bar)$/.test(ctx.data.type)) {
+					return false;
+				}
+
+				if(!angular.isArray(ctx.data.series)) {
+					return false;
+				}
+				return true;
+			}	
+		});
+		deepEqual(window.onCreateNewWidgetAndSavePreset(this.json[0]), 'added');
 	});
 
 	module('chart pie type', {
@@ -75,8 +184,8 @@
 		expect(1);
 
 		throws(function() {
-			window.ValidateWidgetContext(this.json[0]);
-		}, TypeError, 'TypeError: interval is not number');
+			window.onCreateNewWidgetAndSavePreset(this.json[0]);
+		}, new RegExp('interval-is-not-number'), 'CustomError: interval-is-not-number');
 	});
 
 	module('tabs type', {
@@ -92,7 +201,20 @@
 
 	test('passed?', function() {
 		expect(1);
-		ok(window.ValidateWidgetContext(this.json[0]), 'passed');
+		window.addAssetType({
+			name: 'Tabs',
+			id: 'tabs',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function() {
+				return true;
+			}	
+		});
+		
+		deepEqual(window.onCreateNewWidgetAndSavePreset(this.json[0]), 'added');
 	});
 
 	module('wordcloud type', {
@@ -108,7 +230,31 @@
 
 	test('passed?', function() {
 		expect(1);
-		ok(window.ValidateWidgetContext(this.json[0]), 'passed');
+		var angular = window.angular;
+		window.addAssetType({
+			name: 'Wordcloud',
+			id: 'wordcloud',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function(ctx) {
+				if(!angular.isNumber(ctx.interval)) {
+					throw new TypeError('interval-is-not-number');
+				}
+
+				if(angular.isUndefined(ctx.data))	{
+					return false;
+				}
+
+				if(!angular.isString(ctx.data.query)) {
+					return false;
+				}
+				return true;
+			}	
+		});
+		deepEqual(window.onCreateNewWidgetAndSavePreset(this.json[0]), 'added');
 	});
 
 }(jQuery));

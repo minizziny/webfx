@@ -571,59 +571,13 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		angular.element('.newbie').remove();
 	}
 
-	function ValidateWidgetContext(ctx) {
-		if(angular.isUndefined(ctx)) {
-			return false;
-		}
-
-		if(!angular.isString(ctx.guid)) {
-			return false;
-		}
-
-		if(!angular.isString(ctx.name)) {
-			return false;
-		}
-
-		if(!/^(grid|chart|wordcloud|tabs)$/.test(ctx.type)) {
-			return false;
-		}
-
-		if(/^(grid|chart|wordcloud)$/.test(ctx.type)) {
-			if(!angular.isNumber(ctx.interval)) {
-				throw new TypeError('interval is not number');
-			}
-
-			if(angular.isUndefined(ctx.data))	{
-				return false;
-			}
-
-			if(!angular.isString(ctx.data.query)) {
-				return false;
-			}
-		}
-
-		if(/^grid$/.test(ctx.type)) {
-			if(!angular.isArray(ctx.data.order)) {
-				return false;
-			}
-		}
-
-		if(/^chart$/.test(ctx.type)) {
-			if(!/^(line|pie|bar)$/.test(ctx.data.type)) {
-				return false;
-			}
-
-			if(!angular.isArray(ctx.data.series)) {
-				return false;
-			}
-		}
-		
-		return true;
-	}
-
-
 	eventSender.dashboard.onCreateNewWidgetAndSavePreset = function(ctx) {
-		if(!ValidateWidgetContext(ctx)) return;
+		if(!eventSender.dashboard.validateWidgetContext(ctx)) {
+			return;
+		}
+		if(!eventSender.dashboard.isValidContext(ctx)) {
+			return;
+		}
 		var currentPresetId = $('dockpanel:visible:last').attr('id');
 		var isBlank = false;
 		if( $('dockpanel:visible:last > .k-d-col.blank').length ) {
@@ -834,10 +788,15 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 		var widgets = data.widgets;
 
-		widgets.forEach(function(widget) {
-			if(!ValidateWidgetContext(widget)) return;
-			var elWidget = angular.element(serviceWidget.buildWidget(name, widget));
-			$scope.ctxPreset[name].ctxWidget[widget.guid] = widget;
+		widgets.forEach(function(ctx) {
+			if(!eventSender.dashboard.validateWidgetContext(ctx)) {
+				return;
+			}
+			if(!eventSender.dashboard.isValidContext(ctx)) {
+				return;
+			}
+			var elWidget = angular.element(serviceWidget.buildWidget(name, ctx));
+			$scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;
 			elWidget.appendTo(el);
 		});
 
@@ -1636,10 +1595,145 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 			$scope.selectedAsset = obj;	
 		}
 	}
-	$scope.dataAssetTypes = [];
+
+	$scope.dataAssetTypes = [
+		{
+			name: 'Grid',
+			id: 'grid',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function(ctx) {
+				if(!angular.isNumber(ctx.interval)) {
+					throw new TypeError('interval-is-not-number');
+				}
+
+				if(angular.isUndefined(ctx.data))	{
+					return false;
+				}
+
+				if(!angular.isString(ctx.data.query)) {
+					return false;
+				}
+
+				// grid only
+				if(!angular.isArray(ctx.data.order)) {
+					return false;
+				}
+				return true;
+			}	
+		},
+		{
+			name: 'Chart',
+			id: 'chart',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function(ctx) {
+				if(!angular.isNumber(ctx.interval)) {
+					throw new TypeError('interval-is-not-number');
+				}
+
+				if(angular.isUndefined(ctx.data))	{
+					return false;
+				}
+
+				if(!angular.isString(ctx.data.query)) {
+					return false;
+				}
+
+				// chart only
+				if(!/^(line|pie|bar)$/.test(ctx.data.type)) {
+					return false;
+				}
+
+				if(!angular.isArray(ctx.data.series)) {
+					return false;
+				}
+				return true;
+			}	
+		},
+		{
+			name: 'Wordcloud',
+			id: 'wordcloud',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function(ctx) {
+				if(!angular.isNumber(ctx.interval)) {
+					throw new TypeError('interval-is-not-number');
+				}
+
+				if(angular.isUndefined(ctx.data))	{
+					return false;
+				}
+
+				if(!angular.isString(ctx.data.query)) {
+					return false;
+				}
+				return true;
+			}	
+		},
+		{
+			name: 'Tabs',
+			id: 'tabs',
+			event: {
+				onNextStep: function() {
+					throw new TypeError('not implement');
+				}
+			},
+			validator: function() {
+				return true;
+			}
+		}
+	];
 	$scope.selectedAsset;
+	
 	$scope.onNextSelectAsset = function() {
 		$scope.selectedAsset.event.onNextStep();
+	}
+
+	eventSender.dashboard.validateWidgetContext = function(ctx) {
+		if(angular.isUndefined(ctx)) {
+			return false;
+		}
+
+		if(!angular.isString(ctx.guid)) {
+			return false;
+		}
+
+		if(!angular.isString(ctx.name)) {
+			return false;
+		}
+
+		if(!~$scope.dataAssetTypes.map(function(d) { return d.id; }).indexOf(ctx.type)) {
+			return false;
+		}
+
+		return true;
+	}
+
+	eventSender.dashboard.isValidContext = function(ctx) {
+		var f = $scope.dataAssetTypes.filter(function(assetDefinition) {
+			return assetDefinition.id === ctx.type;
+		});
+		if(f.length === 1) {
+			if(angular.isFunction(f[0].validator)) {
+				return f[0].validator(ctx);
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			throw new TypeError('no-definition');
+		}
 	}
 
 	/** end new **/
