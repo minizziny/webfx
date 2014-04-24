@@ -29,7 +29,7 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 
 	eventSender.dashboard.eventHandler = {};
-	extension.dashboard.factory('eventSender', function() {
+	extension.dashboard.factory('serviceDashboard', function() {
 		var ret = {
 			'addAssetType': function(obj) {
 				eventSender.dashboard.addAssetType(obj);
@@ -41,14 +41,18 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		}
 		return ret;
 	});
-	
+
+
 	var apps = ['app0', 'app1'];
+
 	apps.forEach(function(appid) {
 
 		serviceExtension.load(appid)
 		.done(function(manifest) {
 			var prefix = 'apps/' + appid + '/';
 			if(!manifest['dashboard-assets']) return;
+
+			serviceExtension.register(appid, 'dashboard', manifest);
 
 			$.getScript(prefix + manifest['dashboard-assets'].script)
 			.done(function(script) {
@@ -1572,7 +1576,9 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	/** new **/
 	eventSender.dashboard.addAssetType = function(obj) {
 		$scope.dataAssetTypes.push(obj);
-		$scope.selectedAsset = obj;
+		if($scope.selectedAsset === undefined) {
+			$scope.selectedAsset = obj;	
+		}
 	}
 	$scope.dataAssetTypes = [];
 	$scope.selectedAsset;

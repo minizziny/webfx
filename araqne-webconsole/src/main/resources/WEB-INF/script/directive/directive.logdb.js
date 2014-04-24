@@ -182,6 +182,11 @@ angular.module('app.directive.logdb', [])
 				}
 			}
 
+			element[0].setPristine = function() {
+				z = undefined;
+				scope.ngQueryString = '';
+			}
+
 		}
 	}
 })

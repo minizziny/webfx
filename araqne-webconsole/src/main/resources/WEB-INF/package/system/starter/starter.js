@@ -8,6 +8,8 @@ function StarterController($scope, socket, eventSender, $rootScope, serviceExten
 			var prefix = 'apps/' + appid + '/';
 			if(!manifest['starter']) return;
 
+			serviceExtension.register(appid, 'starter', manifest);
+
 			$.getScript(prefix + manifest['starter'].script)
 			.done(function(script) {
 				console.log('loaded')

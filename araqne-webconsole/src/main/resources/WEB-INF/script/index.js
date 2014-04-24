@@ -155,10 +155,29 @@ angular.module('app.events', [])
 });
 
 var extension = {
-	dashboard: angular.module('logpresso.extension.dashboard', [])
+	dashboard: angular.module('logpresso.extension.dashboard', []),
+	global: {
+		addController: function(fn) {
+			var controllers = [];
+			for(var z in window) {
+				if(/Controller/.test(z) ) {
+					controllers.push(z);
+				}
+			}
+			if(!~controllers.indexOf(fn.name)) {
+				window[fn.name] = fn;
+			}
+			else {
+				throw new TypeError("controller is exists.");
+			}
+		}
+	},
+	apps: {
+		dashboard: [],
+		starter: []
+	}
 }
 angular.module('logpresso.extension', ['logpresso.extension.dashboard']);
-
 
 function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSession, serviceDom, $location, $translate) {
 	console.log('Controller init');
