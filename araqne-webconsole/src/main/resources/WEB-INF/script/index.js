@@ -156,6 +156,7 @@ angular.module('app.events', [])
 
 var extension = {
 	dashboard: angular.module('logpresso.extension.dashboard', []),
+	menu: angular.module('logpresso.extension.menu', []),
 	global: {
 		addController: function(fn) {
 			var controllers = [];
@@ -173,11 +174,12 @@ var extension = {
 		}
 	},
 	apps: {
+		menu: [],
 		dashboard: [],
 		starter: []
 	}
 }
-angular.module('logpresso.extension', ['logpresso.extension.dashboard']);
+angular.module('logpresso.extension', ['logpresso.extension.dashboard', 'logpresso.extension.menu']);
 
 function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSession, serviceDom, $location, $translate) {
 	console.log('Controller init');
@@ -245,7 +247,12 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 			angular.element('.view').hide();
 			angular.element('.view#view-' + program).show();
 
-			$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';
+			if(pack === 'apps') {
+				$scope.src[program] = 'apps/' + program + '/index.html';
+			}
+			else {
+				$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';	
+			}
 
 			var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
 			if(idxProgram != -1) {
@@ -389,8 +396,14 @@ function checkDate(member, i) {
 	return angular.isDate(dateFormat.parse(member.toString().substring(0,19))) && rxTimezone.test(member.substring(19, 24));
 }
 
-function MenuController($scope, socket, serviceSession, serviceProgram, eventSender, $location) {
+function MenuController($scope, socket, serviceSession, serviceProgram, eventSender, $location, serviceExtension, $compile, serviceUtility) {
 	$scope.programs = [];
+	$scope.builtin = function() {
+		return $scope.programs.filter(function(p) { return p.packdll !== 'apps' });
+	}
+	$scope.apps = function() {
+		return $scope.programs.filter(function(p) { return p.packdll === 'apps' });
+	}
 
 	function getProgram(path) {
 		var found = null;
@@ -425,12 +438,28 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 		});
 	}
 
+	function addEventToProgram(p){
+		p.isActive = false;
+		p.isCurrent = false;
+		p.halt = function(e) {
+			console.log('halt');
+			e.stopPropagation();
+			var el = angular.element('#view-' + p.path);
+			p.isActive = false;
+			p.isCurrent = false;
+
+			eventSender.root.onClose(p.packdll, p.path);
+		}
+		return p;
+	}
+
 	function initialize() {
 		serviceProgram.getAvailablePrograms()
 		.success(function(m) {
 			$scope.programs.splice(0, $scope.programs.length);
 
 			m.body.programs.forEach(function(p) {
+				p = addEventToProgram(p);
 				p.packdll = (function() {
 					var found = m.body.packs.filter(function(pack) {
 						return pack.name == p.pack;
@@ -440,17 +469,6 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 					}
 					return undefined;
 				}());
-				p.isActive = false;
-				p.isCurrent = false;
-				p.halt = function(e) {
-					console.log('halt');
-					e.stopPropagation();
-					var el = angular.element('#view-' + p.path);
-					p.isActive = false;
-					p.isCurrent = false;
-
-					eventSender.root.onClose(p.packdll, p.path);
-				}
 				$scope.programs.push(p);
 			});
 
@@ -458,22 +476,94 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 
 			$scope.$apply();
 
-			var elProgram = $('.tm-program');
-			var styleTextAll = '';
-			elProgram.each(function(i, obj) {
-				var mw = $(obj).offset().left + $(obj).outerWidth();
-				var styleText = ' @media screen and (max-width: ' + (mw + 200).toString() + 'px) {\
-					.tm .tm-program:nth-child(' + (i + 1).toString() + ') { display: none; }\
-					.tm-more .dropdown-menu li:nth-child(' + (i + 1).toString() + ') { display: block; }\
-				} ';
-				styleTextAll = styleTextAll + styleText;
+			(new Async(getApps))
+			.success(function(m) {
+				m.body.apps.forEach(function(p) {
+					p = addEventToProgram(p);
+					p.packdll = 'apps';
+					$scope.programs.push(p);
+				});
 
-				if(i + 1 == elProgram.length) {
-					styleTextAll = styleTextAll + ' @media screen and (max-width: ' + (mw + 200).toString() + 'px) { .tm .tm-more { display: inline; } } ';
+				applyResponsiveStyle();
+			});
+		});
+	}
+
+	function applyResponsiveStyle() {
+		var elProgram = $('.tm-program');
+		var styleTextAll = '';
+		var elAppWidth = $('.tm-app').outerWidth() + 200;
+		elProgram.each(function(i, obj) {
+			var mw = $(obj).offset().left + $(obj).outerWidth();
+			var styleText = ' @media screen and (max-width: ' + (mw + elAppWidth).toString() + 'px) {\
+				.tm .tm-program:nth-child(' + (i + 1).toString() + ') { display: none; }\
+				.tm-more .dropdown-menu li:nth-child(' + (i + 1).toString() + ') { display: block; }\
+			} ';
+			styleTextAll = styleTextAll + styleText;
+
+			if(i + 1 == elProgram.length) {
+				styleTextAll = styleTextAll + ' @media screen and (max-width: ' + (mw + elAppWidth).toString() + 'px) { .tm .tm-more { display: inline; } } ';
+			}
+		});
+
+		$('<style>'+ styleTextAll + '</style>').appendTo('body');
+	}
+
+	function getApps() {
+		var self = this;
+
+		// socket.send('org.araqne.core.msgbus.AppPlugin.getApps', { 'type': 'program' }, 0)
+		socket.send('com.logpresso.core.msgbus.RegexTesterPlugin.match', { 'regex': '', 'line': '', 'use_multiline': false }, 0)
+		.success(function(m) {
+			var m = {
+				body: {
+
+					apps: []
 				}
+			}
+			var apps = m.body.apps;
+			self.done('success', m);
+
+			
+			apps.map(function(o) {
+				return o.path;
+			})
+			.forEach(function(appid) {
+
+				serviceExtension.load(appid)
+				.done(function(manifest) {
+					var prefix = 'apps/' + appid + '/';
+					if(!manifest['program']) return;
+
+					serviceExtension.register(appid, 'menu', manifest);
+
+					$.getScript(prefix + manifest['program'].script)
+					.done(function(script) {
+
+						// $scope.$parent.$parent.src[appid] = prefix + manifest['program'].html;
+						$scope.$parent.$parent.src[appid] = '';
+						eventSender[appid] = {
+							pid: serviceUtility.getRandomInt(2000, 3000),
+							events: {}
+						};
+
+						console.log(eventSender)
+
+						var ct = angular.element('<div class="view" id="view-' + appid + '" ng-include src="src.' + appid + '"></div>');
+						$compile(ct)($scope);
+						$('#tooltip').before(ct);
+					})
+					.fail(function(a,b,c) {
+						console.log(a,b,c);
+					});
+
+				});
+
 			});
 
-			$('<style>'+ styleTextAll + '</style>').appendTo('body');
+		})
+		.failed(function(m) {
+			self.done('failed');
 		});
 	}
 
