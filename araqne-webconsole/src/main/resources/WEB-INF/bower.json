@@ -1,0 +1,11 @@
+{
+	"name": "araqne-webconsole",
+	"description": "araqne webconsole",
+	"version": "0.0.0",
+	"homepage": "https://github.com/araqne/webfx",
+	"license": "",
+	"private": true,
+	"dependencies": {
+		"angular-mocks": "~1.2.15"
+	}
+}
