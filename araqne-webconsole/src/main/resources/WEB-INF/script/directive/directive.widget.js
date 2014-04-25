@@ -1,4 +1,4 @@
-console.widgetLog = function() {}
+console.widgetLog = function() {};
 
 angular.module('app.directive.widget', [])
 .directive('ngModelOnBlur', function() {
@@ -145,17 +145,20 @@ angular.module('app.directive.widget', [])
 		link: function(scope, el, attrs, ctrl) {
 			console.widgetLog('linking dockpanel');
 			var cached;
+			var cachedAsset;
 
 			function cache() {
 				// 이 시점에선 dockpanel 아래의 link된 widget을 캐시하는 것이 아니고,
 				// 이미 append된 widget들을 캐시한다. link됐으나 append되지 않은건 이미 아까 사라짐.
 				cached = el.find('widget').detach();
+				cachedAsset = el.find('asset').detach();
 				console.widgetLog('cache', cached.length, 'item cached');
+				console.widgetLog('cache', cachedAsset.length, 'asset item cached');
 			}
 
 			function restore() {
-				if(!cached.length) return;
-				console.widgetLog('restore');
+				// if(!cached.length) return;
+				console.widgetLog('restore', cachedAsset);
 
 				cached.each(function(i, widget) {
 					var guid = angular.element(widget).attr('guid');
@@ -168,7 +171,19 @@ angular.module('app.directive.widget', [])
 					}
 				});
 
+				cachedAsset.each(function(i, asset) {
+					var guid = angular.element(asset).data('guid');
+
+					var contentbox = el.find('[dock-id=' + guid + '] > .mybox > .contentbox');
+					if(contentbox.length) {
+						// 이때 append되지 않은건 버려짐.
+						console.widgetLog('restore asset', asset.id, guid);
+						contentbox.append(asset);
+					}
+				})
+
 				cached = undefined;
+				cachedAsset = undefined;
 			}
 
 			function render(layout) {
@@ -232,6 +247,19 @@ angular.module('app.directive.widget', [])
 					ew();
 				}
 			});
+		}
+	}
+})
+.directive('asset', function() {
+	return {
+		restrict: 'E',
+		scope: {
+
+		},
+		transclude: true,
+		template: '<div ng-transclude></div>',
+		link: function(scope, el) {
+
 		}
 	}
 })
@@ -309,6 +337,16 @@ angular.module('app.directive.widget', [])
 
 				// console.widgetLog(ctlrModel.$modelValue); // 여기엔 모델이 없다.
 				$timeout(function() {
+
+					if(typeof ctlrModel === 'undefined') {
+						if(!!ctlrDockpanel) {
+							console.log(ctlrDockpanel)
+							ctlrDockpanel.append({
+								guid: 'w42d4238c5eae2bd7'
+							}, detached);
+						}
+						return;
+					}
 					// ngModel이 활성화되는 시점
 					angular.extend(scope, ctlrModel.$modelValue);
 

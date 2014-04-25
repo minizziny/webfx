@@ -795,10 +795,23 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 			if(!WidgetService.isValidContext(ctx)) {
 				return;
 			}
-			var elWidget = angular.element(serviceWidget.buildWidget(name, ctx));
-			// var elWidget = angular.element(ctx.templa)
-			$scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;
-			elWidget.appendTo(el);
+			if(ctx.type === 'tabs') {
+				var elWidget = angular.element(serviceWidget.buildWidget(name, ctx));	
+				$scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;
+				elWidget.appendTo(el);
+			}
+			else {
+
+				var wdf = WidgetService.list().filter(function(wd) {
+					return wd.id === ctx.type;
+				});
+				console.log(wdf)
+				var tmpl = wdf[0].template.replace(/\{\{guid\}\}/, ctx.guid);
+				console.log(tmpl)
+				var elAsset = angular.element(tmpl);
+				$scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;
+				elAsset.appendTo(el);
+			}
 		});
 
 		$compile(el)($scope);
@@ -1795,7 +1808,10 @@ logpresso.service('WidgetService', ['serviceUtility', function(serviceUtility){
 				}
 				return true;
 			},
-			template: '<div class="e-grid">GridDDD!!</div>'
+			template: '<asset data-guid="{{guid}}"><div class="e-grid">GridDDD!!</div></asset>',
+			link: function() {
+
+			}
 		},
 		{
 			name: 'Chart',
@@ -1827,7 +1843,8 @@ logpresso.service('WidgetService', ['serviceUtility', function(serviceUtility){
 					return false;
 				}
 				return true;
-			}	
+			},
+			template: '<asset data-guid="{{guid}}"><div>Chart Here</div></asset>',
 		},
 		{
 			name: 'Wordcloud',
@@ -1850,7 +1867,8 @@ logpresso.service('WidgetService', ['serviceUtility', function(serviceUtility){
 					return false;
 				}
 				return true;
-			}	
+			},
+			template: '<asset data-guid="{{guid}}"><div>Wordcloud Here</div></asset>',
 		},
 		{
 			name: 'Tabs',
