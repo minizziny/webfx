@@ -1,0 +1,21 @@
+[
+    {
+        "guid": "w63341f81d28a1512",
+        "interval": 15,
+        "name": "wcline",
+        "data": {
+            "series": [
+                {
+                    "color": "#AFD8F8",
+                    "name": "_id",
+                    "key": "_id"
+                }
+            ],
+            "labelType": "number",
+            "query": "table limit=5000000 wc44\n",
+            "label": "_id",
+            "type": "line"
+        },
+        "type": "chart"
+    }
+]

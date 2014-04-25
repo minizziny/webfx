@@ -8,13 +8,18 @@
 
 	serviceDashboard.addAssetType({
 		name: 'Time Series',
+		id: 'timeseries',
 		event: {
 			onNextStep: function() {
 				serviceDashboard.closeWizard();
 				$('.mdlTimeSeriesWizard query-input')[0].setPristine();
 				$('.mdlTimeSeriesWizard')[0].showDialog();
 			}
-		}
+		},
+		validator: function(ctx) {
+			return true;
+		},
+		template: '<div class="timeseries">Time Series</div>'
 	});
 
 	function ParseTimeWithTimezone(timeStr) {
@@ -234,7 +239,7 @@
 		}
 	}
 
-	function TimeSeriesManipulateController($scope, serviceChart) {
+	function TimeSeriesManipulateController($scope, serviceChart, serviceUtility) {
 		$scope.modelTable = [];
 
 		function isNumber(field) {
@@ -298,7 +303,10 @@
 		}
 
 		$scope.getVVV = function() {
-			console.log(vvv);
+
+			$('.mdlTimeSeriesManipulateWizard')[0].hideDialog();
+			var ctx = {"data": {"series": [{"color": "#AFD8F8", "key": "count", "name": "count"}], "label": "table", "type": "pie", "interval": 23, "query": "logdb count | stats c by table", "labelType": "string"}, "guid": 'w' + serviceUtility.generateType2(), "type": "chart", "interval": 23, "name": "count pie"};
+			serviceDashboard.onCreateNewWidgetAndSavePreset(ctx);
 		}
 	}
 
