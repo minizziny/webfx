@@ -57,7 +57,7 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 			serviceExtension.register(appid, 'dashboard', manifest);
 
-			$.getScript(prefix + manifest['dashboard-assets'].script)
+			serviceExtension.getScripts(prefix, manifest['dashboard-assets'])
 			.done(function(script) {
 
 

@@ -17,10 +17,29 @@ angular.module('app.extension', [])
 		return extension.apps[program];
 	}
 
+	function getScripts(prefix, manifest) {
+		var arr;
+		if( angular.isArray(manifest.script) ) {
+			arr = manifest.script.map(function(path) {
+				return $.getScript(prefix + path);
+			});
+		}
+		else if( angular.isString(manifest.script) ) {
+			arr = [ $.getScript(prefix + manifest.script) ];
+		}
+
+		arr.push($.Deferred(function(deferred) {
+			$(deferred.resolve);
+		}));
+		
+		return $.when.apply(this, arr);
+	}
+
 	return {
 		load: load,
 		getManifest: getManifest,
 		register: register,
-		list: list
+		list: list,
+		getScripts: getScripts
 	}
 });

@@ -517,13 +517,30 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 		.success(function(m) {
 			var m = {
 				body: {
+					apps: [
+					{
+						"visible": true,
+						"updated": "2014-03-10 17:24:47+0900",
+						"created": "2014-03-10 17:24:47+0900",
+						"description": null,
+						"display_names": {
+							"ko": 'my app2',
+							"en": 'my app2'
+						},
+						"name": "my app2",
+						"seq": 6,
+						"path": "app2",
+						"pack": "Apps",
+						"manifest": {
 
-					apps: []
+						}
+					}
+					]
+					// apps: []
 				}
 			}
 			var apps = m.body.apps;
 			self.done('success', m);
-
 			
 			apps.map(function(o) {
 				return o.path;
@@ -537,8 +554,8 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 
 					serviceExtension.register(appid, 'menu', manifest);
 
-					$.getScript(prefix + manifest['program'].script)
-					.done(function(script) {
+					serviceExtension.getScripts(prefix, manifest['program'])
+					.done(function(){
 
 						// $scope.$parent.$parent.src[appid] = prefix + manifest['program'].html;
 						$scope.$parent.$parent.src[appid] = '';
