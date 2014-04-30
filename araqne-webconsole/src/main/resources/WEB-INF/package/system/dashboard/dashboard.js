@@ -782,14 +782,8 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 		widgets.forEach(function(widget) {
 			var elWidget = angular.element(serviceWidget.buildWidget(name, widget));
-			if(widget.type != 'alertbox') {
-				$scope.ctxPreset[name].ctxWidget[widget.guid] = widget;	
-			}
-			else if(widget.type === 'alertbox') {
-				$compile(elWidget)($scope);
-				console.log(widget)
-				elWidget[0].setContext(widget);
-			}
+			$scope.ctxPreset[name].ctxWidget[widget.guid] = widget;	
+			
 			elWidget.appendTo(el);
 		});
 
@@ -813,6 +807,13 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 				}
 			});
 			el.appendTo(target);
+
+
+			widgets.forEach(function(widget) {
+				if(widget.type === 'alertbox') {
+					el.find('fds-alert-box#' + widget.guid)[0].setContext(widget);
+				}
+			});
 		});
 	}
 
