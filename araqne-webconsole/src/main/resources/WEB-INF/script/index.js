@@ -17,10 +17,7 @@ var logpresso = angular.module('app', [
 	'app.logdb.management',
 	'pascalprecht.translate',
 	'ui.sortable',
-	'ngAnimate',
-	'app.events',
-	'app.extension',
-	'logpresso.extension'
+	'ngAnimate'
 ], function() {
 });
 
@@ -37,23 +34,6 @@ window._logger = {
 		}
 	}
 };
-
-Object.defineProperty(Array.prototype, 'unique', {
-	enumerable: false,
-	configurable: false,
-	writable: false,
-	value: function() {
-		var a = this.concat();
-		for(var i=0; i<a.length; ++i) {
-				for(var j=i+1; j<a.length; ++j) {
-						if(a[i] === a[j])
-								a.splice(j--, 1);
-				}
-		}
-
-		return a;
-	}
-});
 
 logpresso.run(function($rootScope, $location, $anchorScroll, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
 
@@ -130,13 +110,11 @@ logpresso.config(['$translateProvider', function ($translateProvider) {
 	$translateProvider.fallbackLanguage('en');
 }]);
 
-angular.module('app.events', [])
-.factory('eventSender', function() {
+logpresso.factory('eventSender', function() {
 	var e = {
 		'root': {},
 		'menu': {},
 		'starter': { pid: 11 },
-		'playground': { pid: 1010 },
 		'dashboard': { pid: 22 },
 		'orgchart': { pid: 33 },
 		'auditlog': { pid: 88 },
@@ -155,30 +133,6 @@ angular.module('app.events', [])
 	return e;
 });
 
-var extension = {
-	dashboard: angular.module('logpresso.extension.dashboard', []),
-	global: {
-		addController: function(fn) {
-			var controllers = [];
-			for(var z in window) {
-				if(/Controller/.test(z) ) {
-					controllers.push(z);
-				}
-			}
-			if(!~controllers.indexOf(fn.name)) {
-				window[fn.name] = fn;
-			}
-			else {
-				throw new TypeError("controller is exists.");
-			}
-		}
-	},
-	apps: {
-		dashboard: [],
-		starter: []
-	}
-}
-angular.module('logpresso.extension', ['logpresso.extension.dashboard']);
 
 function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSession, serviceDom, $location, $translate) {
 	console.log('Controller init');
@@ -429,11 +383,6 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 	function initialize() {
 		serviceProgram.getAvailablePrograms()
 		.success(function(m) {
-
-			//
-			var programPlayground = {"visible":true,"updated":"2014-03-10 17:24:46+0900","created":"2014-03-10 17:24:46+0900","description":null,"display_names":{"jp":"Playground","ko":"놀이터","en":"Playground"},"name":"Playground","seq":1,"path":"playground","pack":"System"} ;
-			m.body.programs.insert(programPlayground, 1);
-			//
 			$scope.programs.splice(0, $scope.programs.length);
 
 			m.body.programs.forEach(function(p) {

@@ -2,15 +2,6 @@
 <link href="css/dashboard.css" rel="stylesheet" media="screen">
 
 <style>
-.dashboard-extension-container {
-	/*position: fixed;
-	top: 30px;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: rgba(255,255,255,.3)*/
-}
-
 dockpanel, widget {
 	display: block;
 }
@@ -248,8 +239,7 @@ widget > .tab-comp > ul.nav-tabs > li > button.tab-home {
 }
 
 widget[grid] .widget-grid-container {
-	overflow-y: auto;
-	overflow-x: hidden;
+	overflow: auto;
 	height: 100%;
 }
 
@@ -387,23 +377,10 @@ widget.w-before-loading:before {
 							<input type="radio" ng-model="widgetTypeName" value="graph" ng-change="selectType(1)" id="radioGraph">
 							<label class="radio" for="radioGraph">{{'$S_str_Chart' | translate}}</label>
 						</li>
-						<li>
-							<input type="radio" ng-model="widgetTypeName" value="box" ng-change="selectType(2)" id="radioBox">
-							<label class="radio" for="radioBox">박스</label>
-						</li>
 					</ul>
-					<!-- <ul class="radio">
-						<li ng-repeat="assetType in dataAssetTypes">
-							<label>
-								<input type="radio" name="assetTypes" ng-model="$parent.selectedAsset" ng-value="assetType">{{i}} {{assetType.name}}
-							</label>
-						</li>
-					</ul>
-					{{selectedAsset}} -->
 					<div style="margin-bottom: 20px" ng-bind="selectedParserFactory.description"></div>
 					<div class="control-group submit-group">
 						<button class="wiz-next btn" ng-click="go(1, widgetType.s0nextCallback())">{{'$S_str_Next' | translate}}</button>
-						<!-- <button class="wiz-next btn" ng-click="onNextSelectAsset()">{{'$S_str_Next' | translate}}</button> -->
 					</div>
 				</fieldset>
 			</li>
@@ -637,79 +614,24 @@ widget.w-before-loading:before {
 					<button class="wiz-next btn" ng-click="go(3)">{{'$S_str_Next' | translate}}</button>
 				</div>
 			</li>
-
-			<!-- 7 -->
-			<li class="wiz-step">
-				<legend>{{'$S_str_SelectAndReorderColumn' | translate}}</legend>
-				<fieldset>
-					<div class="fieldset-description">{{'$S_msg_SelectAndReorderColumn' | translate}}</div>
-					<div>
-						<div class="qr-container" style="width: 780px; float: left">
-							<query-result class="qr2 qr-select-table"
-								ng-model="qresult"
-								ng-query="ctxWidget.data.query" 
-								ng-page="numCurrentPage"
-								ng-page-size="numPagerPagesize"
-								is-check-type="true"></query-result>
-						</div>
-						<ul class="listbox arrangeCols" ui-sortable ng-model="qrCols">
-							<li ng-repeat="(i, col) in qrCols">
-								<input type="checkbox" ng-model="col.is_visible">
-								<span>{{col.name}}</span>
-							</li>
-						</ul>
-					</div>
-					<div class="control-group submit-group clearboth">
-						<button class="wiz-prev btn" ng-click="go(1)">{{'$S_str_Previous' | translate}}</button>
-						<button class="wiz-next btn" ng-click="go(8, null, widgetType.s7nextEvent())">{{'$S_str_Next' | translate}}</button>					
-					</div>
-				</fieldset>
-			</li>
-
-			<!-- 8 -->
-			<li class="wiz-step">
-				<legend>룰설정</legend>
-				<fieldset>
-					<form class="formAlertBox"  ng-submit='go(3, widgetType.s8nextCallback())' ng-controller="AlertBoxRullBindingController">
-						<div class="control-group">
-							Label : <input type='text' name='fdslabel' ng-model='fdsrule.fdsLabel'>
-							<div class="controls" ng-repeat="fdsrule in fdsrules">
-								<select ng-model="fdsrule.operater" ng-options="o.value as o.text for o in operaterlists" required>
-									<option value="">연산자선택</option>
-								</select> 
-								<input type="text" name="boundary" ng-model="fdsrule.boundary" pattern="[0-9]*"  only-number required/>
-								이면
-								<input type="color" name='color' ng-model="fdsrule.color" required>
-								<button type="button" class="op-text" class="close" ng-click="removeRule($index)">&times</button>
-							</div>
-							<button class="wiz-rulladd btn" ng-click="addRule()">룰추가</button>
-						</div>
-
-						<div class="control-group submit-group">
-							<button class="wiz-prev btn" ng-click="go(7, null, widgetType.s7nextEvent())">{{'$S_str_Previous' | translate}}</button>
-							<button class="wiz-next btn" ng-disabled="!isPageLoaded" ng-click="go(3, widgetType.s8nextCallback())">{{'$S_str_Next' | translate}}</button>
-						</div>
-					</form>
-				</fieldset>	
-			</li>
 		</ol>
 	</div>
 
 	<div class="modal propertyWidget" modal ng-controller="WidgetPropertyController">
 		<a class="modal-close close" style="margin-bottom: -30px">&times;</a>
-		<legend>{{name}} 속성</legend>
+		<legend>{{name}} {{'$S_str_Property' | translate}}</legend>
 		<div style="margin-bottom: 20px">
-			위젯 속성을 확인하고 변경할 수 있습니다.
+			{{'$S_msg_WidgetProperty' | translate}}
 		</div>
 		<form class="form-horizontal">
 			<div class="control-group">
-				<label class="control-label" for="dashboardWidgetPropertyInterval">새로고침 주기</label>
+				<label class="control-label" for="dashboardWidgetPropertyInterval">{{'$S_str_IntervalRefresh' | translate}}</label>
 				<div class="controls">
-					<input type="number" ng-model="interval" id="dashboardWidgetPropertyInterval">
+					<input type="number" ng-model="interval" min="5" id="dashboardWidgetPropertyInterval"> <ng-pluralize count="interval" when="formSecond"></ng-pluralize>
 				</div>
 			</div>
 			<div class="control-group">
-				<label class="control-label" >쿼리</label>
+				<label class="control-label" >{{'$S_str_QueryString' | translate}}</label>
 				<div class="controls">
 					<code style="display:inline-block; max-height:200px; overflow:auto">{{query}}</code>
 				</div>

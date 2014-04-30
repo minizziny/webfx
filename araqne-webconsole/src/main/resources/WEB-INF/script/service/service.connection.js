@@ -32,16 +32,6 @@ function Async(fn) {
 		return this;
 	}
 
-	this.onHead = function(fn) {
-		callback.onHead = fn;
-		return this;
-	}
-
-	this.onTail = function(fn) {
-		callback.onTail = fn;
-		return this;
-	}
-
 	this.done = function(fname) {
 		var args = Array.prototype.slice.call(arguments);
 		args.shift();

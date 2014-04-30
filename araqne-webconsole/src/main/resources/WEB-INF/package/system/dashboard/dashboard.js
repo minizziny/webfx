@@ -1,4 +1,5 @@
-function DashboardController($scope, $http, $element, $compile, $q, $translate, $timeout, eventSender, $filter, socket, serviceUtility, serviceSession, serviceWidget, serviceExtension) {
+
+function DashboardController($scope, $http, $compile, $translate, $timeout, eventSender, $filter, socket, serviceUtility, serviceSession, serviceWidget) {
 	$scope.getPid = eventSender.dashboard.pid;
 	
 	eventSender.dashboard.$event.on('resume', function() {
@@ -25,49 +26,6 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 			w.suspend();
 		});
 		gt.cancel();
-	});
-
-
-	eventSender.dashboard.eventHandler = {};
-	extension.dashboard.factory('serviceDashboard', function() {
-		var ret = {
-			'addAssetType': function(obj) {
-				eventSender.dashboard.addAssetType(obj);
-			},
-			'closeWizard': function() {
-				$('.newWidget')[0].hideDialog();
-			},
-			'event': new CustomEvent(eventSender.dashboard.eventHandler)
-		}
-		return ret;
-	});
-
-
-	var apps = ['app0', 'app1'];
-
-	apps.forEach(function(appid) {
-
-		serviceExtension.load(appid)
-		.done(function(manifest) {
-			var prefix = 'apps/' + appid + '/';
-			if(!manifest['dashboard-assets']) return;
-
-			serviceExtension.register(appid, 'dashboard', manifest);
-
-			$.getScript(prefix + manifest['dashboard-assets'].script)
-			.done(function(script) {
-
-
-				var ct = angular.element('<div class="dashboard-extension-container" ng-include src="\'' + prefix + manifest['dashboard-assets'].step.html + '\'"></div>');
-				$compile(ct)($scope);
-				$element.append(ct);
-			})
-			.fail(function(a,b,c) {
-				console.log(a,b,c);
-			});
-
-		});
-
 	});
 
 	$scope.formSecond = {
@@ -305,7 +263,6 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		// 활성탭인건 렌더
 		var elWidget = angular.element('.tab-pane.' + tab.guid + ' widget');
 		elWidget.each(function(i, w) {
-			console.log('activetab render call');
 			w.render(function() {
 				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
 			});
@@ -585,7 +542,7 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		
 		$scope.ctxPreset[currentPresetId].ctxWidget[ctx.guid] = ctx;
 
-		console.log('onCreateNewWidgetAndSavePreset',ctx);
+		console.log(ctx);
 
 		var newbie = layoutEngine.ui.layout.box.create({
 			'w': 100,
@@ -1390,9 +1347,7 @@ function ChartBindingController($scope, $filter, $translate, eventSender, servic
 function NewWidgetWizardController($scope, $filter, $translate, eventSender, serviceUtility, $translate) {
 	$scope.numCurrentPage = 0;
 	$scope.numPagerPagesize = 100;
-
 	var dataChart;
-	var dataAlertBox;
 	
 	function getDefaultContext(type) {
 		if(type == "grid") {
@@ -1420,19 +1375,6 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 				}
 			}
 		}
-		else if(type == "alertbox") {
-			return {
-				'name': '',
-				'guid': serviceUtility.generateType2(),
-				'interval': 15,
-				'type': 'alertbox',
-				'data': {
-					'rules': undefined,
-					'label': undefined,
-					'query': ''
-				}
-			}
-		}
 	}
 
 	function makeRemoveClassHandler(regex) {
@@ -1445,7 +1387,6 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		$scope.isPageLoaded = false;
 		$scope.moreCol = false;
 		var newWidgetWin = $('.newWidget').removeClass(makeRemoveClassHandler(/^step/));
-
 		newWidgetWin[0].showDialog();
 			
 		$scope.go(0);
@@ -1578,46 +1519,6 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 			's3prev': function() {
 				return $scope.chartType.nextType;
 			}
-		},
-		{
-			'name': 'alertbox',
-			's0next': 1,
-			's0prevCallback': function() {
-				$scope.isPageLoaded = false;
-			},
-			's0nextCallback': function() {
-				$scope.ctxWidget = getDefaultContext('alertbox');
-				$('.qr1')[0].hideTable();
-				setTimeout(function() {
-					$('query-input textarea').focus();	
-				}, 250);
-				
-			},
-			's1next': 7,
-			's1nextEvent': function() {
-				return function() {
-					return $scope.isPageLoaded;
-				}
-			},
-			's7prev': 1,
-			's7next': 8,
-			's7nextEvent': function() {
-				return function() {
-					return $scope.isPageLoaded;
-				}
-			},
-			's8next': 3,
-			's8nextEvent': function() {
-				return function() {
-					return $scope.isPageLoaded;
-				}
-			},
-			's8nextCallback' : function() {
-				dataAlertBox = eventSender.dashboard.onSendAlertBoxDataWizard();
-			},
-			's3prev': function() {
-				return 8;
-			}
 		}
 	];
 	$scope.widgetType = wtypes[1];
@@ -1628,21 +1529,6 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	}
 
 	$scope.ctxWidget;
-
-	/** new **/
-	eventSender.dashboard.addAssetType = function(obj) {
-		$scope.dataAssetTypes.push(obj);
-		if($scope.selectedAsset === undefined) {
-			$scope.selectedAsset = obj;	
-		}
-	}
-	$scope.dataAssetTypes = [];
-	$scope.selectedAsset;
-	$scope.onNextSelectAsset = function() {
-		$scope.selectedAsset.event.onNextStep();
-	}
-
-	/** end new **/
 
 	$scope.go = function(page, callback, event) {
 		window.scrollTo(0, 0);
@@ -1678,9 +1564,6 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 				submitGraph();	
 			}
 		}
-		else if ($scope.widgetType.name == 'alertbox') {
-			submitAlertbox();
-		}
 
 	}
 
@@ -1694,18 +1577,6 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		$scope.ctxWidget.data.order = order;
 
 		console.log($scope.ctxWidget);
-
-		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
-		$('.newWidget')[0].hideDialog();	
-	}
-
-
-	function submitAlertbox() {
-
-		$scope.ctxWidget.data.rules = dataAlertBox.rules;
-		$scope.ctxWidget.data.fdslabel = $scope.widgetType.name;
-		$scope.ctxWidget.data.type = $scope.widgetType.name;
-		console.log('submitAlertbox',$scope.ctxWidget);
 
 		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
 		$('.newWidget')[0].hideDialog();	
@@ -1822,60 +1693,3 @@ function WidgetPropertyController($scope, eventSender) {
 		$('.propertyWidget')[0].hideDialog();
 	}
 }
-
-function AlertBoxRullBindingController($scope, $filter, $translate, eventSender, serviceLogdb) {
-	$scope.fdsrules			= [];
-	$scope.boundary			= 0;
-	$scope.operaterlists	= {};
-	$scope.colorlists		= {};
-	$scope.isOnSubmit		= false;
-	$scope.setcolor			= "";
-	$scope.fdsLabel			= "";
-
-	console.log('AlertBoxRullController=', serviceLogdb);
-
-	function getDataOpList() {
-		$scope.operaterlists = [{
-			text : "=",
-			value : "="
-		},{
-			text : "!=",
-			value : "!="
-		},{
-			text : ">",
-			value : ">"
-		},{
-			text : "<",
-			value : "<"
-		}];
-	}
-
-	$scope.init = function(e) {
-		getDataOpList();	//연산자 리스트 가져오기
-		$scope.fdsrules.push({operater:'', boundary:'', color:''});
-		
-	}
-
-	$scope.init();
-
-	$scope.addRule = function () {
-
-		$scope.fdsrules.push({operater:'', boundary:'', color:''});
-	};
-
-	$scope.removeRule = function (index) {
-
-		$scope.fdsrules.splice(index, 1);
-
-	};
-
-	eventSender.dashboard.onSendAlertBoxDataWizard = function() {
-		console.log('onSendAlertBoxDataWizard');
-
-		return {
-			'rules': $scope.fdsrules,
-			'fdslabel' : $scope.fdsLabel
-		}
-	}
-
-};

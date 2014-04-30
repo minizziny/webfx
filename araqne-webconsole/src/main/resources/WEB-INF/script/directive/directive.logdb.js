@@ -6,8 +6,6 @@ angular.module('app.directive.logdb', [])
 			onLoading: '&',
 			onLoaded: '&',
 			onStatusChange: '&',
-			onHead: '&',
-			onTail: '&',
 			ngTemplate: '=ngTemplate',
 			ngPageSize: '&',
 			ngQueryString: '=',
@@ -55,18 +53,6 @@ angular.module('app.directive.logdb', [])
 						callback();
 					}
 				}
-			}
-
-			function onHead(helper) {
-				scope.onHead({
-					'$helper': helper
-				});
-			}
-
-			function onTail(helper) {
-				scope.onTail({
-					'$helper': helper
-				});
 			}
 
 			function loadedFn(m) {
@@ -130,8 +116,6 @@ angular.module('app.directive.logdb', [])
 				.started(startedFn)
 				.loaded(loadedFn)
 				.onStatusChange(onStatusChangeFn)
-				.onHead(onHead)
-				.onTail(onTail)
 				.failed(failedFn)
 			}
 
@@ -173,8 +157,6 @@ angular.module('app.directive.logdb', [])
 				.started(startedFn)
 				.loaded(loadedFn)
 				.onStatusChange(onStatusChangeFn)
-				.onHead(onHead)
-				.onTail(onTail)
 				.failed(failedFn);
 
 				if(status == 'Running') {
@@ -182,47 +164,18 @@ angular.module('app.directive.logdb', [])
 				}
 			}
 
-			element[0].setPristine = function() {
-				z = undefined;
-				scope.ngQueryString = '';
-			}
-
 		}
 	}
 })
-.directive('tableView', function($compile) {
+.directive('afterIterate', function() {
 	return {
-		restrict: 'A',
-		require: ['ngModel'],
-		scope: {
-			'model': '=ngModel'
-		},
-		tranclude: true,
-		link: function(scope, element, attrs, ctrl, transclude) {
-			if(element[0].children.length === 0) {
-				var tmpl = angular.element('<thead><tr><th ng-repeat="col in model.cols">{{col}}</th></tr></thead>\
-					<tbody><tr ng-repeat="row in model">\
-						<td ng-repeat="col in model.cols" ng-bind-html="row[col] | crlf"></td>\
-					</tr></tbody>');
-				$compile(tmpl, true)(scope);
-				tmpl.appendTo(element);
+		link: function(scope, element, attrs) {
+			if(scope.$last) {
+				var fn = scope.$parent[attrs.afterIterate];
+				if(!!fn) {
+					fn.call(scope, scope);
+				}
 			}
-
-			function Manipulate(val) {
-				var cols = [];
-				val.forEach(function(row) {
-					cols = cols.concat(Object.keys(row));
-				});
-
-				cols = cols.unique();
-				cols.splice(cols.indexOf('$$hashKey'), 1);
-				ctrl[0].$modelValue.cols = cols;
-			}
-			scope.$watch('model', function(val) {
-				console.log(val)
-				scope.val = val;
-				Manipulate(val);
-			});
 		}
 	}
 })
