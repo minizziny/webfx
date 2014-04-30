@@ -1,108 +1,4 @@
 
-logpresso.directive('fdsAlertBox', function($compile, $timeout, serviceLogdb, serviceChart, $translate) {
-	return {
-		restrict: 'E',
-		template: '<div class="fdsAlertBox">'+
-				'{{context.fdslabel}}<p>'+
-				'{{fdscount}}'+
-				'</div>',
-		scope: {
-			
-		},
-		link: function(scope, elm, attrs) {
-			scope.fdscount = '';
-			scope.fdscolor	= '';
-			scope.context = {};
-			scope.queryInst	= null;
-
-			elm[0].setContext = function(ctx) {
-
-				scope.context = {'query':'table wc | stats count', 'fdslabel':'FDS 총건수', 'fdsrules':[{color:'green',operater:'>',boundary:'10000'}
-										,{color:'yellow',operater:'>',boundary:'1000000'}
-										,{color:'orange',operater:'>',boundary:'100000000'}
-										,{color:'red',operater:'>',boundary:'1000000000'}]};
-				console.log('scope.context', scope.context)
-
-			}
-
-			function resultCallback() {
-				return function(m) {
-					scope.fdscount = m.body.result[0].count;
-					serviceLogdb.remove(queryInst);
-					
-					for (var i = 0, len = scope.context.fdsrules.length; i<len; i++) {
-						console.log("$scope.fdsrule.operater", scope.context.fdsrules[i].operater,'fdsCount:', scope.fdsCount,"scope.context.fdsrules[i].boundary",scope.context.fdsrules[i].boundary);
-						console.log('scope.context.fdsrules[i].color',scope.context.fdsrules[i].color);
-						switch ( scope.context.fdsrules[i].operater ) {
-							case "=":
-								if( scope.fdscount == scope.context.fdsrules[i].boundary ){
-									scope.fdscolor	=	scope.context.fdsrules[i].color;
-								}
-								break;
-							case "!=":
-								if( scope.fdscount != scope.context.fdsrules[i].boundary ){
-									scope.fdscolor	=	scope.context.fdsrules[i].color;
-								}
-								break;
-							case ">":
-								if( scope.fdscount > scope.context.fdsrules[i].boundary ){
-									scope.fdscolor	=	scope.context.fdsrules[i].color;
-								}
-								break;
-							case "<":
-								if( scope.fdscount < scope.context.fdsrules[i].boundary ){
-									scope.fdscolor	=	scope.context.fdsrules[i].color;
-								}
-								break;
-							default : 
-								scope.fdscolor = "white";
-						};
-
-					};
-					elm.find(".fdsAlertBox").css('backgroundColor', scope.fdscolor);
-
-					scope.$apply();
-				}
-			}
-
-			function onStatusChange(){
-				return function(m) {
-					if(m.body.type === 'eof') {
-						queryInst.getResult(0, 100, resultCallback());
-					}	
-				}
-
-			}
-
-			function query() {
-
-				queryInst = serviceLogdb.create(2020);
-				queryInst.query(scope.context.query, 100)
-				.created(function(m) {
-					scope.$apply();
-				})
-				.onStatusChange(
-					onStatusChange()
-				)
-				.loaded(
-					onStatusChange()
-				)
-				.failed(function(m, raw) {
-					serviceLogdb.remove(queryInst);
-				});
-
-			}
-
-			function render() {
-				elm[0].setContext();
-				query();
-			}
-
-			render();
-			elm[0].query = query;
-		}
-	}
-});
 
 // space 말고 tab 써주세요
 console.log("playground")
@@ -342,7 +238,7 @@ function MyFtpProfileWizardController($scope, $filter, socket, $translate, event
 function MyFDSController($scope, $filter, socket, $translate, eventSender, serviceLogdb) {
 	$scope.fdsrules			= [];
 	$scope.boundary			= 0;
-	$scope.operaterlists	= {};
+	$scope.operatorlists	= {};
 	$scope.colorlists		= {};
 	$scope.isOnSubmit		= false;
 	$scope.setcolor			= "";
@@ -396,7 +292,7 @@ function MyFDSController($scope, $filter, socket, $translate, eventSender, servi
 	}
 
 	function getDataOpList() {
-		$scope.operaterlists = [{
+		$scope.operatorlists = [{
 			text : "=",
 			value : "="
 		},{
@@ -434,7 +330,7 @@ function MyFDSController($scope, $filter, socket, $translate, eventSender, servi
 		//getFdsCount($scope, socket, serviceLogdb);
 		getDataOpList();	//연산자 리스트 가져오기
 		getDatacolorlist();	//색상 리스트 가져오기
-		$scope.fdsrules.push({operater:'', boundary:'', color:''});
+		$scope.fdsrules.push({operator:'', boundary:'', color:''});
 		
 	}
 
@@ -444,9 +340,9 @@ function MyFDSController($scope, $filter, socket, $translate, eventSender, servi
 
 		$scope.setcolor = "";
 		for (var i = 0, len = $scope.fdsrules.length; i<len; i++) {
-			console.log("$scope.fdsrule.operater", $scope.fdsrules[i].operater,'fdsCount:', $scope.fdsCount,"$scope.fdsrules[i].boundary",$scope.fdsrules[i].boundary);
+			console.log("$scope.fdsrule.operator", $scope.fdsrules[i].operator,'fdsCount:', $scope.fdsCount,"$scope.fdsrules[i].boundary",$scope.fdsrules[i].boundary);
 			console.log('$scope.fdsrules[i].color',$scope.fdsrules[i].color);
-			switch ( $scope.fdsrules[i].operater ) {
+			switch ( $scope.fdsrules[i].operator ) {
 				case "=":
 					if( $scope.fdsCount == $scope.fdsrules[i].boundary ){
 						$scope.setcolor	=	$scope.fdsrules[i].color;
@@ -479,7 +375,7 @@ function MyFDSController($scope, $filter, socket, $translate, eventSender, servi
 
 	$scope.addScope = function () {
 
-		$scope.fdsrules.push({operater:'', boundary:'', color:''});
+		$scope.fdsrules.push({operator:'', boundary:'', color:''});
 	};
 
 	$scope.removeRule = function (index) {
@@ -551,9 +447,9 @@ function MyFdsAlertBoxController($scope, $filter, socket, $translate, eventSende
 
 	//FDS Rule 가져오기
 	function getFdsRules($scope, socket, serviceLogdb){
-		$scope.fdsRules = [{operater:">", boundary:"100000", color:"#0000ff"}
-							,{operater:'>', boundary:'10000000', color:'#00ff00'}
-							,{operater:'>', boundary:'1000000000', color:'#ff0000'}];
+		$scope.fdsRules = [{operator:">", boundary:"100000", color:"#0000ff"}
+							,{operator:'>', boundary:'10000000', color:'#00ff00'}
+							,{operator:'>', boundary:'1000000000', color:'#ff0000'}];
 
 
 	}
@@ -578,9 +474,9 @@ function MyFdsAlertBoxController($scope, $filter, socket, $translate, eventSende
 		console.log('viewAlertBox!!');
 		$scope.setcolor = "";
 		for (var i = 0, len = $scope.fdsRules.length; i<len; i++) {
-			console.log("$scope.fdsrule.operater", $scope.fdsRules[i].operater,'fdsCount:', $scope.fdsCount,"$scope.fdsRules[i].boundary",$scope.fdsRules[i].boundary);
+			console.log("$scope.fdsrule.operator", $scope.fdsRules[i].operator,'fdsCount:', $scope.fdsCount,"$scope.fdsRules[i].boundary",$scope.fdsRules[i].boundary);
 			console.log('$scope.fdsRules[i].color',$scope.fdsRules[i].color);
-			switch ( $scope.fdsRules[i].operater ) {
+			switch ( $scope.fdsRules[i].operator ) {
 				case "=":
 					if( $scope.fdsCount == $scope.fdsRules[i].boundary ){
 						$scope.setcolor	=	$scope.fdsRules[i].color;
@@ -608,4 +504,45 @@ function MyFdsAlertBoxController($scope, $filter, socket, $translate, eventSende
 		};
 		console.log("$scope.setcolor",$scope.setcolor);		
 	}
+
+
+	var ctx = 
+	{
+		'data': {
+			'query': 'table iis | stats count',
+			'column': 'count',
+			'label': 'FDS총건수',
+			'rules': [
+					{
+							color: 'green',
+							operator: '>',
+							boundary: '10000'
+					},
+					{
+							color: 'yellow',
+							operator: '>',
+							boundary: '1000000'
+					},
+					{
+							color: 'orange',
+							operator: '>',
+							boundary: '100000000'
+					},
+					{
+							color: 'red',
+							operator: '>',
+							boundary: '1000000000'
+					}
+			]
+		},
+		'guid': 'asdf',
+		'interval': 15,
+		'name': 'test',
+		'type': 'alertbox'
+	}
+				
+
+
+
+	$('fds-alert-box')[0].setContext(ctx);
 }

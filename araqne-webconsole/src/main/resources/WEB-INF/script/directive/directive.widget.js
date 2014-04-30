@@ -145,16 +145,19 @@ angular.module('app.directive.widget', [])
 		link: function(scope, el, attrs, ctrl) {
 			console.widgetLog('linking dockpanel');
 			var cached;
+			var cachedAlertBox;
 
 			function cache() {
 				// 이 시점에선 dockpanel 아래의 link된 widget을 캐시하는 것이 아니고,
 				// 이미 append된 widget들을 캐시한다. link됐으나 append되지 않은건 이미 아까 사라짐.
 				cached = el.find('widget').detach();
+				cachedAlertBox = el.find('fds-alert-box').detach();
+
 				console.widgetLog('cache', cached.length, 'item cached');
 			}
 
 			function restore() {
-				if(!cached.length) return;
+				// if(!cached.length) return;
 				console.widgetLog('restore');
 
 				cached.each(function(i, widget) {
@@ -168,7 +171,19 @@ angular.module('app.directive.widget', [])
 					}
 				});
 
+				cachedAlertBox.each(function(i, ab) {
+					var guid = angular.element(ab).attr('id');
+					console.log(guid, ab)
+					var contentbox = el.find('[dock-id=' + guid + '] > .mybox > .contentbox');
+					if(contentbox.length) {
+						// 이때 append되지 않은건 버려짐.
+						console.widgetLog('restore widget', ab.id, guid);
+						contentbox.append(ab);
+					}
+				})
+
 				cached = undefined;
+				cachedAlertBox = undefined;
 			}
 
 			function render(layout) {
@@ -793,64 +808,57 @@ console.log('grid directive query');
 		}
 	}
 })
-.directive('alertbox', function($compile, $timeout, serviceLogdb, serviceChart, $translate) {
+.directive('fdsAlertBox', function($compile, $timeout, serviceLogdb, serviceChart, $translate) {
 	return {
 		restrict: 'E',
-		// template: '<div class="alertbox">'+
-		// 		'{{context.fdslabel}}<p>'+
-		// 		'{{fdscount}}'+
-		// 		'</div>',
+		template: '<div class="fdsAlertBox">'+
+				'{{context.data.label}}<p>'+
+				'{{fdscount}}'+
+				'</div>',
 		scope: {
 			
 		},
 		link: function(scope, elm, attrs) {
-			var elc = el.children('widget');
 			scope.fdscount = '';
 			scope.fdscolor	= '';
+			scope.context = {};
 			scope.queryInst	= null;
 
-			var context = {};
+			elm[0].setContext = function(ctx) {
 
-			elc[0].setContext = function(ctx) {
-
-				// context = {'query':'table wc | stats count', 'fdslabel':'FDS 총건수', 'fdsrules':[{color:'green',operater:'>',boundary:'10000'}
-				// 						,{color:'yellow',operater:'>',boundary:'1000000'}
-				// 						,{color:'orange',operater:'>',boundary:'100000000'}
-				// 						,{color:'red',operater:'>',boundary:'1000000000'}]};
-				var scopec = elc.scope()
-				context = scopec.data;
-	
-				console.log('context', context)
+				scope.context = ctx;
+				query();
 
 			}
 
 			function resultCallback() {
 				return function(m) {
+					console.log(m)
 					scope.fdscount = m.body.result[0].count;
 					serviceLogdb.remove(queryInst);
 					
-					for (var i = 0, len = context.fdsrules.length; i<len; i++) {
-						console.log("$scope.fdsrule.operater", context.fdsrules[i].operater,'fdsCount:', scope.fdsCount,"context.fdsrules[i].boundary",context.fdsrules[i].boundary);
-						console.log('context.fdsrules[i].color',context.fdsrules[i].color);
-						switch ( context.fdsrules[i].operater ) {
+					for (var i = 0, len = scope.context.data.rules.length; i<len; i++) {
+						console.log("$scope.fdsrule.operator", scope.context.data.rules[i].operator,'fdsCount:', scope.fdsCount,"scope.context.rules[i].boundary",scope.context.data.rules[i].boundary);
+						console.log('scope.context.rules[i].color',scope.context.data.rules[i].color);
+						switch ( scope.context.data.rules[i].operator ) {
 							case "=":
-								if( scope.fdscount == context.fdsrules[i].boundary ){
-									scope.fdscolor	=	context.fdsrules[i].color;
+								if( scope.fdscount == scope.context.data.rules[i].boundary ){
+									scope.fdscolor	=	scope.context.data.rules[i].color;
 								}
 								break;
 							case "!=":
-								if( scope.fdscount != context.fdsrules[i].boundary ){
-									scope.fdscolor	=	context.fdsrules[i].color;
+								if( scope.fdscount != scope.context.data.rules[i].boundary ){
+									scope.fdscolor	=	scope.context.data.rules[i].color;
 								}
 								break;
 							case ">":
-								if( scope.fdscount > context.fdsrules[i].boundary ){
-									scope.fdscolor	=	context.fdsrules[i].color;
+								if( scope.fdscount > scope.context.data.rules[i].boundary ){
+									scope.fdscolor	=	scope.context.data.rules[i].color;
 								}
 								break;
 							case "<":
-								if( scope.fdscount < context.fdsrules[i].boundary ){
-									scope.fdscolor	=	context.fdsrules[i].color;
+								if( scope.fdscount < scope.context.data.rules[i].boundary ){
+									scope.fdscolor	=	scope.context.data.rules[i].color;
 								}
 								break;
 							default : 
@@ -858,7 +866,7 @@ console.log('grid directive query');
 						};
 
 					};
-					elc[0].find(".alertbox").css('backgroundColor', scope.fdscolor);
+					elm.find(".fdsAlertBox").css('backgroundColor', scope.fdscolor);
 
 					scope.$apply();
 				}
@@ -874,9 +882,14 @@ console.log('grid directive query');
 			}
 
 			function query() {
+				if(scope.context == undefined) {
+					return;
+				}
+
+				console.log(scope.context)
 
 				queryInst = serviceLogdb.create(2020);
-				queryInst.query(context.query, 100)
+				queryInst.query(scope.context.data.query, 100)
 				.created(function(m) {
 					scope.$apply();
 				})
@@ -892,22 +905,13 @@ console.log('grid directive query');
 
 			}
 
-			function render(callback) {
-console.log('alertbox directive render');
-				var alertbox = angular.element('<div class="alertbox">\
-					{{context.fdslabel}}<p>\
-					{{fdscount}}\
-					</div>');
-				$compile(alertbox)(scope);
-
-				elc.append(alertbox);
-
-				elc[0].setContext();
+			function render() {
+				elm[0].setContext();
 				query();
 			}
 
-//			render();
-			elc[0].query = query;
+			render();
+			elm[0].query = query;
 		}
 	}
 })
@@ -959,7 +963,7 @@ console.log('alertbox directive render');
 				'</widget>';
 		}
 		else if(json.type === 'alertbox') {
-			return '<alert-box></alert-box>';
+			return '<fds-alert-box id="' + json.guid + '"></fds-alert-box>';
 		}
 		else {
 			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +

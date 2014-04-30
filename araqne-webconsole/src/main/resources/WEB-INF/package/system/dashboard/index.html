@@ -674,7 +674,7 @@ widget.w-before-loading:before {
 						<div class="control-group">
 							Label : <input type='text' name='fdslabel' ng-model='fdsrule.fdsLabel'>
 							<div class="controls" ng-repeat="fdsrule in fdsrules">
-								<select ng-model="fdsrule.operater" ng-options="o.value as o.text for o in operaterlists" required>
+								<select ng-model="fdsrule.operator" ng-options="o.value as o.text for o in operaterlists" required>
 									<option value="">연산자선택</option>
 								</select> 
 								<input type="text" name="boundary" ng-model="fdsrule.boundary" pattern="[0-9]*"  only-number required/>

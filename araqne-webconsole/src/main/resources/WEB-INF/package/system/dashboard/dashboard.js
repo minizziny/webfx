@@ -782,7 +782,14 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 		widgets.forEach(function(widget) {
 			var elWidget = angular.element(serviceWidget.buildWidget(name, widget));
-			$scope.ctxPreset[name].ctxWidget[widget.guid] = widget;
+			if(widget.type != 'alertbox') {
+				$scope.ctxPreset[name].ctxWidget[widget.guid] = widget;	
+			}
+			else if(widget.type === 'alertbox') {
+				$compile(elWidget)($scope);
+				console.log(widget)
+				elWidget[0].setContext(widget);
+			}
 			elWidget.appendTo(el);
 		});
 
@@ -1703,7 +1710,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	function submitAlertbox() {
 
 		$scope.ctxWidget.data.rules = dataAlertBox.rules;
-		$scope.ctxWidget.data.fdslabel = $scope.widgetType.name;
+		$scope.ctxWidget.data.label = $scope.widgetType.name;
 		$scope.ctxWidget.data.type = $scope.widgetType.name;
 		console.log('submitAlertbox',$scope.ctxWidget);
 
@@ -1852,7 +1859,7 @@ function AlertBoxRullBindingController($scope, $filter, $translate, eventSender,
 
 	$scope.init = function(e) {
 		getDataOpList();	//연산자 리스트 가져오기
-		$scope.fdsrules.push({operater:'', boundary:'', color:''});
+		$scope.fdsrules.push({operator:'', boundary:'', color:''});
 		
 	}
 
@@ -1860,7 +1867,7 @@ function AlertBoxRullBindingController($scope, $filter, $translate, eventSender,
 
 	$scope.addRule = function () {
 
-		$scope.fdsrules.push({operater:'', boundary:'', color:''});
+		$scope.fdsrules.push({operator:'', boundary:'', color:''});
 	};
 
 	$scope.removeRule = function (index) {
@@ -1871,11 +1878,14 @@ function AlertBoxRullBindingController($scope, $filter, $translate, eventSender,
 
 	eventSender.dashboard.onSendAlertBoxDataWizard = function() {
 		console.log('onSendAlertBoxDataWizard');
-
-		return {
+		var ctx = {
 			'rules': $scope.fdsrules,
-			'fdslabel' : $scope.fdsLabel
+			'label' : $scope.fdsLabel
 		}
+
+		console.log(ctx)
+
+		return ctx;
 	}
 
 };
