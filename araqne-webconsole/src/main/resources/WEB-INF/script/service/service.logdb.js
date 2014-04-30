@@ -43,6 +43,7 @@ angular.module('app.logdb', [])
 		var isDisposed = false;
 
 		var asyncQuery;
+		var isHeadEventSent = false;
 		/* Start QueryClass */
 
 		function onTrap(resp) {
@@ -58,6 +59,7 @@ angular.module('app.logdb', [])
 			//console.log(m)
 			
 			var id = m.body.id;
+
 			if(id != clazz.id) {
 				console.log("not same: " + id);
 				return;	
@@ -73,6 +75,22 @@ angular.module('app.logdb', [])
 
 				clazz.status = 'End';
 				asyncQuery.done('loaded', m);
+				if(!isHeadEventSent) {
+					asyncQuery.done('onHead', {
+						'getResult': function(fn) {
+							return getResult(id, 0, defaultLimit, fn);
+						},
+						'message': m
+					});
+					isHeadEventSent = true;
+				}
+
+				asyncQuery.done('onTail', {
+					'getResult': function(fn) {
+						return getResult(id, (m.body.total_count - defaultLimit < 0) ? 0 : (m.body.total_count - defaultLimit), defaultLimit, fn);
+					},
+					'message': m
+				});
 				applyFn();
 				/*******
 				that.totalCount(m.body.total_count);
@@ -89,6 +107,17 @@ angular.module('app.logdb', [])
 			else if(m.body.type == "status_change") {
 				//console.log('status change', m.body);
 				asyncQuery.done('onStatusChange', m);
+
+				if(( m.body.count > defaultLimit ) && !isHeadEventSent) {
+					asyncQuery.done('onHead', {
+						'getResult': function(fn) {
+							return getResult(id, 0, defaultLimit, fn);
+						},
+						'message': m
+					});
+					isHeadEventSent = true;
+				}
+
 				applyFn();
 			}
 			else {
@@ -149,6 +178,7 @@ angular.module('app.logdb', [])
 			}
 			
 			var name = 'logdb-query-' + clazz.id;
+			isHeadEventSent = false;
 			socket.register(name, pid, onTrap, function(resp) {
 				if(callback != undefined) {
 					callback();	

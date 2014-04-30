@@ -127,11 +127,10 @@
 	"$S_msg_NoWidget": "There is no widget. Add a new widget now!",
 	
 	"--------widget--------": "",
+	"$S_msg_QueryRunCount": "Updated {{p0}} times",
+	"$S_msg_QueryRunInterval": "Run every {{p0}}secs",
 	"$S_msg_UnknownError": "Unknown Error",
 	"$S_msg_OccurError": "Error occurred",
-	"$S_msg_WidgetProperty": "위젯 속성을 확인하고 변경할 수 있습니다.",
-	"$S_str_Property": "속성",
-	"$S_str_IntervalRefresh": "Interval",
 
 	"--------starter--------": "",
 	"$S_str_LogTrend": "Log Trend",
