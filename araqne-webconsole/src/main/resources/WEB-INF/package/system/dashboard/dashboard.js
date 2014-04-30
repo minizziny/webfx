@@ -1436,6 +1436,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 				'data': {
 					'rules': undefined,
 					'label': undefined,
+					'column': undefined,
 					'query': ''
 				}
 			}
@@ -1708,10 +1709,19 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 
 
 	function submitAlertbox() {
+		var column = $scope.qrCols.filter(function(obj) {
+			if(obj.is_visible) return true;
+		})
+		.map(function(obj) {
+			return obj.name;
+		});
+
+		console.log('submitAlertbox column', column.length);
 
 		$scope.ctxWidget.data.rules = dataAlertBox.rules;
 		$scope.ctxWidget.data.label = $scope.widgetType.name;
 		$scope.ctxWidget.data.type = $scope.widgetType.name;
+		$scope.ctxWidget.data.column = column[0];
 		console.log('submitAlertbox',$scope.ctxWidget);
 
 		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);

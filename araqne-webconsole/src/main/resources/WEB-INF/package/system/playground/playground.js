@@ -509,7 +509,7 @@ function MyFdsAlertBoxController($scope, $filter, socket, $translate, eventSende
 	var ctx = 
 	{
 		'data': {
-			'query': 'table iis | stats count',
+			'query': 'table wc | stats count',
 			'column': 'count',
 			'label': 'FDS총건수',
 			'rules': [
