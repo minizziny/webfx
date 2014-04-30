@@ -584,6 +584,7 @@ angular.module('app.directive.widget', [])
 			}
 
 			elc[0].render = function(callback) {
+console.log('grid directive render');
 				var scopec = elc.scope()
 				ctx.data = scopec.data;
 				if(angular.isObject(ctx.data.width)) {
@@ -636,7 +637,7 @@ angular.module('app.directive.widget', [])
 			}
 
 			function query(callback) {
-				
+console.log('grid directive query');
 				ctrl.resume();
 				scope.isLoaded = false;
 				scope.progress = { 'width': '0%' };	
@@ -792,6 +793,124 @@ angular.module('app.directive.widget', [])
 		}
 	}
 })
+.directive('alertbox', function($compile, $timeout, serviceLogdb, serviceChart, $translate) {
+	return {
+		restrict: 'E',
+		// template: '<div class="alertbox">'+
+		// 		'{{context.fdslabel}}<p>'+
+		// 		'{{fdscount}}'+
+		// 		'</div>',
+		scope: {
+			
+		},
+		link: function(scope, elm, attrs) {
+			var elc = el.children('widget');
+			scope.fdscount = '';
+			scope.fdscolor	= '';
+			scope.queryInst	= null;
+
+			var context = {};
+
+			elc[0].setContext = function(ctx) {
+
+				// context = {'query':'table wc | stats count', 'fdslabel':'FDS 총건수', 'fdsrules':[{color:'green',operater:'>',boundary:'10000'}
+				// 						,{color:'yellow',operater:'>',boundary:'1000000'}
+				// 						,{color:'orange',operater:'>',boundary:'100000000'}
+				// 						,{color:'red',operater:'>',boundary:'1000000000'}]};
+				var scopec = elc.scope()
+				context = scopec.data;
+	
+				console.log('context', context)
+
+			}
+
+			function resultCallback() {
+				return function(m) {
+					scope.fdscount = m.body.result[0].count;
+					serviceLogdb.remove(queryInst);
+					
+					for (var i = 0, len = context.fdsrules.length; i<len; i++) {
+						console.log("$scope.fdsrule.operater", context.fdsrules[i].operater,'fdsCount:', scope.fdsCount,"context.fdsrules[i].boundary",context.fdsrules[i].boundary);
+						console.log('context.fdsrules[i].color',context.fdsrules[i].color);
+						switch ( context.fdsrules[i].operater ) {
+							case "=":
+								if( scope.fdscount == context.fdsrules[i].boundary ){
+									scope.fdscolor	=	context.fdsrules[i].color;
+								}
+								break;
+							case "!=":
+								if( scope.fdscount != context.fdsrules[i].boundary ){
+									scope.fdscolor	=	context.fdsrules[i].color;
+								}
+								break;
+							case ">":
+								if( scope.fdscount > context.fdsrules[i].boundary ){
+									scope.fdscolor	=	context.fdsrules[i].color;
+								}
+								break;
+							case "<":
+								if( scope.fdscount < context.fdsrules[i].boundary ){
+									scope.fdscolor	=	context.fdsrules[i].color;
+								}
+								break;
+							default : 
+								scope.fdscolor = "white";
+						};
+
+					};
+					elc[0].find(".alertbox").css('backgroundColor', scope.fdscolor);
+
+					scope.$apply();
+				}
+			}
+
+			function onStatusChange(){
+				return function(m) {
+					if(m.body.type === 'eof') {
+						queryInst.getResult(0, 100, resultCallback());
+					}	
+				}
+
+			}
+
+			function query() {
+
+				queryInst = serviceLogdb.create(2020);
+				queryInst.query(context.query, 100)
+				.created(function(m) {
+					scope.$apply();
+				})
+				.onStatusChange(
+					onStatusChange()
+				)
+				.loaded(
+					onStatusChange()
+				)
+				.failed(function(m, raw) {
+					serviceLogdb.remove(queryInst);
+				});
+
+			}
+
+			function render(callback) {
+console.log('alertbox directive render');
+				var alertbox = angular.element('<div class="alertbox">\
+					{{context.fdslabel}}<p>\
+					{{fdscount}}\
+					</div>');
+				$compile(alertbox)(scope);
+
+				elc.append(alertbox);
+
+				elc[0].setContext();
+				query();
+			}
+
+//			render();
+			elc[0].query = query;
+		}
+	}
+})
 .directive('widgetDroppable', function($compile) {
 	return {
 		restrict: 'A',
@@ -838,6 +957,9 @@ angular.module('app.directive.widget', [])
 		else if(json.type === 'wordcloud') {
 			return '<widget wcloud class="w-before-loading" id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +
 				'</widget>';
+		}
+		else if(json.type === 'alertbox') {
+			return '<alert-box></alert-box>';
 		}
 		else {
 			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +

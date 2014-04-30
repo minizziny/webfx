@@ -1,9 +1,28 @@
 <!-- space 말고 tab 써주세요 -->
+<style type="text/css">
 
+.fdsSquare {
+		width: 200px;
+		height: 200px;
+		text-align: center;
+		border-radius: 10px;
+		font-size: 20px;
+}
+
+.fdsAlertBox {
+		width: 200px;
+		height: 120px;
+		padding-top: 70px;
+		text-align: center;
+		border-radius: 10px;
+		font-size: 20px;	
+}
+
+</style>
 <div class="playground-container" ng-controller="PlaygroundController">
 
-	<div ng-controller="LogQuerySampleController">
-	</div>
+	<!--div ng-controller="LogQuerySampleController">
+	</div-->
 
 	<div class="well" style="margin:20px; box-sizing:border-box" ng-controller="LogQuery2SampleController">
 		<query-input
@@ -34,7 +53,8 @@
 					{{'$S_str_FtpSetting' | translate}}
 					<button class="btn btn-reload pull-right" style="margin-left:5px" ng-click="init($event)"><i class="icon-refresh"></i></button>
 					<button ng-disabled="ftpProfileDeletable()" class="btn pull-right" style="margin-left:5px" ng-click="openDropFtpProfileModal()">{{'$S_str_Remove' | translate}}</button>
-					<button class="btn btn-primary pull-right" ng-click="openCreateFtpProfileModal()">{{'$S_str_NewFtpProfile' | translate}}</button>				
+					<button class="btn btn-primary pull-right" ng-click="openCreateFtpProfileModal()">{{'$S_str_NewFtpProfile' | translate}}</button>
+									
 				</legend>
 				<table class="table table-bordered table-striped">
 					<thead>
@@ -137,18 +157,59 @@
 				</fieldset>
 			</div>
 		</form>
-
-		<!-- drop ftp profile modal window -->
-		<div class="modal dropFtpProfile" modal>
-			<a  class="modal-close close" style="margin-bottom: -30px">&times;</a>
-			<legend>{{'$S_str_RemoveFtpProfile' | translate}}</legend>
-			<div style="margin-bottom: 20px">
-				{{'$S_msg_RemoveFtpProfileConfirmPre' | translate}} <code>{{dataFtpProfiles | isSelected: 'is_checked' | namemap: 'name'}}</code>{{'$S_msg_RemoveConfirmPost' | translate}}
-			</div>
-			<div class="control-group submit-group">
-				<button class="btn btn-danger" ng-click="dropFtpProfile()">{{'$S_str_Remove' | translate}}</button>
-				<button class="btn" ng-click="cancelDropFtpProfile()">{{'$S_str_Cancel' | translate}}</button>
-			</div>
-		</div>
 	</div>
 </div>
+<fds-alert-box></fds-alert-box>
+
+	<ul class="tab well1 tab-fds">
+		<li class="section well1">
+			<table class="table table-bordered table-striped">
+				<tbody>
+				<tr>
+					<td>
+						<div class="paneFDSConfig" ng-controller="MyFDSController">
+							<form class="formFdsSqare" ng-submit="setFdsSqare()">
+							<!-- FDS Square Set -->
+								<legend>조건 설정</legend>
+								<fieldset class="form-horizontal">
+									<div class="control-group">
+										<div class="controls">
+											Label : 
+											<input type="text" ng-model="fdsLabel" required><br>
+											[ 조건 ]
+										</div>
+										<div class="controls" ng-repeat="fdsrule in fdsrules">
+											<select ng-model="fdsrule.operater" ng-options="o.value as o.text for o in operaterlists" required>
+												<option value="">연산자선택</option>
+											</select> 
+											<input type="text" name="boundary" ng-model="fdsrule.boundary" pattern="[0-9]*"  only-number required/>
+											이면
+											<input type="color" ng-model="fdsrule.color" required>
+											<!--select ng-model="fdsrule.color" ng-options="c.value as c.text for c in colorlists" required>
+												<option value="">색상선택</option>
+											</select--> 
+											<button type="button" class="close" ng-click="removeRule($index)">&times</button>
+											<div>{{fdsrule.operater}}-{{fdsrule.boundary}}-{{fdsrule.color}}</div>
+										</div>
+									</div>
+
+									<div class="control-group submit-group">
+										<input type="button" class="btn btn-primary" ng-click="addScope()" value="구간추가">
+										<input type="button" class="btn btn-primary" ng-click="setFdsSquare()" value="선택">
+									</div>
+								</fieldset>		
+							</form>			
+						</div>
+					</td>
+					<td width="200">
+						<!-- FDS Square -->
+						<div class="fdsSquare" ng-show="fdsSquareShow" ng-style="{'background-color':setcolor}" ng-controller="MyFdsAlertBoxController">
+							{{fdsLabel}}<p>
+							{{fdsCount|number}}
+						</div>
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</li>
+	</ul>
