@@ -5,19 +5,32 @@
 
 fds-alert-box .fdsAlertBox {
 	width: 100%;
+	/*height: calc(100% + 17px);
+	top: -17px;*/
 	height: 100%;
 	text-align: center;
 	position: relative;
 }
 
+.fdsAlertBox .b-x {
+	float: right;
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	z-index: 2;
+}
+
 fds-alert-box .fdsAlertBox .centering {
 	box-sizing: border-box;
-	border-radius: 10px;
-	display: inline-block;
-	padding: 20px;
-	margin-top: 10px;
-	background-color: #eee;
-	border: 1px solid #ccc;
+	display: table;
+	width: calc(100% + 1px);
+	height: calc(100% - 3px);
+	box-shadow: inset 1px 1px 1px rgba(0,0,0,.2);
+}
+
+fds-alert-box .fdsAlertBox .hcentering {
+	vertical-align: middle;
+	display: table-cell;
 }
 
 fds-alert-box .fdsAlertBox h4, fds-alert-box .fdsAlertBox h2 {

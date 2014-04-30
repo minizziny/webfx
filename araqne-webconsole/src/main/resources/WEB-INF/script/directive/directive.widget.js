@@ -812,23 +812,16 @@ console.log('grid directive query');
 	return {
 		restrict: 'E',
 		template: 
-						'<span click-to-edit ng-model="context.name" ng-change="onWidgetTitleChange($new, $old, $event)" class="pull-left widget-title"></span>' +
-						'<span class="pull-right widget-toolbox">' +
-							// '<button class="btn btn-extra-mini b-pause" ng-show="isRunning" ng-click="$parent.$parent.pauseWidget($event)">' +
-							// 	'<i class="icon-pause"></i>' +
-							// '</button><button class="btn btn-extra-mini b-play" ng-hide="isRunning" ng-click="$parent.$parent.runWidget($event)">' +
-							// 	'<i class="icon-play"></i>' +
-							// '</button><button class="btn btn-extra-mini b-refresh" ng-click="$parent.$parent.refreshWidget($event)">' +
-							// 	'<i class="icon-refresh"></i>' +
-							// '</button><button class="btn btn-extra-mini b-p" ng-click="$parent.$parent.displayWidgetProperty($event)">' +
-							// 	'<i class="icon-info-sign"></i>' +
-							'</button><button class="btn btn-extra-mini b-x" ng-click="closebox()">' +
+						'<div class="fdsAlertBox k-d-handler">'+
+							'<button class="btn btn-extra-mini b-x" ng-click="closebox()">' +
 								'<i class="icon-remove"></i>' +
 							'</button>' +
-						'</span>' +
-						'<div class="fdsAlertBox">'+
-							'<div class="centering"><h4>{{context.data.label}}</h4>'+
-							'<h2>{{fdscount}}</h2></div>'+
+							'<div class="centering">' +
+								'<div class="hcentering">'+ 
+									'<h4>{{context.data.label}}</h4>'+
+									'<h2>{{fdscount}}</h2></div>'+
+								'</div>'+
+							'</div>' +
 						'</div>',
 		scope: {
 			
