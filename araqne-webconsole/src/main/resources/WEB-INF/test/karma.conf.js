@@ -4,10 +4,19 @@ module.exports = function(config){
     basePath : '../',
 
     files : [
-      'lib/angular/angular.js',
-      'lib/angular-route/angular-route.js',
+      'lib/angular/angular-1.2.16.js',
+      'lib/angular/angular-route.js',
+      'lib/angular/angular-translate.js',
+      'lib/jquery/jquery-2.0.3.js',
       'bower_components/angular-mocks/angular-mocks.js',
-      'test/unit/**/*.js'
+      'script/directive/*.js',
+      'test/unit/**/*.js',
+      {
+        pattern:  'test/resources/*.json',
+        watched:  true,
+        served:   true,
+        included: false
+      }
     ],
 
     autoWatch : true,

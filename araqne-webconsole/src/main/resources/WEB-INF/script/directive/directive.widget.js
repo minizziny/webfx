@@ -250,15 +250,48 @@ angular.module('app.directive.widget', [])
 		}
 	}
 })
-.directive('asset', function() {
+.directive('asset', function($q, $http) {
 	return {
 		restrict: 'E',
 		scope: {
 
 		},
 		transclude: true,
-		template: '<div ng-transclude></div>',
+		template: '<span click-to-edit ng-model="name" class="pull-left widget-title"></span>\
+			<span class="pull-right widget-toolbox">\
+				<button class="btn btn-extra-mini b-pause" ng-show="isRunning">\
+					<i class="icon-pause"></i>\
+				</button><button class="btn btn-extra-mini b-play" ng-hide="isRunning">\
+					<i class="icon-play"></i>\
+				</button><button class="btn btn-extra-mini b-refresh">\
+					<i class="icon-refresh"></i>\
+				</button><button class="btn btn-extra-mini b-p">\
+					<i class="icon-info-sign"></i>\
+				</button><button class="btn btn-extra-mini b-x">\
+					<i class="icon-remove"></i>\
+				</button>\
+			</span>\
+			<div ng-transclude></div>',
 		link: function(scope, el) {
+
+			function setContext(ctx) {
+				
+			}
+
+			el[0].bind = function(ctx) {
+				console.log('bind');
+
+				setContext(ctx);
+			}
+
+			el[0].getHello = function() {
+				var deferred = $q.defer();
+				$http.get('/auth.py').success(function(data) {
+					deferred.resolve(data);
+				});
+				return deferred.promise;
+			}
+
 
 		}
 	}
