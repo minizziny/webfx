@@ -828,16 +828,17 @@ console.log('grid directive query');
 						'</span>' +
 						'<div class="fdsAlertBox">'+
 							'<div class="centering"><h4>{{context.data.label}}</h4>'+
-							'<h2>{{fdscount}}</h2></div>'+
+							'<h2>{{context.data.prefix}}&nbsp;{{formattingFdscount}}&nbsp;{{context.data.suffix}}</h2></div>'+
 						'</div>',
 		scope: {
 			
 		},
 		link: function(scope, elm, attrs) {
 			scope.fdscount = '';
+			scope.formattingFdscount = '';
 			scope.fdscolor	= '';
 			scope.context = {};
-			scope.queryInst	= null;
+			var queryInst	= null;
 
 			elm[0].setContext = function(ctx) {
 
@@ -850,7 +851,6 @@ console.log('grid directive query');
 				return function(m) {
 					scope.fdscount = m.body.result[0][scope.context.data.column];
 					serviceLogdb.remove(queryInst);
-
 					for (var i = 0, len = scope.context.data.rules.length; i<len; i++) {
 						console.log("$scope.fdsrule.operator", scope.context.data.rules[i].operator,'fdsCount:', scope.fdscount,"scope.context.rules[i].boundary",scope.context.data.rules[i].boundary);
 						console.log('scope.context.rules[i].color',scope.context.data.rules[i].color);
@@ -876,10 +876,27 @@ console.log('grid directive query');
 								}
 								break;
 							default : 
-								scope.fdscolor = "white";
+								scope.fdscolor = scope.context.data.defaultcolor;
 						};
 
 					};
+
+					if ( scope.context.data.comma == true || scope.context.data.pointlen > 0 ){
+						//formating d3.format(',.2f')(data)
+						var formatSet = '';
+						if ( scope.context.data.comma == true ){
+							formatSet = ',';
+						};
+
+						if ( scope.context.data.pointlen > 0 ){
+							formatSet = formatSet + '.'+scope.context.data.pointlen+'f';
+						};
+
+						scope.formattingFdscount = d3.format(formatSet)(scope.fdscount);
+					}
+					else{
+						scope.formattingFdscount = scope.fdscount;
+					}
 					elm.find(".fdsAlertBox .centering").css('backgroundColor', scope.fdscolor);
 
 					scope.$apply();
@@ -900,8 +917,6 @@ console.log('grid directive query');
 					return;
 				}
 
-				console.log(scope.context)
-
 				queryInst = serviceLogdb.create(2020);
 				queryInst.query(scope.context.data.query, 100)
 				.created(function(m) {
@@ -919,13 +934,13 @@ console.log('grid directive query');
 
 			}
 
-			function render() {
+			function render(callback) {
 				elm[0].setContext();
 				query();
 			}
 
-
 			render();
+			elm[0].render = render;
 		}
 	}
 })

@@ -305,7 +305,7 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		// 활성탭인건 렌더
 		var elWidget = angular.element('.tab-pane.' + tab.guid + ' widget');
 		elWidget.each(function(i, w) {
-			console.log('activetab render call');
+			console.log('activetab render call', w);
 			w.render(function() {
 				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
 			});
@@ -1437,6 +1437,11 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 					'rules': undefined,
 					'label': undefined,
 					'column': undefined,
+					'prefix': undefined,
+					'suffix': undefined,
+					'comma': undefined,
+					'pointlen': undefined,
+					'defaultcolor': undefined,
 					'query': ''
 				}
 			}
@@ -1611,9 +1616,30 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 			's7next': 8,
 			's7nextEvent': function() {
 				return function() {
-					return $scope.isPageLoaded;
+					var valid = false;
+					var chkCnt = 0;
+					var errCnt = 0;
+					$scope.qrCols.forEach(function(obj){
+						if ( obj.is_visible ){ 
+							chkCnt++;
+							if ( obj.type != "number" ) errCnt++;
+						};
+					});
+
+					if ( chkCnt == 1 && errCnt == 0 ){
+						valid = true;
+						$('.check-col-info').hide();
+					}
+					else{
+						valid = false;
+						$('.check-col-info').fadeIn();
+						$('.check-col-info span').text('하나의 숫자 컬럼만 선택하세요.');
+					}
+
+					return valid;
 				}
 			},
+			's8prev': 7,
 			's8next': 3,
 			's8nextEvent': function() {
 				return function() {
@@ -1719,7 +1745,13 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		console.log('submitAlertbox column', column.length);
 
 		$scope.ctxWidget.data.rules = dataAlertBox.rules;
-		$scope.ctxWidget.data.label = $scope.widgetType.name;
+		$scope.ctxWidget.data.label = dataAlertBox.label;
+		$scope.ctxWidget.data.prefix = dataAlertBox.prefix;
+		$scope.ctxWidget.data.suffix = dataAlertBox.suffix;
+		$scope.ctxWidget.data.comma = dataAlertBox.comma;
+		$scope.ctxWidget.data.pointlen = dataAlertBox.pointlen;
+		$scope.ctxWidget.data.defaultcolor = dataAlertBox.defaultcolor;
+
 		$scope.ctxWidget.data.type = $scope.widgetType.name;
 		$scope.ctxWidget.data.column = column[0];
 		console.log('submitAlertbox',$scope.ctxWidget);
@@ -1848,6 +1880,12 @@ function AlertBoxRullBindingController($scope, $filter, $translate, eventSender,
 	$scope.isOnSubmit		= false;
 	$scope.setcolor			= "";
 	$scope.fdsLabel			= "";
+	$scope.fdsPrefix		= "";
+	$scope.fdsSuffix		= "";
+	$scope.fdsComma			= "";
+	$scope.fdsPointlen		= 0;
+	$scope.fdsDefaultColor	= "#eeeee";
+	$scope.pointLenChecked	= false;
 
 	console.log('AlertBoxRullController=', serviceLogdb);
 
@@ -1888,9 +1926,15 @@ function AlertBoxRullBindingController($scope, $filter, $translate, eventSender,
 
 	eventSender.dashboard.onSendAlertBoxDataWizard = function() {
 		console.log('onSendAlertBoxDataWizard');
+		console.log($scope.fdsPrefix,$scope.fdsSuffix,$scope.fdsComma,$scope.fdsPointLen,$scope.fdsDefaultColor);
 		var ctx = {
 			'rules': $scope.fdsrules,
-			'label' : $scope.fdsLabel
+			'label' : $scope.fdsLabel,
+			'prefix' : $scope.fdsPrefix,
+			'suffix' : $scope.fdsSuffix,
+			'comma' : $scope.fdsComma,
+			'pointlen' : $scope.fdsPointLen,
+			'defaultcolor' : $scope.fdsDefaultColor
 		}
 
 		console.log(ctx)
