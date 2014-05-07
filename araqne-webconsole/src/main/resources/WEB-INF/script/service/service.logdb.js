@@ -108,7 +108,7 @@ angular.module('app.logdb', [])
 				//console.log('status change', m.body);
 				asyncQuery.done('onStatusChange', m);
 
-				if(( m.body.count > defaultLimit ) && !isHeadEventSent) {
+				if(!isHeadEventSent) {
 					asyncQuery.done('onHead', {
 						'getResult': function(fn) {
 							return getResult(id, 0, defaultLimit, fn);
