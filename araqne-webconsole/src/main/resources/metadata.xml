@@ -14,4 +14,6 @@
 	<instance component="webconsole-file-upload-servlet" />
 	<instance component="webconsole-keydist-servlet" />
 	<instance component="webconsole-msgbus-servlet" />
+	<instance component="webconsole-app-registry" />
+	<instance component="webconsole-app-plugin" />
 </ipojo>
