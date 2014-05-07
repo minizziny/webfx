@@ -1233,6 +1233,230 @@
 		}
 	}
 })
+.directive('pagerSavedResult', function() {
+	return {
+		restrict: 'E',
+		scope: {
+			onPageChange: '&',
+			onItemsPerPageChange: '&',
+			ngTotalCount: '=',
+			ngItemsPerPage: '=',
+			ngPageSize: '=',
+			currentPage: '@',
+			currentIndex: '@'
+		},
+		require: 'ngModel',
+		template: '<div class="pagination" ng-hide="ngTotalCount == 0" style="margin: 0px;">\
+					<ul>\
+						<li>\
+							<a  ng-click="firstPage()">{{"$S_str_First" | translate}}</a>\
+						</li>\
+					</ul>\
+					<ul>\
+						<li>\
+							<a ng-click="prevPage()">&lt;&lt;</a>\
+						</li>\
+						<li>\
+							<a ng-click="prevOnePage()">&lt;</a>\
+						</li>\
+						<li ng-class="{\'active\': currentIndex % ngPageSize == i}" ng-repeat="(i,z) in arrPageSize track by $index">\
+							<a  ng-click="changePage($index + (currentPage * ngPageSize), $event)">\
+								{{ 1 + i + (currentPage * ngPageSize) }}\
+							</a>\
+						</li>\
+						<li>\
+							<a ng-click="nextOnePage()">&gt;</a>\
+						</li>\
+						<li>\
+							<a ng-click="nextPage()">&gt;&gt;</a>\
+						</li>\
+					</ul>\
+					<ul>\
+						<li>\
+							<a  ng-click="lastPage()">{{"$S_str_Last" | translate}}(<span>{{totalIndexCount}}</span>)</a>\
+						</li>\
+					</ul>\
+				</div>',
+		link: function(scope, elem, attr, ctrl) {
+			scope.currentIndex = 0;
+			scope.currentPage = 0;
+			scope.arrPageSize = [];
+			scope.totalIndexCount;
+			scope.targetIndex = 1;
+
+			elem[0].getCurrentIndex = function() {
+				return scope.currentIndex;
+			}
+
+			function getTotalPageCount() {
+				return Math.ceil(scope.ngTotalCount / scope.ngItemsPerPage);
+			}
+
+			function getLastPage() {
+				var totalPageCount = getTotalPageCount();
+				return Math.ceil(totalPageCount / scope.ngPageSize) - 1;
+			}
+
+			scope.nextPage = function() {
+				if(scope.currentPage == getLastPage()) return;
+				scope.currentPage = scope.currentPage + 1;
+				render();
+				if(scope.currentIndex + scope.ngPageSize > getTotalPageCount() - 1) {
+					scope.currentIndex = getTotalPageCount() - 1;
+				}
+				else {
+					scope.currentIndex = scope.currentIndex + scope.ngPageSize;	
+				}
+				
+				changePage(scope.currentIndex);
+			}
+
+			scope.nextOnePage = function () {
+				if(scope.currentIndex == getTotalPageCount() - 1) return;	
+
+				if(scope.currentIndex % scope.ngPageSize == 9) {
+					scope.currentPage = scope.currentPage + 1;
+				}
+
+				render();
+
+				scope.currentIndex = scope.currentIndex + 1;
+				changePage(scope.currentIndex);
+			}
+			
+			scope.prevPage = function() {
+				if(scope.currentPage == 0) return;
+				scope.currentPage = scope.currentPage - 1;
+				render();
+				scope.currentIndex = scope.currentIndex - scope.ngPageSize;
+				changePage(scope.currentIndex);
+			}
+
+			scope.prevOnePage = function() {
+				if(scope.currentIndex == 0) return;
+
+				if(scope.currentIndex % scope.ngPageSize == 0)
+					scope.currentPage = scope.currentPage - 1;
+
+				render();
+				scope.currentIndex = scope.currentIndex - 1;
+				changePage(scope.currentIndex);
+			}
+
+			scope.firstPage = function() {
+				scope.currentPage = 0;
+				scope.currentIndex = 0;
+				render();
+				changePage(scope.currentIndex);
+			}
+
+			scope.lastPage = function() {
+				scope.currentPage = getLastPage();
+				scope.currentIndex = getTotalPageCount() - 1;
+				render();
+				changePage(scope.currentIndex);
+			}
+
+			scope.changePage = function(idx, e) {
+				if(e != null) {
+					e.preventDefault();
+				}
+				scope.currentIndex = idx;
+				changePage(idx);
+			}
+
+			scope.goPage = function(idx) {
+				var totalPageCount = getTotalPageCount();
+				if(idx < 0 || idx > totalPageCount-1) return;
+				if(idx == -1) return;
+				scope.currentIndex = idx;
+				scope.currentPage = Math.floor(scope.currentIndex / scope.ngPageSize);
+				render();
+				changePage(idx);
+				scope.isShowJumpPopup = false;
+			}
+
+			elem[0].changePage = scope.goPage;
+
+			function changePage(idx) {
+				if(idx < 0) idx = 0;
+				var expr = attr.onPageChange.replace('()', '(' + idx + ')')
+				scope.$parent.$eval(expr);
+			}
+
+			function render() {
+				// console.warn('render');
+				var totalPageCount = getTotalPageCount();
+				scope.totalIndexCount = totalPageCount;
+
+				if(getLastPage() == scope.currentPage) {
+					if(totalPageCount % scope.ngPageSize == 0) {
+						scope.arrPageSize = new Array(scope.ngPageSize);
+					}
+					else if(totalPageCount % scope.ngPageSize < scope.ngPageSize) {
+						scope.arrPageSize = new Array(totalPageCount % scope.ngPageSize);
+					}
+				}
+				else {
+					if(totalPageCount > scope.ngPageSize) {
+						scope.arrPageSize = new Array(scope.ngPageSize);
+					}
+					else {
+						scope.arrPageSize = new Array(totalPageCount);
+					}
+				}
+				
+			}
+
+			function setTotalCount(count) {
+				scope.ngTotalCount = count;
+			}
+
+			elem[0].setTotalCount = setTotalCount;
+
+			elem[0].reset = function() {
+				scope.currentPage = 0;
+				scope.currentIndex = 0;
+			}
+
+			scope.$watch('ngTotalCount', function() {
+				if(scope.currentIndex == undefined) {
+					scope.currentIndex = 0;	
+				}
+				if(scope.currentPage == undefined) {
+					scope.currentPage = 0;	
+				}				
+				render();
+			});
+
+			scope.isShowJumpPopup = false;
+
+			scope.openJumpPopup = function(e) {
+				e.stopPropagation();
+				if(scope.isShowJumpPopup) {
+					scope.isShowJumpPopup = false;
+					return;
+				}
+
+				scope.isShowJumpPopup = true;
+				$(document).on('click.pagerJumpPop', function(ee) {
+					scope.isShowJumpPopup = false;
+					$(document).off('click.pagerJumpPop');
+					scope.$apply();
+				});
+				//scope.$apply();
+
+				setTimeout(function() {
+					$('.popover input[type=number]').focus();
+				},250);
+			}
+
+			scope.stopPropagation = function(e) {
+				e.stopPropagation();
+			}
+		}
+	}
+})
 .directive('inputFile', function($compile) {
 	return {
 		restrict: 'E',
