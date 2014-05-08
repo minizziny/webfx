@@ -10,7 +10,8 @@ angular.module('app.extension', [])
 	}
 
 	function register(id, program, manifest) {
-		extension.apps[program].push($.extend(manifest, {'id': id}));
+		// extension.apps[program].push($.extend(manifest, {'id': id}));
+		extension.apps[program].push(manifest);
 	}
 
 	function list(program) {
