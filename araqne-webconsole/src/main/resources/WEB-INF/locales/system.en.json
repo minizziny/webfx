@@ -186,7 +186,7 @@
 	"$S_str_ToBackground": "Run as background",
 	"$S_str_Searched": "Found",
 	"$S_str_TableStatus": "Table Input Trends",
-	"$S_str_StatusTable": "Table",
+	"$S_str_Table": "Table",
 	"$S_str_Trend": "Trend",
 	"$S_str_Count": "Count",
 	"$S_msg_CannotLoadTableStatus": "Cannot load table trends.",
