@@ -719,7 +719,7 @@ widget.w-before-loading:before {
 								&nbsp;&nbsp;<input type='checkbox' name='pointLenChk' id="pointLenChk" ng-model='pointLenChecked'>
 								소수점 <input type='text' class='pointLen' name='pointlen' id="pointlen" ng-model='fdsPointLen' maxlength="1" ng-disabled="!pointLenChecked" only-number>자리까지 표시
 							</div>
-							기본색 : <input type="color" name="defaultcolor" ng-model='fdsDefaultColor' required>(아무조건도 해당되지 않을때)<br>
+							기본색 : <input type="color" name="default_color" ng-model='fdsdefault_color' required>(아무조건도 해당되지 않을때)<br>
 							<span class="controls" ng-repeat="fdsrule in fdsrules">
 								<select ng-model="fdsrule.operator" ng-options="o.value as o.text for o in operaterlists" required>
 									<option value="">연산자선택</option>

@@ -876,25 +876,14 @@ console.log('grid directive query');
 								}
 								break;
 							default : 
-								scope.fdscolor = scope.context.data.defaultcolor;
+								scope.fdscolor = scope.context.data.default_color;
 						};
 
 					};
 
-					if ( scope.context.data.comma == true || scope.context.data.pointlen > 0 ){
-						//formating d3.format(',.2f')(data)
-						var formatSet = '';
-						if ( scope.context.data.comma == true ){
-							formatSet = ',';
-						};
-
-						if ( scope.context.data.pointlen > 0 ){
-							formatSet = formatSet + '.'+scope.context.data.pointlen+'f';
-						};
-
-						scope.formattingFdscount = d3.format(formatSet)(scope.fdscount);
-					}
-					else{
+					if( scope.context.data.formatting != undefined && scope.context.data.formatting.length > 0 ){
+						scope.formattingFdscount = d3.format(scope.context.data.formatting)(scope.fdscount);
+					}else{
 						scope.formattingFdscount = scope.fdscount;
 					}
 					elm.find(".fdsAlertBox .centering").css('backgroundColor', scope.fdscolor);
@@ -917,6 +906,10 @@ console.log('grid directive query');
 					return;
 				}
 
+				//기본색 설정
+				scope.fdscolor = scope.context.data.default_color;
+				elm.find(".fdsAlertBox .centering").css('backgroundColor', scope.fdscolor);
+				
 				queryInst = serviceLogdb.create(2020);
 				queryInst.query(scope.context.data.query, 100)
 				.created(function(m) {

@@ -1439,9 +1439,8 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 					'column': undefined,
 					'prefix': undefined,
 					'suffix': undefined,
-					'comma': undefined,
-					'pointlen': undefined,
-					'defaultcolor': undefined,
+					'formatting': undefined,
+					'default_color': undefined,
 					'query': ''
 				}
 			}
@@ -1748,9 +1747,8 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		$scope.ctxWidget.data.label = dataAlertBox.label;
 		$scope.ctxWidget.data.prefix = dataAlertBox.prefix;
 		$scope.ctxWidget.data.suffix = dataAlertBox.suffix;
-		$scope.ctxWidget.data.comma = dataAlertBox.comma;
-		$scope.ctxWidget.data.pointlen = dataAlertBox.pointlen;
-		$scope.ctxWidget.data.defaultcolor = dataAlertBox.defaultcolor;
+		$scope.ctxWidget.data.formatting = dataAlertBox.formatting;
+		$scope.ctxWidget.data.default_color = dataAlertBox.default_color;
 
 		$scope.ctxWidget.data.type = $scope.widgetType.name;
 		$scope.ctxWidget.data.column = column[0];
@@ -1884,7 +1882,7 @@ function AlertBoxRullBindingController($scope, $filter, $translate, eventSender,
 	$scope.fdsSuffix		= "";
 	$scope.fdsComma			= "";
 	$scope.fdsPointlen		= 0;
-	$scope.fdsDefaultColor	= "#eeeee";
+	$scope.fdsdefault_color	= "#eeeee";
 	$scope.pointLenChecked	= false;
 
 	console.log('AlertBoxRullController=', serviceLogdb);
@@ -1926,15 +1924,23 @@ function AlertBoxRullBindingController($scope, $filter, $translate, eventSender,
 
 	eventSender.dashboard.onSendAlertBoxDataWizard = function() {
 		console.log('onSendAlertBoxDataWizard');
-		console.log($scope.fdsPrefix,$scope.fdsSuffix,$scope.fdsComma,$scope.fdsPointLen,$scope.fdsDefaultColor);
+		console.log($scope.fdsPrefix,$scope.fdsSuffix,$scope.fdsComma,$scope.fdsPointLen,$scope.fdsdefault_color);
+		var formatting = '';
+		if ( $scope.fdsComma ){
+			formatting = ","
+		}
+
+		if ( $scope.fdsPointLen != undefined && $scope.fdsPointLen > 0){
+			formatting = formatting + '.' + $scope.fdsPointLen + 'f';
+		}
+
 		var ctx = {
 			'rules': $scope.fdsrules,
 			'label' : $scope.fdsLabel,
 			'prefix' : $scope.fdsPrefix,
 			'suffix' : $scope.fdsSuffix,
-			'comma' : $scope.fdsComma,
-			'pointlen' : $scope.fdsPointLen,
-			'defaultcolor' : $scope.fdsDefaultColor
+			'formatting' : formatting,
+			'default_color' : $scope.fdsdefault_color
 		}
 
 		console.log(ctx)
