@@ -25,7 +25,7 @@
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu pull-right">
-						<li ng-repeat="app in apps()"><a tabindex="-1" href="/#/apps/{{app.path}}">{{app.display_names | translateMsgbus}}</a></li>
+						<li ng-repeat="app in apps()"><a tabindex="-1" href="/#/{{app.packdll}}/{{app.path}}">{{app.display_names | translateMsgbus}}</a></li>
 					</ul>
 				</div>
 			</li>

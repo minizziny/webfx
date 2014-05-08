@@ -145,8 +145,7 @@ angular.module('app.events', [])
 		'license': { pid: 77 },
 		'regextester': {},
 		'querymanager': {},
-		'config': { pid: 99 },
-		'import': {}
+		'config': { pid: 99 }
 	};
 
 	for(var program in e) {
@@ -186,6 +185,8 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 	console.log('Controller init');
 
 	$location.path('/');
+
+	$scope.loadedapp = [];
 
 	$scope.timeout = 1000 * 60 * 1;
 
@@ -248,8 +249,10 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 			angular.element('.view').hide();
 			angular.element('.view#view-' + program).show();
 
-			if(pack === 'apps') {
-				$scope.src[program] = 'apps/' + program + '/index.html';
+			var lid = $scope.loadedapp.map(function(m) { return m.id });
+
+			if(~lid.indexOf(pack)) {
+				$scope.src[program] = 'apps/' + pack + '/' + program + '/index.html';
 			}
 			else {
 				$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';	
@@ -400,10 +403,10 @@ function checkDate(member, i) {
 function MenuController($scope, socket, serviceSession, serviceProgram, eventSender, $location, serviceExtension, $compile, serviceUtility) {
 	$scope.programs = [];
 	$scope.builtin = function() {
-		return $scope.programs.filter(function(p) { return p.packdll !== 'apps' });
+		return $scope.programs.filter(function(p) { return !p.isExternal });
 	}
 	$scope.apps = function() {
-		return $scope.programs.filter(function(p) { return p.packdll === 'apps' });
+		return $scope.programs.filter(function(p) { return p.isExternal });
 	}
 
 	function getProgram(path) {
@@ -478,11 +481,22 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 			$scope.$apply();
 
 			(new Async(getApps))
-			.success(function(m) {
-				m.body.apps.forEach(function(p) {
-					p = addEventToProgram(p);
-					p.packdll = 'apps';
-					$scope.programs.push(p);
+			.success(function(manifests) {
+
+				manifests.forEach(function(mf) {
+					mf.programs.forEach(function(p) {
+						var obj = {
+							'visible': true,
+							'display_names': p.display_names,
+							'path': p.id,
+							'pack': 'Apps',
+							'packdll': mf.id,
+							'isExternal': true
+						}
+						obj = addEventToProgram(obj);
+						$scope.programs.push(obj);
+
+					});
 				});
 
 				applyResponsiveStyle();
@@ -513,68 +527,56 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 	function getApps() {
 		var self = this;
 
-		// socket.send('org.araqne.core.msgbus.AppPlugin.getApps', { 'type': 'program' }, 0)
-		socket.send('com.logpresso.core.msgbus.RegexTesterPlugin.match', { 'regex': '', 'line': '', 'use_multiline': false }, 0)
+		socket.send('org.araqne.webconsole.plugins.AppPlugin.getApps', { 'type': 'program' }, 0)
 		.success(function(m) {
-			var m = {
-				body: {
-					apps: [
-					{
-						"visible": true,
-						"updated": "2014-03-10 17:24:47+0900",
-						"created": "2014-03-10 17:24:47+0900",
-						"description": null,
-						"display_names": {
-							"ko": 'my app2',
-							"en": 'my app2'
-						},
-						"name": "my app2",
-						"seq": 6,
-						"path": "app2",
-						"pack": "Apps",
-						"manifest": {
-
-						}
-					}
-					]
-					// apps: []
-				}
-			}
-			var apps = m.body.apps;
-			self.done('success', m);
 			
-			apps.map(function(o) {
-				return o.path;
-			})
-			.forEach(function(appid) {
+			console.log(m);
+			var apps = m.body.apps;
+
+			var manifestList = apps.map(function(appid) {
+				return appid.split('/')[0];
+			}).unique();
+
+			var loadedlen = 0;
+			
+			manifestList.forEach(function(appid) {
 
 				serviceExtension.load(appid)
 				.done(function(manifest) {
+					$scope.$parent.$parent.loadedapp.push(manifest);
+
 					var prefix = 'apps/' + appid + '/';
-					if(!manifest['program']) return;
+					if(!manifest['programs']) return;
 
 					serviceExtension.register(appid, 'menu', manifest);
 
-					serviceExtension.getScripts(prefix, manifest['program'])
-					.done(function(){
+					manifest['programs'].forEach(function(program) {
 
-						// $scope.$parent.$parent.src[appid] = prefix + manifest['program'].html;
-						$scope.$parent.$parent.src[appid] = '';
-						eventSender[appid] = {
-							pid: serviceUtility.getRandomInt(2000, 3000),
-							events: {}
-						};
+						serviceExtension.getScripts(prefix, program)
+						.done(function(){
+							
+							$scope.$parent.$parent.src[program.id] = '';
+							eventSender[program.id] = {
+								pid: serviceUtility.getRandomInt(2000, 3000),
+								events: {}
+							};
 
-						console.log(eventSender)
+							var ct = angular.element('<div class="view" id="view-' + program.id + '" ng-include src="src[\'' + program.id + '\']"></div>');
+							$compile(ct)($scope);
+							$('#tooltip').before(ct);
+						})
+						.fail(function(a,b,c) {
+							console.log(a,b,c);
+						});
 
-						var ct = angular.element('<div class="view" id="view-' + appid + '" ng-include src="src.' + appid + '"></div>');
-						$compile(ct)($scope);
-						$('#tooltip').before(ct);
-					})
-					.fail(function(a,b,c) {
-						console.log(a,b,c);
 					});
 
+				})
+				.always(function() {
+					loadedlen++;
+					if(manifestList.length === loadedlen) {
+						self.done('success', $scope.$parent.$parent.loadedapp);
+					}
 				});
 
 			});
