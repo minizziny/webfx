@@ -37,6 +37,10 @@ fds-alert-box .fdsAlertBox h4, fds-alert-box .fdsAlertBox h2 {
 	margin: auto;
 }
 
+input[type=text].pointLen  {
+	width: 10px;
+}
+
 
 .dashboard-extension-container {
 	/*position: fixed;
@@ -316,6 +320,14 @@ widget.w-before-loading:before {
 	font-size: 13pt;
 	text-shadow: 1px 1px 2px #ddd;
 	letter-spacing: 1px;
+}
+.fdsAlertBox {
+		width: 200px;
+		height: 120px;
+		padding-top: 70px;
+		text-align: center;
+		border-radius: 10px;
+		font-size: 20px;	
 }
 
 </style>
@@ -678,9 +690,13 @@ widget.w-before-loading:before {
 			<li class="wiz-step">
 				<legend>{{'$S_str_SelectAndReorderColumn' | translate}}</legend>
 				<fieldset>
+					<div class="alert alert-error check-col-info" style="display:none">
+						<button type="button" class="close" data-dismiss="alert">&times;</button>
+						<span></span>
+					</div>
 					<div class="fieldset-description">{{'$S_msg_SelectAndReorderColumn' | translate}}</div>
 					<div>
-						<div class="qr-container" style="width: 780px; float: left">
+						<div class="qr-container" style="width: 680px; float: left">
 							<query-result class="qr2 qr-select-table"
 								ng-model="qresult"
 								ng-query="ctxWidget.data.query" 
@@ -706,31 +722,39 @@ widget.w-before-loading:before {
 			<li class="wiz-step">
 				<legend>룰설정</legend>
 				<fieldset>
-					<form class="formAlertBox"  ng-submit='go(3, widgetType.s8nextCallback())' ng-controller="AlertBoxRullBindingController">
+					<form name="formAlertBox" ng-controller="AlertBoxRullBindingController">
 						<div class="control-group">
-							Label : <input type='text' name='fdslabel' ng-model='fdsrule.fdsLabel'>
-							<div class="controls" ng-repeat="fdsrule in fdsrules">
+							<div>레이블 : <input type='text' name='fdsLabel' ng-model='fdsLabel' required></div>
+							<span>접두사 : <input type='text' name='fdsLabel' ng-model='fdsPrefix' required></span>
+							<span>&nbsp;접미사 : <input type='text' name='fdsLabel' ng-model='fdsSuffix' required></span>
+							<div>
+								서식 : <input type='checkbox' name='comma' ng-model='fdsComma'>천단위로 끊어서 표시
+								&nbsp;&nbsp;<input type='checkbox' name='pointLenChk' id="pointLenChk" ng-model='pointLenChecked'>
+								소수점 <input type='text' class='pointLen' name='pointlen' id="pointlen" ng-model='fdsPointLen' maxlength="1" ng-disabled="!pointLenChecked" only-number>자리까지 표시
+							</div>
+							기본색 : <input type="color" name="defaultcolor" ng-model='fdsDefaultColor' required>(아무조건도 해당되지 않을때)<br>
+							<span class="controls" ng-repeat="fdsrule in fdsrules">
 								<select ng-model="fdsrule.operator" ng-options="o.value as o.text for o in operaterlists" required>
 									<option value="">연산자선택</option>
 								</select> 
-								<input type="text" name="boundary" ng-model="fdsrule.boundary" pattern="[0-9]*"  only-number required/>
+								<input type="text" name="boundary" ng-model="fdsrule.boundary" pattern="[0-9]*"  only-number required>
 								이면
 								<input type="color" name='color' ng-model="fdsrule.color" required>
 								<button type="button" class="op-text" class="close" ng-click="removeRule($index)">&times</button>
-							</div>
-							<button class="wiz-rulladd btn" ng-click="addRule()">룰추가</button>
+							</span>
+							<span><button class="wiz-rulladd btn" ng-click="addRule()">룰추가</button></span>
 						</div>
 
 						<div class="control-group submit-group">
-							<button class="wiz-prev btn" ng-click="go(7, null, widgetType.s7nextEvent())">{{'$S_str_Previous' | translate}}</button>
-							<button class="wiz-next btn" ng-disabled="!isPageLoaded" ng-click="go(3, widgetType.s8nextCallback())">{{'$S_str_Next' | translate}}</button>
+							<button class="wiz-prev btn" ng-click="go(7)">{{'$S_str_Previous' | translate}}</button>
+							<button class="wiz-next btn" ng-click="go(widgetType.s8next, widgetType.s8nextCallback(), widgetType.s8nextEvent())" ng-disabled="formAlertBox.$invalid">{{'$S_str_Next' | translate}}</button>
 						</div>
 					</form>
 				</fieldset>	
 			</li>
 		</ol>
 	</div>
-
+.
 	<div class="modal propertyWidget" modal ng-controller="WidgetPropertyController">
 		<a class="modal-close close" style="margin-bottom: -30px">&times;</a>
 		<legend>{{name}} 속성</legend>
