@@ -145,7 +145,8 @@ angular.module('app.events', [])
 		'license': { pid: 77 },
 		'regextester': {},
 		'querymanager': {},
-		'config': { pid: 99 }
+		'config': { pid: 99 },
+		'import': {}
 	};
 
 	for(var program in e) {
