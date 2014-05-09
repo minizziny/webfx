@@ -25,8 +25,6 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.araqne.webconsole.AppProvider;
 import org.araqne.webconsole.AppRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Component(name = "webconsole-app-registry")
 @Provides
@@ -86,10 +84,10 @@ public class AppRegistryImpl implements AppRegistry {
 		return m;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getApp(String id) {
-		Map<String, Object> m = (Map<String, Object>) providers.get(id);
+		AppProvider provider = providers.get(id);
+		Map<String, Object> m = provider.getManifest();
 		return m;
 	}
 
