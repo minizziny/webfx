@@ -319,6 +319,7 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		// 활성탭인건 렌더
 		var elWidget = angular.element('.tab-pane.' + tab.guid + ' widget');
 		elWidget.each(function(i, w) {
+			console.log('activetab render call', w);
 			w.render(function() {
 				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
 			});
@@ -604,7 +605,7 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 		$scope.ctxPreset[currentPresetId].ctxWidget[ctx.guid] = ctx;
 
-		console.log(ctx);
+		console.log('onCreateNewWidgetAndSavePreset',ctx);
 
 		var newbie = layoutEngine.ui.layout.box.create({
 			'w': 100,
@@ -813,15 +814,19 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 			}
 			else {
 
-				var wdf = WidgetService.list().filter(function(wd) {
-					return wd.id === ctx.type;
-				});
-				console.log(wdf)
-				var tmpl = wdf[0].template.replace(/\{\{guid\}\}/, ctx.guid);
-				console.log(tmpl)
-				var elAsset = angular.element(tmpl);
-				$scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;
-				elAsset.appendTo(el);
+				// var wdf = WidgetService.list().filter(function(wd) {
+				// 	return wd.id === ctx.type;
+				// });
+				// console.log(wdf)
+				// var tmpl = wdf[0].template.replace(/\{\{guid\}\}/, ctx.guid);
+				// console.log(tmpl)
+				// var elAsset = angular.element(tmpl);
+				// $scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;
+				// elAsset.appendTo(el);
+				
+				var elWidget = angular.element(serviceWidget.buildWidget(name, ctx));
+				$scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;	
+				elWidget.appendTo(el);
 			}
 		});
 
@@ -845,6 +850,13 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 				}
 			});
 			el.appendTo(target);
+
+
+			widgets.forEach(function(widget) {
+				if(widget.type === 'alertbox') {
+					el.find('fds-alert-box#' + widget.guid)[0].setContext(widget);
+				}
+			});
 		});
 	}
 
@@ -1431,6 +1443,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	$scope.numPagerPagesize = 100;
 
 	var dataChart;
+	var dataAlertBox;
 	
 	function getDefaultContext(type) {
 		if(type == "grid") {
@@ -1458,6 +1471,24 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 				}
 			}
 		}
+		else if(type == "alertbox") {
+			return {
+				'name': '',
+				'guid': serviceUtility.generateType2(),
+				'interval': 15,
+				'type': 'alertbox',
+				'data': {
+					'rules': undefined,
+					'label': undefined,
+					'column': undefined,
+					'prefix': undefined,
+					'suffix': undefined,
+					'formatting': undefined,
+					'default_color': undefined,
+					'query': ''
+				}
+			}
+		}
 	}
 
 	function makeRemoveClassHandler(regex) {
@@ -1470,6 +1501,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		$scope.isPageLoaded = false;
 		$scope.moreCol = false;
 		var newWidgetWin = $('.newWidget').removeClass(makeRemoveClassHandler(/^step/));
+
 		newWidgetWin[0].showDialog();
 			
 		$scope.go(0);
@@ -1602,6 +1634,67 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 			's3prev': function() {
 				return $scope.chartType.nextType;
 			}
+		},
+		{
+			'name': 'alertbox',
+			's0next': 1,
+			's0prevCallback': function() {
+				$scope.isPageLoaded = false;
+			},
+			's0nextCallback': function() {
+				$scope.ctxWidget = getDefaultContext('alertbox');
+				$('.qr1')[0].hideTable();
+				setTimeout(function() {
+					$('query-input textarea').focus();	
+				}, 250);
+				
+			},
+			's1next': 7,
+			's1nextEvent': function() {
+				return function() {
+					return $scope.isPageLoaded;
+				}
+			},
+			's7prev': 1,
+			's7next': 8,
+			's7nextEvent': function() {
+				return function() {
+					var valid = false;
+					var chkCnt = 0;
+					var errCnt = 0;
+					$scope.qrCols.forEach(function(obj){
+						if ( obj.is_visible ){ 
+							chkCnt++;
+							if ( obj.type != "number" ) errCnt++;
+						};
+					});
+
+					if ( chkCnt == 1 && errCnt == 0 ){
+						valid = true;
+						$('.check-col-info').hide();
+					}
+					else{
+						valid = false;
+						$('.check-col-info').fadeIn();
+						$('.check-col-info span').text('하나의 숫자 컬럼만 선택하세요.');
+					}
+
+					return valid;
+				}
+			},
+			's8prev': 7,
+			's8next': 3,
+			's8nextEvent': function() {
+				return function() {
+					return $scope.isPageLoaded;
+				}
+			},
+			's8nextCallback' : function() {
+				dataAlertBox = eventSender.dashboard.onSendAlertBoxDataWizard();
+			},
+			's3prev': function() {
+				return 8;
+			}
 		}
 	];
 	$scope.widgetType = wtypes[1];
@@ -1660,6 +1753,9 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 				submitGraph();	
 			}
 		}
+		else if ($scope.widgetType.name == 'alertbox') {
+			submitAlertbox();
+		}
 
 	}
 
@@ -1676,6 +1772,32 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 
 		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
 		$('.newWidget')[0].hideDialog();
+	}
+
+
+	function submitAlertbox() {
+		var column = $scope.qrCols.filter(function(obj) {
+			if(obj.is_visible) return true;
+		})
+		.map(function(obj) {
+			return obj.name;
+		});
+
+		console.log('submitAlertbox column', column.length);
+
+		$scope.ctxWidget.data.rules = dataAlertBox.rules;
+		$scope.ctxWidget.data.label = dataAlertBox.label;
+		$scope.ctxWidget.data.prefix = dataAlertBox.prefix;
+		$scope.ctxWidget.data.suffix = dataAlertBox.suffix;
+		$scope.ctxWidget.data.formatting = dataAlertBox.formatting;
+		$scope.ctxWidget.data.default_color = dataAlertBox.default_color;
+
+		$scope.ctxWidget.data.type = $scope.widgetType.name;
+		$scope.ctxWidget.data.column = column[0];
+		console.log('submitAlertbox',$scope.ctxWidget);
+
+		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
+		$('.newWidget')[0].hideDialog();	
 	}
 
 	// chart options
@@ -1789,3 +1911,84 @@ function WidgetPropertyController($scope, eventSender) {
 		$('.propertyWidget')[0].hideDialog();
 	}
 }
+
+function AlertBoxRullBindingController($scope, $filter, $translate, eventSender, serviceLogdb) {
+	$scope.fdsrules			= [];
+	$scope.boundary			= 0;
+	$scope.operaterlists	= {};
+	$scope.colorlists		= {};
+	$scope.isOnSubmit		= false;
+	$scope.setcolor			= "";
+	$scope.fdsLabel			= "";
+	$scope.fdsPrefix		= "";
+	$scope.fdsSuffix		= "";
+	$scope.fdsComma			= "";
+	$scope.fdsPointlen		= 0;
+	$scope.fdsdefault_color	= "#eeeee";
+	$scope.pointLenChecked	= false;
+
+	console.log('AlertBoxRullController=', serviceLogdb);
+
+	function getDataOpList() {
+		$scope.operaterlists = [{
+			text : "=",
+			value : "="
+		},{
+			text : "!=",
+			value : "!="
+		},{
+			text : ">",
+			value : ">"
+		},{
+			text : "<",
+			value : "<"
+		}];
+	}
+
+	$scope.init = function(e) {
+		getDataOpList();	//연산자 리스트 가져오기
+		$scope.fdsrules.push({operator:'', boundary:'', color:''});
+		
+	}
+
+	$scope.init();
+
+	$scope.addRule = function () {
+
+		$scope.fdsrules.push({operator:'', boundary:'', color:''});
+	};
+
+	$scope.removeRule = function (index) {
+
+		$scope.fdsrules.splice(index, 1);
+
+	};
+
+	eventSender.dashboard.onSendAlertBoxDataWizard = function() {
+		console.log('onSendAlertBoxDataWizard');
+		console.log($scope.fdsPrefix,$scope.fdsSuffix,$scope.fdsComma,$scope.fdsPointLen,$scope.fdsdefault_color);
+		var formatting = '';
+		if ( $scope.fdsComma ){
+			formatting = ","
+		}
+
+		if ( $scope.fdsPointLen != undefined && $scope.fdsPointLen > 0){
+			formatting = formatting + '.' + $scope.fdsPointLen + 'f';
+		}
+
+		var ctx = {
+			'rules': $scope.fdsrules,
+			'label' : $scope.fdsLabel,
+			'prefix' : $scope.fdsPrefix,
+			'suffix' : $scope.fdsSuffix,
+			'formatting' : formatting,
+			'default_color' : $scope.fdsdefault_color
+		}
+
+		console.log(ctx)
+
+		return ctx;
+	}
+
+};
+
