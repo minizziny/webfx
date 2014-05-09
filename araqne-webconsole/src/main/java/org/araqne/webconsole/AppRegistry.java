@@ -15,12 +15,20 @@
  */
 package org.araqne.webconsole;
 
+import java.io.File;
 import java.util.List;
+import java.util.Map;
 
 public interface AppRegistry {
+	Map<String, Object> getManifest(File file);
+	
 	List<String> getAppKeys();
 
 	List<AppProvider> getAppProviders();
+	
+	Map<String, Object> getApps(String type);
+	
+	Map<String, Object> getApp(String id);
 
 	void register(AppProvider provider);
 

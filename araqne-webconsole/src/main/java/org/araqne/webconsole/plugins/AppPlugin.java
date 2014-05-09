@@ -32,6 +32,13 @@ public class AppPlugin {
 
 	@MsgbusMethod
 	public void getApps(Request req, Response resp) {
-		resp.put("apps", appRegistry.getAppKeys());
+		String feature = req.getString("feature");
+		resp.put("apps", appRegistry.getApps(feature));
+	}
+
+	@MsgbusMethod
+	public void getApp(Request req, Response resp) {
+		String id = req.getString("id");
+		resp.put("app", appRegistry.getApp(id));
 	}
 }
