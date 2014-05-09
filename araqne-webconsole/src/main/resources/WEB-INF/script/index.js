@@ -527,22 +527,20 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 	function getApps() {
 		var self = this;
 
-		socket.send('org.araqne.webconsole.plugins.AppPlugin.getApps', { 'type': 'program' }, 0)
+		socket.send('org.araqne.webconsole.plugins.AppPlugin.getApps', { 'feature': 'programs'}, 0)
 		.success(function(m) {
 			
 			console.log(m);
 			var apps = m.body.apps;
 
-			var manifestList = apps.map(function(appid) {
-				return appid.split('/')[0];
-			}).unique();
+			var manifestList = Object.keys(apps);
 
 			var loadedlen = 0;
 			
 			manifestList.forEach(function(appid) {
 
-				serviceExtension.load(appid)
-				.done(function(manifest) {
+				socket.send('org.araqne.webconsole.plugins.AppPlugin.getApp', { 'id': appid}, 0)
+				.success(function (m) {
 					$scope.$parent.$parent.loadedapp.push(manifest);
 
 					var prefix = 'apps/' + appid + '/';
@@ -571,13 +569,17 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 
 					});
 
-				})
-				.always(function() {
 					loadedlen++;
 					if(manifestList.length === loadedlen) {
 						self.done('success', $scope.$parent.$parent.loadedapp);
 					}
-				});
+				})
+				.failed(function() {
+					loadedlen++;
+					if(manifestList.length === loadedlen) {
+						self.done('success', $scope.$parent.$parent.loadedapp);
+					}
+				})
 
 			});
 
