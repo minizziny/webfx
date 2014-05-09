@@ -56,9 +56,11 @@ public class AppRegistryImpl implements AppRegistry {
 
 				List<String> typeIdList = new ArrayList<String>();
 				for (String key : features.keySet()) {
-					Map<String, Object> t = (Map<String, Object>) features.get(key);
-					String typeId = (String) t.get("id");
-					typeIdList.add(typeId);
+					List<Map<String, Object>> category = (List<Map<String, Object>>) features.get(key);
+					for (Map<String, Object> c : category) {
+						String typeId = (String) c.get("id");
+						typeIdList.add(typeId);
+					}
 				}
 				m.put(appId, typeIdList);
 			}
