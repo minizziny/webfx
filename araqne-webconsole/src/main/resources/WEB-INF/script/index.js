@@ -482,9 +482,10 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 
 			(new Async(getApps))
 			.success(function(manifests) {
+				console.log(manifests)
 
 				manifests.forEach(function(mf) {
-					mf.programs.forEach(function(p) {
+					mf.feature.programs.forEach(function(p) {
 						var obj = {
 							'visible': true,
 							'display_names': p.display_names,
@@ -541,14 +542,16 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 
 				socket.send('org.araqne.webconsole.plugins.AppPlugin.getApp', { 'id': appid}, 0)
 				.success(function (m) {
+					console.log(m);
+					var manifest = m.body.app;
 					$scope.$parent.$parent.loadedapp.push(manifest);
-
-					var prefix = 'apps/' + appid + '/';
-					if(!manifest['programs']) return;
+					if(!manifest.feature['programs']) return;
 
 					serviceExtension.register(appid, 'menu', manifest);
 
-					manifest['programs'].forEach(function(program) {
+					manifest.feature['programs'].forEach(function(program) {
+
+						var prefix = 'apps/' + appid + '/' + program.id + '/';
 
 						serviceExtension.getScripts(prefix, program)
 						.done(function(){
