@@ -15,6 +15,9 @@
  */
 package org.araqne.webconsole;
 
+import java.util.Map;
+
 public interface AppProvider {
-	String getKey();
+	String getId();
+	Map<String, Object> getManifest();	
 }
