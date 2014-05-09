@@ -25,12 +25,15 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.araqne.webconsole.AppProvider;
 import org.araqne.webconsole.AppRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component(name = "webconsole-app-registry")
 @Provides
 public class AppRegistryImpl implements AppRegistry {
 
 	private ConcurrentHashMap<String, AppProvider> providers = new ConcurrentHashMap<String, AppProvider>();
+	private Logger logger = LoggerFactory.getLogger(AppRegistryImpl.class);
 
 	@Override
 	public List<String> getAppKeys() {
@@ -73,6 +76,9 @@ public class AppRegistryImpl implements AppRegistry {
 			String appId = (String) manifest.get("id");
 
 			List<Map<String, Object>> typeList = (List<Map<String, Object>>) features.get(feature);
+			
+			logger.info("logpresso-app-registry: feature=[{}], list=[{}]", feature, typeList);
+			
 			List<String> typeIdList = new ArrayList<String>();
 			for (Map<String, Object> t : typeList) {
 				String typeId = (String) t.get("id");
