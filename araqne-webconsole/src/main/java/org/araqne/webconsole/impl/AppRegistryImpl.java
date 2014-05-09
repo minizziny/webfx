@@ -15,13 +15,6 @@
  */
 package org.araqne.webconsole.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,10 +25,6 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.araqne.webconsole.AppProvider;
 import org.araqne.webconsole.AppRegistry;
-import org.json.JSONConverter;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 @Component(name = "webconsole-app-registry")
 @Provides
@@ -110,23 +99,6 @@ public class AppRegistryImpl implements AppRegistry {
 	public void unregister(AppProvider provider) {
 		if (!providers.remove(provider.getId(), provider))
 			throw new IllegalStateException("app provider not found: " + provider.getId());
-	}
-
-	@Override
-	public Map<String, Object> getManifest(File file) {
-		Map<String, Object> m = null;
-
-		try {
-			InputStream is = new FileInputStream(file);
-			JSONTokener tokenizer = new JSONTokener(new InputStreamReader(is, Charset.forName("utf-8")));
-			Object value = tokenizer.nextValue();
-			m = JSONConverter.parse((JSONObject) value);
-		} catch (FileNotFoundException e) {
-		} catch (JSONException e) {
-		} catch (IOException e) {
-		}
-
-		return m;
 	}
 
 }
