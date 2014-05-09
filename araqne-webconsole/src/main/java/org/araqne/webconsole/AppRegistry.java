@@ -22,9 +22,9 @@ public interface AppRegistry {
 	List<String> getAppKeys();
 
 	List<AppProvider> getAppProviders();
-	
-	Map<String, Object> getApps(String type);
-	
+
+	Map<String, Object> getApps(String feature);
+
 	Map<String, Object> getApp(String id);
 
 	void register(AppProvider provider);
