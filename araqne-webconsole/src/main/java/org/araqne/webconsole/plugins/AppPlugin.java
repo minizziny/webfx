@@ -36,7 +36,6 @@ public class AppPlugin {
 	@MsgbusMethod
 	public void getApps(Request req, Response resp) {
 		String feature = req.getString("feature");
-		logger.info("logpresso-app-plugin: feature=[{}]", feature);
 		resp.put("apps", appRegistry.getApps(feature));
 	}
 
