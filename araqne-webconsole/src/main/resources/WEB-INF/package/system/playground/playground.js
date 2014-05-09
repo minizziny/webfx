@@ -512,8 +512,7 @@ function MyFdsAlertBoxController($scope, $filter, socket, $translate, eventSende
 			'query': 'table wc | stats count',
 			'column': 'count',
 			'label': 'FDS총건수',
-			'comma': true,
-			'pointlen': 0,
+			'formatting': ',',
 			'prefix': '총',
 			'suffix': '건', 
 			'rules': [
