@@ -4,6 +4,7 @@ angular.module('app.widget', [])
 		{
 			name: 'Grid',
 			id: 'grid',
+			visible: false,
 			event: {
 				onNextStep: function() {
 					throw new TypeError('not implement');
@@ -36,6 +37,7 @@ angular.module('app.widget', [])
 		{
 			name: 'Chart',
 			id: 'chart',
+			visible: false,
 			event: {
 				onNextStep: function() {
 					throw new TypeError('not implement');
@@ -64,11 +66,12 @@ angular.module('app.widget', [])
 				}
 				return true;
 			},
-			template: '<asset data-guid="{{guid}}"><div>Chart Here</div></asset>',
+			template: '<asset data-guid="{{guid}}"><div>Chart Here</div></asset>'
 		},
 		{
 			name: 'Wordcloud',
 			id: 'wordcloud',
+			visible: false,
 			event: {
 				onNextStep: function() {
 					throw new TypeError('not implement');
@@ -88,11 +91,12 @@ angular.module('app.widget', [])
 				}
 				return true;
 			},
-			template: '<asset data-guid="{{guid}}"><div>Wordcloud Here</div></asset>',
+			template: '<asset data-guid="{{guid}}"><div>Wordcloud Here</div></asset>'
 		},
 		{
 			name: 'Tabs',
 			id: 'tabs',
+			visible: false,
 			event: {
 				onNextStep: function() {
 					throw new TypeError('not implement');

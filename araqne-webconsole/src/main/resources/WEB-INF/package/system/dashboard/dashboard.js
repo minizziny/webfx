@@ -73,6 +73,17 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 	});
 
+
+	$.getScript('/package/system/dashboard/alertbox.js')
+	.done(function(script) {
+		var ct = angular.element('<div class="dashboard-extension-container" ng-include src="\'/package/system/dashboard/alertbox.html\'"></div>');
+		$compile(ct)($scope);
+		$element.append(ct);
+	})
+	.fail(function(a,b,c) {
+		console.log(a,b,c);
+	});
+
 	$scope.formSecond = {
 		'0': $translate('$S_str_Seconds'),
 		'one': $translate('$S_str_Second'),
