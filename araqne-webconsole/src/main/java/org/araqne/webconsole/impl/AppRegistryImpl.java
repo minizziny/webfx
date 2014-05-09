@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 public class AppRegistryImpl implements AppRegistry {
 
 	private ConcurrentHashMap<String, AppProvider> providers = new ConcurrentHashMap<String, AppProvider>();
-	private Logger logger = LoggerFactory.getLogger(AppRegistryImpl.class);
 
 	@Override
 	public List<String> getAppKeys() {
@@ -50,8 +49,8 @@ public class AppRegistryImpl implements AppRegistry {
 	public Map<String, Object> getApps(String feature) {
 		Map<String, Object> m = new HashMap<String, Object>();
 
-		// return all type id
 		if (feature == null || feature == "") {
+			// return all type id
 			for (AppProvider p : providers.values()) {
 				Map<String, Object> manifest = (Map<String, Object>) p.getManifest();
 				Map<String, Object> features = (Map<String, Object>) manifest.get("feature");
@@ -67,25 +66,23 @@ public class AppRegistryImpl implements AppRegistry {
 				}
 				m.put(appId, typeIdList);
 			}
-		}
+		} else {
+			// return type id by type
+			for (AppProvider p : providers.values()) {
+				Map<String, Object> manifest = (Map<String, Object>) p.getManifest();
+				Map<String, Object> features = (Map<String, Object>) manifest.get("feature");
+				String appId = (String) manifest.get("id");
 
-		// return type id by type
-		for (AppProvider p : providers.values()) {
-			Map<String, Object> manifest = (Map<String, Object>) p.getManifest();
-			Map<String, Object> features = (Map<String, Object>) manifest.get("feature");
-			String appId = (String) manifest.get("id");
-
-			List<Map<String, Object>> typeList = (List<Map<String, Object>>) features.get(feature);
-			
-			logger.info("logpresso-app-registry: feature=[{}], list=[{}]", feature, typeList);
-			
-			List<String> typeIdList = new ArrayList<String>();
-			for (Map<String, Object> t : typeList) {
-				String typeId = (String) t.get("id");
-				typeIdList.add(typeId);
+				List<Map<String, Object>> typeList = (List<Map<String, Object>>) features.get(feature);
+				List<String> typeIdList = new ArrayList<String>();
+				for (Map<String, Object> t : typeList) {
+					String typeId = (String) t.get("id");
+					typeIdList.add(typeId);
+				}
+				m.put(appId, typeIdList);
 			}
-			m.put(appId, typeIdList);
 		}
+
 		return m;
 	}
 
