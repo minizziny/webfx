@@ -1,3 +1,29 @@
+window._utility = {
+	'sortColumns': function sortColumns(cols) {
+		return cols.sort().sort(function(a, b) {
+			if(a.indexOf('_') === 0 && b.indexOf('_') === 0) { 
+				if(a > b) {
+					return 1;
+				}
+				if(b > a) {
+					return -1;
+				}
+			}
+			else if(a.indexOf('_') === 0) { return -1; }
+			else if(b.indexOf('_') === 0) { return 1; }
+			else { 
+				if(a > b) {
+					return 1;
+				}
+				if(b > a) {
+					return -1;
+				}
+			}
+			return 0;
+		});
+	}
+}
+
 angular.module('app.directive.logdb', [])
 .directive('queryInput', function($compile, $parse, $translate, serviceLogdb, serviceSession) {
 	return {
@@ -6,6 +32,8 @@ angular.module('app.directive.logdb', [])
 			onLoading: '&',
 			onLoaded: '&',
 			onStatusChange: '&',
+			onHead: '&',
+			onTail: '&',
 			ngTemplate: '=ngTemplate',
 			ngPageSize: '&',
 			ngQueryString: '=',
@@ -53,6 +81,18 @@ angular.module('app.directive.logdb', [])
 						callback();
 					}
 				}
+			}
+
+			function onHead(helper) {
+				scope.onHead({
+					'$helper': helper
+				});
+			}
+
+			function onTail(helper) {
+				scope.onTail({
+					'$helper': helper
+				});
 			}
 
 			function loadedFn(m) {
@@ -116,6 +156,8 @@ angular.module('app.directive.logdb', [])
 				.started(startedFn)
 				.loaded(loadedFn)
 				.onStatusChange(onStatusChangeFn)
+				.onHead(onHead)
+				.onTail(onTail)
 				.failed(failedFn)
 			}
 
@@ -157,6 +199,8 @@ angular.module('app.directive.logdb', [])
 				.started(startedFn)
 				.loaded(loadedFn)
 				.onStatusChange(onStatusChangeFn)
+				.onHead(onHead)
+				.onTail(onTail)
 				.failed(failedFn);
 
 				if(status == 'Running') {
@@ -164,18 +208,48 @@ angular.module('app.directive.logdb', [])
 				}
 			}
 
+			element[0].setPristine = function() {
+				z = undefined;
+				scope.ngQueryString = '';
+			}
+
 		}
 	}
 })
-.directive('afterIterate', function() {
+.directive('tableView', function($compile) {
 	return {
-		link: function(scope, element, attrs) {
-			if(scope.$last) {
-				var fn = scope.$parent[attrs.afterIterate];
-				if(!!fn) {
-					fn.call(scope, scope);
-				}
+		restrict: 'A',
+		require: ['ngModel'],
+		scope: {
+			'model': '=ngModel'
+		},
+		tranclude: true,
+		link: function(scope, element, attrs, ctrl, transclude) {
+			if(element[0].children.length === 0) {
+				var tmpl = angular.element('<thead><tr><th ng-repeat="col in model.cols">{{col}}</th></tr></thead>\
+					<tbody><tr ng-repeat="row in model">\
+						<td ng-repeat="col in model.cols" ng-bind-html="row[col] | crlf"></td>\
+					</tr></tbody>');
+				$compile(tmpl, true)(scope);
+				tmpl.appendTo(element);
 			}
+
+			function Manipulate(val) {
+				var cols = [];
+				val.forEach(function(row) {
+					cols = cols.concat(Object.keys(row));
+				});
+
+				cols = cols.unique();
+				cols.splice(cols.indexOf('$$hashKey'), 1);
+				cols = window._utility.sortColumns(cols);
+				ctrl[0].$modelValue.cols = cols;
+			}
+			scope.$watch('model', function(val) {
+				console.log(val)
+				scope.val = val;
+				Manipulate(val);
+			});
 		}
 	}
 })
@@ -326,31 +400,8 @@ angular.module('app.directive.logdb', [])
 				}
 				
 				if(fields.length <= 0 || fields == null) {
-					cols.sort().sort(function(a, b) {
-						if(a.indexOf('_') === 0 && b.indexOf('_') === 0) { 
-							if(a > b) {
-								return 1;
-							}
-							if(b > a) {
-								return -1;
-							}
-						}
-						else if(a.indexOf('_') === 0) { return -1; }
-						else if(b.indexOf('_') === 0) { return 1; }
-						else { 
-							if(a > b) {
-								return 1;
-							}
-							if(b > a) {
-								return -1;
-							}
-						}
-						return 0;
-					}).forEach(function(k, i) {
-						if(k == '$$hashKey') {
-							cols.splice(cols.indexOf(k), 1);
-						}
-					});
+					cols.splice(cols.indexOf('$$hashKey'), 1);
+					cols = window._utility.sortColumns(cols);
 				} else {
 					cols.forEach(function(a) {
 						if(a == '$$hashKey') {

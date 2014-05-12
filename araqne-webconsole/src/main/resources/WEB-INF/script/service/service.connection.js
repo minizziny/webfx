@@ -32,6 +32,16 @@ function Async(fn) {
 		return this;
 	}
 
+	this.onHead = function(fn) {
+		callback.onHead = fn;
+		return this;
+	}
+
+	this.onTail = function(fn) {
+		callback.onTail = fn;
+		return this;
+	}
+
 	this.done = function(fname) {
 		var args = Array.prototype.slice.call(arguments);
 		args.shift();
@@ -42,10 +52,9 @@ function Async(fn) {
 			callback[fname].apply(this, args);	
 		}
 		else {
-			if(fname != 'created' && fname != 'onStatusChange' && fname != 'started') {
+			if(!!~window._logger.current.indexOf('logdb-null-event-alert')) {
 				console.warn(name + '.' + fname + ', but do nothing.', (args.length > 1) ? (args[1][0].method) : '');
 			}
-			//console.trace();
 		}
 		
 		return this;

@@ -22,16 +22,26 @@ import org.araqne.msgbus.Response;
 import org.araqne.msgbus.handler.MsgbusMethod;
 import org.araqne.msgbus.handler.MsgbusPlugin;
 import org.araqne.webconsole.AppRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @MsgbusPlugin
 @Component(name = "webconsole-app-plugin")
 public class AppPlugin {
+	private Logger logger = LoggerFactory.getLogger(AppPlugin.class);
 
 	@Requires
 	private AppRegistry appRegistry;
 
 	@MsgbusMethod
 	public void getApps(Request req, Response resp) {
-		resp.put("apps", appRegistry.getAppKeys());
+		String feature = req.getString("feature");
+		resp.put("apps", appRegistry.getApps(feature));
+	}
+
+	@MsgbusMethod
+	public void getApp(Request req, Response resp) {
+		String id = req.getString("id");
+		resp.put("app", appRegistry.getApp(id));
 	}
 }

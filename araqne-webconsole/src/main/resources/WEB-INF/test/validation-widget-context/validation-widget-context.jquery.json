@@ -1,0 +1,26 @@
+{
+  "name": "validation-widget-context",
+  "title": "Validation Widget Context",
+  "description": "The best jQuery plugin ever.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/araqne/webfx",
+  "author": {
+    "name": "gotoweb",
+    "email": "igotoweb@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/araqne/webfx.git"
+  },
+  "bugs": "https://github.com/araqne/webfx/issues",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/araqne/webfx/blob/master/LICENSE-MIT"
+    }
+  ],
+  "dependencies": {
+    "jquery": "*"
+  },
+  "keywords": []
+}

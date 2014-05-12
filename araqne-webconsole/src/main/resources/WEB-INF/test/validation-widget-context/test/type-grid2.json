@@ -1,0 +1,14 @@
+[
+    {
+        "guid": "wa21c337d5a904eeb",
+        "interval": 15,
+        "name": "asdf",
+        "data": {
+            "order": [
+                "table"
+            ],
+            "query": "logdb tables"
+        },
+        "type": "grid"
+    }
+]

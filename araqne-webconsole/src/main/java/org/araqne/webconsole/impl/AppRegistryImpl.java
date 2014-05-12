@@ -16,7 +16,9 @@
 package org.araqne.webconsole.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.felix.ipojo.annotations.Component;
@@ -40,17 +42,66 @@ public class AppRegistryImpl implements AppRegistry {
 		return new ArrayList<AppProvider>(providers.values());
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> getApps(String feature) {
+		Map<String, Object> m = new HashMap<String, Object>();
+
+		if (feature == null || feature == "") {
+			// return all type id
+			for (AppProvider p : providers.values()) {
+				Map<String, Object> manifest = (Map<String, Object>) p.getManifest();
+				Map<String, Object> features = (Map<String, Object>) manifest.get("feature");
+				String appId = (String) manifest.get("id");
+
+				List<String> typeIdList = new ArrayList<String>();
+				for (String key : features.keySet()) {
+					List<Map<String, Object>> category = (List<Map<String, Object>>) features.get(key);
+					for (Map<String, Object> c : category) {
+						String typeId = (String) c.get("id");
+						typeIdList.add(typeId);
+					}
+				}
+				m.put(appId, typeIdList);
+			}
+		} else {
+			// return type id by type
+			for (AppProvider p : providers.values()) {
+				Map<String, Object> manifest = (Map<String, Object>) p.getManifest();
+				Map<String, Object> features = (Map<String, Object>) manifest.get("feature");
+				String appId = (String) manifest.get("id");
+
+				List<Map<String, Object>> typeList = (List<Map<String, Object>>) features.get(feature);
+				List<String> typeIdList = new ArrayList<String>();
+				for (Map<String, Object> t : typeList) {
+					String typeId = (String) t.get("id");
+					typeIdList.add(typeId);
+				}
+				m.put(appId, typeIdList);
+			}
+		}
+
+		return m;
+	}
+
+	@Override
+	public Map<String, Object> getApp(String id) {
+		AppProvider provider = providers.get(id);
+		Map<String, Object> m = provider.getManifest();
+		return m;
+	}
+
 	@Override
 	public void register(AppProvider provider) {
-		AppProvider old = providers.putIfAbsent(provider.getKey(), provider);
+		AppProvider old = providers.putIfAbsent(provider.getId(), provider);
 		if (old != null)
-			throw new IllegalStateException("duplicated app provider: " + provider.getKey());
+			throw new IllegalStateException("duplicated app provider: " + provider.getId());
 	}
 
 	@Override
 	public void unregister(AppProvider provider) {
-		if (!providers.remove(provider.getKey(), provider))
-			throw new IllegalStateException("app provider not found: " + provider.getKey());
+		if (!providers.remove(provider.getId(), provider))
+			throw new IllegalStateException("app provider not found: " + provider.getId());
 	}
 
 }

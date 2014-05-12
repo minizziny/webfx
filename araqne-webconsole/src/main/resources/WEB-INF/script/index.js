@@ -17,12 +17,15 @@ var logpresso = angular.module('app', [
 	'app.logdb.management',
 	'pascalprecht.translate',
 	'ui.sortable',
-	'ngAnimate'
+	'ngAnimate',
+	'app.events',
+	'app.extension',
+	'logpresso.extension'
 ], function() {
 });
 
 window._logger = {
-	'list': ['dashboard-widget-timer', 'logdb-get-result'],
+	'list': ['dashboard-widget-timer', 'logdb-get-result', 'logdb-null-event-alert'],
 	'current': [],
 	'on': function(name) {
 		window._logger.current.push(name);
@@ -34,6 +37,23 @@ window._logger = {
 		}
 	}
 };
+
+Object.defineProperty(Array.prototype, 'unique', {
+	enumerable: false,
+	configurable: false,
+	writable: false,
+	value: function() {
+		var a = this.concat();
+		for(var i=0; i<a.length; ++i) {
+				for(var j=i+1; j<a.length; ++j) {
+						if(a[i] === a[j])
+								a.splice(j--, 1);
+				}
+		}
+
+		return a;
+	}
+});
 
 logpresso.run(function($rootScope, $location, $anchorScroll, $compile, eventSender, serviceSession, $templateCache, $location, $translate) {
 
@@ -110,7 +130,8 @@ logpresso.config(['$translateProvider', function ($translateProvider) {
 	$translateProvider.fallbackLanguage('en');
 }]);
 
-logpresso.factory('eventSender', function() {
+angular.module('app.events', [])
+.factory('eventSender', function() {
 	var e = {
 		'root': {},
 		'menu': {},
@@ -133,11 +154,39 @@ logpresso.factory('eventSender', function() {
 	return e;
 });
 
+var extension = {
+	dashboard: angular.module('logpresso.extension.dashboard', []),
+	menu: angular.module('logpresso.extension.menu', []),
+	global: {
+		addController: function(fn) {
+			var controllers = [];
+			for(var z in window) {
+				if(/Controller/.test(z) ) {
+					controllers.push(z);
+				}
+			}
+			if(!~controllers.indexOf(fn.name)) {
+				window[fn.name] = fn;
+			}
+			else {
+				throw new TypeError("controller is exists.");
+			}
+		}
+	},
+	apps: {
+		menu: [],
+		dashboard: [],
+		starter: []
+	}
+}
+angular.module('logpresso.extension', ['logpresso.extension.dashboard', 'logpresso.extension.menu']);
 
 function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSession, serviceDom, $location, $translate) {
 	console.log('Controller init');
 
 	$location.path('/');
+
+	$scope.loadedapp = [];
 
 	$scope.timeout = 1000 * 60 * 1;
 
@@ -200,7 +249,14 @@ function Controller($scope, $rootScope, $filter, socket, eventSender, serviceSes
 			angular.element('.view').hide();
 			angular.element('.view#view-' + program).show();
 
-			$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';
+			var lid = $scope.loadedapp.map(function(m) { return m.id });
+
+			if(~lid.indexOf(pack)) {
+				$scope.src[program] = 'apps/' + pack + '/' + program + '/index.html';
+			}
+			else {
+				$scope.src[program] = 'package/' + pack + '/' + program + '/index.html';	
+			}
 
 			var idxProgram = $scope.recentPrograms.indexOf(program + '@' + pack);
 			if(idxProgram != -1) {
@@ -344,8 +400,14 @@ function checkDate(member, i) {
 	return angular.isDate(dateFormat.parse(member.toString().substring(0,19))) && rxTimezone.test(member.substring(19, 24));
 }
 
-function MenuController($scope, socket, serviceSession, serviceProgram, eventSender, $location) {
+function MenuController($scope, socket, serviceSession, serviceProgram, eventSender, $location, serviceExtension, $compile, serviceUtility) {
 	$scope.programs = [];
+	$scope.builtin = function() {
+		return $scope.programs.filter(function(p) { return !p.isExternal });
+	}
+	$scope.apps = function() {
+		return $scope.programs.filter(function(p) { return p.isExternal });
+	}
 
 	function getProgram(path) {
 		var found = null;
@@ -380,12 +442,28 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 		});
 	}
 
+	function addEventToProgram(p){
+		p.isActive = false;
+		p.isCurrent = false;
+		p.halt = function(e) {
+			console.log('halt');
+			e.stopPropagation();
+			var el = angular.element('#view-' + p.path);
+			p.isActive = false;
+			p.isCurrent = false;
+
+			eventSender.root.onClose(p.packdll, p.path);
+		}
+		return p;
+	}
+
 	function initialize() {
 		serviceProgram.getAvailablePrograms()
 		.success(function(m) {
 			$scope.programs.splice(0, $scope.programs.length);
 
 			m.body.programs.forEach(function(p) {
+				p = addEventToProgram(p);
 				p.packdll = (function() {
 					var found = m.body.packs.filter(function(pack) {
 						return pack.name == p.pack;
@@ -395,17 +473,6 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 					}
 					return undefined;
 				}());
-				p.isActive = false;
-				p.isCurrent = false;
-				p.halt = function(e) {
-					console.log('halt');
-					e.stopPropagation();
-					var el = angular.element('#view-' + p.path);
-					p.isActive = false;
-					p.isCurrent = false;
-
-					eventSender.root.onClose(p.packdll, p.path);
-				}
 				$scope.programs.push(p);
 			});
 
@@ -413,22 +480,115 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 
 			$scope.$apply();
 
-			var elProgram = $('.tm-program');
-			var styleTextAll = '';
-			elProgram.each(function(i, obj) {
-				var mw = $(obj).offset().left + $(obj).outerWidth();
-				var styleText = ' @media screen and (max-width: ' + (mw + 200).toString() + 'px) {\
-					.tm .tm-program:nth-child(' + (i + 1).toString() + ') { display: none; }\
-					.tm-more .dropdown-menu li:nth-child(' + (i + 1).toString() + ') { display: block; }\
-				} ';
-				styleTextAll = styleTextAll + styleText;
+			(new Async(getApps))
+			.success(function(manifests) {
+				console.log(manifests)
 
-				if(i + 1 == elProgram.length) {
-					styleTextAll = styleTextAll + ' @media screen and (max-width: ' + (mw + 200).toString() + 'px) { .tm .tm-more { display: inline; } } ';
-				}
+				manifests.forEach(function(mf) {
+					mf.feature.programs.forEach(function(p) {
+						var obj = {
+							'visible': true,
+							'display_names': p.display_names,
+							'path': p.id,
+							'pack': 'Apps',
+							'packdll': mf.id,
+							'isExternal': true
+						}
+						obj = addEventToProgram(obj);
+						$scope.programs.push(obj);
+
+					});
+				});
+
+				applyResponsiveStyle();
+			});
+		});
+	}
+
+	function applyResponsiveStyle() {
+		var elProgram = $('.tm-program');
+		var styleTextAll = '';
+		var elAppWidth = $('.tm-app').outerWidth() + 200;
+		elProgram.each(function(i, obj) {
+			var mw = $(obj).offset().left + $(obj).outerWidth();
+			var styleText = ' @media screen and (max-width: ' + (mw + elAppWidth).toString() + 'px) {\
+				.tm .tm-program:nth-child(' + (i + 1).toString() + ') { display: none; }\
+				.tm-more .dropdown-menu li:nth-child(' + (i + 1).toString() + ') { display: block; }\
+			} ';
+			styleTextAll = styleTextAll + styleText;
+
+			if(i + 1 == elProgram.length) {
+				styleTextAll = styleTextAll + ' @media screen and (max-width: ' + (mw + elAppWidth).toString() + 'px) { .tm .tm-more { display: inline; } } ';
+			}
+		});
+
+		$('<style>'+ styleTextAll + '</style>').appendTo('body');
+	}
+
+	function getApps() {
+		var self = this;
+
+		socket.send('org.araqne.webconsole.plugins.AppPlugin.getApps', { 'feature': 'programs'}, 0)
+		.success(function(m) {
+			
+			console.log(m);
+			var apps = m.body.apps;
+
+			var manifestList = Object.keys(apps);
+
+			var loadedlen = 0;
+			
+			manifestList.forEach(function(appid) {
+
+				socket.send('org.araqne.webconsole.plugins.AppPlugin.getApp', { 'id': appid}, 0)
+				.success(function (m) {
+					console.log(m);
+					var manifest = m.body.app;
+					$scope.$parent.$parent.loadedapp.push(manifest);
+					if(!manifest.feature['programs']) return;
+
+					serviceExtension.register(appid, 'menu', manifest);
+
+					manifest.feature['programs'].forEach(function(program) {
+
+						var prefix = 'apps/' + appid + '/' + program.id + '/';
+
+						serviceExtension.getScripts(prefix, program)
+						.done(function(){
+							
+							$scope.$parent.$parent.src[program.id] = '';
+							eventSender[program.id] = {
+								pid: serviceUtility.getRandomInt(2000, 3000),
+								events: {}
+							};
+
+							var ct = angular.element('<div class="view" id="view-' + program.id + '" ng-include src="src[\'' + program.id + '\']"></div>');
+							$compile(ct)($scope);
+							$('#tooltip').before(ct);
+						})
+						.fail(function(a,b,c) {
+							console.log(a,b,c);
+						});
+
+					});
+
+					loadedlen++;
+					if(manifestList.length === loadedlen) {
+						self.done('success', $scope.$parent.$parent.loadedapp);
+					}
+				})
+				.failed(function() {
+					loadedlen++;
+					if(manifestList.length === loadedlen) {
+						self.done('success', $scope.$parent.$parent.loadedapp);
+					}
+				})
+
 			});
 
-			$('<style>'+ styleTextAll + '</style>').appendTo('body');
+		})
+		.failed(function(m) {
+			self.done('failed');
 		});
 	}
 

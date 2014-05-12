@@ -1,0 +1,43 @@
+[
+	{
+		"guid": "w00e4c394275321fb",
+		"name": "자동 저장",
+		"data": {
+			"tabs": [
+				{
+					"guid": "w8812964be55b4e62",
+					"$$hashKey": "01U",
+					"contents": "pwfc342b767808bf26",
+					"is_active": false,
+					"name": "자동 저장",
+					"type": "dockpanel"
+				},
+				{
+					"guid": "tw63dba3eb64e21556",
+					"$$hashKey": "0ZK",
+					"contents": "pw0bb7374a7c4ecaf8",
+					"is_active": false,
+					"name": "wcline",
+					"type": "dockpanel"
+				},
+				{
+					"guid": "tw0e40358675bfa54b",
+					"$$hashKey": "0I0",
+					"is_active": false,
+					"contents": "pw8f3fedf544c5f3fe",
+					"name": "Tab 7",
+					"type": "dockpanel"
+				},
+				{
+					"guid": "tw82737af466d39d3b",
+					"$$hashKey": "0A0",
+					"is_active": true,
+					"contents": "pw0d06c51dbe9e42d3",
+					"name": "Tab 4",
+					"type": "dockpanel"
+				}
+			]
+		},
+		"type": "tabs"
+	}
+]
