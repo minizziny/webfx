@@ -1,195 +1,155 @@
 <!-- space 말고 tab 써주세요 -->
+<style>
+input[type=text].ruleSpec,
+input[type=number].ruleSpec {
+	width: 100px;
+}
+
+select.ruleSpec {
+	width: 70px;
+}
+</style>
+
+
 <div class="playground-container" ng-controller="PlaygroundController">
-
-	<!--div ng-controller="LogQuerySampleController">
-	</div-->
-
-	<div class="well" style="margin:20px; box-sizing:border-box" ng-controller="LogQuery2SampleController">
-		<query-input
-			id="playground-qi-1"
-			ng-model="queryResult"
-			ng-query-string="queryString"
-			ng-page-size="numPageSize"
-			ng-pid="numPid"
-			on-head="onHead($helper)"
-			on-tail="onTail($helper)">
-		</query-input>
-
-		<div>
-			<label><input type="radio" ng-model="optionResultCursor" value="head"> 처음</label>
-			<label><input type="radio" ng-model="optionResultCursor" value="tail"> 마지막</label>
-			<input type="number" ng-model="numPageSize" max="500" min="1"/> 건의 결과
-			{{optionResultCursor}}
-		</div>
-
-		<table table-view ng-model="modelTable" class="table table-bordered table-condensed">
-		</table>
-	</div>
-
-	<div class="paneFtpConfig" ng-controller="MyFtpProfileConfigController">
-		<ul class="tab well1 tab-ftp">
+	<div class="paneRuleTemplateConfig" ng-controller="RuleTemplateConfigController">
+		<ul class="tab well1 tab-ruletemplate">
 			<li class="section well1">
 				<legend>
-					{{'$S_str_FtpSetting' | translate}}
+					룰 템플릿 관리
 					<button class="btn btn-reload pull-right" style="margin-left:5px" ng-click="init($event)"><i class="icon-refresh"></i></button>
-					<button ng-disabled="ftpProfileDeletable()" class="btn pull-right" style="margin-left:5px" ng-click="openDropFtpProfileModal()">{{'$S_str_Remove' | translate}}</button>
-					<button class="btn btn-primary pull-right" ng-click="openCreateFtpProfileModal()">{{'$S_str_NewFtpProfile' | translate}}</button>
-									
+					<button ng-disabled="ruleTemplateDeletable()" class="btn pull-right" style="margin-left:5px" ng-click="openDropRuleTemplateModal()">{{'$S_str_Remove' | translate}}</button>
+					<button class="btn pull-right" ng-show="canUserEdit" ng-click="enterEditMode()">{{'$S_str_Edit' | translate}}</button>
+					<button class="btn btn-primary pull-right" ng-click="openCreateRuleTemplateModal()">생성</button>
 				</legend>
 				<table class="table table-bordered table-striped">
 					<thead>
 						<tr>
-							<th class="check">
-								<select-all-checkbox checkboxes="dataFtpProfiles" master="checkAll" class="select-all-cb"></select-all-checkbox>
+							<th class="check"  ng-class="{ 'td-check-show': isEditMode, 'td-check-hide': !isEditMode }" >
+								<button class="btn btn-mini" ng-click="toggleSelectAll()">
+									<i class="icon-check"></i>
+								</button>
 							</th>
-							<th>{{'$S_str_Name' | translate}}</th>
-							<th>{{'$S_str_HostAddress' | translate}}</th>	
-							<th>{{'$S_str_FtpPort' | translate}}</th>	
-							<th>{{'$S_str_Timeout' | translate}}</th>
-							<th>{{'$S_str_User' | translate}}</th>	
-							<th>{{'$S_str_ActiveMode' | translate}}</th>
-							<th>{{'$S_str_ExtendedPAssiveMode' | translate}}</th>
+							<th>룰타입</th>
+							<th>이름</th>	
+							<th>쿼리템플릿</th>	
+							<th>설명</th>	
 						</tr>
 					</thead>
 					<tbody>
-						<tr ng-class="{'tr-selected': ftp.is_checked}" tr-multi-selectable="ftp" ng-repeat="ftp in dataFtpProfiles">
-							<td class="checks"><input type="checkbox" ng-model="ftp.is_checked" ng-checked="ftp.is_checked"/></td>
-							<td>{{ftp.name}}</td>
-							<td>{{ftp.host}}</td>
-							<td>{{ftp.port}}</td>
-							<td>{{ftp.timeout}}{{'$S_str_Second' | translate}}</td>
-							<td>{{ftp.username}}</td>
-							<td>{{ftp.active_mode}}</td>
-							<td>{{ftp.use_epsv}}</td>		
+						<tr ng-class="{'tr-selected': dataRuleTemplate.is_checked}" tr-multi-selectable="dataRuleTemplate" ng-repeat="dataRuleTemplate in dataRuleTemplates" ng-click="openEditRuleTemplateModal($index)">
+							<td ng-class="{ 'td-check-show': isEditMode, 'td-check-hide': !isEditMode }">
+								<input type="checkbox" ng-model="dataRuleTemplate.is_checked" ng-checked="dataRuleTemplate.is_checked">
+							</td>
+							<td>{{dataRuleTemplate.type}}</td>
+							<td>{{dataRuleTemplate.name}}</td>
+							<td>{{dataRuleTemplate.query_template}}</td>
+							<td>{{dataRuleTemplate.description}}</td>
 						</tr>
 					</tbody>
 				</table>							
 			</li>
 		</ul>
 
-		<!-- create ftp profile modal window -->
-		<form name="FormFtpProfile" novalidate ng-submit="createFtpProfile()">
-			<div class="modal createFtpProfile" ng-controller="MyFtpProfileWizardController" modal ng-class="{'error': FormFtpProfile.$invalid && isOnSubmit}">
+		<!-- create Rull Template modal window -->
+		<form name="FormRuleTemplate" novalidate ng-submit="createRuleTemplate()">
+			<div class="modal createRuleTemplate" ng-controller="RuleTemplateWizardController" modal ng-class="{'error': FormRuleTemplate.$invalid && isOnSubmit}">
 				<a class="modal-close close" style="margin-bottom: -30px">&times;</a>
-				<legend>{{'$S_str_NewFtpProfile' | translate}}</legend>
+				<legend>룰 템플릿 {{modal_title}}</legend>
 				<fieldset class="form-horizontal">
-					<div class="control-group" ng-class="{'error': (FormFtpProfile.name.$error.required && isOnSubmit) || FormFtpProfile.name.$error.pattern}">
-						<label class="control-label">{{'$S_str_Name' | translate}}</label>
+					<div class="control-group">
+						<label class="control-label">룰 타입</label>
 						<div class="controls">
-							<input type="text" name="name" ng-model="dataFtpProfile.name" ng-pattern="dataNamePattern" required/>
-							<span class="help-block" ng-show="FormFtpProfile.name.$error.required && isOnSubmit">{{'$S_msg_PleaseEnterFtpProfileName' | translate}}</span>
-							<span class="help-block" ng-show="FormFtpProfile.name.$error.pattern">{{'$S_str_NameValidationErrorMsg' | translate}}</span>
+							<input type="radio" name="ruletype" ng-model="dataRuleTemplate.type" value="SCHEDULE">주기적
+							<input type="radio" name="ruletype" ng-model="dataRuleTemplate.type" value="STREAM">실시간
 						</div>
 					</div>
-					<div class="control-group" ng-class="{'error': FormFtpProfile.host.$error.required && isOnSubmit}">
-						<label class="control-label">{{'$S_str_HostAddress' | translate}}</label>
+					<div class="control-group" ng-class="{'error': FormRuleTemplate.rulename.$error.required && isOnSubmit}">
+						<label class="control-label">이름</label>
 						<div class="controls">
-							<input type="text" name="host" ng-model="dataFtpProfile.host" required/>
-							<span class="help-block" ng-show="FormFtpProfile.host.$error.required && isOnSubmit">{{'$S_msg_PleaseEnterHostAddress' | translate}}</span>
+							<input type="text" name="rulename" ng-model="dataRuleTemplate.name" ng-readonly="form_readOnly" required/>
+						</div>
+					</div>
+					<div class="control-group" ng-class="{'error': (FormRuleTemplate.query_template.$error.required && isOnSubmit) || param_alarm}">
+						<label class="control-label">쿼리 템플릿</label>
+						<div class="controls">
+							<textarea name="query_template" class="input-xlarge" autosize autosize-max-height="145" ng-model="dataRuleTemplate.query_template" ng-readonly="form_readOnly" required></textarea>
+							<button class="btn" ng-click="addSpec()">
+								파라미터 생성
+							</button>
+							<div class="help-block">파라미터는 '$'로 표시, 파라미터간 구분은 콤마 또는 스페이스</div>
+							<div class="help-block" ng-show="param_alarm">파라미터 생성 오류</div>
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label">{{'$S_str_FtpPort' | translate}}</label>
-						<div class="controls">
-							<input type="text" name="port" ng-model="dataFtpProfile.port" maxlength="5" only-number />
+						<label class="control-label">룰 파라미터</label>
+						<div class="controls" ng-class="{'error': FormRuleTemplate.spec.$error.required && isOnSubmit}">
+							<table class="table table-bordered table-striped">
+								<thead>
+									<tr>
+										<th>타입</th>
+										<th>키</th>	
+										<th>이름</th>	
+										<th>설명</th>
+										<th>기본값</th>	
+										<th></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="spec in dataRuleTemplate.specs">
+										<td class="cell-center">
+											<select name="type" class="ruleSpec type" ng-change="setDefaultType($index)" ng-model="spec.type" ng-options="st.value as st.text for st in spec_types" ng-readonly="form_readOnly" required>
+												<option value="">선택</option>
+											</select>
+											<div class="help-block" ng-show="FormRuleTemplate.type.$error.required  && isOnSubmit">타입선택</div>
+										</td>
+										<td class="cell-center">
+											<input type="text" class="ruleSpec key" name="key" ng-model="spec.key" ng-pattern="dataNamePattern" ng-readonly="form_readOnly" required>
+											<div class="help-block" ng-show="FormRuleTemplate.key.$error.required && isOnSubmit">키입력</div>
+											<div class="help-block" ng-show="FormRuleTemplate.key.$error.pattern && isOnSubmit">숫자,영문,_ 만 가능</div>
+										</td>
+										<td class="cell-center">
+											<input type="text" class="ruleSpec name" name="name" ng-model="spec.name" ng-readonly="form_readOnly" required>
+											<div class="help-block" ng-show="FormRuleTemplate.name.$error.required && isOnSubmit">이름입력</div>
+										</td>
+										<td class="cell-center">
+											<input type="text" class="ruleSpec description" name="description" ng-model="spec.description" ng-readonly="form_readOnly">
+										</td>
+										<td class="cell-center">
+											<input type="text" class="ruleSpec default" name="default" id="default"ng-model="spec.default" ng-readonly="form_readOnly" required>
+											<div class="help-block" ng-show="FormRuleTemplate.default.$error.required && isOnSubmit">타입에 따른 기본값 입력</div>
+										</td>
+										<td class="cell-center">
+											<button type="button" class="close" ng-click="removeSpec($index)">&times</button>	
+										</td>
+									</tr>
+								</tbody>
+							</table>
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label">{{'$S_str_Timeout' | translate}}</label>
+						<label class="control-label">설명</label>
 						<div class="controls">
-							<input type="text" name="timeout" ng-model="dataFtpProfile.timeout" maxlength="5" only-number/>
+							<textarea name="description" class="input-xlarge" ng-model="dataRuleTemplate.description" ng-readonly="form_readOnly"></textarea>
 						</div>
 					</div>
-					<div class="control-group" ng-class="{'error': (FormFtpProfile.user.$error.required && isOnSubmit) || FormFtpProfile.user.$error.pattern}">
-						<label class="control-label">{{'$S_str_User' | translate}}</label>
-						<div class="controls">
-							<input type="text" name="user" ng-model="dataFtpProfile.user" ng-pattern="dataNamePattern" required/>
-							<span class="help-block" ng-show="FormFtpProfile.user.$error.required && isOnSubmit">{{'$S_msg_PleaseEnterUserName' | translate}}</span>
-							<span class="help-block" ng-show="FormFtpProfile.user.$error.pattern">{{'$S_str_NameValidationErrorMsg' | translate}}</span>
-						</div>
-					</div>
-					<div class="control-group" ng-class="{'error': FormFtpProfile.password.$error.required && isOnSubmit}">
-						<label class="control-label" for="inputName">{{'$S_str_Password' | translate}}</label>
-						<div class="controls">
-							<input type="password" name="password" ng-model="dataFtpProfile.password" required/>
-							<span class="help-block" ng-show="FormFtpProfile.password.$error.required && isOnSubmit">{{'$S_msg_PleaseEnterPassword' | translate}}</span>
-						</div>
-					</div>
-					<div class="control-group">
-						<label class="control-label">{{'$S_str_ActiveMode' | translate}}</label>
-						<div class="controls">
-							<label class="radio">
-								<input type="checkbox" name="active" ng-model="dataFtpProfile.active"/>
-							</label>
-						</div>
-					</div>
-					<div class="control-group" ng-show="!dataFtpProfile.active">
-						<label class="control-label">{{'$S_str_ExtendedPAssiveMode' | translate}}</label>
-						<div class="controls">
-							<label class="radio">
-								<input type="checkbox" name="extend-passive" ng-model="dataFtpProfile.extend_passive"/>
-							</label>
-						</div>
-					</div>					
 					<div class="control-group submit-group">
-						<input type="submit" class="btn btn-primary" ng-click="validCreatingFtpProfile()" value="{{'$S_str_Create' | translate}}">
+						<input type="submit" class="btn btn-primary btn-primary-modal" ng-click="validCreatingRuleTemplate()" value="{{'$S_str_Create' | translate}}">
 					</div>
 				</fieldset>
 			</div>
 		</form>
+
+		<div class="modal dropRuleTemplate" modal="">
+			<a class="modal-close close" style="margin-bottom: -30px">×</a>
+			<legend class="ng-binding">룰 템플릿 삭제</legend>
+			<div style="margin-bottom: 20px" class="ng-binding">
+				정말 룰 텔블릿 <code>{{dropRuleTemplateName}}</code>을 삭제하시겠습니까?
+			</div>
+			<div class="control-group submit-group">
+				<button class="btn btn-danger ng-binding" ng-click="dropRuleTemplate()">삭제</button>
+				<button class="btn ng-binding" ng-click="cancelDropRuleTemplate()">취소</button>
+			</div>
+		</div>
 	</div>
 </div>
-<fds-alert-box></fds-alert-box>
-
-	<ul class="tab well1 tab-fds">
-		<li class="section well1">
-			<table class="table table-bordered table-striped">
-				<tbody>
-				<tr>
-					<td>
-						<div class="paneFDSConfig" ng-controller="MyFDSController">
-							<form class="formFdsSqare" ng-submit="setFdsSqare()">
-							<!-- FDS Square Set -->
-								<legend>조건 설정</legend>
-								<fieldset class="form-horizontal">
-									<div class="control-group">
-										<div class="controls">
-											Label : 
-											<input type="text" ng-model="fdsLabel" required><br>
-											[ 조건 ]
-										</div>
-										<div class="controls" ng-repeat="fdsrule in fdsrules">
-											<select ng-model="fdsrule.operater" ng-options="o.value as o.text for o in operaterlists" required>
-												<option value="">연산자선택</option>
-											</select> 
-											<input type="text" name="boundary" ng-model="fdsrule.boundary" pattern="[0-9]*"  only-number required/>
-											이면
-											<input type="color" ng-model="fdsrule.color" required>
-											<!--select ng-model="fdsrule.color" ng-options="c.value as c.text for c in colorlists" required>
-												<option value="">색상선택</option>
-											</select--> 
-											<button type="button" class="close" ng-click="removeRule($index)">&times</button>
-											<div>{{fdsrule.operater}}-{{fdsrule.boundary}}-{{fdsrule.color}}</div>
-										</div>
-									</div>
-
-									<div class="control-group submit-group">
-										<input type="button" class="btn btn-primary" ng-click="addScope()" value="구간추가">
-										<input type="button" class="btn btn-primary" ng-click="setFdsSquare()" value="선택">
-									</div>
-								</fieldset>		
-							</form>			
-						</div>
-					</td>
-					<td width="200">
-						<!-- FDS Square -->
-						<div class="fdsSquare" ng-show="fdsSquareShow" ng-style="{'background-color':setcolor}" ng-controller="MyFdsAlertBoxController">
-							{{fdsLabel}}<p>
-							{{fdsCount|number}}
-						</div>
-					</td>
-				</tr>
-				</tbody>
-			</table>
-		</li>
-	</ul>
