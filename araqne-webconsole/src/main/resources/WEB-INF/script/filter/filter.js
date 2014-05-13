@@ -94,4 +94,10 @@ angular.module('app.filter', ['pascalprecht.translate'])
 	return function(t) {
 		return t.charAt(0).toUpperCase() + t.slice(1);
 	}
+})
+.filter('d3TimeFormat', function() {
+	return function(val, inputformat, outputformat) {
+		var date = d3.time.format(inputformat).parse(val);
+		return d3.time.format(outputformat)(date);
+	}
 });
