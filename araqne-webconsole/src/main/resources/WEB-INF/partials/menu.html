@@ -14,7 +14,12 @@
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu pull-right">
-						<li ng-repeat="program in builtin()"><a tabindex="-1" href="/#/{{program.packdll}}/{{program.path}}">{{program.display_names | translateMsgbus}}</a></li>
+						<li ng-repeat="program in builtin()">
+							<a tabindex="-1" href="/#/{{program.packdll}}/{{program.path}}">
+								<span>{{program.display_names | translateMsgbus}}</span>
+								<button class="btn btn-inverse btn-mini pull-right clearfix" style="margin-top: -1px" ng-show="program.isActive" ng-click="program.halt($event)"><i class="icon-remove icon-white"></i></button>
+							</a>
+						</li>
 					</ul>
 				</div>
 			</li>
@@ -25,7 +30,12 @@
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu pull-right">
-						<li ng-repeat="app in apps()"><a tabindex="-1" href="/#/{{app.packdll}}/{{app.path}}">{{app.display_names | translateMsgbus}}</a></li>
+						<li ng-repeat="app in apps()">
+							<a tabindex="-1" href="/#/{{app.packdll}}/{{app.path}}">
+								<span>{{app.display_names | translateMsgbus}}</span>
+								<button class="btn btn-inverse btn-mini pull-right clearfix" style="margin-top: -1px" ng-show="app.isActive" ng-click="app.halt($event)"><i class="icon-remove icon-white"></i></button>
+							</a>
+						</li>
 					</ul>
 				</div>
 			</li>

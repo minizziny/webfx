@@ -448,6 +448,8 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 		p.halt = function(e) {
 			console.log('halt');
 			e.stopPropagation();
+			e.preventDefault();
+			$(e.target).parents('.btn-group.open:first').removeClass('open');
 			var el = angular.element('#view-' + p.path);
 			p.isActive = false;
 			p.isCurrent = false;
@@ -500,6 +502,7 @@ function MenuController($scope, socket, serviceSession, serviceProgram, eventSen
 					});
 				});
 
+				$scope.$apply();
 				applyResponsiveStyle();
 			});
 		});
