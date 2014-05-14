@@ -10,7 +10,7 @@ function StarterController($scope, socket, eventSender, $rootScope, serviceExten
 
 			serviceExtension.register(appid, 'starter', manifest);
 
-			$.getScript(prefix + manifest['starter'].script)
+			serviceExtension.getScripts(prefix, manifest['starter'])
 			.done(function(script) {
 				console.log('loaded')
 			})

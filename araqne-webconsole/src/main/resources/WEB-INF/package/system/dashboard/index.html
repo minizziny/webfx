@@ -288,8 +288,7 @@ widget > .tab-comp > ul.nav-tabs > li > button.tab-home {
 }
 
 widget[grid] .widget-grid-container {
-	overflow-y: auto;
-	overflow-x: hidden;
+	overflow: auto;
 	height: 100%;
 }
 
@@ -757,19 +756,19 @@ widget.w-before-loading:before {
 .
 	<div class="modal propertyWidget" modal ng-controller="WidgetPropertyController">
 		<a class="modal-close close" style="margin-bottom: -30px">&times;</a>
-		<legend>{{name}} 속성</legend>
+		<legend>{{name}} {{'$S_str_Property' | translate}}</legend>
 		<div style="margin-bottom: 20px">
-			위젯 속성을 확인하고 변경할 수 있습니다.
+			{{'$S_msg_WidgetProperty' | translate}}
 		</div>
 		<form class="form-horizontal">
 			<div class="control-group">
-				<label class="control-label" for="dashboardWidgetPropertyInterval">새로고침 주기</label>
+				<label class="control-label" for="dashboardWidgetPropertyInterval">{{'$S_str_IntervalRefresh' | translate}}</label>
 				<div class="controls">
-					<input type="number" ng-model="interval" id="dashboardWidgetPropertyInterval">
+					<input type="number" ng-model="interval" min="5" id="dashboardWidgetPropertyInterval"> <ng-pluralize count="interval" when="formSecond"></ng-pluralize>
 				</div>
 			</div>
 			<div class="control-group">
-				<label class="control-label" >쿼리</label>
+				<label class="control-label" >{{'$S_str_QueryString' | translate}}</label>
 				<div class="controls">
 					<code style="display:inline-block; max-height:200px; overflow:auto">{{query}}</code>
 				</div>

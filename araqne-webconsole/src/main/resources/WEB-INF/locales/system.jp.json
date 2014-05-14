@@ -127,10 +127,11 @@
 	"$S_msg_NoWidget": "ウィジェットがありません。新しいウィジェットを追加してください",
 
 	"--------widget--------": "",
-	"$S_msg_QueryRunCount": "クエリ {{p0}} 番を実行",
-	"$S_msg_QueryRunInterval": "{{p0}}秒毎に更新",
 	"$S_msg_UnknownError": "原因不明のエラー",
 	"$S_msg_OccurError": "エラーが発生しました",
+	"$S_msg_WidgetProperty": "위젯 속성을 확인하고 변경할 수 있습니다.",
+	"$S_str_Property": "속성",
+	"$S_str_IntervalRefresh": "새로고침 주기",
 
 	"--------starter--------": "",
 	"$S_str_LogTrend": "ログ発生推移",

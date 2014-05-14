@@ -14,16 +14,22 @@
 	<link rel="stylesheet" type="text/css" href="css/logo.css" />
 	<link rel="stylesheet" type="text/css" href="css/dashboard-wizard.css" />
 	<link rel="stylesheet" type="text/css" href="lib/jquery/jquery.resizableColumns.css" />
+	<link rel="stylesheet" type="text/css" href="lib/jquery/jquery-ui.css" />
 	<link rel="stylesheet" href="package/logpresso/logquery/logquery2.css"/> 
 
-	<script src="lib/jquery/jquery-2.0.3.js"></script>
+	<script src="lib/jquery/jquery-2.1.0.js"></script>
 	<script src="lib/jquery/jquery.ui.core.js"></script>
 	<script src="lib/jquery/jquery.ui.widget.js"></script>
 	<script src="lib/jquery/jquery.ui.mouse.js"></script>
+	<script src="lib/jquery/jquery.ui.sortable.js"></script>
+
 	<script src="lib/jquery/jquery.ui.draggable.js"></script>
 	<script src="lib/jquery/jquery.ui.droppable.js"></script>
+	
 	<script src="lib/jquery/jquery.ui.datepicker.js"></script>
-	<script src="lib/jquery/jquery.ui.sortable.js"></script>
+	<script src="lib/jquery/datepicker-ko.js"></script>
+	<script src="lib/jquery/jquery.ui.slider.js"></script>
+	
 	<script src="lib/jquery/scrollsync.js"></script>
 	<script src="lib/jquery/dragscrollable.js"></script>
 	<script src="/lib/angular/angular-1.2.16.js"></script>
@@ -75,6 +81,7 @@
 	<script src="package/logpresso/table/table.js"></script>
 	<script src="package/logpresso/logsource/logsource.js"></script>
 	<script src="package/logpresso/config/config.js"></script>
+	<script src="package/logpresso/import/import.js"></script>
 	
 	<style>
 	a {
@@ -130,8 +137,10 @@
 	<div class="view" id="view-logsource" ng-include src="src.logsource"></div>
 	<div class="view" id="view-querymanager" ng-include src="src.querymanager"></div>
 	<div class="view" id="view-config" ng-include src="src.config"></div>
+	<div class="view" id="view-import" ng-include src="src.import"></div>
 
-	<div id="tooltip" class="tooltip fade top">
+
+	<div id="tooltip" class="tooltip fade top" style="display:none">
 		<div class="tooltip-arrow"></div>
 		<div class="tooltip-inner">...</div>
 	</div>

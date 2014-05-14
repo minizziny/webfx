@@ -1,3 +1,29 @@
+window._utility = {
+	'sortColumns': function sortColumns(cols) {
+		return cols.sort().sort(function(a, b) {
+			if(a.indexOf('_') === 0 && b.indexOf('_') === 0) { 
+				if(a > b) {
+					return 1;
+				}
+				if(b > a) {
+					return -1;
+				}
+			}
+			else if(a.indexOf('_') === 0) { return -1; }
+			else if(b.indexOf('_') === 0) { return 1; }
+			else { 
+				if(a > b) {
+					return 1;
+				}
+				if(b > a) {
+					return -1;
+				}
+			}
+			return 0;
+		});
+	}
+}
+
 angular.module('app.directive.logdb', [])
 .directive('queryInput', function($compile, $parse, $translate, serviceLogdb, serviceSession) {
 	return {
@@ -216,6 +242,7 @@ angular.module('app.directive.logdb', [])
 
 				cols = cols.unique();
 				cols.splice(cols.indexOf('$$hashKey'), 1);
+				cols = window._utility.sortColumns(cols);
 				ctrl[0].$modelValue.cols = cols;
 			}
 			scope.$watch('model', function(val) {
@@ -373,31 +400,8 @@ angular.module('app.directive.logdb', [])
 				}
 				
 				if(fields.length <= 0 || fields == null) {
-					cols.sort().sort(function(a, b) {
-						if(a.indexOf('_') === 0 && b.indexOf('_') === 0) { 
-							if(a > b) {
-								return 1;
-							}
-							if(b > a) {
-								return -1;
-							}
-						}
-						else if(a.indexOf('_') === 0) { return -1; }
-						else if(b.indexOf('_') === 0) { return 1; }
-						else { 
-							if(a > b) {
-								return 1;
-							}
-							if(b > a) {
-								return -1;
-							}
-						}
-						return 0;
-					}).forEach(function(k, i) {
-						if(k == '$$hashKey') {
-							cols.splice(cols.indexOf(k), 1);
-						}
-					});
+					cols.splice(cols.indexOf('$$hashKey'), 1);
+					cols = window._utility.sortColumns(cols);
 				} else {
 					cols.forEach(function(a) {
 						if(a == '$$hashKey') {
