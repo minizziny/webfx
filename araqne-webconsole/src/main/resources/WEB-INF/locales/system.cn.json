@@ -1,5 +1,6 @@
 {
 	"$S_str_More": "更多",
+	"$S_str_Apps": "Apps",
 
 	"--------orgchart--------": "",
 	"$S_str_RemoveOrganization": "删除部门",
@@ -113,6 +114,7 @@
 	"$S_str_WordCloud": "单词云",
 	"$S_str_Preview": "预览",
 	"$S_msg_ClickNextToContinue": "单击下一步继续。",
+
 	"$S_str_Autosave": "自动保存",
 	"$S_msg_SavePresetAs": "请输入新的模板名称。",
 	"$S_msg_NewPresetName": "请输入新的模板名称。",
@@ -126,8 +128,6 @@
 	"$S_msg_NoWidget": "没有widget,请添加widget!",
 	
 	"--------widget--------": "",
-	"$S_msg_QueryRunCount": "执行{{p0}}次查询",
-	"$S_msg_QueryRunInterval": "每{{p0}}秒运行一次",
 	"$S_msg_UnknownError": "未知错误",
 	"$S_msg_OccurError": "发生错误。",
 	"$S_msg_WidgetProperty": "可查看并修改Widget属性。",
@@ -209,6 +209,7 @@
 	"$S_str_Close": "关闭",
 
 	"$S_str_SubQuery": "子查询",
+
 	"$S_str_SaveThisQuery": "保存查询",
 	"$S_str_QueryName": "查询名称",
 
@@ -285,7 +286,7 @@
 	"$S_str_CreateScheduledQuery": "生成预约查询报警",
 	"$S_str_Save": "保存",
 	"$S_str_NotSave": "不保存",
-	"$S_str_time": "时间",
+	"$S_str_Time": "时间",
 	"$S_str_EveryTime": "时",
 	"$S_str_PerMinute": "分",
 	"$S_str_PerMinutePost": "分钟",
@@ -307,7 +308,8 @@
 	"$S_str_Saturday": "星期六",
 	"$S_str_Date": "日期",
 	"$S_str_DayOfWeek": "星期",
-	"$S_str_PerMonth": "个月",
+	"$S_str_PerMonthPre" : "",
+	"$S_str_PerMonthPost": "个月",
 	"$S_str_DateTh": "日",
 	"$S_str_RemoveScheduledQuery": "删除已预约查询",
 	"$S_msg_ConfirmRemoveScheduledQueriesPre": "确信要删除",
@@ -358,6 +360,7 @@
 	"$S_msg_Oct": "10月",
 	"$S_msg_Nov": "11月",
 	"$S_msg_Dec": "12月",
+
 	"--------logsource--------": "",
 	"$S_str_Logger": "Loggers",
 	"$S_str_LoggerTree": "本地日志",
@@ -461,6 +464,7 @@
 	"$S_msg_IsClosed" : "没有连接Sentry。",
 	"$S_msg_RpcTimeout" : "远程过程调用超时。",
 	"$S_msg_IntervalCannotBeZero" : "周期不能为0。",
+	"$S_msg_SameSyslogMapping": "Same syslog mapping already exists.",
 	
 	"$S_str_Category": "项目",
 	"$S_str_MacAddress": "MAC地址",
@@ -536,8 +540,7 @@
 	"$S_str_NoLoggerOnList": "列表中不存在的Logger...",
 	"$S_msg_SelectedLoggerPre": "Logger ",
 	"$S_msg_SelectedLoggerPost": " 已选择",
-	"$S_msg_WarningStopLoggerBeforeRemovalPost": "",
-	"$S_msg_StopLoggerFirst": "请先停止logger。",
+
 	"$S_str_Skip": "跳过",
 
 	"--------license--------": "",
@@ -707,19 +710,12 @@
 	"$S_str_SelectTokenizer": "请选择Tokenizer",
 	"$S_str_DefaultValueDescription": "如果不输入，将设置为默认值。",
 	"$S_str_NameValidationErrorMsg" : "名称需由英文字符，数字，'-' ，'_'组成。",
+	"$S_str_EmailValidationErrorMsg" : "Email can only contain alphabets, numbers, '_', '@', domain characters",
 	"$S_str_AlreadyExistsMsg": "table already exists",
 
 	"--------index--------": "",
 	"$S_str_ValidateDateFormat": "日期格式为yyyymmdd。",
 	"$S_str_InvalidateDateFormat": "无效日期格式。",
-
-	"$S_str_Sunday": "星期日",
-	"$S_str_Monday": "星期一",
-	"$S_str_Tuesday": "星期二",
-	"$S_str_Wednesday": "星期三",
-	"$S_str_Thursday": "星期四",
-	"$S_str_Friday": "星期五",
-	"$S_str_Saturday": "星期六",
 
 	"--------audit log--------": "",
 	"$S_str_AuditLog": "审计日志",
@@ -728,11 +724,12 @@
 	"$S_str_Action": "操作",
 	"$S_str_Success": "成功",
 	"$S_str_Failed": "失败",
+	"$S_str_Details": "Details",
 
 	"--------config-----------": "",
 	"--------parser config-----------": "",
-	"$S_str_ParserSetting": "Parser设置",
-	"$S_str_Parser": "Parser",
+	"$S_str_ParserSetting": "解析器设置",
+	"$S_str_Parser": "解析器设置",
 	"$S_str_CreateParser": "创建Parser",
 	"$S_str_RemoveParser": "删除Parser",
 	"$S_str_ParserType": "Parser类型",
@@ -741,7 +738,8 @@
 	"$S_msg_PleaseSelectParserName" : "请输入parser名称。",
 
 	"--------transformer config-----------": "",
-	"$S_str_TransformerSetting": "Transformer设置",
+	"$S_str_Transformer": "转换器设置",
+	"$S_str_TransformerSetting": "转换器设置",
 	"$S_str_TransformerType": "Transformer类型",
 	"$S_str_SelectTransformerType": "选择Transformer类型",
 	"$S_str_RemoveTransformer": "删除Transformer",
@@ -751,17 +749,21 @@
 	"$S_msg_RemoveTransformerConfirmPre": "确信要删除Transformer",
 
 	"--------ftp config-----------": "",
+	"$S_str_FtpProfile": "FTP设置",
 	"$S_str_FtpSetting": "FTP设置",
 	"$S_str_HostAddress": "主机地址",
 	"$S_str_NewFtpProfile": "创建FTP配置(profile)",
 	"$S_str_FtpPort": "FTP端口",
+	"$S_str_Timeout": "Timeout",
 	"$S_str_CreateFtpProfile": "创建FTP配置(profile)",
 	"$S_str_RemoveFtpProfile": "删除FTP配置(profile)",
 	"$S_str_User": "用户", 
 	"$S_str_ActiveMode": "主动模式", 
+	"$S_str_ExtendedPAssiveMode": "Use Extended Passive mode",
 	"$S_msg_RemoveFtpProfileConfirmPre": "确信要删除FTP配置(profile)",
 
 	"--------ssh config-----------": "",
+	"$S_str_SshProfile": "SSH设置",
 	"$S_str_SshSetting": "SSH设置",
 	"$S_str_SshProfileSetting": "SSH配置设置",
 	"$S_str_NewSshProfile" : "创建SSH配置(profile)",
@@ -771,6 +773,7 @@
 	"$S_msg_RemoveSshProfileConfirmPre": "确信要删除SSH配置",	
 
 	"--------jdbc config-----------": "",
+	"$S_str_JdbcProfile": "JDBC设置",
 	"$S_str_JdbcSetting": "JDBC设置",
 	"$S_str_JdbcProfileSetting": "JDBC配置(profile)设置",
 	"$S_str_ConnectionString": "连接字符串",
@@ -781,6 +784,7 @@
 	"$S_msg_RemoveJdbcProfileConfirmPre": "确信要删除JDBC配置(profile)",
 
 	"--------hdfs config-----------": "",
+	"$S_str_Hdfs": "HDFS设置",
 	"$S_str_HdfsSetting": "HDFS设置",
 	"$S_str_HDFSPath": "HDFS路径",
 	"$S_str_NewHdfs" : "创建HDFS",
@@ -789,14 +793,16 @@
 	"$S_msg_RemoveHdfsConfirmPre": "确信要删除HDFS",
 
 	"--------apikey config-----------": "",
-	"$S_str_ApiKeySetting": "APIKEY设置",
-	"$S_str_CreateNewAPIKey": "创建APIKEY",
-	"$S_str_APIKey": "APIKEY",
+	"$S_str_ApiKeyProfile": "API密钥设置",
+	"$S_str_ApiKeySetting": "API密钥设置",
+	"$S_str_CreateNewAPIKey": "创建API密钥",
+	"$S_str_APIKey": "API密钥",
 	"$S_msg_PleaseEnterGuid" : "请输入guid。",
-	"$S_str_RemoveApikey" : "删除APIKEY",
-	"$S_msg_RemoveApiConfirmPre": "确信要删除APIKEY",
+	"$S_str_RemoveApikey" : "删除API密钥",
+	"$S_msg_RemoveApiConfirmPre": "确信要删除API密钥",
 
 	"--------crypto config-----------": "",
+	"$S_str_CryptoProfile": "加密/完整性设置",
 	"$S_str_CryptoSetting": "加密/完整性设置",
 	"$S_str_NewCrypto": "创建加密配置(profile)",
 	"$S_str_Cipher": "加密算法",
@@ -808,6 +814,7 @@
 	"$S_msg_RemoveCryptoConfirmPre": "确信要删除加密配置(profile)",
 
 	"--------index cache config-----------": "",
+	"$S_str_IndexCache": "索引缓存设置",
 	"$S_str_IndexCacheSetting": "索引缓存设置",
 	"$S_str_CleanIndexCache": "删除索引缓存",
 	"$S_str_Type": "类型",
@@ -819,21 +826,26 @@
 	"$S_msg_RemoveIndexCacheConfirmPre": "确信要删除索引缓存",
 
 	"--------federation config-----------": "",
-	"$S_str_FederationSetting": "联合(Federation)设置",
+	"$S_str_Federation": "集群设置",
+	"$S_str_FederationSetting": "集群设置",
 	"$S_str_Address": "地址",
 	"$S_str_RegisterFederationNode": "注册节点",
 	"$S_str_WebserverPort": "Web服务器端口",
+	"$S_str_ActiveStatus": "Active",
+	"$S_str_DeactiveStatus": "Deactive",
+	"$S_str_ConnectionFailed": "Connection Failed",
 	"$S_str_RemoveNode": "注销节点",
 	"$S_msg_RemoveNodeConfirmPre": "确信要删除节点",	
 
 	"--------smtp config-----------": "",
-	"$S_str_SmtpProfile": "SMTP属性",
+	"$S_str_SmtpProfile": "SMTP属性设置",
 	"$S_str_SmtpProfileSetting": "SMTP属性设置",
 	"$S_str_NewSmtpProfile": "SMTP属性生成",
 	"$S_str_RemoveSmtp": "删除SMTP",
 	"$S_str_SmtpPort": "SMTP端口",
 	"$S_str_SmtpUser": "SMTP账户",
 	"$S_msg_RemoveSmtpConfirmPre": "确信要SMTP",
+
 	"--------common config msg-----------": "",
 	"$S_msg_PleaseEnterProfileName": "请输入配置(profile)名称。",
 	"$S_msg_PleaseEnterSshProfileName": "请输入配置(profile)名称。",	
