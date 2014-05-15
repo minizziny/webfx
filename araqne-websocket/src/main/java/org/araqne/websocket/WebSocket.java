@@ -33,6 +33,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+
 import org.araqne.websocket.WebSocketFrame.Opcode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +55,10 @@ public class WebSocket {
 	private boolean closed;
 
 	public WebSocket(URI uri) throws IOException {
+		String scheme = uri.getScheme();
+		if (!scheme.equalsIgnoreCase("ws") && !scheme.equalsIgnoreCase("wss"))
+			throw new IllegalArgumentException("illegal websocket schema: " + scheme);
+
 		this.uri = uri;
 		this.listeners = new CopyOnWriteArraySet<WebSocketListener>();
 
@@ -64,10 +71,28 @@ public class WebSocket {
 
 	private void connect() throws UnknownHostException, IOException {
 		int port = uri.getPort();
-		if (port == -1)
-			port = 80;
 
-		socket = new Socket(uri.getHost(), port);
+		String scheme = uri.getScheme();
+		if (scheme.equalsIgnoreCase("ws")) {
+			if (port == -1)
+				port = 80;
+			socket = new Socket(uri.getHost(), port);
+		} else {
+			// @since 0.1.6
+			if (port == -1)
+				port = 443;
+
+			SSLContext sc = null;
+			try {
+				sc = SSLContext.getDefault();
+			} catch (NoSuchAlgorithmException e) {
+				throw new IllegalStateException("unsupported ssl context", e);
+			}
+
+			SSLSocketFactory factory = sc.getSocketFactory();
+			socket = factory.createSocket(uri.getHost(), port);
+		}
+
 		socket.setSoTimeout(10000);
 
 		try {
