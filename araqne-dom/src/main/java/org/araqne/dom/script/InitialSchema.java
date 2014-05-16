@@ -189,7 +189,7 @@ public class InitialSchema {
 		displayNames.put("en", enName);
 		displayNames.put("jp", jpName);
 		displayNames.put("ko", koName);
-		displayNames.put("cn", cnName);
+		displayNames.put("zh", cnName);
 
 		Program program = new Program();
 		program.setPack("System");
