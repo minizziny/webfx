@@ -724,7 +724,7 @@
 		}
 	};
 })
-.directive('pager', function() {
+.directive('pager', function(serviceUtility) {
 	return {
 		restrict: 'E',
 		scope: {
@@ -912,6 +912,8 @@
 						scope.arrPageSize = new Array(totalPageCount);
 					}	
 				}
+
+				renderPager();
 				
 			}
 
@@ -937,23 +939,6 @@
 				render();
 			});
 
-			// scope.$watch('ngItemsPerPage', function(val) {
-
-			// 	var totalPageCount = getTotalPageCount();
-			// 	if(scope.currentIndex > totalPageCount - 1) {
-			// 		scope.currentIndex = totalPageCount - 1;
-			// 		changePage(scope.currentIndex);
-			// 	}
-
-			// 	// console.log(getTotalPageCount(), scope.ngPageSize, scope.currentPage, getLastPage())
-
-			// 	if(getLastPage() < scope.currentPage) {
-			// 		scope.currentPage = getLastPage();
-			// 	}
-
-			// 	render();
-			// 	scope.$parent.$eval(attr.onItemsPerPageChange);
-			// });
 
 			scope.isShowJumpPopup = false;
 
@@ -977,9 +962,37 @@
 				},250);
 			}
 
+			elem[0].setThresholdWidth = function(w) {
+				wThreshold = w;
+			}
+
+			var wElPager, wThreshold = 500;
+			function renderPager() {
+				if( elem.is('hidden') ) return;
+				if(wElPager == undefined) wElPager = elem.width();
+				if(!!~window._logger.current.indexOf('logdb-get-result')) {
+					console.warn(eventName + ':', $(window).width(), wThreshold, wElPager);
+				}
+				if( $(window).width() - wThreshold < wElPager ) {
+					elem.find('li').off('click.addedEvent').on('click.addedEvent', renderPager);
+					elem.find('li.ng-scope').hide();
+					elem.find('li.ng-scope.active').show();
+				}
+				else {
+					elem.find('li.ng-scope').show();
+					elem.find('li').off('click.addedEvent');
+					wElPager = undefined;
+				}
+			}
+
+			var eventName = 'resize.pager' + serviceUtility.generateType3();
+			$(window).on(eventName, renderPager);
+
 			scope.stopPropagation = function(e) {
 				e.stopPropagation();
 			}
+
+
 		}
 	}
 })

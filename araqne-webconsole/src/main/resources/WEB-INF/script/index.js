@@ -25,7 +25,7 @@ var logpresso = angular.module('app', [
 });
 
 window._logger = {
-	'list': ['dashboard-widget-timer', 'logdb-get-result', 'logdb-null-event-alert'],
+	'list': ['dashboard-widget-timer', 'logdb-get-result', 'logdb-null-event-alert', 'pager-resize'],
 	'current': [],
 	'on': function(name) {
 		window._logger.current.push(name);
