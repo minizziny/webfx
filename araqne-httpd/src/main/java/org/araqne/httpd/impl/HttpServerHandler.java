@@ -140,7 +140,8 @@ public class HttpServerHandler extends IdleStateAwareChannelHandler {
 		} else if (e.getCause() instanceof ClosedChannelException) {
 			logger.trace("araqne httpd: connection closed", e.getCause());
 		} else {
-			logger.error("araqne httpd: transport error", e.getCause());
+			logger.error("araqne httpd: transport error: {}", e.getCause().getMessage());
+			logger.trace("araqne httpd: transport error detail", e.getCause());
 			e.getChannel().close();
 		}
 	}
