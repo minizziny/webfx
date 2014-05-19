@@ -269,7 +269,7 @@ angular.module('app.directive.logdb', [])
 				</table>\
 			</div>\
 			<div class="pager-container">\
-				<div class="pull-left">{{ngTotalCount}}건이 검색되었습니다.</div>\
+				<div class="pull-left status">{{ngTotalCount}}건이 검색되었습니다.</div>\
 				<pager class="pull-right"\
 					ng-model="model"\
 					ng-total-count="ngTotalCount"\
