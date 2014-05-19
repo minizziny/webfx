@@ -3,40 +3,6 @@
 
 <style>
 
-fds-alert-box .fdsAlertBox {
-	width: 100%;
-	/*height: calc(100% + 17px);
-	top: -17px;*/
-	height: 100%;
-	text-align: center;
-	position: relative;
-}
-
-.fdsAlertBox .b-x {
-	float: right;
-	position: absolute;
-	right: 5px;
-	top: 5px;
-	z-index: 2;
-}
-
-fds-alert-box .fdsAlertBox .centering {
-	box-sizing: border-box;
-	display: table;
-	width: calc(100% + 1px);
-	height: calc(100% - 3px);
-	box-shadow: inset 1px 1px 1px rgba(0,0,0,.2);
-}
-
-fds-alert-box .fdsAlertBox .hcentering {
-	vertical-align: middle;
-	display: table-cell;
-}
-
-fds-alert-box .fdsAlertBox h4, fds-alert-box .fdsAlertBox h2 {
-	margin: auto;
-}
-
 input[type=text].pointLen  {
 	width: 10px;
 }
@@ -72,9 +38,50 @@ widget {
 	height: calc(100% - 4px);
 }
 
+alert-box {
+	/*border: 1px dotted red;*/
+	margin: 0px;
+	height: 100%;
+	display:block;
+}
+
 .contentbox > [ng-transclude] {
 	height: 100%;
 }
+
+
+
+	alert-box.bold .widget-title {
+		margin-top: -21px;
+	}
+
+	alert-box.bold .widget-toolbox {
+		margin-top: -22px;
+	}
+
+
+	alert-box .progress {
+		height: 2px;
+		margin-bottom: 0;
+		margin-top: -2px;
+		clear: both;
+	}
+
+	alert-box .progress > .bar {
+		-webkit-transition:all linear 0.5s;
+		opacity:1;
+	}
+
+	alert-box .progress > .bar.ng-hide-add,
+	alert-box .progress > .bar.ng-hide-remove {
+		display: block !important;
+	}
+
+	alert-box .progress > .bar.ng-hide {
+		opacity: 0;
+	}
+
+
 
 /* widget end */
 
@@ -319,14 +326,6 @@ widget.w-before-loading:before {
 	font-size: 13pt;
 	text-shadow: 1px 1px 2px #ddd;
 	letter-spacing: 1px;
-}
-.fdsAlertBox {
-		width: 200px;
-		height: 120px;
-		padding-top: 70px;
-		text-align: center;
-		border-radius: 10px;
-		font-size: 20px;	
 }
 
 </style>

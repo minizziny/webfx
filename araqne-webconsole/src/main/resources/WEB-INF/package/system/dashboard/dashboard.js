@@ -79,6 +79,7 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		var ct = angular.element('<div class="dashboard-extension-container" ng-include src="\'/package/system/dashboard/alertbox.html\'"></div>');
 		$compile(ct)($scope);
 		$element.append(ct);
+		console.log('alertbox loaded')
 	})
 	.fail(function(a,b,c) {
 		console.log(a,b,c);
@@ -854,7 +855,14 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 			widgets.forEach(function(widget) {
 				if(widget.type === 'alertbox') {
-					el.find('fds-alert-box#' + widget.guid)[0].setContext(widget);
+					var ab = el.find('alert-box#' + widget.guid);
+					ab[0].setContext(widget);
+					ab[0].addEvent('close', function() {
+						var id = widget.guid;
+						var target = ab.parents('.k-d-col:first');
+						var presetId = ab.parents('dockpanel:first').attr('id');
+						// return $scope.onCloseWidget(id, target, presetId);
+					})
 				}
 			});
 		});

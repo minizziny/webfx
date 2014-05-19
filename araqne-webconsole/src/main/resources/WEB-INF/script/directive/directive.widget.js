@@ -153,7 +153,7 @@ angular.module('app.directive.widget', [])
 				// 이미 append된 widget들을 캐시한다. link됐으나 append되지 않은건 이미 아까 사라짐.
 				cached = el.find('widget').detach();
 				cachedAsset = el.find('asset').detach();
-				cachedAlertBox = el.find('fds-alert-box').detach();
+				cachedAlertBox = el.find('alert-box').detach();
 
 				console.widgetLog('cache', cached.length, 'item cached');
 				console.widgetLog('cache', cachedAsset.length, 'asset item cached');
@@ -877,14 +877,26 @@ angular.module('app.directive.widget', [])
 		}
 	}
 })
-.directive('fdsAlertBox', function($compile, $timeout, serviceLogdb, serviceChart, $translate) {
+.directive('alertBox', function($compile, $timeout, serviceLogdb, serviceChart, $translate) {
 	return {
 		restrict: 'E',
 		template: 
-						'<div class="fdsAlertBox k-d-handler">'+
-							'<button class="btn btn-extra-mini b-x" ng-click="closebox()">' +
+						'<span click-to-edit ng-model="context.name" ng-change="onWidgetTitleChange($new, $old, $event)" class="pull-left widget-title"></span>' +
+						'<span class="pull-right widget-toolbox">' +
+							// '<button class="btn btn-extra-mini b-pause" ng-show="isRunning" ng-click="$parent.$parent.pauseWidget($event)">' +
+							// 	'<i class="icon-pause"></i>' +
+							// '</button><button class="btn btn-extra-mini b-play" ng-hide="isRunning" ng-click="$parent.$parent.runWidget($event)">' +
+							// 	'<i class="icon-play"></i>' +
+							'</button><button class="btn btn-extra-mini b-refresh" ng-click="query()">' +
+								'<i class="icon-refresh"></i>' +
+							// '</button><button class="btn btn-extra-mini b-p" ng-click="$parent.$parent.displayWidgetProperty($event)">' +
+							// 	'<i class="icon-info-sign"></i>' +
+							'</button><button class="btn btn-extra-mini b-x" ng-click="closebox()">' +
 								'<i class="icon-remove"></i>' +
 							'</button>' +
+						'</span>' +
+						'<div class="progress"><div class="bar" ng-hide="isLoaded" ng-style="progress"></div></div>' +
+						'<div class="fdsAlertBox k-d-handler">'+
 							'<div class="centering">' +
 								'<div class="hcentering">'+ 
 									'<h4>{{context.data.label}}</h4>'+
@@ -893,7 +905,6 @@ angular.module('app.directive.widget', [])
 							'</div>' +
 						'</div>',
 		scope: {
-			
 		},
 		link: function(scope, elm, attrs) {
 			scope.fdscount = '';
@@ -905,12 +916,36 @@ angular.module('app.directive.widget', [])
 			elm[0].setContext = function(ctx) {
 
 				scope.context = ctx;
-				query();
+				scope.query();
 
+			}
+
+			var events = {
+				close: undefined,
+				titlechange: undefined
+			}
+
+			elm[0].addEvent = function(eventName, fn) {
+				events[eventName] = fn;
+			}
+
+			scope.onWidgetTitleChange = function(newval, oldval, e) {
+				console.log(newval, oldval)
+				if(events.titlechange != undefined) {
+					events.titlechange();
+				}
+			}
+
+			scope.closebox = function() {
+				if(events.close != undefined) {
+					events.close();
+				}
 			}
 
 			function resultCallback() {
 				return function(m) {
+					scope.progress = { 'width': '100%' };	
+					scope.isLoaded = true;
 					scope.fdscount = m.body.result[0][scope.context.data.column];
 					serviceLogdb.remove(queryInst);
 					for (var i = 0, len = scope.context.data.rules.length; i<len; i++) {
@@ -963,18 +998,26 @@ angular.module('app.directive.widget', [])
 
 			}
 
-			function query() {
+			scope.query = function() {
 				if(scope.context == undefined) {
+					return;
+				}
+
+				if(scope.context.data == undefined) {
 					return;
 				}
 
 				//기본색 설정
 				scope.fdscolor = scope.context.data.default_color;
 				elm.find(".fdsAlertBox .centering").css('backgroundColor', scope.fdscolor);
+
+				scope.isLoaded = false;
+				scope.progress = { 'width': '0%' };	
 				
 				queryInst = serviceLogdb.create(2020);
 				queryInst.query(scope.context.data.query, 100)
 				.created(function(m) {
+					scope.progress = { 'width': '20%' };
 					scope.$apply();
 				})
 				.onStatusChange(
@@ -988,14 +1031,8 @@ angular.module('app.directive.widget', [])
 				});
 
 			}
-
-			function render(callback) {
-				elm[0].setContext();
-				query();
-			}
-
-			render();
-			elm[0].render = render;
+			scope.query();
+			
 		}
 	}
 })
@@ -1047,7 +1084,7 @@ angular.module('app.directive.widget', [])
 				'</widget>';
 		}
 		else if(json.type === 'alertbox') {
-			return '<fds-alert-box id="' + json.guid + '"></fds-alert-box>';
+			return '<alert-box id="' + json.guid + '"></alert-box>';
 		}
 		else {
 			return '<widget id="' + json.guid + '" ng-model="ctxPreset.' + preset + '.ctxWidget.' + json.guid + '" on-close="onCloseWidget($id, $target, \'' + preset + '\')" on-change="onChangeWidget($id, \'' + preset + '\', $field, $old, $new)">' +

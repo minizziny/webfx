@@ -22,19 +22,27 @@
 	});
 
 	function AlertBoxRuleBindingController($scope, $filter, $translate, eventSender, serviceLogdb) {
-		$scope.fdsrules			= [];
 		$scope.boundary			= 0;
 		$scope.operaterlists	= {};
 		$scope.colorlists		= {};
 		$scope.isOnSubmit		= false;
 		$scope.setcolor			= "";
-		$scope.fdsLabel			= "";
-		$scope.fdsPrefix		= "";
-		$scope.fdsSuffix		= "";
-		$scope.fdsComma			= "";
-		$scope.fdsPointlen		= 0;
-		$scope.fdsdefault_color	= "#eeeee";
-		$scope.pointLenChecked	= false;
+
+
+		$scope.context = {
+			label: '',
+			rules: [],
+			prefix: '',
+			suffix: '',
+			formatting: undefined,
+			default_color: ''	
+		};
+
+		$scope.hasComma = false;
+		$scope.hasPoint	= false;
+		$scope.lenPoint = 2;
+		$scope.colorDefault	= "#EEEEEE";
+		
 
 		function getDataOpList() {
 			$scope.operaterlists = [
@@ -53,45 +61,44 @@
 			}];
 		}
 
+		function getDefaultRule() {
+			return {
+				operator: '>',
+				boundary: 0,
+				color: '#CC0000'
+			}
+		}
+
 		$scope.init = function(e) {
 			getDataOpList();	//연산자 리스트 가져오기
-			$scope.fdsrules.push({operator:'', boundary:'', color:''});
+			$scope.context.rules.push(getDefaultRule());
 		}
 
 		$scope.init();
 
 		$scope.addRule = function () {
-			$scope.fdsrules.push({operator:'', boundary:'', color:''});
+			$scope.context.rules.push(getDefaultRule());
 		};
 
 		$scope.removeRule = function (index) {
-			$scope.fdsrules.splice(index, 1);
+			$scope.context.rules.splice(index, 1);
 		};
 
 		eventSender.dashboard.onSendAlertBoxDataWizard = function() {
 			console.log('onSendAlertBoxDataWizard');
-			console.log($scope.fdsPrefix,$scope.fdsSuffix,$scope.fdsComma,$scope.fdsPointLen,$scope.fdsdefault_color);
 			var formatting = '';
-			if ( $scope.fdsComma ){
+			if ( $scope.hasComma ){
 				formatting = ","
 			}
 
-			if ( $scope.fdsPointLen != undefined && $scope.fdsPointLen > 0){
-				formatting = formatting + '.' + $scope.fdsPointLen + 'f';
+			if ( $scope.lenPoint != undefined && $scope.lenPoint > 0){
+				formatting = formatting + '.' + $scope.lenPoint + 'f';
 			}
 
-			var ctx = {
-				'rules': $scope.fdsrules,
-				'label' : $scope.fdsLabel,
-				'prefix' : $scope.fdsPrefix,
-				'suffix' : $scope.fdsSuffix,
-				'formatting' : formatting,
-				'default_color' : $scope.fdsdefault_color
-			}
+			$scope.context.formatting = formatting;
+			console.log($scope.context);
 
-			console.log(ctx)
-
-			return ctx;
+			return $scope.context;
 		}
 
 	};

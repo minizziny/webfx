@@ -1,31 +1,158 @@
-<div class="modal mdlAlertBoxController" modal>
+<style>
+
+.mdlAlertBoxController .form-horizontal .control-label {
+	width: 120px;
+}
+
+.mdlAlertBoxController .form-horizontal .controls {
+	margin-left: 140px;
+}
+
+.fdsAlertBox {
+		width: 400px;
+		height: 120px;
+		text-align: center;
+		font-size: 20px;	
+		overflow: hidden;
+}
+
+alert-box .fdsAlertBox {
+	width: 100%;
+	height: calc(100% - 2px);
+	/*top: -17px;*/
+	height: 100%;
+	text-align: center;
+	position: relative;
+}
+
+.fdsAlertBox .b-x {
+	float: right;
+	position: absolute;
+	right: 5px;
+	top: 5px;
+	z-index: 2;
+}
+
+alert-box .fdsAlertBox .centering {
+	box-sizing: border-box;
+	display: table;
+	width: calc(100% + 1px);
+	height: calc(100% - 3px);
+	box-shadow: inset 1px 1px 1px rgba(0,0,0,.2);
+}
+
+alert-box .fdsAlertBox .hcentering {
+	vertical-align: middle;
+	display: table-cell;
+}
+
+alert-box .fdsAlertBox h4, 
+alert-box .fdsAlertBox h2 {
+	margin: auto;
+}
+
+form[name=formAlertBox] {
+	padding-right: 30px;
+}
+</style>
+<div class="modal mdlAlertBoxController" modal ng-controller="AlertBoxRuleBindingController">
 	<a class="modal-close close" style="margin-bottom: -30px">&times;</a>
 	<legend>룰설정</legend>
 	<fieldset>
-		<form name="formAlertBox" ng-controller="AlertBoxRuleBindingController">
-			<div class="control-group">
-				<div>레이블 : <input type='text' name='fdsLabel' ng-model='fdsLabel' required></div>
-				<span>접두사 : <input type='text' name='fdsLabel' ng-model='fdsPrefix' required></span>
-				<span>&nbsp;접미사 : <input type='text' name='fdsLabel' ng-model='fdsSuffix' required></span>
-				<div>
-					서식 : <input type='checkbox' name='comma' ng-model='fdsComma'>천단위로 끊어서 표시
-					&nbsp;&nbsp;<input type='checkbox' name='pointLenChk' id="pointLenChk" ng-model='pointLenChecked'>
-					소수점 <input type='text' class='pointLen' name='pointlen' id="pointlen" ng-model='fdsPointLen' maxlength="1" ng-disabled="!pointLenChecked" only-number>자리까지 표시
+		<form name="formAlertBox" class="form-horizontal">
+			<div class="pull-right">
+				<h5>미리보기</h5>
+				<div class="fdsAlertBox k-d-handler" ng-style="{'backgroundColor': colorDefault}">
+					<div class="centering">
+						<div class="hcentering">
+							<h4>{{context.label}}</h4>
+							<h2>{{context.prefix}} 10000000 {{context.suffix}}</h2>
+						</div>
+					</div>
 				</div>
-				기본색 : <input type="color" name="default_color" ng-model='fdsdefault_color' required>(아무조건도 해당되지 않을때)<br>
-				<span class="controls" ng-repeat="fdsrule in fdsrules">
-					결과가 <select ng-model="fdsrule.operator" ng-options="o.value as o.text for o in operaterlists" required>
-					</select>
-					<input type="text" name="boundary" ng-model="fdsrule.boundary" pattern="[0-9]*"  only-number required>
-					
-					배경색을 다음과 같이 설정 <input type="color" name='color' ng-model="fdsrule.color" required> 
-					<button type="button" class="op-text" class="close" ng-click="removeRule($index)">&times</button>
-				</span>
-				<span><button class="wiz-rulladd btn" ng-click="addRule()">룰추가</button></span>
+			</div>
+			<div class="pull-left">
+				<div class="control-group">
+					<div class="control-label">레이블</div>
+					<div class="controls">
+						<input type='text' name='fdsLabel' ng-model='context.label'>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="control-label">접두사</div>
+					<div class="controls">
+						<input type='text' name='fdsLabel' ng-model='context.prefix'>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="control-label">접미사</div>
+					<div class="controls">
+						<input type='text' name='fdsLabel' ng-model='context.suffix'>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="control-label">서식</div>
+					<div class="controls">
+						<label>
+							<input type='checkbox' name='comma' ng-model='hasComma'> 천단위로 끊어서 표시
+						</label>
+						<label>
+							<input type='checkbox' name='pointLenChk' id="pointLenChk" ng-model='hasPoint'> 소수점
+							<input type='text' class='pointLen' name='pointlen' id="pointlen" ng-model='lenPoint' maxlength="1" ng-disabled="!hasPoint" only-number> 자리까지 표시
+						</label>
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="control-label">기본 배경색</div>
+					<div class="controls">
+						<input type="color" name="default_color" ng-model='colorDefault' required>
+					</div>
+				</div>
+			</div>
+			<div class="control-group clearboth">
+				<div class="control-label">배경색 조건</div>
+				<div class="controls">
+					<table class="table table-condensed">
+						<thead>
+							<tr>
+								<th>결과가</th>
+								<th></th>
+								<th>배경색 설정</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr ng-repeat="rule in context.rules">
+								<td>
+									<select ng-model="rule.operator" ng-options="o.value as o.text for o in operaterlists" required></select>
+								</td>
+								<td>
+									<input type="number" name="boundary" ng-model="rule.boundary" required style="width:110px">
+								</td>
+								<td>
+									<input type="color" name='color' ng-model="rule.color" required>
+								</td>
+								<td>
+									<button class="op-text btn btn-danger btn-mini" ng-click="removeRule($index)">
+										<i class="icon-remove icon-white"></i>
+									</button>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="3"></td>
+								<td>
+									<button class="wiz-rulladd btn btn-primary btn-mini" ng-click="addRule()">
+										<i class="icon-plus icon-white"></i>
+									</button>
+								</td>
+						</tbody>
+					</table>
+
+				</div>
 			</div>
 
-			<div class="control-group submit-group">
-				<button class="wiz-prev btn" ng-click="go(7)">{{'$S_str_Previous' | translate}}</button>
+			<div class="control-group submit-group" style="margin-right: -30px">
+				<button class="wiz-prev btn">{{'$S_str_Previous' | translate}}</button>
 				<button class="wiz-next btn" ng-click="go(widgetType.s8next, widgetType.s8nextCallback(), widgetType.s8nextEvent())" ng-disabled="formAlertBox.$invalid">{{'$S_str_Next' | translate}}</button>
 			</div>
 		</form>
