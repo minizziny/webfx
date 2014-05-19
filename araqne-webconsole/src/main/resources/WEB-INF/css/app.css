@@ -859,3 +859,18 @@ input[type=text].input-single.error:focus {
 .table-cell {
 	display: table-cell;
 }
+
+
+/* table-view-with-pager */
+table-view-with-pager {
+	display: block;
+}
+
+table-view-with-pager .tbl-view-container {
+	height: calc(100% - 35px);
+	overflow: auto;
+}
+
+table-view-with-pager .pager-container {
+	height: 35px;
+}

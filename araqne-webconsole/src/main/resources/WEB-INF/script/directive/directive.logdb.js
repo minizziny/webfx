@@ -253,6 +253,50 @@ angular.module('app.directive.logdb', [])
 		}
 	}
 })
+.directive('tableViewWithPager', function($timeout) {
+	return {
+		restrict: 'E',
+		require: ['ngModel'],
+		scope: {
+			model: '=ngModel',
+			ngTotalCount: '=',
+			ngItemsPerPage: '=',
+			ngPageSize: '=',
+			onPageChange: '&'
+		},
+		template: '<div class="tbl-view-container">\
+				<table table-view ng-model="model" show-index="true" class="table table-bordered table-condensed table-striped">\
+				</table>\
+			</div>\
+			<div class="pager-container">\
+				<div class="pull-left">{{ngTotalCount}}건이 검색되었습니다.</div>\
+				<pager class="pull-right"\
+					ng-model="model"\
+					ng-total-count="ngTotalCount"\
+					ng-items-per-page="ngItemsPerPage"\
+					ng-page-size="ngPageSize"\
+					on-page-change="changePage()"></pager>\
+			</div>',
+		link: function(scope, element, attrs, ctrl) {
+
+			scope.numCurrentPage = 0;
+			scope.ngTotalCount = 0;
+
+			console.log(scope.ngItemsPerPage, scope.ngPageSize);
+			scope.changePage = function(idx) {
+				scope.numCurrentPage = idx;
+
+				scope.onPageChange({
+					'$idx': idx,
+					'$model': scope.model
+				});
+			}
+
+			element.find('pager')[0].reset();
+			element.find('pager')[0].setThresholdWidth(10);
+		}
+	}
+})
 .directive('queryResult', function($compile, serviceUtility) {
 	return {
 		restrict: 'E',
