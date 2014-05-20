@@ -37,6 +37,10 @@ code {
 	overflow: auto;
 }
 
+.leftPane > .nav-list {
+	margin-right: 15px;
+}
+
 .rightPane {
 	float: left;
 	margin-left: 21.5%;
