@@ -859,3 +859,30 @@ input[type=text].input-single.error:focus {
 .table-cell {
 	display: table-cell;
 }
+
+
+/* table-view-with-pager */
+table-view-with-pager {
+	display: block;
+}
+
+table-view-with-pager .tbl-view-container {
+	height: calc(100% - 34px);
+	overflow: auto;
+}
+
+table-view-with-pager .pager-container {
+	height: 33px;
+	overflow: hidden;
+	padding: 0px 5px;
+	border-top: 1px solid #ccc;
+	background-color: #eee;
+}
+
+table-view-with-pager .pager-container > div.status {
+	margin: 5px;
+}
+
+table-view-with-pager .pager-container pager {
+	margin: 1px;
+}

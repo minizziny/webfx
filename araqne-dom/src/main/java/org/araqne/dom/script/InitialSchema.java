@@ -137,10 +137,10 @@ public class InitialSchema {
 
 		programApi.removePrograms(DEFAULT_DOMAIN, deleteProgramNames);
 
-		Program home = createProgram(context, programApi, "Home", "Home", "홈", "ホーム", "starter", 1);
-		Program dashBoard = createProgram(context, programApi, "Dashboard", "Dashboard", "대시보드", "ダッシュボード", "dashboard", 2);
-		Program account = createProgram(context, programApi, "Account", "Accounts", "계정관리", "アカウント管理", "orgchart", 3);
-		Program auditLog = createProgram(context, programApi, "Audit Log", "Audit Log", "감사로그", "監査ログ", "auditlog", 4);
+		Program home = createProgram(context, programApi, "Home", "Home", "홈", "ホーム", "首页", "starter", 1);
+		Program dashBoard = createProgram(context, programApi, "Dashboard", "Dashboard", "대시보드", "ダッシュボード", "仪表板", "dashboard", 2);
+		Program account = createProgram(context, programApi, "Account", "Accounts", "계정관리", "アカウント管理", "账户管理", "orgchart", 3);
+		Program auditLog = createProgram(context, programApi, "Audit Log", "Audit Log", "감사로그", "監査ログ", "审计日志", "auditlog", 4);
 
 		List<Program> allPrograms = new ArrayList<Program>();
 		allPrograms.add(home);
@@ -181,7 +181,7 @@ public class InitialSchema {
 	}
 
 	private static Program createProgram(ScriptContext context, ProgramApi programApi, String name, String enName, String koName,
-			String jpName, String type, int seq) {
+			String jpName, String cnName, String type, int seq) {
 		if (programApi.findProgram(DEFAULT_DOMAIN, "System", name) != null)
 			return programApi.findProgram(DEFAULT_DOMAIN, "System", name);
 
@@ -189,6 +189,7 @@ public class InitialSchema {
 		displayNames.put("en", enName);
 		displayNames.put("jp", jpName);
 		displayNames.put("ko", koName);
+		displayNames.put("zh", cnName);
 
 		Program program = new Program();
 		program.setPack("System");

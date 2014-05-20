@@ -21,12 +21,13 @@ var logpresso = angular.module('app', [
 	'ngAnimate',
 	'app.events',
 	'app.extension',
-	'logpresso.extension'
+	'logpresso.extension',
+	'ui.tree'
 ], function() {
 });
 
 window._logger = {
-	'list': ['dashboard-widget-timer', 'logdb-get-result', 'logdb-null-event-alert'],
+	'list': ['dashboard-widget-timer', 'logdb-get-result', 'logdb-null-event-alert', 'pager-resize'],
 	'current': [],
 	'on': function(name) {
 		window._logger.current.push(name);
