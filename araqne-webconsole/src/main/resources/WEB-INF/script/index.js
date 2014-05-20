@@ -20,7 +20,8 @@ var logpresso = angular.module('app', [
 	'ngAnimate',
 	'app.events',
 	'app.extension',
-	'logpresso.extension'
+	'logpresso.extension',
+	'ui.tree'
 ], function() {
 });
 
