@@ -949,8 +949,8 @@ angular.module('app.directive.widget', [])
 					scope.fdscount = m.body.result[0][scope.context.data.column];
 					serviceLogdb.remove(queryInst);
 					for (var i = 0, len = scope.context.data.rules.length; i<len; i++) {
-						console.log("$scope.fdsrule.operator", scope.context.data.rules[i].operator,'fdsCount:', scope.fdscount,"scope.context.rules[i].boundary",scope.context.data.rules[i].boundary);
-						console.log('scope.context.rules[i].color',scope.context.data.rules[i].color);
+						// console.log("$scope.fdsrule.operator", scope.context.data.rules[i].operator,'fdsCount:', scope.fdscount,"scope.context.rules[i].boundary",scope.context.data.rules[i].boundary);
+						// console.log('scope.context.rules[i].color',scope.context.data.rules[i].color);
 						switch ( scope.context.data.rules[i].operator ) {
 							case "=":
 								if( scope.fdscount == scope.context.data.rules[i].boundary ){

@@ -62,16 +62,22 @@ form[name=formAlertBox] {
 		<form name="formAlertBox" class="form-horizontal">
 			<div class="pull-right">
 				<h5>미리보기</h5>
-				<div class="fdsAlertBox k-d-handler" ng-style="{'backgroundColor': colorDefault}">
+				<div class="fdsAlertBox k-d-handler" ng-style="{'backgroundColor': context.default_color}">
 					<div class="centering">
 						<div class="hcentering">
 							<h4>{{context.label}}</h4>
-							<h2>{{context.prefix}} 10000000 {{context.suffix}}</h2>
+							<h2>{{context.prefix}} {{numSample}} {{context.suffix}}</h2>
 						</div>
 					</div>
 				</div>
 			</div>
 			<div class="pull-left">
+				<div class="control-group">
+					<div class="control-label">데이터 소스</div>
+					<div class="controls">
+						<select ng-model="selectedColumn" ng-options="col.name for col in dataColumns | filter:{ type: 'number' }"></select><br>
+					</div>
+				</div>
 				<div class="control-group">
 					<div class="control-label">레이블</div>
 					<div class="controls">
@@ -105,7 +111,7 @@ form[name=formAlertBox] {
 				<div class="control-group">
 					<div class="control-label">기본 배경색</div>
 					<div class="controls">
-						<input type="color" name="default_color" ng-model='colorDefault' required>
+						<input type="color" name="default_color" ng-model='context.default_color' required>
 					</div>
 				</div>
 			</div>
@@ -152,8 +158,7 @@ form[name=formAlertBox] {
 			</div>
 
 			<div class="control-group submit-group" style="margin-right: -30px">
-				<button class="wiz-prev btn">{{'$S_str_Previous' | translate}}</button>
-				<button class="wiz-next btn" ng-click="go(widgetType.s8next, widgetType.s8nextCallback(), widgetType.s8nextEvent())" ng-disabled="formAlertBox.$invalid">{{'$S_str_Next' | translate}}</button>
+				<button class="wiz-next btn" ng-click="sendContext()" ng-disabled="formAlertBox.$invalid">{{'$S_str_Next' | translate}}</button>
 			</div>
 		</form>
 	</fieldset>	

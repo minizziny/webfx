@@ -8,7 +8,11 @@
 		id: 'alertbox',
 		visible: true,
 		event: {
-			onNextStep: function() {
+			onNextStep: function(p) {
+
+				console.log(p);
+				setDataSource(p);
+
 				serviceDashboard.closeWizard();
 				$('.mdlAlertBoxController')[0].showDialog();
 				// var ctx = {"data": {"series": [{"color": "#AFD8F8", "key": "count", "name": "count"}], "label": "table", "type": "pie", "interval": 23, "query": "logdb count | stats c by table", "labelType": "string"}, "guid": 'w' + serviceUtility.generateType2(), "type": "chart", "interval": 23, "name": "count pie"};
@@ -21,7 +25,33 @@
 		template: '<asset data-guid="{{guid}}"><div>alertbox Here</div></asset>'
 	});
 
+	var setDataSource;
+
 	function AlertBoxRuleBindingController($scope, $filter, $translate, eventSender, serviceLogdb) {
+
+
+		$scope.dataColumns = [];
+		$scope.selectedColumn;
+
+		var dataSourceFirstRow;
+
+		setDataSource = function(src) {
+			$scope.formAlertBox.$setPristine();
+
+			dataSourceFirstRow = src.model[0];
+			$scope.dataColumns = src.columns;
+			$scope.selectedColumn = $scope.dataColumns[0];
+			$scope.context.query = src.query;
+		}
+
+		$scope.$watch('selectedColumn', function(val) {
+			$scope.context.column = val.name;
+			$scope.numSample = dataSourceFirstRow[val.name];
+		});
+
+		$scope.numSample = 0;
+
+
 		$scope.boundary			= 0;
 		$scope.operaterlists	= {};
 		$scope.colorlists		= {};
@@ -30,18 +60,19 @@
 
 
 		$scope.context = {
+			column: undefined,
 			label: '',
 			rules: [],
 			prefix: '',
 			suffix: '',
+			query: '',
 			formatting: undefined,
-			default_color: ''	
+			default_color: '#EEEEEE'	
 		};
 
 		$scope.hasComma = false;
 		$scope.hasPoint	= false;
 		$scope.lenPoint = 2;
-		$scope.colorDefault	= "#EEEEEE";
 		
 
 		function getDataOpList() {
@@ -84,21 +115,22 @@
 			$scope.context.rules.splice(index, 1);
 		};
 
-		eventSender.dashboard.onSendAlertBoxDataWizard = function() {
-			console.log('onSendAlertBoxDataWizard');
+		$scope.sendContext = function() {
+
 			var formatting = '';
 			if ( $scope.hasComma ){
 				formatting = ","
 			}
 
-			if ( $scope.lenPoint != undefined && $scope.lenPoint > 0){
+			if ( $scope.hasPoint ){
 				formatting = formatting + '.' + $scope.lenPoint + 'f';
 			}
 
 			$scope.context.formatting = formatting;
 			console.log($scope.context);
 
-			return $scope.context;
+			$('.mdlAlertBoxController')[0].hideDialog();
+			serviceDashboard.onCreateNewWidgetData($scope.context);
 		}
 
 	};
