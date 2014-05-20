@@ -2,6 +2,16 @@
 <link href="css/dashboard.css" rel="stylesheet" media="screen">
 
 <style>
+
+input[type=text].pointLen  {
+	width: 10px;
+}
+
+ul.radio li {
+	list-style: none;
+}
+
+
 .dashboard-extension-container {
 	/*position: fixed;
 	top: 30px;
@@ -32,9 +42,50 @@ widget {
 	height: calc(100% - 4px);
 }
 
+alert-box {
+	/*border: 1px dotted red;*/
+	margin: 0px;
+	height: 100%;
+	display:block;
+}
+
 .contentbox > [ng-transclude] {
 	height: 100%;
 }
+
+
+
+	alert-box.bold .widget-title {
+		margin-top: -21px;
+	}
+
+	alert-box.bold .widget-toolbox {
+		margin-top: -22px;
+	}
+
+
+	alert-box .progress {
+		height: 2px;
+		margin-bottom: 0;
+		margin-top: -2px;
+		clear: both;
+	}
+
+	alert-box .progress > .bar {
+		-webkit-transition:all linear 0.5s;
+		opacity:1;
+	}
+
+	alert-box .progress > .bar.ng-hide-add,
+	alert-box .progress > .bar.ng-hide-remove {
+		display: block !important;
+	}
+
+	alert-box .progress > .bar.ng-hide {
+		opacity: 0;
+	}
+
+
 
 /* widget end */
 
@@ -386,10 +437,14 @@ widget.w-before-loading:before {
 							<input type="radio" ng-model="widgetTypeName" value="graph" ng-change="selectType(1)" id="radioGraph">
 							<label class="radio" for="radioGraph">{{'$S_str_Chart' | translate}}</label>
 						</li>
+						<li>
+							<input type="radio" ng-model="widgetTypeName" value="box" ng-change="selectType(2)" id="radioBox">
+							<label class="radio" for="radioBox">박스</label>
+						</li>
 					</ul>
-					<!-- <ul class="radio">
+<!-- 					<ul class="radio">
 						<li ng-repeat="assetType in dataAssetTypes">
-							<label>
+							<label ng-show="assetType.visible">
 								<input type="radio" name="assetTypes" ng-model="$parent.selectedAsset" ng-value="assetType">{{i}} {{assetType.name}}
 							</label>
 						</li>
@@ -439,7 +494,8 @@ widget.w-before-loading:before {
 					</div>
 					<div class="control-group submit-group">
 						<button class="wiz-prev btn" ng-click="go(0, widgetType.s0prevCallback())">{{'$S_str_Previous' | translate}}</button>
-						<button class="wiz-next btn" ng-disabled="!isPageLoaded" ng-click="go(widgetType.s1next, null, widgetType.s1nextEvent())">{{'$S_str_Next' | translate}}</button>
+						<button class="wiz-next btn" ng-show="widgetType.name != 'alertbox'" ng-disabled="!isPageLoaded" ng-click="go(widgetType.s1next, null, widgetType.s1nextEvent())">{{'$S_str_Next' | translate}}</button>
+						<button class="wiz-next btn" ng-show="widgetType.name == 'alertbox'" ng-disabled="!isPageLoaded" ng-click="onNextSelectAsset()">{{'$S_str_Next' | translate}}</button>
 					</div>
 				</fieldset>
 			</li>
@@ -490,7 +546,7 @@ widget.w-before-loading:before {
 						</div>
 					</form>
 					<div class="control-group submit-group clearboth">
-						<button class="wiz-prev btn" ng-click="go(widgetType.s3prev())">{{'$S_str_Previous' | translate}}</button>
+						<button class="wiz-prev btn" ng-show="widgetType.name != 'alertbox'" ng-click="go(widgetType.s3prev())">{{'$S_str_Previous' | translate}}</button>
 						<button class="wiz-next btn" ng-click="submit()" ng-disabled="formWidgetCommon.$invalid || ctxWidget.name == undefined">{{'$S_str_Done' | translate}}</button>
 					</div>
 				</fieldset>
@@ -632,9 +688,10 @@ widget.w-before-loading:before {
 					<button class="wiz-next btn" ng-click="go(3)">{{'$S_str_Next' | translate}}</button>
 				</div>
 			</li>
+
 		</ol>
 	</div>
-
+.
 	<div class="modal propertyWidget" modal ng-controller="WidgetPropertyController">
 		<a class="modal-close close" style="margin-bottom: -30px">&times;</a>
 		<legend>{{name}} {{'$S_str_Property' | translate}}</legend>

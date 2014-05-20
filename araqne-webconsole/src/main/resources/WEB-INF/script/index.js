@@ -15,6 +15,7 @@ var logpresso = angular.module('app', [
 	'app.program',
 	'app.logdb',
 	'app.logdb.management',
+	'app.widget',
 	'pascalprecht.translate',
 	'ui.sortable',
 	'ngAnimate',

@@ -1,19 +1,11 @@
 {
-  "name": "araqne-webconsole",
-  "version": "1.0.0",
-  "ignore": [
-    "**/.*",
-    "node_modules",
-    "components",
-    "bower_components",
-    "test",
-    "tests"
-  ],
-  "dependencies": {
-    "angular": "1.0.7",
-    "d3": "git://github.com/mbostock/d3.git",
-    "moment": "git://github.com/timrwood/moment.git",
-    "jquery-ui": "git://github.com/components/jqueryui",
-    "jquery": "git://github.com/components/jquery.git"
-  }
+	"name": "araqne-webconsole",
+	"description": "araqne webconsole",
+	"version": "0.0.0",
+	"homepage": "https://github.com/araqne/webfx",
+	"license": "",
+	"private": true,
+	"dependencies": {
+		"angular-mocks": "~1.2.15"
+	}
 }

@@ -5,6 +5,7 @@
 	
 	sender.addAssetType({
 		name: 'Basic Charts',
+		visible: true,
 		event: {
 			onNextStep: function() {
 				sender.closeWizard();

@@ -1,0 +1,56 @@
+[
+    {
+        "guid": "a28345ab-c46b-4f1a-b19f-2689f06c10f4",
+        "source": "",
+        "session": "6330a617-193b-4ef7-8ab0-94e8805e5080",
+        "requestId": "95b36663-6a40-1ecc-5cec-b2021aaa720c",
+        "target": "44",
+        "method": "org.araqne.logdb.msgbus.LogQueryPlugin.getResult",
+        "type": "Response"
+    },
+    {
+        "result": [
+            {
+                "general-error": 7,
+                "_time": "2014-01-23 00:00:00+0900"
+            },
+            {
+                "general-error": 2,
+                "_time": "2014-01-27 00:00:00+0900"
+            },
+            {
+                "invalid-password": 1,
+                "_time": "2014-02-11 00:00:00+0900"
+            },
+            {
+                "general-error": 14,
+                "_time": "2014-02-12 00:00:00+0900"
+            },
+            {
+                "invalid-password": 1,
+                "_time": "2014-02-20 00:00:00+0900"
+            },
+            {
+                "invalid-password": 1,
+                "_time": "2014-02-24 00:00:00+0900"
+            },
+            {
+                "general-error": 1,
+                "_time": "2014-02-26 00:00:00+0900"
+            },
+            {
+                "general-error": 3,
+                "_time": "2014-03-03 00:00:00+0900"
+            },
+            {
+                "invalid-password": 1,
+                "_time": "2014-04-01 00:00:00+0900"
+            },
+            {
+                "invalid-password": 1,
+                "_time": "2014-04-09 00:00:00+0900"
+            }
+        ],
+        "count": 10
+    }
+]

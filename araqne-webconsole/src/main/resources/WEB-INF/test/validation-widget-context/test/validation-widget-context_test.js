@@ -20,6 +20,8 @@
 			throws(block, [expected], [message])
 	*/
 
+	var RES_SRC = '../../resources/';
+
 	module('basic', {
 	});
 
@@ -31,7 +33,7 @@
 	module('grid type', {
 		setup: function() {
 			var self = this;
-			$.getJSON('type-grid.json', function(resp) {
+			$.getJSON(RES_SRC + 'type-grid.json', function(resp) {
 				self.json = resp;
 				QUnit.start();
 			});
@@ -77,7 +79,7 @@
 	module('grid2 type', {
 		setup: function() {
 			var self = this;
-			$.getJSON('type-grid2.json', function(resp) {
+			$.getJSON(RES_SRC + 'type-grid2.json', function(resp) {
 				self.json = resp;
 				QUnit.start();
 			});
@@ -123,7 +125,7 @@
 	module('chart line type', {
 		setup: function() {
 			var self = this;
-			$.getJSON('type-chart-line.json', function(resp) {
+			$.getJSON(RES_SRC + 'type-chart-line.json', function(resp) {
 				self.json = resp;
 				QUnit.start();
 			});
@@ -172,7 +174,7 @@
 	module('chart pie type', {
 		setup: function() {
 			var self = this;
-			$.getJSON('type-chart-pie.json', function(resp) {
+			$.getJSON(RES_SRC + 'type-chart-pie-wrong-interval.json', function(resp) {
 				self.json = resp;
 				QUnit.start();
 			});
@@ -191,7 +193,7 @@
 	module('tabs type', {
 		setup: function() {
 			var self = this;
-			$.getJSON('type-tabs.json', function(resp) {
+			$.getJSON(RES_SRC + 'type-tabs.json', function(resp) {
 				self.json = resp;
 				QUnit.start();
 			});
@@ -220,7 +222,7 @@
 	module('wordcloud type', {
 		setup: function() {
 			var self = this;
-			$.getJSON('type-wordcloud.json', function(resp) {
+			$.getJSON(RES_SRC + 'type-wordcloud.json', function(resp) {
 				self.json = resp;
 				QUnit.start();
 			});

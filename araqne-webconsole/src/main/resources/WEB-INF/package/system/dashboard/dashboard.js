@@ -40,6 +40,9 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 			'onCreateNewWidgetAndSavePreset': function(ctx) {
 				eventSender.dashboard.onCreateNewWidgetAndSavePreset(ctx);
 			},
+			'onCreateNewWidgetData': function(ctx) {
+				eventSender.dashboard.openCommonSettingWindow(ctx);
+			},
 			'event': new CustomEvent(eventSender.dashboard.eventHandler)
 		}
 		return ret;
@@ -71,6 +74,18 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 		});
 
+	});
+
+
+	$.getScript('/package/system/dashboard/alertbox.js')
+	.done(function(script) {
+		var ct = angular.element('<div class="dashboard-extension-container" ng-include src="\'/package/system/dashboard/alertbox.html\'"></div>');
+		$compile(ct)($scope);
+		$element.append(ct);
+		console.log('alertbox loaded')
+	})
+	.fail(function(a,b,c) {
+		console.log(a,b,c);
 	});
 
 	$scope.formSecond = {
@@ -308,6 +323,7 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		// 활성탭인건 렌더
 		var elWidget = angular.element('.tab-pane.' + tab.guid + ' widget');
 		elWidget.each(function(i, w) {
+			console.log('activetab render call', w);
 			w.render(function() {
 				gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);	
 			});
@@ -593,7 +609,7 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 		$scope.ctxPreset[currentPresetId].ctxWidget[ctx.guid] = ctx;
 
-		console.log(ctx);
+		console.log('onCreateNewWidgetAndSavePreset',ctx);
 
 		var newbie = layoutEngine.ui.layout.box.create({
 			'w': 100,
@@ -644,10 +660,28 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 			
 			widget.appendTo(el.find('.contentbox'));
 			$timeout(function() {
-				var w = widget.find('widget')[0];
-				w.render(function() {
-					gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
-				});
+				if(ctx.type === 'alertbox') {
+					console.log('alertbox render', widget);
+					var w = widget[0];
+					w.setContext(ctx);
+					w.addEvent('close', function() {
+						var id = ctx.guid;
+						var target = function() {
+							return widget.parents('.k-d-col:first');
+						}
+						var presetId = function() {
+							return widget.parents('dockpanel:first').attr('id');
+						}
+						return $scope.onCloseWidget(id, target(), presetId());
+					});
+
+				}
+				else {
+					var w = widget.find('widget')[0];
+					w.render(function() {
+						gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+					});
+				}
 			}, 500)
 			
 
@@ -795,10 +829,27 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 			if(!WidgetService.isValidContext(ctx)) {
 				return;
 			}
-			var elWidget = angular.element(serviceWidget.buildWidget(name, ctx));
-			// var elWidget = angular.element(ctx.templa)
-			$scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;
-			elWidget.appendTo(el);
+			if(ctx.type === 'tabs') {
+				var elWidget = angular.element(serviceWidget.buildWidget(name, ctx));	
+				$scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;
+				elWidget.appendTo(el);
+			}
+			else {
+
+				// var wdf = WidgetService.list().filter(function(wd) {
+				// 	return wd.id === ctx.type;
+				// });
+				// console.log(wdf)
+				// var tmpl = wdf[0].template.replace(/\{\{guid\}\}/, ctx.guid);
+				// console.log(tmpl)
+				// var elAsset = angular.element(tmpl);
+				// $scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;
+				// elAsset.appendTo(el);
+				
+				var elWidget = angular.element(serviceWidget.buildWidget(name, ctx));
+				$scope.ctxPreset[name].ctxWidget[ctx.guid] = ctx;	
+				elWidget.appendTo(el);
+			}
 		});
 
 		$compile(el)($scope);
@@ -821,6 +872,20 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 				}
 			});
 			el.appendTo(target);
+
+
+			widgets.forEach(function(widget) {
+				if(widget.type === 'alertbox') {
+					var ab = el.find('alert-box#' + widget.guid);
+					ab[0].setContext(widget);
+					ab[0].addEvent('close', function() {
+						var id = widget.guid;
+						var target = ab.parents('.k-d-col:first');
+						var presetId = ab.parents('dockpanel:first').attr('id');
+						return $scope.onCloseWidget(id, target, presetId);
+					})
+				}
+			});
 		});
 	}
 
@@ -1407,6 +1472,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	$scope.numPagerPagesize = 100;
 
 	var dataChart;
+	var dataAlertBox;
 	
 	function getDefaultContext(type) {
 		if(type == "grid") {
@@ -1434,6 +1500,15 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 				}
 			}
 		}
+		else if(type == "alertbox") {
+			return {
+				'name': '',
+				'guid': serviceUtility.generateType2(),
+				'interval': 15,
+				'type': 'alertbox',
+				'data': undefined
+			}
+		}
 	}
 
 	function makeRemoveClassHandler(regex) {
@@ -1446,6 +1521,7 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 		$scope.isPageLoaded = false;
 		$scope.moreCol = false;
 		var newWidgetWin = $('.newWidget').removeClass(makeRemoveClassHandler(/^step/));
+
 		newWidgetWin[0].showDialog();
 			
 		$scope.go(0);
@@ -1578,6 +1654,28 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 			's3prev': function() {
 				return $scope.chartType.nextType;
 			}
+		},
+		{
+			'name': 'alertbox',
+			's0next': 1,
+			's0prevCallback': function() {
+				$scope.isPageLoaded = false;
+			},
+			's0nextCallback': function() {
+				$scope.ctxWidget = getDefaultContext('alertbox');
+				$('.qr1')[0].hideTable();
+				setTimeout(function() {
+					$('query-input textarea').focus();
+
+					$scope.selectedAsset = $scope.dataAssetTypes.filter(function(t) {
+						return t.id === 'alertbox';
+					}).first();
+
+					console.log($scope.selectedAsset)
+
+				}, 250);
+				
+			}
 		}
 	];
 	$scope.widgetType = wtypes[1];
@@ -1595,10 +1693,23 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 	}
 	$scope.selectedAsset;
 	$scope.onNextSelectAsset = function() {
-		$scope.selectedAsset.event.onNextStep();
+		var params = {
+			columns: $scope.qrCols,
+			model: $scope.qresult,
+			query: $scope.ctxWidget.data.query
+		};
+		$scope.selectedAsset.event.onNextStep(params);
 	}
 
 	$scope.dataAssetTypes = WidgetService.list();
+
+	eventSender.dashboard.openCommonSettingWindow = function(ctx) {
+		
+		$scope.go(3);
+		$('.newWidget')[0].showDialog();
+		$scope.ctxWidget.data = ctx;
+		console.log($scope.ctxWidget);
+	}
 
 	/** end new **/
 
@@ -1636,6 +1747,9 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 				submitGraph();	
 			}
 		}
+		else if ($scope.widgetType.name == 'alertbox') {
+			submitAlertbox();
+		}
 
 	}
 
@@ -1652,6 +1766,14 @@ function NewWidgetWizardController($scope, $filter, $translate, eventSender, ser
 
 		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
 		$('.newWidget')[0].hideDialog();
+	}
+
+
+	function submitAlertbox() {
+		console.log('submitAlertbox',$scope.ctxWidget);
+
+		eventSender.dashboard.onCreateNewWidgetAndSavePreset($scope.ctxWidget);
+		$('.newWidget')[0].hideDialog();	
 	}
 
 	// chart options
@@ -1766,149 +1888,4 @@ function WidgetPropertyController($scope, eventSender) {
 	}
 }
 
-logpresso.service('WidgetService', ['serviceUtility', function(serviceUtility){
-	var dataAssetTypes = [
-		{
-			name: 'Grid',
-			id: 'grid',
-			event: {
-				onNextStep: function() {
-					throw new TypeError('not implement');
-				}
-			},
-			validator: function(ctx) {
-				if(!angular.isNumber(ctx.interval)) {
-					throw new TypeError('interval-is-not-number');
-				}
 
-				if(angular.isUndefined(ctx.data))	{
-					return false;
-				}
-
-				if(!angular.isString(ctx.data.query)) {
-					return false;
-				}
-
-				// grid only
-				if(!angular.isArray(ctx.data.order)) {
-					return false;
-				}
-				return true;
-			},
-			template: '<div class="e-grid">GridDDD!!</div>'
-		},
-		{
-			name: 'Chart',
-			id: 'chart',
-			event: {
-				onNextStep: function() {
-					throw new TypeError('not implement');
-				}
-			},
-			validator: function(ctx) {
-				if(!angular.isNumber(ctx.interval)) {
-					throw new TypeError('interval-is-not-number');
-				}
-
-				if(angular.isUndefined(ctx.data))	{
-					return false;
-				}
-
-				if(!angular.isString(ctx.data.query)) {
-					return false;
-				}
-
-				// chart only
-				if(!/^(line|pie|bar)$/.test(ctx.data.type)) {
-					return false;
-				}
-
-				if(!angular.isArray(ctx.data.series)) {
-					return false;
-				}
-				return true;
-			}	
-		},
-		{
-			name: 'Wordcloud',
-			id: 'wordcloud',
-			event: {
-				onNextStep: function() {
-					throw new TypeError('not implement');
-				}
-			},
-			validator: function(ctx) {
-				if(!angular.isNumber(ctx.interval)) {
-					throw new TypeError('interval-is-not-number');
-				}
-
-				if(angular.isUndefined(ctx.data))	{
-					return false;
-				}
-
-				if(!angular.isString(ctx.data.query)) {
-					return false;
-				}
-				return true;
-			}	
-		},
-		{
-			name: 'Tabs',
-			id: 'tabs',
-			event: {
-				onNextStep: function() {
-					throw new TypeError('not implement');
-				}
-			},
-			validator: function() {
-				return true;
-			}
-		}
-	];
-
-	this.addAssetType = function(obj) {
-		dataAssetTypes.push(obj);
-		return obj;
-	}
-
-	this.validateWidgetContext = function(ctx) {
-		if(angular.isUndefined(ctx)) {
-			return false;
-		}
-
-		if(!angular.isString(ctx.guid)) {
-			return false;
-		}
-
-		if(!angular.isString(ctx.name)) {
-			return false;
-		}
-
-		if(!~dataAssetTypes.map(function(d) { return d.id; }).indexOf(ctx.type)) {
-			return false;
-		}
-
-		return true;
-	}
-
-	this.isValidContext = function(ctx) {
-		var f = dataAssetTypes.filter(function(assetDefinition) {
-			return assetDefinition.id === ctx.type;
-		});
-		if(f.length === 1) {
-			if(angular.isFunction(f[0].validator)) {
-				return f[0].validator(ctx);
-			}
-			else {
-				return false;
-			}
-		}
-		else {
-			throw new TypeError('no-definition');
-		}
-	}
-
-	this.list = function() {
-		return dataAssetTypes;
-	}
-}]);

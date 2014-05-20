@@ -9,6 +9,7 @@
 	serviceDashboard.addAssetType({
 		name: 'Time Series',
 		id: 'timeseries',
+		visible: true,
 		event: {
 			onNextStep: function() {
 				serviceDashboard.closeWizard();
