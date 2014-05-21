@@ -700,11 +700,31 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 			
 			widget.appendTo(el.find('.contentbox'));
 			$timeout(function() {
-				var w = widget.find('widget')[0];
-				w.render(function() {
-					gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
-				});
 
+
+				if(ctx.type === 'alertbox') {
+					console.log('alertbox render', widget);
+					var w = widget[0];
+					w.setContext(ctx);
+					w.addEvent('close', function() {
+						var id = ctx.guid;
+						var target = function() {
+							return widget.parents('.k-d-col:first');
+						}
+						var presetId = function() {
+							return widget.parents('dockpanel:first').attr('id');
+						}
+						return $scope.onCloseWidget(id, target(), presetId());
+					});
+
+				}
+				else {
+					var w = widget.find('widget')[0];
+					w.render(function() {
+						gt.registerCallback(w.id, refresh(w), w.getInterval() * ONE_SECOND);
+					});
+				}
+				
 				$scope.ctxPreset[currentPresetId].ctxWidget[ctx.guid] = ctx;
 				OnPresetChanged(currentPresetId); // save state
 			}, 500)

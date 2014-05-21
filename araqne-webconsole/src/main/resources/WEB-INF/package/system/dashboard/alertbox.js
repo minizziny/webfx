@@ -36,11 +36,43 @@
 		var dataSourceFirstRow;
 
 		setDataSource = function(src) {
+			console.log($scope.formAlertBox)
 			$scope.formAlertBox.$setPristine();
 
 			dataSourceFirstRow = src.model[0];
 			$scope.dataColumns = src.columns;
 			$scope.selectedColumn = $scope.dataColumns[0];
+			
+
+
+			//reset
+			$scope.boundary			= 0;
+			$scope.operaterlists	= {};
+			$scope.colorlists		= {};
+			$scope.isOnSubmit		= false;
+			$scope.setcolor			= "";
+
+
+			$scope.context = {
+				column: undefined,
+				label: '',
+				rules: [],
+				prefix: '',
+				suffix: '',
+				query: '',
+				formatting: undefined,
+				default_color: '#EEEEEE'	
+			};
+
+			$scope.hasComma = false;
+			$scope.hasPoint	= false;
+			$scope.lenPoint = 2;
+
+
+			$scope.init();
+
+			//reset end
+
 			$scope.context.query = src.query;
 		}
 
@@ -48,8 +80,6 @@
 			$scope.context.column = val.name;
 			$scope.numSample = dataSourceFirstRow[val.name];
 		});
-
-		$scope.numSample = 0;
 
 
 		$scope.boundary			= 0;
@@ -130,7 +160,7 @@
 			console.log($scope.context);
 
 			$('.mdlAlertBoxController')[0].hideDialog();
-			serviceDashboard.onCreateNewWidgetData($scope.context);
+			serviceDashboard.onCreateNewWidgetData(angular.copy($scope.context));
 		}
 
 	};
