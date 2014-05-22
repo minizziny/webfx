@@ -3,7 +3,7 @@
 /* jasmine specs for directives go here */
 
 describe('services', function() {
-	var INTERVAL = 200;
+	var INTERVAL = 100;
 
 	var tester;
 	beforeEach(function() {
@@ -40,7 +40,7 @@ describe('services', function() {
 			}, INTERVAL + 100);
 
 			runs(function() {
-				expect(true).toBe(true);
+				expect(viewEl.find('svg > g > text:first').text()).toEqual('www.facebook.com');
 			});
 		});
 
@@ -68,7 +68,7 @@ describe('services', function() {
 			}, INTERVAL + 100);
 
 			runs(function() {
-				expect(true).toBe(true);
+				expect(viewEl.find('svg > g > text:first').text()).toEqual('www.facebook.com');
 			});
 		});
 
