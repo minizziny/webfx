@@ -1,4 +1,4 @@
-angular.module('app.chart', [])
+angular.module('app.chart', ['app.utility'])
 .factory('serviceChart', function(serviceUtility) {
 	var tooltip = angular.element('#tooltip')
 
