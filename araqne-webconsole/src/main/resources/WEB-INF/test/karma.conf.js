@@ -8,6 +8,8 @@ module.exports = function(config){
       'lib/angular/angular-1.2.16.js',
       'lib/angular/angular-route.js',
       'lib/angular/angular-translate.js',
+      'lib/d3/d3.js',
+      'lib/d3/d3.layout.cloud.js',
       'node_modules/ng-midway-tester/src/ngMidwayTester.js',
       'bower_components/angular-mocks/angular-mocks.js',
       'lib/highcharts/highcharts.js',

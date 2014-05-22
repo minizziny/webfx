@@ -3,6 +3,7 @@
 /* jasmine specs for directives go here */
 
 describe('directives', function() {
+	var INTERVAL = 200;
 
 	var tester;
 	beforeEach(function() {
@@ -29,14 +30,14 @@ describe('directives', function() {
 				// runs 블록은 순차적으로 실행할 것입니다.
 				setTimeout(function() {
 					flag = true;
-				}, 1000);
+				}, INTERVAL);
 			});
 
 			waitsFor(function() {
 				// 여기는 flag 가 true 가 될때까지 반복적으로 기다립니다.
 				// 화면에 directive 를 뿌리기 위해 이러한 코드를 넣었습니다.
 				return flag;
-			}, 1100);
+			}, INTERVAL + 100);
 
 			runs(function() {
 				expect(viewEl.find('pie').hasClass('ng-scope')).toBe(true);
@@ -56,18 +57,18 @@ describe('directives', function() {
 				setTimeout(function() {
 					scope.dataPie.push('aa');
 					scope.$apply();
-				}, 1000);
+				}, INTERVAL);
 
 				setTimeout(function() {
 					flag = true;
-				}, 2000);
+				}, INTERVAL + INTERVAL);
 			});
 
 			waitsFor(function() {
 				// 여기는 flag 가 true 가 될때까지 반복적으로 기다립니다.
 				// 화면에 directive 를 뿌리기 위해 이러한 코드를 넣었습니다.
 				return flag;
-			}, 2100);
+			}, INTERVAL + INTERVAL + 100);
 
 			runs(function() {
 				// expect(viewEl.find('pie').text()).toEqual('chart pie');

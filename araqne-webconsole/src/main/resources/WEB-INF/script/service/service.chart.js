@@ -371,7 +371,7 @@ angular.module('app.chart', ['app.utility'])
 		var maxValue = Math.max.apply(this, result.map(function(item) { return item[colNameNumber]} ));
 		var fill = d3.scale.category20();
 		var fontSize = d3.scale.linear().range([11, 80]);
-		fontSize.domain([1, maxValue]);
+		fontSize.domain([1, maxValue*2]);
 
 		el = $(el);
 		el.empty();
