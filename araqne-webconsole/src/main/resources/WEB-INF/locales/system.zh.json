@@ -1,6 +1,6 @@
 {
 	"$S_str_More": "更多",
-	"$S_str_Apps": "Apps",
+	"$S_str_Apps": "应用程序",
 
 	"--------orgchart--------": "",
 	"$S_str_RemoveOrganization": "删除部门",
@@ -126,6 +126,11 @@
 
 	"$S_msg_BeforeAddWidgetNotifyDragAndDrop": "可通过拖拽操作添加widget。",
 	"$S_msg_NoWidget": "没有widget,请添加widget!",
+
+	"$S_str_Tab": "标签",
+	"$S_msg_PleaseInputTabName":"请输入标签名称。",
+	"$S_msg_BeforeRemoveTabNotifyAllRemove": "如果删除标签，将会同时删除标签页面中的图表。确信要继续吗？",
+	"$S_msg_SetStartTab": "被设置为首页标签。",
 	
 	"--------widget--------": "",
 	"$S_msg_UnknownError": "未知错误",
@@ -754,12 +759,12 @@
 	"$S_str_HostAddress": "主机地址",
 	"$S_str_NewFtpProfile": "创建FTP配置(profile)",
 	"$S_str_FtpPort": "FTP端口",
-	"$S_str_Timeout": "Timeout",
+	"$S_str_Timeout": "超时",
 	"$S_str_CreateFtpProfile": "创建FTP配置(profile)",
 	"$S_str_RemoveFtpProfile": "删除FTP配置(profile)",
 	"$S_str_User": "用户", 
 	"$S_str_ActiveMode": "主动模式", 
-	"$S_str_ExtendedPAssiveMode": "Use Extended Passive mode",
+	"$S_str_ExtendedPAssiveMode": "扩展被动模式",
 	"$S_msg_RemoveFtpProfileConfirmPre": "确信要删除FTP配置(profile)",
 
 	"--------ssh config-----------": "",
