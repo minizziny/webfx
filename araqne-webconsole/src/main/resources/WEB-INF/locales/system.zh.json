@@ -31,7 +31,7 @@
 	"$S_msg_ChangePassword": "修改用户{{p0}}的口令",
 	"$S_str_Password": "口令",
 	"$S_msg_PasswordInadequacyError": "密码长度不能少于9个字符，须由英文字符、数字及特殊字符组成。",
-	"$S_str_PasswordRetype": "确认口令", //modifed
+	"$S_str_PasswordRetype": "确认口令",
 	"$S_msg_PasswordMismatchError": "输入口令不一致。",
 	"$S_msg_NameRequiredError": "请输入名称。",
 	"$S_str_Title": "职位",
@@ -49,9 +49,9 @@
 	"$S_str_ReadPrivilege": "读权限",
 	"$S_plr_Item": "个",
 	"$S_plr_Items": "个",
-	"$S_msg_AvailableTableCount": "授权访问如下{{p0}}个数据表",//modifed
-	"$S_msg_AvailableTableCountMore": "继续查看{{p0}}个授权访问数据表..",//modifed
-	"$S_str_RemoveThisUser": "删除用户",//modifed
+	"$S_msg_AvailableTableCount": "授权访问如下{{p0}}个数据表",
+	"$S_msg_AvailableTableCountMore": "继续查看{{p0}}个授权访问数据表..",
+	"$S_str_RemoveThisUser": "删除用户",
 	"$S_str_Change": "应用",
 	"$S_str_RemoveUser": "删除用户",
 	"$S_msg_RemoveUserConfirmPre": "确信要删除用户",
@@ -89,7 +89,7 @@
 	"$S_msg_QueryData": "请输入查询命令，将根据查询结果生成图表。",
 	"$S_str_SelectAndReorderColumn": "字段排列",
 	"$S_msg_SelectAndReorderColumn": "请选择字段并在右侧列表中进行拖拽调整字段顺序。",
-	"$S_str_WidgetCommonSetting": "常规设置",//modifed
+	"$S_str_WidgetCommonSetting": "常规设置",
 	"$S_msg_WidgetCommonSetting": "请输入图表名称及数据刷新周期。",
 	"$S_str_Interval": "刷新周期",
 	"$S_str_Second": "秒",
@@ -524,8 +524,8 @@
 	"$S_str_PrimaryLoggerSetting": "主采集器设置",
 	"$S_msg_EnterLoggerName": "请输入数据采集器名称。",
 
-	"$S_msg_PrimaryLoggerSetting": "请选择备用采集器。当指定的时间内主采集器无应答时，将会自动由备用采集器接管采集。相反，当备用采集器工作期间主采集器恢复正常，将会自动切换到主采集器进行采集。",//added
-	"$S_msg_BackupLoggerSetting": "请选择主采集器。备用采集器实时监控主采集器并记录其工作状态。同时，当主采集器恢复工作时，从备用采集器最后工作状态开始进行采集。",//added
+	"$S_msg_PrimaryLoggerSetting": "请选择备用采集器。当指定的时间内主采集器无应答时，将会自动由备用采集器接管采集。相反，当备用采集器工作期间主采集器恢复正常，将会自动切换到主采集器进行采集。",
+	"$S_msg_BackupLoggerSetting": "请选择主采集器。备用采集器实时监控主采集器并记录其工作状态。同时，当主采集器恢复工作时，从备用采集器最后工作状态开始进行采集。",
 
 	"$S_str_HASetting": "双机设置",
 	"$S_msg_HASettingSetPrimaryOnWizard": "创建当前采集器的备用采集器。",
