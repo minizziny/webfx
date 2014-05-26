@@ -415,7 +415,8 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 	}
 
 	$scope.addTab = function(tabdata, e, preset) {
-		var newTabName = prompt('탭 이름을 입력하세요.', 'Tab ' + (tabdata.length + 1));
+		var msgPleaseInsertName = $filter('translate')('$S_msg_PleaseInputTabName');
+		var newTabName = prompt(msgPleaseInsertName, 'Tab ' + (tabdata.length + 1));
 		if(newTabName == null) return;
 
 		var tabctx = {
@@ -438,7 +439,8 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 	}
 
 	$scope.closeTab = function(tab, preset, widget, e) {
-		var sure = confirm('이 탭을 삭제하면 탭 안의 위젯도 삭제됩니다. 계속하시겠습니까?');
+		var msgBeforeRemove = $filter('translate')('$S_msg_BeforeRemoveTabNotifyAllRemove');
+		var sure = confirm(msgBeforeRemove);
 		if(!sure) return;
 
 		var tabs = $scope.ctxPreset[preset].ctxWidget[widget].data.tabs;
@@ -462,7 +464,11 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 		
 		tabs[idx].is_active = true;
 		OnPresetChanged(preset); // save state
-		notify('success', '탭 ' + tab.name + '(이)가 시작 탭으로 설정되었습니다.' , true);
+
+		var strTab = $filter('translate')('$S_str_Tab');
+		var msgSetStartTab = $filter('translate')('$S_msg_SetStartTab');
+
+		notify('success', strTab + ' ' + tab.name + msgSetStartTab, true);
 
 	}
 
