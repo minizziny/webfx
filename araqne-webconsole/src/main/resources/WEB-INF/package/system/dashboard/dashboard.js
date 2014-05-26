@@ -467,7 +467,6 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 
 		var strTab = $filter('translate')('$S_str_Tab');
 		var msgSetStartTab = $filter('translate')('$S_msg_SetStartTab');
-
 		notify('success', strTab + ' ' + tab.name + msgSetStartTab, true);
 
 	}
