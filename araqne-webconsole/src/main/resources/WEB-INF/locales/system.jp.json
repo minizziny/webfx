@@ -725,6 +725,7 @@
 	"--------audit log--------": "",
 	"$S_str_AuditLog": "監査ログ",
 	"$S_str_Duration": "期間",
+	"$S_str_AuditLogFrom": " から",
 	"$S_str_To": "まで",
 	"$S_str_Action": "行為",
 	"$S_str_Success": "成功",
