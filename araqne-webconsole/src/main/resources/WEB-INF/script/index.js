@@ -22,7 +22,9 @@ var logpresso = angular.module('app', [
 	'app.events',
 	'app.extension',
 	'logpresso.extension',
-	'ui.tree'
+	'ui.tree',
+	'ngRoute',
+	'ajoslin.promise-tracker'
 ], function() {
 });
 
