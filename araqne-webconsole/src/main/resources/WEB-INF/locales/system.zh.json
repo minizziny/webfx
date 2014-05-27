@@ -747,6 +747,7 @@
 	"$S_msg_PleaseSelectParserName" : "请输入数据解析器名称。",
 
 	"--------transformer config-----------": "",
+	"$S_str_Transformer": "转换器",
 	"$S_str_TransformerSetting": "转换器设置",
 	"$S_str_TransformerType": "转换器类型",
 	"$S_str_SelectTransformerType": "选择转换器类型",
@@ -757,6 +758,7 @@
 	"$S_msg_RemoveTransformerConfirmPre": "确信要删除转换器",
 
 	"--------ftp config-----------": "",
+	"$S_str_FtpProfile": "FTP设置",
 	"$S_str_FtpSetting": "FTP设置",
 	"$S_str_HostAddress": "服务器地址",
 	"$S_str_NewFtpProfile": "创建",
@@ -770,6 +772,7 @@
 	"$S_msg_RemoveFtpProfileConfirmPre": "确信要删除FTP设置",
 
 	"--------ssh config-----------": "",
+	"$S_str_SshProfile": "SSH设置",
 	"$S_str_SshSetting": "SSH设置",
 	"$S_str_SshProfileSetting": "SSH设置",
 	"$S_str_NewSshProfile" : "创建",
@@ -779,6 +782,7 @@
 	"$S_msg_RemoveSshProfileConfirmPre": "确信要删除SSH设置",
 
 	"--------jdbc config-----------": "",
+	"$S_str_JdbcProfile": "JDBC设置",
 	"$S_str_JdbcSetting": "JDBC设置",
 	"$S_str_JdbcProfileSetting": "JDBC设置",
 	"$S_str_ConnectionString": "连接字符串",
@@ -789,6 +793,7 @@
 	"$S_msg_RemoveJdbcProfileConfirmPre": "确信要删除JDBC设置",
 
 	"--------hdfs config-----------": "",
+	"$S_str_Hdfs": "HDFS",
 	"$S_str_HdfsSetting": "HDFS设置",
 	"$S_str_HDFSPath": "HDFS路径",
 	"$S_str_NewHdfs" : "创建",
@@ -797,6 +802,7 @@
 	"$S_msg_RemoveHdfsConfirmPre": "确信要删除HDFS设置",
 
 	"--------apikey config-----------": "",
+	"$S_str_ApiKeyProfile": "API密钥设置",
 	"$S_str_ApiKeySetting": "API密钥设置",
 	"$S_str_CreateNewAPIKey": "创建",
 	"$S_str_APIKey": "API密钥",
@@ -805,6 +811,7 @@
 	"$S_msg_RemoveApiConfirmPre": "确信要删除API密钥",
 
 	"--------crypto config-----------": "",
+	"$S_str_CryptoProfile": "加密/完整性设置",
 	"$S_str_CryptoSetting": "加密/完整性设置",
 	"$S_str_NewCrypto": "创建",
 	"$S_str_Cipher": "加密算法",
@@ -816,6 +823,7 @@
 	"$S_msg_RemoveCryptoConfirmPre": "确信要删除加密设置",
 
 	"--------index cache config-----------": "",
+	"$S_str_IndexCache": "索引缓存",
 	"$S_str_IndexCacheSetting": "索引缓存设置",
 	"$S_str_CleanIndexCache": "删除索引缓存",
 	"$S_str_Type": "类型",
@@ -827,6 +835,7 @@
 	"$S_msg_RemoveIndexCacheConfirmPre": "确信要删除索引缓存",
 
 	"--------federation config-----------": "",
+	"$S_str_Federation": "集群",
 	"$S_str_FederationSetting": "集群设置",
 	"$S_str_Address": "IP地址",
 	"$S_str_RegisterFederationNode": "添加节点",
@@ -842,6 +851,7 @@
 	"$S_str_SmtpPort": "SMTP服务器端口",
 	"$S_str_SmtpUser": "SMTP账户",
 	"$S_msg_RemoveSmtpConfirmPre": "确信要删除SMTP设置",
+
 	"--------common config msg-----------": "",
 	"$S_msg_PleaseEnterProfileName": "请输入设置名称。",
 	"$S_msg_PleaseEnterSshProfileName": "请输入设置名称。",
