@@ -725,6 +725,7 @@
 	"--------audit log--------": "",
 	"$S_str_AuditLog": "감사 로그",
 	"$S_str_Duration": "기간",
+	"$S_str_AuditLogFrom": "부터",
 	"$S_str_To": "까지",
 	"$S_str_Action": "행위",
 	"$S_str_Success": "성공",

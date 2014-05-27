@@ -138,7 +138,7 @@ public class InitialSchema {
 		programApi.removePrograms(DEFAULT_DOMAIN, deleteProgramNames);
 
 		Program home = createProgram(context, programApi, "Home", "Home", "홈", "ホーム", "首页", "starter", 1);
-		Program dashBoard = createProgram(context, programApi, "Dashboard", "Dashboard", "대시보드", "ダッシュボード", "仪表板", "dashboard", 2);
+		Program dashBoard = createProgram(context, programApi, "Dashboard", "Dashboard", "대시보드", "ダッシュボード", "仪表盘", "dashboard", 2);
 		Program account = createProgram(context, programApi, "Account", "Accounts", "계정관리", "アカウント管理", "账户管理", "orgchart", 3);
 		Program auditLog = createProgram(context, programApi, "Audit Log", "Audit Log", "감사로그", "監査ログ", "审计日志", "auditlog", 4);
 
