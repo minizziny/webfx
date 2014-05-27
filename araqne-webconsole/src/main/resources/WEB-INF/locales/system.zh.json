@@ -31,7 +31,7 @@
 	"$S_msg_ChangePassword": "修改用户{{p0}}的口令",
 	"$S_str_Password": "口令",
 	"$S_msg_PasswordInadequacyError": "密码长度不能少于9个字符，须由英文字符、数字及特殊字符组成。",
-	"$S_str_PasswordRetype": "确认口令", 
+	"$S_str_PasswordRetype": "确认口令",
 	"$S_msg_PasswordMismatchError": "输入口令不一致。",
 	"$S_msg_NameRequiredError": "请输入名称。",
 	"$S_str_Title": "职位",
