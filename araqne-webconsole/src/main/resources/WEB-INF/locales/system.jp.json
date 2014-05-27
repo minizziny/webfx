@@ -127,6 +127,11 @@
 	"$S_msg_BeforeAddWidgetNotifyDragAndDrop": "ドラッグ・アンド・ドロップしてウィジェットをドッキングすると追加が完了されます",
 	"$S_msg_NoWidget": "ウィジェットがありません。新しいウィジェットを追加してください",
 
+	"$S_str_Tab": "タブ",
+	"$S_msg_PleaseInputTabName":"タブの名前を入力してください。",
+	"$S_msg_BeforeRemoveTabNotifyAllRemove": "このタブを削除すると中のウィジェットも削除されます。続きますか？",
+	"$S_msg_SetStartTab": "が開始タブに設定されました。",
+
 	"--------widget--------": "",
 	"$S_msg_UnknownError": "原因不明のエラー",
 	"$S_msg_OccurError": "エラーが発生しました",
@@ -720,6 +725,7 @@
 	"--------audit log--------": "",
 	"$S_str_AuditLog": "監査ログ",
 	"$S_str_Duration": "期間",
+	"$S_str_AuditLogFrom": " から",
 	"$S_str_To": "まで",
 	"$S_str_Action": "行為",
 	"$S_str_Success": "成功",
