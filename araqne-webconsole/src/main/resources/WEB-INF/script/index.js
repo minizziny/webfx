@@ -3,6 +3,7 @@ var proc = { pid: 0 };
 
 var logpresso = angular.module('app', [
 	'app.directive',
+	'app.directive.cron',
 	'app.directive.logdb',
 	'app.directive.tree',
 	'app.directive.widget',
