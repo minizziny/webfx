@@ -101,8 +101,8 @@ angular.module('app.filter', ['pascalprecht.translate'])
 		return d3.time.format(outputformat)(date);
 	}
 })
-.filter('stringifyCron', function(serviceUtility) {
+.filter('cronStringify', function(serviceUtility) {
 	return function(val) {
-		return serviceUtility.cronStringify(val);
+		return serviceUtility.cronStringify(val, 'every_day');
 	}
 });
