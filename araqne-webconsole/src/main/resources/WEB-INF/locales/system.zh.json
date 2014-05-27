@@ -114,6 +114,7 @@
 	"$S_str_WordCloud": "词汇云",
 	"$S_str_Preview": "预览",
 	"$S_msg_ClickNextToContinue": "单击【下一步】继续。",
+
 	"$S_str_Autosave": "自动保存",
 	"$S_msg_SavePresetAs": "请输入模板名称。",
 	"$S_msg_NewPresetName": "请输入模板名称。",
@@ -132,8 +133,6 @@
 	"$S_msg_SetStartTab": "被设置为首页标签。",
 
 	"--------widget--------": "",
-	"$S_msg_QueryRunCount": "执行{{p0}}次查询",
-	"$S_msg_QueryRunInterval": "每{{p0}}秒执行一次",
 	"$S_msg_UnknownError": "未知错误",
 	"$S_msg_OccurError": "发生错误。",
 	"$S_msg_WidgetProperty": "在这里可以编辑图表属性。",
@@ -215,6 +214,7 @@
 	"$S_str_Close": "关闭",
 
 	"$S_str_SubQuery": "子查询",
+
 	"$S_str_SaveThisQuery": "保存查询",
 	"$S_str_QueryName": "查询名称",
 
@@ -313,6 +313,8 @@
 	"$S_str_Saturday": "星期六",
 	"$S_str_Date": "日期",
 	"$S_str_DayOfWeek": "星期",
+	"$S_str_PerMonthPre" : "",
+	"$S_str_PerMonthPost": "月",
 	"$S_str_PerMonth": "月",
 	"$S_str_DateTh": "日",
 	"$S_str_RemoveScheduledQuery": "删除已预约查询",
@@ -364,6 +366,7 @@
 	"$S_msg_Oct": "10月",
 	"$S_msg_Nov": "11月",
 	"$S_msg_Dec": "12月",
+
 	"--------logsource--------": "",
 	"$S_str_Logger": "数据采集器",
 	"$S_str_LoggerTree": "本地",
@@ -467,6 +470,7 @@
 	"$S_msg_IsClosed" : "没有连接代理采集器。",
 	"$S_msg_RpcTimeout" : "远程过程调用超时。",
 	"$S_msg_IntervalCannotBeZero" : "周期不能为0。",
+	"$S_msg_SameSyslogMapping": "存在相同的syslog映射。",
 
 	"$S_str_Category": "项目",
 	"$S_str_MacAddress": "MAC地址",
@@ -542,8 +546,7 @@
 	"$S_str_NoLoggerOnList": "添加数据采集器...",
 	"$S_msg_SelectedLoggerPre": "数据采集器 ",
 	"$S_msg_SelectedLoggerPost": " 已选中。",
-	"$S_msg_WarningStopLoggerBeforeRemovalPost": "",
-	"$S_msg_StopLoggerFirst": "请先停止数据采集器。",
+
 	"$S_str_Skip": "跳过",
 
 	"--------license--------": "",
@@ -713,27 +716,22 @@
 	"$S_str_SelectTokenizer": "请选择索引分隔符",
 	"$S_str_DefaultValueDescription": "如果不输入，将设置为默认值。",
 	"$S_str_NameValidationErrorMsg" : "名称需由英文字符，数字，'-' ，'_'组成。",
+	"$S_str_EmailValidationErrorMsg" : "메일 주소는 영어, 숫자, '_' + '@' + 도메인 으로 구성되어야 합니다.",
 	"$S_str_AlreadyExistsMsg": "数据表已经存在。",
 
 	"--------index--------": "",
 	"$S_str_ValidateDateFormat": "日期格式为yyyymmdd。",
 	"$S_str_InvalidateDateFormat": "无效日期格式。",
 
-	"$S_str_Sunday": "星期日",
-	"$S_str_Monday": "星期一",
-	"$S_str_Tuesday": "星期二",
-	"$S_str_Wednesday": "星期三",
-	"$S_str_Thursday": "星期四",
-	"$S_str_Friday": "星期五",
-	"$S_str_Saturday": "星期六",
-
 	"--------audit log--------": "",
 	"$S_str_AuditLog": "审计日志",
 	"$S_str_Duration": "时间",
+	"$S_str_AuditLogFrom" : "~",
 	"$S_str_To": "到",
 	"$S_str_Action": "操作",
 	"$S_str_Success": "成功",
 	"$S_str_Failed": "失败",
+	"$S_str_Details": "内容",
 
 	"--------config-----------": "",
 	"--------parser config-----------": "",
