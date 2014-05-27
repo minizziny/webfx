@@ -131,7 +131,7 @@
 	"$S_msg_PleaseInputTabName":"请输入标签名称。",
 	"$S_msg_BeforeRemoveTabNotifyAllRemove": "如果删除标签，将会同时删除标签页面中的图表。确信要继续吗？",
 	"$S_msg_SetStartTab": "被设置为首页标签。",
-	
+
 	"--------widget--------": "",
 	"$S_msg_UnknownError": "未知错误",
 	"$S_msg_OccurError": "发生错误。",
@@ -281,7 +281,7 @@
 	"$S_str_ScheduledQuery": "已预约查询",
 	"$S_str_IsSaveThisQueryResult": "是否保存查询结果",
 	"$S_str_IsUseAlert": "是否启用报警",
-	"$S_str_RunQueryString": "查询语句", 
+	"$S_str_RunQueryString": "查询语句",
 	"$S_str_AlertQueryString": "报警语句",
 	"$S_str_SuppressInterval": "忽略周期",
 	"$S_str_MailProfileName": "邮件属性",
@@ -458,8 +458,8 @@
 	"$S_msg_SentryNotFound" : "没找到Sentry。",
 	"$S_msg_SentryNotConnected" : "无法连接Sentry。",
 	"$S_msg_LoggerFactoryNotFound" : "无法找到Logger factory。",
-	"$S_msg_LoggerAlreadyExists" : "Logger已存在。",	
-	"$S_msg_DuplicatedManagedLoggerExists" : "logger已存在。",		
+	"$S_msg_LoggerAlreadyExists" : "Logger已存在。",
+	"$S_msg_DuplicatedManagedLoggerExists" : "logger已存在。",
 	"$S_msg_LoggerNameMustNotBeNull" : "请输入Logger名称。",
 	"$S_msg_AlreadyConnectedLoggerRegistry" : "已连接到logger添加设置。",
 	"$S_msg_RemoteLoggerNotFoundOnLoggerRegistry" : "没找到远程logger。",
@@ -470,7 +470,7 @@
 	"$S_msg_RpcTimeout" : "远程过程调用超时。",
 	"$S_msg_IntervalCannotBeZero" : "周期不能为0。",
 	"$S_msg_SameSyslogMapping": "Same syslog mapping already exists.",
-	
+
 	"$S_str_Category": "项目",
 	"$S_str_MacAddress": "MAC地址",
 	"$S_str_DiskLetter": "驱动器名称",
@@ -565,7 +565,7 @@
 	"$S_str_Refresh": "刷新",
 	"$S_str_Volume": "大小",
 	"$S_str_AlertRecent30Day": "最近30天报警内容",
-	"$S_str_AlertDate": "报警日期",	
+	"$S_str_AlertDate": "报警日期",
 
 	"$S_str_RemoveLicense": "卸载证书",
 	"$S_msg_RemoveLicenseConfirm": "确信要卸载该证书吗?",
@@ -601,7 +601,7 @@
 	"$S_str_RegexHelp": "正则表达式帮助",
 
 	"$S_str_UseLinePatternMatch": "行模式匹配",
-	
+
 	"--------regexhelp--------": "",
 	"$S_str_RegexHelp1": "匹配a或b或c",
 	"$S_str_RegexHelp2": "匹配a,b,c之外的任意一个字符",
@@ -649,8 +649,8 @@
 	"$S_str_DateFormatHelp16": "秒",
 	"$S_str_DateFormatHelp17": "毫秒",
 	"$S_str_DateFormatHelp18": "时区",
-	"$S_str_DateFormatHelp19": "时区(RFC 822)",	
-	
+	"$S_str_DateFormatHelp19": "时区(RFC 822)",
+
 	"--------table--------": "",
 	"$S_str_Table": "数据表",
 	"$S_str_TableList": "数据表",
@@ -762,8 +762,8 @@
 	"$S_str_Timeout": "超时",
 	"$S_str_CreateFtpProfile": "创建FTP配置(profile)",
 	"$S_str_RemoveFtpProfile": "删除FTP配置(profile)",
-	"$S_str_User": "用户", 
-	"$S_str_ActiveMode": "主动模式", 
+	"$S_str_User": "用户",
+	"$S_str_ActiveMode": "主动模式",
 	"$S_str_ExtendedPAssiveMode": "扩展被动模式",
 	"$S_msg_RemoveFtpProfileConfirmPre": "确信要删除FTP配置(profile)",
 
@@ -775,7 +775,7 @@
 	"$S_str_SshPort": "SSH端口",
 	"$S_str_CreateSshProfile": "创建SSH配置(profile)",
 	"$S_str_RemoveSshprofile": "删除SSH配置(profile)",
-	"$S_msg_RemoveSshProfileConfirmPre": "确信要删除SSH配置",	
+	"$S_msg_RemoveSshProfileConfirmPre": "确信要删除SSH配置",
 
 	"--------jdbc config-----------": "",
 	"$S_str_JdbcProfile": "JDBC设置",
@@ -785,7 +785,7 @@
 	"$S_str_NewJdbcProfile" : "创建JDBC配置(profile)",
 	"$S_str_Readonly" : "只读",
 	"$S_str_CreateJdbcProfile": "创建JDBC配置(profile)",
-	"$S_str_RemoveJdbcProfile": "删除JDBC配置(profile)",	
+	"$S_str_RemoveJdbcProfile": "删除JDBC配置(profile)",
 	"$S_msg_RemoveJdbcProfileConfirmPre": "确信要删除JDBC配置(profile)",
 
 	"--------hdfs config-----------": "",
@@ -840,7 +840,7 @@
 	"$S_str_DeactiveStatus": "Deactive",
 	"$S_str_ConnectionFailed": "Connection Failed",
 	"$S_str_RemoveNode": "注销节点",
-	"$S_msg_RemoveNodeConfirmPre": "确信要删除节点",	
+	"$S_msg_RemoveNodeConfirmPre": "确信要删除节点",
 
 	"--------smtp config-----------": "",
 	"$S_str_SmtpProfile": "SMTP属性设置",
@@ -853,7 +853,7 @@
 
 	"--------common config msg-----------": "",
 	"$S_msg_PleaseEnterProfileName": "请输入配置(profile)名称。",
-	"$S_msg_PleaseEnterSshProfileName": "请输入配置(profile)名称。",	
+	"$S_msg_PleaseEnterSshProfileName": "请输入配置(profile)名称。",
 	"$S_msg_RemoveConfirmPost": "?",
 	"$S_msg_CleanConfirmPost": "?",
 	"$S_msg_PleaseEnterFtpProfileName" : "请输入配置(profile)名称。",
