@@ -31,7 +31,7 @@
 	"$S_msg_ChangePassword": "修改用户{{p0}}的口令",
 	"$S_str_Password": "口令",
 	"$S_msg_PasswordInadequacyError": "密码长度不能少于9个字符，须由英文字符、数字及特殊字符组成。",
-	"$S_str_PasswordRetype": "确认口令", //modifed
+	"$S_str_PasswordRetype": "确认口令", 
 	"$S_msg_PasswordMismatchError": "输入口令不一致。",
 	"$S_msg_NameRequiredError": "请输入名称。",
 	"$S_str_Title": "职位",
@@ -49,9 +49,9 @@
 	"$S_str_ReadPrivilege": "读权限",
 	"$S_plr_Item": "个",
 	"$S_plr_Items": "个",
-	"$S_msg_AvailableTableCount": "授权访问如下{{p0}}个数据表",//modifed
-	"$S_msg_AvailableTableCountMore": "继续查看{{p0}}个授权访问数据表..",//modifed
-	"$S_str_RemoveThisUser": "删除用户",//modifed
+	"$S_msg_AvailableTableCount": "授权访问如下{{p0}}个数据表",
+	"$S_msg_AvailableTableCountMore": "继续查看{{p0}}个授权访问数据表..",
+	"$S_str_RemoveThisUser": "删除用户",
 	"$S_str_Change": "应用",
 	"$S_str_RemoveUser": "删除用户",
 	"$S_msg_RemoveUserConfirmPre": "确信要删除用户",
@@ -89,7 +89,7 @@
 	"$S_msg_QueryData": "请输入查询命令，将根据查询结果生成图表。",
 	"$S_str_SelectAndReorderColumn": "字段排列",
 	"$S_msg_SelectAndReorderColumn": "请选择字段并在右侧列表中进行拖拽调整字段顺序。",
-	"$S_str_WidgetCommonSetting": "常规设置",//modifed
+	"$S_str_WidgetCommonSetting": "常规设置",
 	"$S_msg_WidgetCommonSetting": "请输入图表名称及数据刷新周期。",
 	"$S_str_Interval": "刷新周期",
 	"$S_str_Second": "秒",
@@ -111,7 +111,7 @@
 	"$S_str_AxisX": "X轴",
 	"$S_str_NullToZero": "空值表示为0",
 
-	"$S_str_WordCloud": "词汇云", 
+	"$S_str_WordCloud": "词汇云",
 	"$S_str_Preview": "预览",
 	"$S_msg_ClickNextToContinue": "单击【下一步】继续。",
 	"$S_str_Autosave": "自动保存",
@@ -130,7 +130,7 @@
 	"$S_msg_PleaseInputTabName":"请输入标签名称。",
 	"$S_msg_BeforeRemoveTabNotifyAllRemove": "如果删除标签，将会同时删除标签页面中的图表。确信要继续吗？",
 	"$S_msg_SetStartTab": "被设置为首页标签。",
-	
+
 	"--------widget--------": "",
 	"$S_msg_QueryRunCount": "执行{{p0}}次查询",
 	"$S_msg_QueryRunInterval": "每{{p0}}秒执行一次",
@@ -281,7 +281,7 @@
 	"$S_str_ScheduledQuery": "预约查询列表",
 	"$S_str_IsSaveThisQueryResult": "是否保存查询结果",
 	"$S_str_IsUseAlert": "是否启用报警",
-	"$S_str_RunQueryString": "查询语句", 
+	"$S_str_RunQueryString": "查询语句",
 	"$S_str_AlertQueryString": "报警语句",
 	"$S_str_SuppressInterval": "忽略周期",
 	"$S_str_MailProfileName": "邮件属性",
@@ -456,8 +456,8 @@
 	"$S_msg_SentryNotFound" : "没找到代理采集器。",
 	"$S_msg_SentryNotConnected" : "无法连接代理采集器。",
 	"$S_msg_LoggerFactoryNotFound" : "无法找到采集器工厂。",
-	"$S_msg_LoggerAlreadyExists" : "数据采集器已存在。",	
-	"$S_msg_DuplicatedManagedLoggerExists" : "数据采集器已存在。",		
+	"$S_msg_LoggerAlreadyExists" : "数据采集器已存在。",
+	"$S_msg_DuplicatedManagedLoggerExists" : "数据采集器已存在。",
 	"$S_msg_LoggerNameMustNotBeNull" : "请输入数据采集器名称。",
 	"$S_msg_AlreadyConnectedLoggerRegistry" : "已连接到采集器添加设置。",
 	"$S_msg_RemoteLoggerNotFoundOnLoggerRegistry" : "没找到远程采集器。",
@@ -467,7 +467,7 @@
 	"$S_msg_IsClosed" : "没有连接代理采集器。",
 	"$S_msg_RpcTimeout" : "远程过程调用超时。",
 	"$S_msg_IntervalCannotBeZero" : "周期不能为0。",
-	
+
 	"$S_str_Category": "项目",
 	"$S_str_MacAddress": "MAC地址",
 	"$S_str_DiskLetter": "驱动器名称",
@@ -524,8 +524,8 @@
 	"$S_str_PrimaryLoggerSetting": "主采集器设置",
 	"$S_msg_EnterLoggerName": "请输入数据采集器名称。",
 
-	"$S_msg_PrimaryLoggerSetting": "请选择备用采集器。当指定的时间内主采集器无应答时，将会自动由备用采集器接管采集。相反，当备用采集器工作期间主采集器恢复正常，将会自动切换到主采集器进行采集。",//added
-	"$S_msg_BackupLoggerSetting": "请选择主采集器。备用采集器实时监控主采集器并记录其工作状态。同时，当主采集器恢复工作时，从备用采集器最后工作状态开始进行采集。",//added
+	"$S_msg_PrimaryLoggerSetting": "请选择备用采集器。当指定的时间内主采集器无应答时，将会自动由备用采集器接管采集。相反，当备用采集器工作期间主采集器恢复正常，将会自动切换到主采集器进行采集。",
+	"$S_msg_BackupLoggerSetting": "请选择主采集器。备用采集器实时监控主采集器并记录其工作状态。同时，当主采集器恢复工作时，从备用采集器最后工作状态开始进行采集。",
 
 	"$S_str_HASetting": "双机设置",
 	"$S_msg_HASettingSetPrimaryOnWizard": "创建当前采集器的备用采集器。",
@@ -559,11 +559,11 @@
 	"$S_str_InstallDate": "安装时间",
 	"$S_str_LimitEPS": "每秒事件数",
 	"$S_str_LimitDailyLog": "每天数据大小",
-	"$S_str_LogTrendDaily": "数据趋势图", 
+	"$S_str_LogTrendDaily": "数据趋势图",
 	"$S_str_Refresh": "刷新",
 	"$S_str_Volume": "大小",
 	"$S_str_AlertRecent30Day": "最近30天报警记录",
-	"$S_str_AlertDate": "报警日期",	
+	"$S_str_AlertDate": "报警日期",
 
 	"$S_str_RemoveLicense": "卸载授权证书",
 	"$S_msg_RemoveLicenseConfirm": "确信要卸载该授权证书吗?",
@@ -599,7 +599,7 @@
 	"$S_str_RegexHelp": "正则表达式帮助",
 
 	"$S_str_UseLinePatternMatch": "行模式匹配",
-	
+
 	"--------regexhelp--------": "",
 	"$S_str_RegexHelp1": "匹配a或b或c",
 	"$S_str_RegexHelp2": "匹配a,b,c之外的任意一个字符",
@@ -647,8 +647,8 @@
 	"$S_str_DateFormatHelp16": "秒",
 	"$S_str_DateFormatHelp17": "毫秒",
 	"$S_str_DateFormatHelp18": "时区",
-	"$S_str_DateFormatHelp19": "时区(RFC 822)",	
-	
+	"$S_str_DateFormatHelp19": "时区(RFC 822)",
+
 	"--------table--------": "",
 	"$S_str_Table": "数据表",
 	"$S_str_TableList": "数据表",
@@ -730,8 +730,7 @@
 	"--------audit log--------": "",
 	"$S_str_AuditLog": "审计日志",
 	"$S_str_Duration": "时间",
-	"$S_str_AuditLogFrom": "~",
-	"$S_str_To": "",
+	"$S_str_To": "到",
 	"$S_str_Action": "操作",
 	"$S_str_Success": "成功",
 	"$S_str_Failed": "失败",
@@ -765,8 +764,8 @@
 	"$S_str_Timeout": "超时",
 	"$S_str_CreateFtpProfile": "创建FTP设置",
 	"$S_str_RemoveFtpProfile": "删除FTP设置",
-	"$S_str_User": "用户", 
-	"$S_str_ActiveMode": "主动模式", 
+	"$S_str_User": "用户",
+	"$S_str_ActiveMode": "主动模式",
 	"$S_str_ExtendedPAssiveMode": "扩展被动模式",
 	"$S_msg_RemoveFtpProfileConfirmPre": "确信要删除FTP设置",
 
@@ -777,7 +776,7 @@
 	"$S_str_SshPort": "SSH端口",
 	"$S_str_CreateSshProfile": "创建SSH设置",
 	"$S_str_RemoveSshprofile": "删除SSH设置",
-	"$S_msg_RemoveSshProfileConfirmPre": "确信要删除SSH设置",	
+	"$S_msg_RemoveSshProfileConfirmPre": "确信要删除SSH设置",
 
 	"--------jdbc config-----------": "",
 	"$S_str_JdbcSetting": "JDBC设置",
@@ -786,7 +785,7 @@
 	"$S_str_NewJdbcProfile" : "创建",
 	"$S_str_Readonly" : "只读",
 	"$S_str_CreateJdbcProfile": "创建JDBC设置",
-	"$S_str_RemoveJdbcProfile": "删除JDBC设置",	
+	"$S_str_RemoveJdbcProfile": "删除JDBC设置",
 	"$S_msg_RemoveJdbcProfileConfirmPre": "确信要删除JDBC设置",
 
 	"--------hdfs config-----------": "",
@@ -833,7 +832,7 @@
 	"$S_str_RegisterFederationNode": "添加节点",
 	"$S_str_WebserverPort": "Web服务器端口",
 	"$S_str_RemoveNode": "删除节点",
-	"$S_msg_RemoveNodeConfirmPre": "确信要删除节点",	
+	"$S_msg_RemoveNodeConfirmPre": "确信要删除节点",
 
 	"--------smtp config-----------": "",
 	"$S_str_SmtpProfile": "SMTP属性",
@@ -845,7 +844,7 @@
 	"$S_msg_RemoveSmtpConfirmPre": "确信要删除SMTP设置",
 	"--------common config msg-----------": "",
 	"$S_msg_PleaseEnterProfileName": "请输入设置名称。",
-	"$S_msg_PleaseEnterSshProfileName": "请输入设置名称。",	
+	"$S_msg_PleaseEnterSshProfileName": "请输入设置名称。",
 	"$S_msg_RemoveConfirmPost": "?",
 	"$S_msg_CleanConfirmPost": "?",
 	"$S_msg_PleaseEnterFtpProfileName" : "请输入设置名称。",
