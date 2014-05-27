@@ -100,4 +100,9 @@ angular.module('app.filter', ['pascalprecht.translate'])
 		var date = d3.time.format(inputformat).parse(val);
 		return d3.time.format(outputformat)(date);
 	}
+})
+.filter('stringifyCron', function(serviceUtility) {
+	return function(val) {
+		return serviceUtility.cronStringify(val);
+	}
 });

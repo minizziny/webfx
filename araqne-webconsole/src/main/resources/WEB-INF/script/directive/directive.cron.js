@@ -4,16 +4,21 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 		restrict: 'E',
 		scope: {
 		},
+		require: 'ngModel',
 		templateUrl: '/script/directive/directive.cron.html',
 		replace: true,
 		controller: function() {
 
 		},
-		link: function(scope, element, attrs) {
+		link: function(scope, element, attrs, ctrl) {
 			var $scope = scope;
-			var pid = 77712;
 				
 			//$scope.filter = $filter;
+
+			$scope.period = function(page) {
+				var el = element.find('.wizard-scheduled-cron-detail li.cron-detail-step').removeClass('active')[page];
+				$(el).addClass('active');
+			}
 			
 			$scope.dataTime = [
 				"0" + $filter('translate')('$S_str_TimePost'), 
@@ -85,16 +90,6 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 
 			function initScheduleQueryOptions() {
 				$scope.dataScheduleQuery = {};
-				$scope.dataScheduleQuery.use_save_result = "false";
-				$scope.dataScheduleQuery.use_alert = "false";
-				$scope.dataScheduleQuery.use_alert_bool = false;
-				$scope.dataScheduleQuery.suppress_interval = 600;
-				$scope.dataScheduleQuery.mail_profiles;
-				$scope.dataScheduleQuery.mail_from = '';
-				$scope.dataScheduleQuery.mail_to = '';
-				$scope.dataScheduleQuery.mail_subject = '';		
-				$scope.dataScheduleQuery.mail_profile_name = '';
-				$scope.dataScheduleQuery.mail_profile_names = [];
 
 				$scope.dataScheduleQuery.period_time = "true";
 				$scope.dataScheduleQuery.period = "every_day";
@@ -123,12 +118,6 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 				$scope.dataScheduleQuery.year.day_month = getCurrentMonth();
 				$scope.dataScheduleQuery.year.date = getCurrentDate();
 				$scope.dataScheduleQuery.year.day = getCurrentLogicDay();
-
-				// $scope.frmCreateScheduleQuery.$setPristine();
-				$scope.isOnSubmit = false;
-
-				// getSmtpProfiles();
-				$scope.period(0);
 			}	
 
 			$scope.calculateStartTime = function() {
@@ -173,44 +162,17 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 				return newArray;
 			}
 
-			$scope.isOnSubmit = false;
+			$scope.$watch('dataScheduleQuery', function(val) {
+				var cronobj = cronize(val);
+				ctrl.$setViewValue(cronobj);
+			}, true);
 
-			$scope.validStep0 = function() {
-				if($scope.frmCreateScheduleQuery.$invalid) {
-					$scope.isOnSubmit = true;
-				}
-				else {
-					$scope.isOnSubmit = false;
-				}
-			}
-
-			$scope.convertToBoolean = function() {
-				if($scope.dataScheduleQuery.use_alert == "true")
-					$scope.dataScheduleQuery.use_alert_bool = true;
-				else
-					$scope.dataScheduleQuery.use_alert_bool = false;
-			}
-
-			$scope.selectMailProfile = function() {
-				$scope.dataScheduleQuery.mail_profiles.forEach(function(obj) {
-					if(obj.name == $scope.dataScheduleQuery.mail_profile)
-						$scope.dataScheduleQuery.mail_from = obj.user;
-				});
-			}
-
-			
-
-			$scope.period = function(page) {
-				var el = $('.logquery-container .wizard-scheduled-cron-detail li.cron-detail-step').removeClass('active')[page];
-				$(el).addClass('active');
-			}
-
-			function cronize() {
-				var period = $scope.dataScheduleQuery.period;
-				var periodTime = $scope.dataScheduleQuery.period_time;
-				var daySelectEveryDay = $scope.dataScheduleQuery.day.every_day;
-				var monthSelectDate = $scope.dataScheduleQuery.month.select_date;
-				var yearSelectDate= $scope.dataScheduleQuery.year.select_date;
+			function cronize(dataSchedule) {
+				var period = dataSchedule.period;
+				var periodTime = dataSchedule.period_time;
+				var daySelectEveryDay = dataSchedule.day.every_day;
+				var monthSelectDate = dataSchedule.month.select_date;
+				var yearSelectDate= dataSchedule.year.select_date;
 
 				//init
 				var min = "*";
@@ -221,10 +183,10 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 
 				var hourPost = $filter('translate')('$S_str_TimePost');
 
-				var start = $scope.dataScheduleQuery.startTime.replace(hourPost, "");
-				var end = $scope.dataScheduleQuery.endTime.replace(hourPost, "");
+				var start = dataSchedule.startTime.replace(hourPost, "");
+				var end = dataSchedule.endTime.replace(hourPost, "");
 
-				min = $scope.dataScheduleQuery.minute;
+				min = dataSchedule.minute;
 
 				//시간반복 결정
 				if(periodTime == "false") {
@@ -237,10 +199,10 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 
 				if(period == "every_day") {
 					if(daySelectEveryDay == "false") {
-						date += "/" + $scope.dataScheduleQuery.day.date;
+						date += "/" + dataSchedule.day.date;
 					}
 				} else if(period == "every_week") {
-					var week = $scope.dataScheduleQuery.week.day;
+					var week = dataSchedule.week.day;
 
 					day = "";
 					jQuery.each(week, function(i, obj) {
@@ -257,15 +219,15 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 
 				} else if(period == "every_month") {
 					if(monthSelectDate == "true") {
-						var monthCount = $scope.dataScheduleQuery.month.date_month_count;
-						var monthDate = $scope.dataScheduleQuery.month.date;
+						var monthCount = dataSchedule.month.date_month_count;
+						var monthDate = dataSchedule.month.date;
 
 						month += "/" + monthCount;
 						date = monthDate;
 
 					} else {
-						var monthCount = $scope.dataScheduleQuery.month.day_month_count;
-						var selectDay = $scope.dataScheduleQuery.month.day;
+						var monthCount = dataSchedule.month.day_month_count;
+						var selectDay = dataSchedule.month.day;
 
 						month += "/" + monthCount;
 						day = getDayOfMonth(selectDay);
@@ -273,16 +235,16 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 
 				} else if(period == "every_year") {
 					if(yearSelectDate == "true") {
-						var month_count_string = $scope.dataScheduleQuery.year.date_month;
+						var month_count_string = dataSchedule.year.date_month;
 						var month_count = $scope.dataMonth.indexOf(month_count_string) + 1;
-						var selectDate = $scope.dataScheduleQuery.year.date;
+						var selectDate = dataSchedule.year.date;
 
 						month = month_count;
 						date = selectDate;
 					} else {
-						var month_count_string = $scope.dataScheduleQuery.year.day_month;
+						var month_count_string = dataSchedule.year.day_month;
 						var month_count = $scope.dataMonth.indexOf(month_count_string) + 1;
-						var selectDay = getDayOfMonth($scope.dataScheduleQuery.year.day);
+						var selectDay = getDayOfMonth(dataSchedule.year.day);
 
 						month = month_count;
 						day = selectDay;
@@ -291,19 +253,9 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 
 
 				var requestValue = {};
-				requestValue.title = $scope.dataScheduleQuery.title;
-				requestValue.query = $scope.dataScheduleQuery.query;
 				requestValue.cron_schedule = min + " " + hour + " " + date + " " + month + " " + day;
 				requestValue.period = period;
-				requestValue.save_result = $scope.dataScheduleQuery.use_save_result == "true" ? true : false;
-				requestValue.use_alert = $scope.dataScheduleQuery.use_alert == "true" ? true : false;
-				requestValue.suppress_interval = $scope.dataScheduleQuery.suppress_interval;
-				requestValue.alert_query = $scope.dataScheduleQuery.alert_query;
-				requestValue.mail_profile = $scope.dataScheduleQuery.mail_profile;
-				requestValue.mail_from = $scope.dataScheduleQuery.mail_from;
-				requestValue.mail_to = $scope.dataScheduleQuery.mail_to;
-				requestValue.mail_subject = $scope.dataScheduleQuery.mail_subject;
-
+				
 				return requestValue;
 			}
 
@@ -400,15 +352,8 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 				return $scope.dataMonth[month_count];
 			}
 
-
-			function msgbusFailed(m, raw) {
-				console.log(m, raw)
-			}
 			initScheduleQueryOptions();
 
-			element[0].getCron = function() {
-				return cronize();
-			}
 		}
 	}
 });

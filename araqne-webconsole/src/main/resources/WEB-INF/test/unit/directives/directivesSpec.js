@@ -175,7 +175,7 @@ describe('directives', function() {
 	"$S_msg_Dec": "12월"
 		}
 
-		var INTERVAL = 5000;
+		var INTERVAL = 1000;
 		var $compile, scope, template, body = $('<div id="fixture"></div>').appendTo('body');
 
 		angular.module('app', function () {})
@@ -208,8 +208,8 @@ describe('directives', function() {
 		});
 	
 		it("cronizer", function() {
-
-			var element = $compile(angular.element('<ui-cronizer></ui-cronizer>'))(scope);
+			scope.dataCron = '';
+			var element = $compile(angular.element('<div><h4>{{dataCron}}</h4><ui-cronizer ng-model="dataCron"></ui-cronizer></div>'))(scope);
 			element.appendTo(body);			
 			scope.$digest();
 
@@ -226,9 +226,7 @@ describe('directives', function() {
 			}, INTERVAL + 100);
 
 			runs(function() {
-				var result = element[0].getCron();
-				console.log(result);
-				expect(result).toBe('cron');
+				expect(scope.dataCron).toEqual({ cron_schedule : '0 * */1 * *', period : 'every_day' });
 			});
 		})
 	});

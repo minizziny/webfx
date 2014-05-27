@@ -1,0 +1,25 @@
+.ui-cronizer input[type=text],
+.ui-cronizer input[type=number],
+.ui-cronizer select {
+  width: 100px !important;
+}
+.ui-cronizer .subtitle {
+  font-size: 14px;
+  padding: 0px 0px 5px 0px;
+  line-height: 20px;
+  margin-bottom: 10px;
+}
+.ui-cronizer legend.title {
+  font-size: 14px;
+  padding: 0px 0px 5px 0px;
+  line-height: 20px;
+  margin-bottom: 10px;
+}
+.ui-cronizer label {
+  display: inline;
+}
+.ui-cronizer label input[type=radio],
+.ui-cronizer label input[type=checkbox] {
+  margin-right: 7px;
+  margin-top: -1px;
+}

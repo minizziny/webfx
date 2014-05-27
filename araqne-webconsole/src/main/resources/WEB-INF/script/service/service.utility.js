@@ -1,5 +1,5 @@
-angular.module('app.utility', [])
-.factory('serviceUtility', function() {
+angular.module('app.utility', ['app.filter'])
+.factory('serviceUtility', function($filter) {
 
 	var s4 = function() {
 		return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
@@ -7,6 +7,290 @@ angular.module('app.utility', [])
 
 	var getRandomInt = function(min, max) {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
+
+	function cronStringify(cron, period) {
+
+		if(cron == null)
+			return "";
+
+		var dataCronArray = cron.split(" ");
+		var min = dataCronArray[0];
+		var hour = dataCronArray[1];
+		var date = dataCronArray[2];
+		var month = dataCronArray[3];
+		var dayOfWeek = dataCronArray[4];
+
+		var result = "";
+
+		if(period == "every_day") {
+			if(date == "*") {
+				if(hour == "*") {
+					result += $filter('translate')('$S_msg_EveryDay');
+					result += $filter('translate')('$S_msg_Every');
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				} else {
+					result += $filter('translate')('$S_msg_EveryDay');
+					result += $filter('translate')('$S_msg_Every');
+					result += analysisUnit($filter, hour, "hour");
+					result += " "
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				}
+			} else {
+				if(hour == "*") {
+					result += $filter('translate')('$S_msg_Every');
+					result += analysisUnit($filter, date, "date");
+					result += " " + $filter('translate')('$S_msg_EveryHour');
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				} else {
+					result += $filter('translate')('$S_msg_Every');
+					result += analysisUnit($filter, date, "date");
+					result += " " + $filter('translate')('$S_msg_Every');
+					result += analysisUnit($filter, hour, "hour");
+					result += " ";
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				}
+			}
+		} else if(period == "every_week") {
+			if(hour == "*") {
+				result += $filter('translate')('$S_msg_EveryWeek');
+				result += analysisUnit($filter, dayOfWeek, "day-of-week");
+				result += " " + $filter('translate')('$S_msg_EveryHour');
+				result += analysisUnit($filter, min, "minute");
+				result += $filter('translate')('$S_msg_Moment');
+			} else {
+				result += $filter('translate')('$S_msg_EveryWeek');
+				result += analysisUnit($filter, dayOfWeek, "day-of-week");
+
+				if(analysisUnit($filter, dayOfWeek, "day-of-week") != "")
+					result += " ";
+
+				result += analysisUnit($filter, hour, "hour");
+				result += " ";
+				result += analysisUnit($filter, min, "minute");
+				result += $filter('translate')('$S_msg_Moment');
+			}
+		} else if(period == "every_month") {
+			if(dayOfWeek == "*"){
+				if(hour == "*") {
+					result += analysisUnit($filter, month, "month");
+					result += $filter('translate')('$S_msg_AttachMoment');
+					result += analysisUnit($filter, date, "date");
+					result += $filter('translate')('$S_msg_On');
+					result += $filter('translate')('$S_msg_EveryHour');
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				} else {
+					result += analysisUnit($filter, month, "month");
+					result += $filter('translate')('$S_msg_AttachMoment');
+					result += analysisUnit($filter, date, "date");
+					result += $filter('translate')('$S_msg_On');
+					result += $filter('translate')('$S_msg_PreEvery');
+					result += analysisUnit($filter, hour, "hour");
+					result += " ";
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				}				
+			} else {
+				if(hour == "*") {
+					result += analysisUnit($filter, month, "month");
+					result += $filter('translate')('$S_msg_AttachMoment');
+					result += analysisUnit($filter, dayOfWeek, "day-of-week");
+					result += $filter('translate')('$S_msg_On');
+					result += $filter('translate')('$S_msg_EveryHour');
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				} else {
+					result += analysisUnit($filter, month, "month");
+					result += $filter('translate')('$S_msg_AttachMoment');
+					result += analysisUnit($filter, dayOfWeek, "day-of-week");
+					result += $filter('translate')('$S_msg_On');
+					result += $filter('translate')('$S_msg_PreEvery')
+					result += analysisUnit($filter, hour, "hour");
+					result += " ";
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				}
+			}
+		} else if(period == "every_year") {
+			if(dayOfWeek == "*"){
+				if(hour == "*") {
+					result += $filter('translate')('$S_msg_EveryYear');
+					result += analysisUnit($filter, month, "month");
+					result += " ";
+					result += analysisUnit($filter, date, "date");
+					result += $filter('translate')('$S_msg_On');
+					result += $filter('translate')('$S_msg_EveryHour');
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				} else {
+					result += $filter('translate')('$S_msg_EveryYear');
+					result += analysisUnit($filter, month, "month");
+					result += " ";
+					result += analysisUnit($filter, date, "date");
+					result += $filter('translate')('$S_msg_On');
+					result += $filter('translate')('$S_msg_PreEvery')
+					result += analysisUnit($filter, hour, "hour");
+					result += " ";
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				}
+			} else {
+				if(hour == "*") {
+					result += $filter('translate')('$S_msg_EveryYear');
+					result += analysisUnit($filter, month, "month");
+					result += " ";
+					result += analysisUnit($filter, dayOfWeek, "day-of-week");
+					result += $filter('translate')('$S_msg_On');
+					result += $filter('translate')('$S_msg_EveryHour');
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				} else {
+					result += $filter('translate')('$S_msg_EveryYear');
+					result += analysisUnit($filter, month, "month");
+					result += " ";
+					result += analysisUnit($filter, dayOfWeek, "day-of-week");
+					result += $filter('translate')('$S_msg_On');
+					result += $filter('translate')('$S_msg_PreEvery')
+					result += analysisUnit($filter, hour, "hour");
+					result += " ";
+					result += analysisUnit($filter, min, "minute");
+					result += $filter('translate')('$S_msg_Moment');
+				}
+			}
+		} else {
+			if(hour == "*" && date == "*" && month == "*" && dayOfWeek == "*") {
+				result += $filter('translate')('$S_msg_EveryDay');
+				result += $filter('translate')('$S_msg_Every');
+				result += analysisUnit($filter, min, "minute");
+				result += $filter('translate')('$S_msg_Moment');
+			}			
+		}
+		return result;
+	}
+
+	var dataDayOfWeek = [
+		$filter('translate')('$S_str_Sunday'), 
+		$filter('translate')('$S_str_Monday'), 
+		$filter('translate')('$S_str_Tuesday'), 
+		$filter('translate')('$S_str_Wednesday'), 
+		$filter('translate')('$S_str_Thursday'), 
+		$filter('translate')('$S_str_Friday'), 
+		$filter('translate')('$S_str_Saturday'),
+		$filter('translate')('$S_str_Weekend'),  
+		$filter('translate')('$S_str_Weekday'), 
+	];
+
+	var dataMonth = [
+		$filter('translate')('$S_str_Jan'),
+		$filter('translate')('$S_str_Feb'),
+		$filter('translate')('$S_str_Mar'),
+		$filter('translate')('$S_str_Apr'),
+		$filter('translate')('$S_str_May'),
+		$filter('translate')('$S_str_Jun'),
+		$filter('translate')('$S_str_Jul'),
+		$filter('translate')('$S_str_Aug'),
+		$filter('translate')('$S_msg_Sep'),
+		$filter('translate')('$S_msg_Oct'),
+		$filter('translate')('$S_msg_Nov'),
+		$filter('translate')('$S_msg_Dec'),
+	];
+
+	function analysisUnit($filter, cronUnit, type) {
+		var unit = "";
+		var post = "";
+		var fromPost = $filter('translate')('$S_msg_From');
+		var toPost = $filter('translate')('$S_msg_To');
+		var between = $filter('translate')('$S_msg_Between');
+		var and = $filter('translate')('$S_msg_And');
+		var postWeek = $filter('translate')('$S_msg_PostWeek');
+		var oclock = $filter('translate')('$S_msg_Oclock');
+
+		if(type == "minute")
+			post = $filter('translate')('$S_msg_Min');
+		else if(type == "hour")
+			post = $filter('translate')('$S_msg_Hour');
+		else if(type == "date")
+			post = $filter('translate')('$S_msg_Date');
+		else if(type == "month")
+			post = "";
+		else if(type == "day-of-week")
+			post = "";
+
+		if(type == "day-of-week") {
+			if(cronUnit.indexOf(",") > -1) {
+				if(cronUnit == "1,2,3,4,5") {
+					cronUnit = dataDayOfWeek[8];
+				} else if(cronUnit == "0,6") {
+					cronUnit = dataDayOfWeek[7];
+				} else {
+					var dayOfWeekArray = cronUnit.split(",");
+					var convertToLocale = "";
+
+					dayOfWeekArray.forEach(function(obj) {
+					 	convertToLocale += dataDayOfWeek[obj] + ", "
+					});
+
+					//마지막 , 삭제
+					convertToLocale = convertToLocale.substring(0, convertToLocale.length - 2);
+					cronUnit = convertToLocale;
+				}
+			} else {
+				if(cronUnit == "*") {
+					cronUnit = "";
+				} else if(cronUnit == "1-5") {
+					cronUnit = dataDayOfWeek[8];
+				} else {
+					cronUnit = dataDayOfWeek[cronUnit];
+				}
+			}
+
+			unit = cronUnit + post + postWeek;
+
+		} else {
+			if(cronUnit.indexOf("/") > -1) {				
+				if(type == "month") {
+					unit += $filter('translate')('$S_msg_PreMonth');
+					unit += cronUnit.split("/")[1];
+					unit += $filter('translate')('$S_msg_NumberOfMonth');
+					if(cronUnit.split("/")[1] == 1)
+						unit += $filter('translate')('$S_msg_PostMonth');
+					else
+						unit += $filter('translate')('$S_msg_PostMonths');
+				} else {
+					unit = cronUnit.split("/")[1] + post;
+				}
+			} else if(cronUnit.indexOf(",") > -1) {
+				if(type == "hour")
+					unit = cronUnit + oclock;
+				else	
+					unit = cronUnit + post;
+
+			} else if(cronUnit.indexOf("-") > -1) {
+				var from = 	cronUnit.split("-")[0];	
+				var to = cronUnit.split("-")[1];
+				unit = between + from + and + fromPost + " " + to + oclock + toPost;
+			} else {
+				if(type == "month") {
+					parseInt
+					var index = parseInt(cronUnit) + 1;
+					unit = dataMonth[index] + $filter('translate')('$S_msg_Comma');
+				} else if(type == "date") {
+					unit = $filter('translate')('$S_msg_PreDate') + cronUnit + $filter('translate')('$S_msg_PostDate') + $filter('translate')('$S_msg_PostDate2');
+				} else if(type == "hour") {
+					unit = cronUnit + oclock;
+				} else {
+					unit = cronUnit + post;
+				}
+			}
+		}
+
+		return unit;
 	}
 
 	return {
@@ -19,6 +303,7 @@ angular.module('app.utility', [])
 		generateType3: function() {
 			return ('w'+s4());
 		},
-		getRandomInt: getRandomInt
+		getRandomInt: getRandomInt,
+		cronStringify: cronStringify
 	}
 });
