@@ -59,7 +59,7 @@ public class GlobalConfigApiImpl implements GlobalConfigApi {
 	public Object getConfig(String key) {
 		ConfigDatabase db = confsvc.ensureDatabase(DB_NAME);
 		Config c = db.findOne(cls, Predicates.field("key", key));
-		return (c != null) ? c.getDocument(cls) : null;
+		return (c != null) ? c.getDocument(cls).getValue() : null;
 	}
 
 	@Override
