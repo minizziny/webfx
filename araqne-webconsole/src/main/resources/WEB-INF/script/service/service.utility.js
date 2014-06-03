@@ -9,18 +9,49 @@ angular.module('app.utility', ['app.filter'])
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 
+	function convertToCronObject(cron) {
+		var dataCronArray = cron.split(" ");
 
-	function cronStringify(cron, period) {
+		var object = {};
+		object.min = dataCronArray[0];
+		object.hour = dataCronArray[1];
+		object.date = dataCronArray[2];
+		object.month = dataCronArray[3];
+		object.dayOfWeek = dataCronArray[4];
+
+		object.period = '';
+
+		if (object.date == "*" && object.month == "*" && object.dayOfWeek == "*")
+			object.period = "every_day";
+		else if (object.date.indexOf("/") > -1 && object.month == "*" && object.dayOfWeek == "*")
+			object.period = "every_day";
+		else if (object.date == "*" && object.month == "*" && object.dayOfWeek.indexOf(",") > -1)
+			object.period = "every_week";
+		else if (object.date == "*" && object.month == "*" && isNaN(object.dayOfWeek) == false)
+			object.period = "every_week";
+		else if (object.month.indexOf("/") > -1)
+			object.period = "every_month";
+		else if (isNaN(object.month) == false)
+			object.period = "every_year";
+
+		return object;
+	}
+
+	function cronStringify(cron) {
 
 		if(cron == null)
 			return "";
 
+		var conObject = convertToCronObject(cron);
+
 		var dataCronArray = cron.split(" ");
-		var min = dataCronArray[0];
-		var hour = dataCronArray[1];
-		var date = dataCronArray[2];
-		var month = dataCronArray[3];
-		var dayOfWeek = dataCronArray[4];
+		var min = conObject.min;
+		var hour = conObject.hour;
+		var date = conObject.date;
+		var month = conObject.month;
+		var dayOfWeek = conObject.dayOfWeek;
+
+		var period = conObject.period;
 
 		var result = "";
 
@@ -278,7 +309,7 @@ angular.module('app.utility', ['app.filter'])
 			} else {
 				if(type == "month") {
 					parseInt
-					var index = parseInt(cronUnit) + 1;
+					var index = parseInt(cronUnit) - 1;
 					unit = dataMonth[index] + $filter('translate')('$S_msg_Comma');
 				} else if(type == "date") {
 					unit = $filter('translate')('$S_msg_PreDate') + cronUnit + $filter('translate')('$S_msg_PostDate') + $filter('translate')('$S_msg_PostDate2');

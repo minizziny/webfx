@@ -254,7 +254,6 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 
 				var requestValue = {};
 				requestValue.cron_schedule = min + " " + hour + " " + date + " " + month + " " + day;
-				requestValue.period = period;
 				
 				return requestValue;
 			}
