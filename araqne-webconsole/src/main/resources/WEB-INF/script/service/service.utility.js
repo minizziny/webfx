@@ -205,34 +205,34 @@ angular.module('app.utility', ['app.filter'])
 		return result;
 	}
 
-	var dataDayOfWeek = [
-		$filter('translate')('$S_str_Sunday'), 
-		$filter('translate')('$S_str_Monday'), 
-		$filter('translate')('$S_str_Tuesday'), 
-		$filter('translate')('$S_str_Wednesday'), 
-		$filter('translate')('$S_str_Thursday'), 
-		$filter('translate')('$S_str_Friday'), 
-		$filter('translate')('$S_str_Saturday'),
-		$filter('translate')('$S_str_Weekend'),  
-		$filter('translate')('$S_str_Weekday'), 
-	];
-
-	var dataMonth = [
-		$filter('translate')('$S_str_Jan'),
-		$filter('translate')('$S_str_Feb'),
-		$filter('translate')('$S_str_Mar'),
-		$filter('translate')('$S_str_Apr'),
-		$filter('translate')('$S_str_May'),
-		$filter('translate')('$S_str_Jun'),
-		$filter('translate')('$S_str_Jul'),
-		$filter('translate')('$S_str_Aug'),
-		$filter('translate')('$S_msg_Sep'),
-		$filter('translate')('$S_msg_Oct'),
-		$filter('translate')('$S_msg_Nov'),
-		$filter('translate')('$S_msg_Dec'),
-	];
 
 	function analysisUnit($filter, cronUnit, type) {
+		var dataDayOfWeek = [
+			$filter('translate')('$S_str_Sunday'), 
+			$filter('translate')('$S_str_Monday'), 
+			$filter('translate')('$S_str_Tuesday'), 
+			$filter('translate')('$S_str_Wednesday'), 
+			$filter('translate')('$S_str_Thursday'), 
+			$filter('translate')('$S_str_Friday'), 
+			$filter('translate')('$S_str_Saturday'),
+			$filter('translate')('$S_str_Weekend'),  
+			$filter('translate')('$S_str_Weekday'), 
+		];
+		var dataMonth = [
+			$filter('translate')('$S_str_Jan'),
+			$filter('translate')('$S_str_Feb'),
+			$filter('translate')('$S_str_Mar'),
+			$filter('translate')('$S_str_Apr'),
+			$filter('translate')('$S_str_May'),
+			$filter('translate')('$S_str_Jun'),
+			$filter('translate')('$S_str_Jul'),
+			$filter('translate')('$S_str_Aug'),
+			$filter('translate')('$S_msg_Sep'),
+			$filter('translate')('$S_msg_Oct'),
+			$filter('translate')('$S_msg_Nov'),
+			$filter('translate')('$S_msg_Dec'),
+		];
+
 		var unit = "";
 		var post = "";
 		var fromPost = $filter('translate')('$S_msg_From');

@@ -103,6 +103,6 @@ angular.module('app.filter', ['pascalprecht.translate'])
 })
 .filter('cronStringify', function(serviceUtility) {
 	return function(val) {
-		return serviceUtility.cronStringify(val, 'every_day');
+		return serviceUtility.cronStringify(val);
 	}
 });
