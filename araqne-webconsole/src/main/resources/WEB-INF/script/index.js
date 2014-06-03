@@ -19,7 +19,6 @@ var logpresso = angular.module('app', [
 	'app.widget',
 	'pascalprecht.translate',
 	'ui.sortable',
-	'ngAnimate',
 	'app.events',
 	'app.extension',
 	'logpresso.extension',
