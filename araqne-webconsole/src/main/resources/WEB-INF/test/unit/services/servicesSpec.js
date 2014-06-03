@@ -125,15 +125,15 @@ describe('services', function() {
 		});
 
 		it("every_day", function() {
-			expect(serviceUtility.cronStringify('0 * */1 * *', 'every_day')).toEqual('매 1일 매시 0분 마다.');
+			expect(serviceUtility.cronStringify('0 * */1 * *')).toEqual('매 1일 매시 0분 마다.');
 		});
 
 		it('every_month', function() {
-			expect(serviceUtility.cronStringify('20 20 * */1 2', 'every_month')).toEqual('1개월 마다 화요일에 매 20시 20분 마다.');
+			expect(serviceUtility.cronStringify('20 20 * */1 2')).toEqual('1개월 마다 화요일에 매 20시 20분 마다.');
 		})
 
 		it("failed test", function() {
-			expect(serviceUtility.cronStringify('1 1 2 */1 * *', 'every_month')).toEqual('매 매시 0분 마다.');
+			expect(serviceUtility.cronStringify('1 1 2 */1 *')).toEqual('1개월 마다 2일에 매 1시 1분 마다.');
 		});
 	});
 	

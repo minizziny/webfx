@@ -175,7 +175,7 @@ describe('directives', function() {
 	"$S_msg_Dec": "12월"
 		}
 
-		var INTERVAL = 1000;
+		var INTERVAL = 500;
 		var $compile, scope, template, body = $('<div id="fixture"></div>').appendTo('body');
 
 		angular.module('app', function () {})
@@ -226,7 +226,7 @@ describe('directives', function() {
 			}, INTERVAL + 100);
 
 			runs(function() {
-				expect(scope.dataCron).toEqual({ cron_schedule : '0 * */1 * *', period : 'every_day' });
+				expect(scope.dataCron).toEqual({ cron_schedule : '0 * */1 * *' });
 			});
 		})
 	});
