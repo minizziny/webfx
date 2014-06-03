@@ -349,8 +349,15 @@ function DashboardController($scope, $http, $element, $compile, $q, $translate, 
 	}
 
 	$scope.displayWidgetProperty = function(e) {
-		var w = $(e.target).parents('widget:first')[0];
+		
+		
 		var dockpanel = $(e.target).parents('dockpanel:first')[0];
+
+		var w = $(e.target).parents('alert-box:first')[0];
+		if(w == undefined) {
+			w = $(e.target).parents('widget:first')[0];
+		}
+		
 
 		eventSender.dashboard.setWidgetProperty(w, dockpanel.id);
 		$('.propertyWidget')[0].showDialog();

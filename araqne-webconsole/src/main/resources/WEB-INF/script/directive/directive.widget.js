@@ -889,8 +889,8 @@ angular.module('app.directive.widget', [])
 							// 	'<i class="icon-play"></i>' +
 							'</button><button class="btn btn-extra-mini b-refresh" ng-click="query()">' +
 								'<i class="icon-refresh"></i>' +
-							// '</button><button class="btn btn-extra-mini b-p" ng-click="$parent.$parent.displayWidgetProperty($event)">' +
-							// 	'<i class="icon-info-sign"></i>' +
+							'</button><button class="btn btn-extra-mini b-p" ng-click="$parent.displayWidgetProperty($event)">' +
+								'<i class="icon-info-sign"></i>' +
 							'</button><button class="btn btn-extra-mini b-x" ng-click="closebox()">' +
 								'<i class="icon-remove"></i>' +
 							'</button>' +
@@ -918,6 +918,22 @@ angular.module('app.directive.widget', [])
 				scope.context = ctx;
 				scope.query();
 
+			}
+
+			elm[0].getQuery = function() {
+				return scope.context.data.query;
+			}
+
+			elm[0].getInterval = function() {
+				return scope.context.interval;	
+			}
+
+			elm[0].setInterval = function(interval) {
+				scope.context.interval = interval;
+			}
+
+			elm[0].getName = function() {
+				return scope.context.name;
 			}
 
 			var events = {
