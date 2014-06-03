@@ -226,9 +226,9 @@ angular.module('app.directive.logdb', [])
 		tranclude: true,
 		link: function(scope, element, attrs, ctrl, transclude) {
 			if(element[0].children.length === 0) {
-				var tmpl = angular.element('<thead><tr><th ng-repeat="col in model.cols">{{col}}</th></tr></thead>\
+				var tmpl = angular.element('<thead><tr><th ng-repeat="col in model.__cols__">{{col}}</th></tr></thead>\
 					<tbody><tr ng-repeat="row in model">\
-						<td ng-repeat="col in model.cols" ng-bind-html="row[col] | crlf"></td>\
+						<td ng-repeat="col in model.__cols__" ng-bind-html="row[col] | crlf"></td>\
 					</tr></tbody>');
 				$compile(tmpl, true)(scope);
 				tmpl.appendTo(element);
@@ -239,16 +239,17 @@ angular.module('app.directive.logdb', [])
 				val.forEach(function(row) {
 					cols = cols.concat(Object.keys(row));
 				});
-
+				
 				cols = cols.unique();
 				cols.splice(cols.indexOf('$$hashKey'), 1);
 				cols = window._utility.sortColumns(cols);
-				ctrl[0].$modelValue.cols = cols;
+				ctrl[0].$modelValue.__cols__ = cols.slice(0);
 			}
 			scope.$watch('model', function(val) {
-				console.log(val)
-				scope.val = val;
+				if(val.length == 0) return;
+				ctrl[0].$modelValue.__cols__ = [];
 				Manipulate(val);
+				scope.val = val;
 			});
 		}
 	}
