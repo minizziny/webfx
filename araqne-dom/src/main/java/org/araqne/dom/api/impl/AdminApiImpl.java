@@ -430,6 +430,11 @@ public class AdminApiImpl implements AdminApi {
 			loggedIn.remove(new LoggedInAdmin(session));
 			for (LoginCallback callback : callbacks)
 				callback.onLogout(admin, session);
+			
+			// unset credentials
+			session.unsetProperty("org_domain");
+			session.unsetProperty("admin_login_name");
+			session.unsetProperty("auth");
 		}
 	}
 

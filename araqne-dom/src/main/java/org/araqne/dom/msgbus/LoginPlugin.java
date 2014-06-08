@@ -102,9 +102,6 @@ public class LoginPlugin {
 
 		String auth = session.getString("auth");
 		if (auth != null && auth.equals("dom")) {
-			session.unsetProperty("org_domain");
-			session.unsetProperty("admin_login_name");
-			session.unsetProperty("auth");
 			adminApi.logout(session);
 		}
 	}
