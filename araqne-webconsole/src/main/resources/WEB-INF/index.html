@@ -2,23 +2,24 @@
 <html ng-app="app">
 <head>
 	<title>Logpresso</title>
-	<meta charset="utf-8" />
+	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link href="lib/bootstrap2/css/bootstrap.min.css" rel="stylesheet" media="screen">
 
 	<link href="css/app.css" rel="stylesheet" media="screen">
-	<link rel="stylesheet" href="css/toggle-switch.css" />
+	<link rel="stylesheet" href="css/toggle-switch.css"/>
 
-	<link rel="stylesheet" type="text/css" href="css/base.css" />
-	<link rel="stylesheet" type="text/css" href="css/menu.css" />
-	<link rel="stylesheet" type="text/css" href="css/logo.css" />
-	<link rel="stylesheet" type="text/css" href="css/dashboard-wizard.css" />
-	<link rel="stylesheet" type="text/css" href="css/ui-cronizer.css" />
-	<link rel="stylesheet" type="text/css" href="lib/jquery/jquery.resizableColumns.css" />
-	<link rel="stylesheet" type="text/css" href="lib/jquery/jquery-ui.css" />
-	<link rel="stylesheet" type="text/css" href="lib/jquery/jquery-ui-timepicker-addon.css" />
-	<link rel="stylesheet" href="package/logpresso/logquery/logquery2.css"/> 
-	<link rel="stylesheet" href="css/angular-ui-tree.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/base.css"/>
+	<link rel="stylesheet" type="text/css" href="css/menu.css"/>
+	<link rel="stylesheet" type="text/css" href="css/logo.css"/>
+	<link rel="stylesheet" type="text/css" href="css/dashboard-wizard.css"/>
+	<link rel="stylesheet" type="text/css" href="css/ui-cronizer.css"/>
+	<link rel="stylesheet" type="text/css" href="lib/jquery/jquery.resizableColumns.css"/>
+	<link rel="stylesheet" type="text/css" href="lib/jquery/jquery-ui.css"/>
+	<link rel="stylesheet" type="text/css" href="lib/jquery/jquery-ui-timepicker-addon.css"/>
+	<link rel="stylesheet" type="text/css" href="lib/bootstrap-multiselect/bootstrap-multiselect.css"/>
+	<link rel="stylesheet" href="package/logpresso/logquery/logquery2.css"/>
+	<link rel="stylesheet" href="css/angular-ui-tree.min.css"/>
 
 	<script src="lib/jquery/jquery-2.1.0.js"></script>
 	<script src="lib/jquery/jquery.ui.core.js"></script>
@@ -28,12 +29,14 @@
 
 	<script src="lib/jquery/jquery.ui.draggable.js"></script>
 	<script src="lib/jquery/jquery.ui.droppable.js"></script>
-	
+
 	<script src="lib/jquery/jquery.ui.datepicker.js"></script>
 	<script src="lib/jquery/datepicker-ko.js"></script>
 	<script src="lib/jquery/jquery-ui-timepicker-addon.js"></script>
 	<script src="lib/jquery/jquery.ui.slider.js"></script>
-	
+
+	<script src="lib/bootstrap-multiselect/bootstrap-multiselect.js"></script>
+
 	<script src="lib/jquery/scrollsync.js"></script>
 	<script src="lib/jquery/dragscrollable.js"></script>
 	<script src="/lib/angular/angular-1.2.16.js"></script>
@@ -88,72 +91,73 @@
 	<script src="package/logpresso/logsource/logsource.js"></script>
 	<script src="package/logpresso/config/config.js"></script>
 	<script src="package/logpresso/import/import.js"></script>
-	
+
 	<style>
-	a {
-		cursor: pointer !important;
-	}
-	.view {
-		top: 30px;
-		position: relative;
-	}
+		a {
+			cursor: pointer !important;
+		}
 
-	.logpresso-brand {
-		background-image: url(/images/logpresso-logo.svg);
-		width: 350px;
-		height: 70px;
-		background-position: 295px 140px;
-		background-size: 105%;
-	}
+		.view {
+			top: 30px;
+			position: relative;
+		}
 
-	.frm-login {
-		margin: auto;
-		width: 220px;
-		padding: 8%;
-		padding-right: 10%;
-	}
+		.logpresso-brand {
+			background-image: url(/images/logpresso-logo.svg);
+			width: 350px;
+			height: 70px;
+			background-position: 295px 140px;
+			background-size: 105%;
+		}
 
-	.frm-login .btn.btn-primary {
-		float: right;
-	}
+		.frm-login {
+			margin: auto;
+			width: 220px;
+			padding: 8%;
+			padding-right: 10%;
+		}
 
-	.login-footer {
-		text-align: center;
-		font-size: .9em;
-		color: #ccc;
-		padding-top: 100px;
-	}
+		.frm-login .btn.btn-primary {
+			float: right;
+		}
 
-	.gray {
-		background-color: #eee !important;
-	}
+		.login-footer {
+			text-align: center;
+			font-size: .9em;
+			color: #ccc;
+			padding-top: 100px;
+		}
+
+		.gray {
+			background-color: #eee !important;
+		}
 	</style>
 </head>
-<body ng-controller="Controller" ng-class="{'gray': grayBackground}">	
-	<div id="view-menu" ng-include src="src.menu"></div>
-	<div class="view" id="view-login" ng-include src="src.login"></div>
-	<div class="view" id="view-starter" ng-include src="src.starter"></div>
-	<div class="view" id="view-orgchart" ng-include src="src.orgchart"></div>
-	<div class="view" id="view-dashboard" ng-include src="src.dashboard"></div>
-	<div class="view" id="view-auditlog" ng-include src="src.auditlog"></div>
-	<div class="view" id="view-license" ng-include src="src.license"></div>
-	<div class="view" id="view-regextester" ng-include src="src.regextester"></div>
-	<div class="view" id="view-logquery" ng-include src="src.logquery"></div>
-	<div class="view" id="view-table" ng-include src="src.table"></div>
-	<div class="view" id="view-logsource" ng-include src="src.logsource"></div>
-	<div class="view" id="view-querymanager" ng-include src="src.querymanager"></div>
-	<div class="view" id="view-config" ng-include src="src.config"></div>
-	<div class="view" id="view-import" ng-include src="src.import"></div>
+<body ng-controller="Controller" ng-class="{'gray': grayBackground}">
+<div id="view-menu" ng-include src="src.menu"></div>
+<div class="view" id="view-login" ng-include src="src.login"></div>
+<div class="view" id="view-starter" ng-include src="src.starter"></div>
+<div class="view" id="view-orgchart" ng-include src="src.orgchart"></div>
+<div class="view" id="view-dashboard" ng-include src="src.dashboard"></div>
+<div class="view" id="view-auditlog" ng-include src="src.auditlog"></div>
+<div class="view" id="view-license" ng-include src="src.license"></div>
+<div class="view" id="view-regextester" ng-include src="src.regextester"></div>
+<div class="view" id="view-logquery" ng-include src="src.logquery"></div>
+<div class="view" id="view-table" ng-include src="src.table"></div>
+<div class="view" id="view-logsource" ng-include src="src.logsource"></div>
+<div class="view" id="view-querymanager" ng-include src="src.querymanager"></div>
+<div class="view" id="view-config" ng-include src="src.config"></div>
+<div class="view" id="view-import" ng-include src="src.import"></div>
 
 
-	<div id="tooltip" class="tooltip fade top" style="display:none">
-		<div class="tooltip-arrow"></div>
-		<div class="tooltip-inner">...</div>
-	</div>
+<div id="tooltip" class="tooltip fade top" style="display:none">
+	<div class="tooltip-arrow"></div>
+	<div class="tooltip-inner">...</div>
+</div>
 
-	<div id="alert-fix-side" class="alert alert-success" style="display:none">
-		<button type="button" class="close">&times;</button>
-		<span class="msg"></span>
-	</div>
+<div id="alert-fix-side" class="alert alert-success" style="display:none">
+	<button type="button" class="close">&times;</button>
+	<span class="msg"></span>
+</div>
 </body>
 </html>
