@@ -199,6 +199,7 @@
 	"$S_msg_CannotLoadTableStatus": "테이블 상태를 로딩할 수 없습니다. 문제가 있습니다.",
 	"$S_str_RecentQuery": "최근 쿼리",
 	"$S_str_Query": "쿼리",
+	"$S_str_QueryOnMenu": "쿼리",
 	"$S_str_RunAt": "실행 시간",
 	"$S_msg_CannotLoadRecentQuery": "최근 쿼리를 로딩할 수 없습니다. 문제가 있습니다.",
 	"$S_str_Status": "상태",
@@ -717,6 +718,9 @@
 	"$S_str_NameValidationErrorMsg" : "이름은 영어, 숫자, '_' 로 구성되어야 합니다.",
 	"$S_str_EmailValidationErrorMsg" : "메일 주소는 영어, 숫자, '_' + '@' + 도메인 으로 구성되어야 합니다.",
 	"$S_str_AlreadyExistsMsg": "이미 존재하는 테이블 입니다.",
+
+	"$S_str_ChangeIndexDay": "인덱스 대상 기간 변경",
+	"$S_msg_ChangeIndexDay": "변경할 인덱스 대상 기간을 입력하세요.",
 
 	"--------index--------": "",
 	"$S_str_ValidateDateFormat": "날짜형식은 yyyymmdd 형태 입니다.",
