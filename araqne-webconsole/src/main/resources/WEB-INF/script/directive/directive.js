@@ -1607,7 +1607,7 @@
 				buttonClass: 'btn',
 				buttonWidth: 'auto',
 				buttonContainer: '<div class="btn-group" />',
-				maxHeight: false,
+				maxHeight: 300,
 				buttonText: function(options) {
 					if (options.length == 0) {
 						return '선택해 주세요 <b class="caret"></b>';
