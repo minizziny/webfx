@@ -16,8 +16,10 @@
 package org.araqne.dom.api;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.araqne.dom.model.Admin;
+import org.araqne.dom.model.Program;
 import org.araqne.dom.model.User;
 import org.araqne.msgbus.Session;
 
@@ -45,4 +47,19 @@ public interface AdminApi extends UserExtensionProvider {
 	void registerLoginCallback(LoginCallback callback);
 
 	void unregisterLoginCallback(LoginCallback callback);
+
+	/**
+	 * @since 3.1.0
+	 */
+	List<Program> getAvailablePrograms(Session session);
+
+	/**
+	 * @since 3.1.0
+	 */
+	void addProgramFilter(ProgramFilter filter);
+
+	/**
+	 * @since 3.1.0
+	 */
+	void removeProgramFilter(ProgramFilter filter);
 }

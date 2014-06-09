@@ -9,7 +9,7 @@
 		<version>1.0.0</version>
 	</parent>
 	<artifactId>araqne-webconsole</artifactId>
-	<version>3.2.4</version>
+	<version>3.2.5</version>
 	<packaging>bundle</packaging>
 	<name>Araqne Web Console</name>
 	<build>

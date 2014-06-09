@@ -15,8 +15,8 @@
  */
 package org.araqne.dom.msgbus;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Requires;
@@ -25,7 +25,6 @@ import org.araqne.dom.api.AdminApi;
 import org.araqne.dom.api.ProgramApi;
 import org.araqne.dom.model.Program;
 import org.araqne.dom.model.ProgramPack;
-import org.araqne.dom.model.ProgramProfile;
 import org.araqne.msgbus.Request;
 import org.araqne.msgbus.Response;
 import org.araqne.msgbus.handler.MsgbusMethod;
@@ -53,13 +52,9 @@ public class ProgramPlugin {
 
 	@MsgbusMethod
 	public void getAvailablePrograms(Request req, Response resp) {
-		Collection<ProgramPack> packs = programApi.getProgramPacks(req.getOrgDomain()); 
-		ProgramProfile profile = adminApi.getAdmin(req.getOrgDomain(), req.getAdminLoginName()).getProfile();
-		
-		Collection<Program> programs = new ArrayList<Program>();
-		if (profile != null)
-			programs = profile.getPrograms();
-		
+		Collection<ProgramPack> packs = programApi.getProgramPacks(req.getOrgDomain());
+		List<Program> programs = adminApi.getAvailablePrograms(req.getSession());
+
 		resp.put("programs", PrimitiveConverter.serialize(programs));
 		resp.put("packs", PrimitiveConverter.serialize(packs, PrimitiveConverter.SerializeOption.INCLUDE_SKIP_FIELD));
 	}
