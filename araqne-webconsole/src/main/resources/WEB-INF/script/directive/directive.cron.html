@@ -1,131 +1,94 @@
 <div class="ui-cronizer">
-	<div style="margin-bottom: 10px;">
-		<legend class="title">{{'$S_str_Time' | translate}}</legend>
-		<div style="margin-bottom: 5px;">
-			<label>
-				<input type="radio" ng-model="dataScheduleQuery.period_time" value="true"/> 
-				{{'$S_str_EveryTime' | translate}} 
-				{{'$S_str_PerMinutePre' | translate}}
-				<input type="text" class="wizard-text" name="scheduleQueryMin" ng-model="dataScheduleQuery.minute"/> 
-				{{'$S_str_PerMinutePost' | translate}}
-			</label>
-		</div>
-		<div style="margin-bottom: 5px;">
-			<label>
-				<input type="radio" ng-model="dataScheduleQuery.period_time" value="false"/>
-				{{'$S_str_Every' | translate}} 
-				<select class="wizard-select" ng-options="t for t in dataStartTime" ng-model="dataScheduleQuery.startTime" ng-change="calculateEndTime()"></select>&nbsp;
-				{{'$S_str_From' | translate}}  
-				<select class="wizard-select" ng-options="t for t in dataEndTime" ng-model="dataScheduleQuery.endTime" ng-change="calculateStartTime()"></select>&nbsp;
-				{{'$S_str_PerMinutePre' | translate}}
-				<input type="text" class="wizard-text" name="scheduleQueryMin" ng-model="dataScheduleQuery.minute"/> 
-				{{'$S_str_PerMinutePost' | translate}}
-			</label>
-		</div>
-	</div>
-	<div style="margin-bottom: 10px;">
-		<legend class="title">{{'$S_Str_RepeatMethod' | translate}}</legend>							
-		<ol class="wizard-scheduled-cron clearboth">							
-			<li>									
-				<label>
-					<input type="radio" ng-model="dataScheduleQuery.period" ng-click="period(0)" value="every_day"/>{{'$S_Str_EveryDay' | translate}}
-				</label>
-			</li>
-			<li>
-				<label>
-					<input type="radio" ng-model="dataScheduleQuery.period" ng-click="period(1)" value="every_week"/>{{'$S_Str_EveryWeek' | translate}}
-				</label>
-			</li>
-			<li>
-				<label>
-					<input type="radio" ng-model="dataScheduleQuery.period" ng-click="period(2)" value="every_month"/>{{'$S_Str_EveryMonth' | translate}}
-				</label>
-			</li>
-			<li>
-				<label>
-					<input type="radio" ng-model="dataScheduleQuery.period" ng-click="period(3)" value="every_year"/>{{'$S_Str_EveryYear' | translate}}
-				</label>
-			</li>
-		</ol>
-		<ol class="wizard-scheduled-cron-detail">
-			<!-- 매일 -->
-			<li class="cron-detail-step active" ng-show="dataScheduleQuery.period == 'every_day'">
-				<div style="margin-bottom: 5px;">
-					<label>
-						<input type="radio" ng-model="dataScheduleQuery.day.every_day" value="false"/>
-						{{'$S_str_Every' | translate}} 
-						{{'$S_str_PerDayPre' | translate}}
-						<input type="text" class="wizard-text" ng-model="dataScheduleQuery.day.date"/>&nbsp;
-						{{'$S_str_PerDayPost' | translate}}
-					</label>
-				</div>
-				<div>
-					<label><input type="radio" ng-model="dataScheduleQuery.day.every_day" value="true"/>{{'$S_Str_EveryDay' | translate}}<label>
-				</div>
-			</li>
-
-			<!-- 매주 -->
-			<li class="cron-detail-step" ng-show="dataScheduleQuery.period == 'every_week'">
-				<div style="margin-bottom: 5px;">
-					<label><input type="radio" ng-model="dataScheduleQuery.week.every_week" value="true"/>{{'$S_str_EveryWeekRepeatNextDay' | translate}}</label>
-				</div>
-				<div style="margin-bottom: 5px;">
-					<label><input type="checkbox" ng-model="dataScheduleQuery.week.day.sun"/>{{'$S_str_Sunday' | translate}}</label>
-					&nbsp;
-					<label><input type="checkbox" ng-model="dataScheduleQuery.week.day.mon"/>{{'$S_str_Monday' | translate}}</label>
-					&nbsp;
-					<label><input type="checkbox" ng-model="dataScheduleQuery.week.day.tue"/>{{'$S_str_Tuesday' | translate}}</label>
-					&nbsp;
-					<label><input type="checkbox" ng-model="dataScheduleQuery.week.day.wed"/>{{'$S_str_Wednesday' | translate}}</label>
-				</div>
-				<div>
-					<label><input type="checkbox" ng-model="dataScheduleQuery.week.day.thu"/>{{'$S_str_Thursday' | translate}}</label>
-					&nbsp;
-					<label><input type="checkbox" ng-model="dataScheduleQuery.week.day.fri"/>{{'$S_str_Friday' | translate}}</label>
-					&nbsp;
-					<label><input type="checkbox" ng-model="dataScheduleQuery.week.day.sat"/>{{'$S_str_Saturday' | translate}}</label>
-				</div>
-			</li>
-
-			<!-- 매월 -->
-			<li class="cron-detail-step" ng-show="dataScheduleQuery.period == 'every_month'">
-				<div style="margin-bottom: 5px;">
-					<label>
-						<input type="radio" ng-model="dataScheduleQuery.month.select_date" value="true"/>
-						{{'$S_str_Date' | translate}} : {{'$S_str_PerMonthPre' | translate}}
-						<input type="text" class="wizard-text" ng-model="dataScheduleQuery.month.date_month_count"/>&nbsp;{{'$S_str_PerMonthPost' | translate}}&nbsp;
-						<input type="text" class="wizard-text" ng-model="dataScheduleQuery.month.date"/>&nbsp;{{'$S_str_DateTh' | translate}}
-					</label>
-				</div>
-				<div>
-					<label>
-						<input type="radio" ng-model="dataScheduleQuery.month.select_date"  value="false"/>
-						{{'$S_str_DayOfWeek' | translate}} : {{'$S_str_PerMonthPre' | translate}}
-						<input type="text" class="wizard-text" ng-model="dataScheduleQuery.month.day_month_count"/>&nbsp;{{'$S_str_PerMonthPost' | translate}}
-						<select class="wizard-select" ng-options="d for d in dataDay" ng-model="dataScheduleQuery.month.day"></select>&nbsp;
-					</label>
-				</div>
-			</li>
-
-			<!-- 매년 -->
-			<li class="cron-detail-step" ng-show="dataScheduleQuery.period == 'every_year'">
-				<div style="margin-bottom: 5px;">
-					<label>
-						<input type="radio" ng-model="dataScheduleQuery.year.select_date" value="true"/>
-						{{'$S_str_Date' | translate}} : 
-						<select class="wizard-month" ng-options="m for m in dataMonth" ng-model="dataScheduleQuery.year.date_month"></select>&nbsp;
-						<input type="text" class="wizard-text" ng-model="dataScheduleQuery.year.date"/>&nbsp;{{'$S_str_DateTh' | translate}}
-					</label>
-				</div>
-				<div>
-					<label>
-						<input type="radio" ng-model="dataScheduleQuery.year.select_date" value="false"/>
-						{{'$S_str_DayOfWeek' | translate}} :
-						<select class="wizard-month" ng-options="m for m in dataMonth" ng-model="dataScheduleQuery.year.day_month"></select>
-						<select class="wizard-select" ng-options="d for d in dataDay" ng-model="dataScheduleQuery.year.day"></select>
-					</label>
-				</div>
-			</li>
-		</ol>
-	</div>
+	<table class="table table-condensed">
+		<tbody>
+			<tr>
+				<td>Minute</td>
+				<td><input type="checkbox" ng-model="everyMinute"></td>
+				<td colspan="7">
+					<input type="text" ng-model="valMinute" ng-model-setter="setRange($value, $model, 0, 59)">
+					<input type="range" ng-model="valMinute" min="0" max="59" step="1">
+				</td>
+				<td>
+					<input type="text" ng-model="cron.valMinute">
+				</td>
+			</tr>
+			<tr>
+				<td>Hour</td>
+				<td><input type="checkbox" ng-model="everyHour"></td>
+				<td colspan="7">
+					<input type="text" ng-model="valHour" ng-model-setter="setRange($value, $model, 0, 23)">
+					<input type="range" ng-model="valHour" min="0" max="23" step="1">
+				</td>
+				<td>
+					<input type="text" ng-model="cron.valHour">
+				</td>
+			</tr>
+			<tr>
+				<td>Day of Month</td>
+				<td><input type="checkbox" ng-model="everyDayofMonth"></td>
+				<td colspan="7">
+					<input type="text" ng-model="valDayofMonth" ng-model-setter="setRange($value, $model, 1, 31)">
+					<input type="range" ng-model="valDayofMonth" min="1" max="31" step="1">
+				</td>
+				<td>
+					<input type="text" ng-model="cron.valDayofMonth">
+				</td>
+			</tr>
+			<tr>
+				<td>Month</td>
+				<td><input type="checkbox" ng-model="everyMonth"></td>
+				<td colspan="7">
+					<input type="text" ng-model="valMonth" ng-model-setter="setRange($value, $model, 1, 12)">
+					<input type="range" ng-model="valMonth" min="1" max="12" step="1">
+				</td>
+				<td>
+					<input type="text" ng-model="cron.valMonth">
+				</td>
+			</tr>
+			<tr>
+				<td>Day of week</td>
+				<td><input type="checkbox" ng-model="everyDayofWeek"></td>
+				<td>
+					<input type="checkbox" ng-model="valDayofWeek[0]">
+				</td>
+				<td>
+					<input type="checkbox" ng-model="valDayofWeek[1]">
+				</td>
+				<td>
+					<input type="checkbox" ng-model="valDayofWeek[2]">
+				</td>
+				<td>
+					<input type="checkbox" ng-model="valDayofWeek[3]">
+				</td>
+				<td>
+					<input type="checkbox" ng-model="valDayofWeek[4]">
+				</td>
+				<td>
+					<input type="checkbox" ng-model="valDayofWeek[5]">
+				</td>
+				<td>
+					<input type="checkbox" ng-model="valDayofWeek[6]">
+				</td>
+				<td>
+					<input type="text" ng-model="cron.valDayofWeek">
+				</td>
+			</tr>
+		</tbody>
+		<tfoot>
+			<tr>
+				<th></th>
+				<th>All</th>
+				<th>Mo</th>
+				<th>Tu</th>
+				<th>We</th>
+				<th>Th</th>
+				<th>Fr</th>
+				<th>Sa</th>
+				<th>Su</th>
+				<th></th>
+			</tr>
+		</tfoot>
+	</table>
+	<!-- {{valMinute}}
+	{{valDayofWeek}} -->
 </div>

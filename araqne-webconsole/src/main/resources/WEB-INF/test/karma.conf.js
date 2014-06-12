@@ -32,7 +32,15 @@ module.exports = function(config){
         served:   true,
         included: false
       },
-      'script/directive/*.html'
+      'script/directive/*.html',
+      'lib/bootstrap2/css/*',
+      {
+        pattern:  'lib/bootstrap2/img/*',
+        watched:  true,
+        served:   true,
+        included: false
+      },
+      'css/ui-cronizer.css'
     ],
 
     preprocessors: {

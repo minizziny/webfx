@@ -175,7 +175,7 @@ describe('directives', function() {
 	"$S_msg_Dec": "12월"
 		}
 
-		var INTERVAL = 500;
+		var INTERVAL = 1000;
 		var $compile, scope, template, body = $('<div id="fixture"></div>').appendTo('body');
 
 		angular.module('app', function () {})
@@ -193,7 +193,7 @@ describe('directives', function() {
 			}
 		});
 
-		beforeEach(module('pascalprecht.translate', 'app', 'app.directive.cron', 'app.filter', 'script/directive/directive.cron.html'));
+		beforeEach(module('pascalprecht.translate', 'app', 'app.directive.cron', 'app.filter', 'app.directive.validation', 'script/directive/directive.cron.html'));
 	
 		beforeEach(inject(function($templateCache,_$compile_,_$rootScope_) {
 			template = $templateCache.get('script/directive/directive.cron.html');
@@ -209,7 +209,7 @@ describe('directives', function() {
 	
 		it("cronizer", function() {
 			scope.dataCron = '';
-			var element = $compile(angular.element('<div><h4>{{dataCron}}</h4><ui-cronizer ng-model="dataCron"></ui-cronizer></div>'))(scope);
+			var element = $compile(angular.element('<div><ui-cronizer ng-model="dataCron"></ui-cronizer><hr><h4>{{dataCron}}</h4></div>'))(scope);
 			element.appendTo(body);			
 			scope.$digest();
 
@@ -226,7 +226,7 @@ describe('directives', function() {
 			}, INTERVAL + 100);
 
 			runs(function() {
-				expect(scope.dataCron).toEqual({ cron_schedule : '0 * */1 * *' });
+				expect(scope.dataCron).toEqual('0 0 1 1 ');
 			});
 		})
 	});
