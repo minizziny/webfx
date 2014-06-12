@@ -1,6 +1,7 @@
 {
 	"$S_str_More": "更多",
 	"$S_str_Apps": "超时",
+	"$S_str_All": "All",
 
 	"--------orgchart--------": "",
 	"$S_str_RemoveOrganization": "删除部门",
@@ -311,6 +312,15 @@
 	"$S_str_Thursday": "星期四",
 	"$S_str_Friday": "星期五",
 	"$S_str_Saturday": "星期六",
+	"$S_str_Minute": "分",
+	"$S_str_Hour": "时",
+	"$S_str_Sunday_shrt": "日",
+	"$S_str_Monday_shrt": "一",
+	"$S_str_Tuesday_shrt": "二",
+	"$S_str_Wednesday_shrt": "三",
+	"$S_str_Thursday_shrt": "四",
+	"$S_str_Friday_shrt": "五",
+	"$S_str_Saturday_shrt": "六",
 	"$S_str_Date": "日期",
 	"$S_str_DayOfWeek": "星期",
 	"$S_str_PerMonth": "月",

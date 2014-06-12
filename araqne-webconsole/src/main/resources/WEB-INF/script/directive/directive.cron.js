@@ -11,6 +11,7 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 
 		},
 		link: function(scope, element, attrs, ctrl) {
+			var mode = 'basic';
 			scope.valMinute = 0;
 			scope.valHour = 0;
 			scope.valDayofMonth = 1;
@@ -40,7 +41,13 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 						scope[model] = val;
 						scope.cron[model] = val;
 					}
+
+					scope.clearCheck(model);
 				}
+			}
+
+			scope.clearCheck = function(model) {
+				scope['every' + model.substring(3)] = false;
 			}
 
 			scope.cron = {}
@@ -59,13 +66,13 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 			scope.$watch('everyHour', setEvery(0, 'valHour'));
 			scope.$watch('everyDayofMonth', setEvery(1, 'valDayofMonth'));
 			scope.$watch('everyMonth', setEvery(1, 'valMonth'));
-			scope.$watch('everyDayofWeek', function(v) {
+			scope.changeDayofWeek = function() {
 				for (var i = 6; i >= 0; i--) {
-					scope.valDayofWeek[i] = v;
+					scope.valDayofWeek[i] = scope.everyDayofWeek;
 				}
-			});
+			};
 
-			scope.$watch('valDayofWeek', function(newval) {
+			function parseValDayofWeek(newval) {
 				if(newval.every(function(v) { return v })) {
 					scope.cron.valDayofWeek = '*';
 				}
@@ -74,12 +81,36 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 						.map(function(v, i) { return v ? i+1 : '' })
 						.filter(function(v) { return !!v })
 						.join(',');
+					scope.everyDayofWeek = false;
 				}
-			}, true);
+				return scope.cron.valDayofWeek;
+			}
+
+			scope.$watch('valDayofWeek', parseValDayofWeek, true);
 
 			scope.$watch('cron', function(val) {
 				ctrl.$setViewValue(val.valMinute + ' ' + val.valHour + ' ' + val.valDayofMonth + ' ' + val.valMonth + ' ' + val.valDayofWeek);
 			}, true);
+
+			scope.toggle = function(val) {
+				mode = val;
+				if(mode === 'expert') {
+					element.find('col.expert')[0].style.cssText = '';
+					element.find('col.basic').each(function(i, el) {
+						el.style.cssText = 'width: 0px !important';
+					});
+
+					ctrl.$setViewValue(scope.cron.valMinute + ' ' + scope.cron.valHour + ' ' + scope.cron.valDayofMonth + ' ' + scope.cron.valMonth + ' ' + scope.cron.valDayofWeek);
+				}
+				else if (mode === 'basic') {
+					element.find('col.expert')[0].style.cssText = 'width: 0px !important';
+					element.find('col.basic').each(function(i, el) {
+						el.style.cssText = '';
+					});
+
+					ctrl.$setViewValue(scope.valMinute + ' ' + scope.valHour + ' ' + scope.valDayofMonth + ' ' + scope.valMonth + ' ' + parseValDayofWeek(scope.valDayofWeek));
+				}
+			}
 		}
 	}
 });

@@ -1,53 +1,69 @@
 <div class="ui-cronizer">
+	<div class="btn-group">
+		<button class="btn" ng-click="toggle('basic')">Basic</button>
+		<button class="btn" ng-click="toggle('expert')">Expert</button>
+	</div>
 	<table class="table table-condensed">
+		<colgroup>
+			<col style="width: 110px">
+			<col class="basic">
+			<col class="basic">
+			<col class="basic">
+			<col class="basic">
+			<col class="basic">
+			<col class="basic">
+			<col class="basic">
+			<col class="basic">
+			<col class="expert" style="width: 0px !important">
+		</colgroup>
 		<tbody>
 			<tr>
-				<td>Minute</td>
+				<td>{{'$S_str_Minute' | translate}}</td>
 				<td><input type="checkbox" ng-model="everyMinute"></td>
 				<td colspan="7">
 					<input type="text" ng-model="valMinute" ng-model-setter="setRange($value, $model, 0, 59)">
-					<input type="range" ng-model="valMinute" min="0" max="59" step="1">
+					<input type="range" ng-model="valMinute" min="0" max="59" step="1" ng-change="clearCheck('valMinute')">
 				</td>
 				<td>
 					<input type="text" ng-model="cron.valMinute">
 				</td>
 			</tr>
 			<tr>
-				<td>Hour</td>
+				<td>{{'$S_str_Hour' | translate}}</td>
 				<td><input type="checkbox" ng-model="everyHour"></td>
 				<td colspan="7">
 					<input type="text" ng-model="valHour" ng-model-setter="setRange($value, $model, 0, 23)">
-					<input type="range" ng-model="valHour" min="0" max="23" step="1">
+					<input type="range" ng-model="valHour" min="0" max="23" step="1" ng-change="clearCheck('valHour')">
 				</td>
 				<td>
 					<input type="text" ng-model="cron.valHour">
 				</td>
 			</tr>
 			<tr>
-				<td>Day of Month</td>
+				<td>{{'$S_str_Day' | translate}}</td>
 				<td><input type="checkbox" ng-model="everyDayofMonth"></td>
 				<td colspan="7">
 					<input type="text" ng-model="valDayofMonth" ng-model-setter="setRange($value, $model, 1, 31)">
-					<input type="range" ng-model="valDayofMonth" min="1" max="31" step="1">
+					<input type="range" ng-model="valDayofMonth" min="1" max="31" step="1" ng-change="clearCheck('valDayofMonth')">
 				</td>
 				<td>
 					<input type="text" ng-model="cron.valDayofMonth">
 				</td>
 			</tr>
 			<tr>
-				<td>Month</td>
+				<td>{{'$S_str_Month' | translate}}</td>
 				<td><input type="checkbox" ng-model="everyMonth"></td>
 				<td colspan="7">
 					<input type="text" ng-model="valMonth" ng-model-setter="setRange($value, $model, 1, 12)">
-					<input type="range" ng-model="valMonth" min="1" max="12" step="1">
+					<input type="range" ng-model="valMonth" min="1" max="12" step="1" ng-change="clearCheck('valMonth')">
 				</td>
 				<td>
 					<input type="text" ng-model="cron.valMonth">
 				</td>
 			</tr>
 			<tr>
-				<td>Day of week</td>
-				<td><input type="checkbox" ng-model="everyDayofWeek"></td>
+				<td>{{'$S_str_DayOfWeek' | translate}}</td>
+				<td><input type="checkbox" ng-model="everyDayofWeek" ng-change="changeDayofWeek()"></td>
 				<td>
 					<input type="checkbox" ng-model="valDayofWeek[0]">
 				</td>
@@ -77,14 +93,14 @@
 		<tfoot>
 			<tr>
 				<th></th>
-				<th>All</th>
-				<th>Mo</th>
-				<th>Tu</th>
-				<th>We</th>
-				<th>Th</th>
-				<th>Fr</th>
-				<th>Sa</th>
-				<th>Su</th>
+				<th>{{'$S_str_All' | translate}}</th>
+				<th>{{'$S_str_Monday_shrt' | translate}}</th>
+				<th>{{'$S_str_Tuesday_shrt' | translate}}</th>
+				<th>{{'$S_str_Wednesday_shrt' | translate}}</th>
+				<th>{{'$S_str_Thursday_shrt' | translate}}</th>
+				<th>{{'$S_str_Friday_shrt' | translate}}</th>
+				<th>{{'$S_str_Saturday_shrt' | translate}}</th>
+				<th>{{'$S_str_Sunday_shrt' | translate}}</th>
 				<th></th>
 			</tr>
 		</tfoot>

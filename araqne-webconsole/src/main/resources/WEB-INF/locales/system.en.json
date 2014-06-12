@@ -1,6 +1,7 @@
 {
 	"$S_str_More": "More",
 	"$S_str_Apps": "Apps",
+	"$S_str_All": "All",
 
 	"--------orgchart--------": "",
 	"$S_str_RemoveOrganization": "Delete Department",
@@ -311,6 +312,15 @@
 	"$S_str_Thursday": "Thursday",
 	"$S_str_Friday": "Friday",
 	"$S_str_Saturday": "Saturday",
+	"$S_str_Minute": "Minute",
+	"$S_str_Hour": "Hour",
+	"$S_str_Sunday_shrt": "Sun",
+	"$S_str_Monday_shrt": "Mon",
+	"$S_str_Tuesday_shrt": "Tue",
+	"$S_str_Wednesday_shrt": "Wed",
+	"$S_str_Thursday_shrt": "Thu",
+	"$S_str_Friday_shrt": "Fri",
+	"$S_str_Saturday_shrt": "Sat",
 	"$S_str_Date": "Date",
 	"$S_str_DayOfWeek": "Day Of Week",
 	"$S_str_PerMonthPre": "per",

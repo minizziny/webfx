@@ -1,6 +1,7 @@
 {
 	"$S_str_More": "더보기",
 	"$S_str_Apps": "앱",
+	"$S_str_All": "전체",
 
 	"--------orgchart--------": "",
 	"$S_str_RemoveOrganization": "부서 삭제",
@@ -311,6 +312,15 @@
 	"$S_str_Thursday": "목요일",
 	"$S_str_Friday": "금요일",
 	"$S_str_Saturday": "토요일",
+	"$S_str_Minute": "분",
+	"$S_str_Hour": "시",
+	"$S_str_Sunday_shrt": "월",
+	"$S_str_Monday_shrt": "화",
+	"$S_str_Tuesday_shrt": "화",
+	"$S_str_Wednesday_shrt": "수",
+	"$S_str_Thursday_shrt": "목",
+	"$S_str_Friday_shrt": "금",
+	"$S_str_Saturday_shrt": "토",
 	"$S_str_Date": "날짜",
 	"$S_str_DayOfWeek": "요일",
 	"$S_str_PerMonthPre" : "",

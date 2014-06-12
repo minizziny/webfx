@@ -1,3 +1,13 @@
-.ui-cronizer input[type=number] {
-  width: 30px;
+.ui-cronizer table {
+  table-layout: fixed;
+  width: 100%;
+}
+.ui-cronizer table th,
+.ui-cronizer table td {
+  overflow-x: hidden;
+  white-space: nowrap;
+  height: 30px;
+}
+.ui-cronizer td[colspan="7"] input[type=text] {
+  width: 30px !important;
 }
