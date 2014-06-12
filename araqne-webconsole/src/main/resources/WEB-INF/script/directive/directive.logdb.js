@@ -254,7 +254,7 @@ angular.module('app.directive.logdb', [])
 		}
 	}
 })
-.directive('tableViewWithPager', function($timeout) {
+.directive('tableViewWithPager', function($compile) {
 	return {
 		restrict: 'E',
 		require: ['ngModel'],
@@ -265,37 +265,50 @@ angular.module('app.directive.logdb', [])
 			ngPageSize: '=',
 			onPageChange: '&'
 		},
-		template: '<div class="tbl-view-container">\
-				<table table-view ng-model="model" show-index="true" class="table table-bordered table-condensed table-striped">\
-				</table>\
-			</div>\
-			<div class="pager-container">\
-				<div class="pull-left status">{{ngTotalCount}}건이 검색되었습니다.</div>\
-				<pager class="pull-right"\
-					ng-model="model"\
-					ng-total-count="ngTotalCount"\
-					ng-items-per-page="ngItemsPerPage"\
-					ng-page-size="ngPageSize"\
-					on-page-change="changePage()"></pager>\
-			</div>',
-		link: function(scope, element, attrs, ctrl) {
-
-			scope.numCurrentPage = 0;
-			scope.ngTotalCount = 0;
-
-			console.log(scope.ngItemsPerPage, scope.ngPageSize);
-			scope.changePage = function(idx) {
-				scope.numCurrentPage = idx;
-
-				scope.onPageChange({
-					'$idx': idx,
-					'$model': scope.model
-				});
+		tranclude: true,
+		compile: function compile(tElement, tAttrs, transclude) {
+			var tbodystr = '';
+			if(tElement[0].children.length !== 0) {
+				tbodystr = tElement.children().html().toString();
+				tElement[0].innerHTML = '';
 			}
+			return function postLink(scope, element, attrs, ctrl, transclude) {
+				var htmlstr = '<div class="tbl-view-container">\
+					<table table-view ng-model="model" show-index="true" class="table table-bordered table-condensed table-striped">'
+					+ tbodystr +
+					'</table>\
+				</div>\
+				<div class="pager-container">\
+					<div class="pull-left status">{{ngTotalCount}}건이 검색되었습니다.</div>\
+					<pager class="pull-right"\
+						ng-model="model"\
+						ng-total-count="ngTotalCount"\
+						ng-items-per-page="ngItemsPerPage"\
+						ng-page-size="ngPageSize"\
+						on-page-change="changePage()"></pager>\
+				</div>';
+				
+				var tmpl = angular.element(htmlstr);
+				$compile(tmpl, true)(scope);
+				tmpl.appendTo(element);
 
-			element.find('pager')[0].reset();
-			element.find('pager')[0].setThresholdWidth(10);
-		}
+				scope.numCurrentPage = 0;
+				scope.ngTotalCount = 0;
+
+				console.log(scope.ngItemsPerPage, scope.ngPageSize);
+				scope.changePage = function(idx) {
+					scope.numCurrentPage = idx;
+
+					scope.onPageChange({
+						'$idx': idx,
+						'$model': scope.model
+					});
+				}
+
+				element.find('pager')[0].reset();
+				element.find('pager')[0].setThresholdWidth(10);
+			}
+		} 
 	}
 })
 .directive('queryResult', function($compile, serviceUtility) {
