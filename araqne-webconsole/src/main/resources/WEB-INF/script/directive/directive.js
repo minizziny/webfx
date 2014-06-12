@@ -1613,7 +1613,7 @@
 					if (options.length == 0) {
 						return '선택해 주세요 <b class="caret"></b>';
 					}
-					else if (options.length > 3) {
+					else if (options.length > 1) {
 						return options.length + ' selected  <b class="caret"></b>';
 					}
 					else {
