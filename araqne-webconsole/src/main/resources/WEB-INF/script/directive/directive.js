@@ -59,7 +59,7 @@
 				throw new Error("Expected trSelectable in form of '_storageTargetVariable_ = _item_' but got '" + expression + "'.");
 				return;
 			}
-			
+
 			lhs = match[1];
 			rhs = match[2];
 
@@ -105,7 +105,7 @@
 				}
 				else {
 					bindingMultiEvent();
-				}	
+				}
 			}
 
 			function bindingMultiEvent() {
@@ -124,7 +124,7 @@
 	return {
 		restrict: 'E',
 		link: function (scope, element, attrs)
-		{	
+		{
 			var htmlstring = element.html();
 			var isEmpty = htmlstring.trim() === '';
 			var iconRefresh = '<button ng-click="childRefresh($event)" el-type="refresh" class="icon pull-right" style="display:none">\
@@ -134,7 +134,7 @@
 			var indiRefresh = '<span class="pull-right indi" style="display: none; color: silver; font-style: italic; font-size: 8pt; letter-spacing: -1px">새로고침 중...</span>';
 
 			if(!!scope.node.children) {
-				
+
 				var template = angular.element(
 					'<ul class="nav nav-list" ng-show="!node.isCollapsed">\
 						<li ng-repeat="node in node.children | filter: filterItem"\
@@ -161,7 +161,7 @@
 							'</tree-element>\
 						</li>\
 					</ul>');
-				
+
 				var linkFunction = $compile(template);
 				linkFunction(scope);
 				// element.replaceWith( template );
@@ -183,7 +183,7 @@
 				var template = angular.element('<i class="icon-minus tree-node-icon" el-type="toggle"></i>');
 			}
 			else {
-				var template = angular.element('<i class="icon-null tree-node-icon" el-type="toggle"></i>');	
+				var template = angular.element('<i class="icon-null tree-node-icon" el-type="toggle"></i>');
 			}
 
 			if(isCollapsed) {
@@ -203,7 +203,7 @@
 				scope.node.isCollapsed = !scope.node.isCollapsed;
 				scope.$apply();
 			})
-				
+
 			var linkFunction = $compile(template);
 			linkFunction(scope);
 			element.replaceWith(template);
@@ -222,10 +222,10 @@
 
 			var indiRefresh = '<span class="pull-right indi" style="display: none; color: silver; font-style: italic; font-size: 8pt; letter-spacing: -1px">새로고침 중...</span>';
 
-			scope.$watch(attrs.treeData, function(val) {				
+			scope.$watch(attrs.treeData, function(val) {
 				var template = angular.element(
 					'<div class="tree-container">' +
-					(attrs.displaySearch == 'false' ? '' : '<input type="search" placeholder="' + attrs.treeSearchPlaceholder + '" ng-model="filterValue"/>') + 
+					(attrs.displaySearch == 'false' ? '' : '<input type="search" placeholder="' + attrs.treeSearchPlaceholder + '" ng-model="filterValue"/>') +
 					'<ul class="nav nav-list tree-root">\
 						<li ng-repeat="node in ' + attrs.treeData + ' | filter: filterItem"\
 							ng-class="{\'active\': node.isSelected}"\
@@ -250,7 +250,7 @@
 							'</tree-element>\
 						</li>\
 					</ul></div>');
-				
+
 				var linkFunction = $compile(template);
 				linkFunction(scope);
 				element.html(null).append( template );
@@ -293,7 +293,7 @@
 				}
 
 				scope.$watch('filterValue', function() {
-					scope.$broadcast('nodeOnFiltering', { 
+					scope.$broadcast('nodeOnFiltering', {
 					});
 				});
 
@@ -333,7 +333,7 @@
 
 					if(angular.element(e.target).length) {
 						if($(e.target).attr('el-type') == 'item') {
-							
+
 							if(e.target.tagName == 'SPAN') {
 								var target = e.target.parentNode;
 							}
@@ -356,14 +356,14 @@
 
 							scope.$apply();
 						}
-						
+
 						if($(e.target).attr('el-type') == 'toggle') {
 							var parentElement = angular.element(e.target).parent().parent();
-							
+
 							if(parentElement.children().length) {
 								var isHidden = !parentElement.find('ul:first').is(':hidden');
 
-								scope.$broadcast('nodeToggled', { 
+								scope.$broadcast('nodeToggled', {
 									isHidden: isHidden,
 									selectedNode: parentElement.attr('node-id'),
 									selectedNodeType: parentElement.attr('node-tree-type'),
@@ -398,7 +398,7 @@
 
 			function textarea_esc(e) {
 				if( e.which == 27 ) { // cancel esc
-					
+
 					e.target = null;
 					outhover(e, true);
 				}
@@ -451,13 +451,13 @@
 				var txt = element.text();
 
 				textarea.val(txt);
-				
+
 				/*
 				var linkFunction = $compile(textarea);
 				linkFunction(scope);
 				*/
 				textarea.on('keypress', textarea_enter).on('keyup', textarea_esc);;
-				
+
 				element.replaceWith(textarea);
 				placeholder.remove();
 				textarea.focus();
@@ -515,10 +515,10 @@
 				var sheet = document.createElement('style');
 				$(sheet).attr('id','myHidden');
 				sheet.innerHTML = '.my-hidden { display: none }';
-					
+
 				document.body.appendChild(sheet);
 			}
-			
+
 			element.addClass('my-hidden');
 		}
 	}
@@ -539,10 +539,10 @@
 
 				if(scope[attrs.ngModelOnblur] != undefined) {
 					if(scope[attrs.ngModelOnblur].hasOwnProperty('is_edit_mode')) {
-						scope[attrs.ngModelOnblur].is_edit_mode = false;	
+						scope[attrs.ngModelOnblur].is_edit_mode = false;
 					}
 				}
-				
+
 				setTimeout(function() {
 					scope.$apply();
 					cancel = false;
@@ -579,7 +579,7 @@
 						var expr = attrs.ngRepeat;
 						return expr.substring(expr.indexOf('in') + 3, expr.length).split('|')[0].trim();
 					}
-					
+
 					var dataSrc = scope.$parent[getDataSourceString()];
 
 					element.draggable({
@@ -616,7 +616,7 @@
 				//console.log($attrs.draggable, $scope)
 				if(!$scope.$parent[$attrs.draggable]) {
 					$element.draggable();
-					$element.draggable('disable');	
+					$element.draggable('disable');
 					return;
 				}
 
@@ -659,7 +659,7 @@
 		restrict: 'A',
 		require: 'ngModel',
 		link: function(scope, elem, attrs, ctrl) {
-			
+
 			scope.$watch(attrs.ngModel, function(value) {
 				var option = scope.$eval(attrs.ngUnique);
 				if(option.condition) {
@@ -679,7 +679,7 @@
 		require: 'ngModel',
 		link: function(scope, elem, attrs, ctrl) {
 			var mdlTree = attrs.ngModel.split('.');
-			
+
 			var getLastParent = function(obj, arr) {
 				if (arr.length > 0) {
 					if (arr.length == 1) {
@@ -690,7 +690,7 @@
 						if(obj[arr[0]] == null) {
 							return obj;
 						}
-						else return getLastParent(obj[arr[0]], (function() { 
+						else return getLastParent(obj[arr[0]], (function() {
 							arr.shift();
 							return arr;
 						})());
@@ -813,23 +813,23 @@
 					scope.currentIndex = getTotalPageCount() - 1;
 				}
 				else {
-					scope.currentIndex = scope.currentIndex + scope.ngPageSize;	
+					scope.currentIndex = scope.currentIndex + scope.ngPageSize;
 				}
-				
+
 				changePage(scope.currentIndex);
 			}
 
 			scope.nextOnePage = function () {
-				if(scope.currentIndex == getTotalPageCount() - 1) return;	
+				if(scope.currentIndex == getTotalPageCount() - 1) return;
 
 				if(scope.currentIndex % scope.ngPageSize == 9)
 					scope.currentPage = scope.currentPage + 1;
 
 				render();
-				scope.currentIndex = scope.currentIndex + 1;	
+				scope.currentIndex = scope.currentIndex + 1;
 				changePage(scope.currentIndex);
 			}
-			
+
 			scope.prevPage = function() {
 				if(scope.currentPage == 0) return;
 				scope.currentPage = scope.currentPage - 1;
@@ -910,9 +910,9 @@
 					}
 					else {
 						scope.arrPageSize = new Array(totalPageCount);
-					}	
+					}
 				}
-				
+
 			}
 
 			function setTotalCount(count) {
@@ -928,12 +928,12 @@
 
 			scope.$watch('ngTotalCount', function() {
 				if(scope.currentIndex == undefined) {
-					scope.currentIndex = 0;	
+					scope.currentIndex = 0;
 				}
 				if(scope.currentPage == undefined) {
-					scope.currentPage = 0;	
+					scope.currentPage = 0;
 				}
-				
+
 				render();
 			});
 
@@ -1061,14 +1061,14 @@
 					scope.currentIndex = getTotalPageCount() - 1;
 				}
 				else {
-					scope.currentIndex = scope.currentIndex + scope.ngPageSize;	
+					scope.currentIndex = scope.currentIndex + scope.ngPageSize;
 				}
-				
+
 				changePage(scope.currentIndex);
 			}
 
 			scope.nextOnePage = function () {
-				if(scope.currentIndex == getTotalPageCount() - 1) return;	
+				if(scope.currentIndex == getTotalPageCount() - 1) return;
 
 				if(scope.currentIndex % scope.ngPageSize == 9) {
 					scope.currentPage = scope.currentPage + 1;
@@ -1079,7 +1079,7 @@
 				scope.currentIndex = scope.currentIndex + 1;
 				changePage(scope.currentIndex);
 			}
-			
+
 			scope.prevPage = function() {
 				if(scope.currentPage == 0) return;
 				scope.currentPage = scope.currentPage - 1;
@@ -1161,7 +1161,7 @@
 						scope.arrPageSize = new Array(totalPageCount);
 					}
 				}
-				
+
 			}
 
 			function setTotalCount(count) {
@@ -1177,11 +1177,11 @@
 
 			scope.$watch('ngTotalCount', function() {
 				if(scope.currentIndex == undefined) {
-					scope.currentIndex = 0;	
+					scope.currentIndex = 0;
 				}
 				if(scope.currentPage == undefined) {
-					scope.currentPage = 0;	
-				}				
+					scope.currentPage = 0;
+				}
 				render();
 			});
 
@@ -1202,7 +1202,7 @@
 			// 	render();
 			// 	scope.$parent.$eval(attr.onItemsPerPageChange);
 
-				
+
 			// });
 
 			scope.isShowJumpPopup = false;
@@ -1305,14 +1305,14 @@
 					scope.currentIndex = getTotalPageCount() - 1;
 				}
 				else {
-					scope.currentIndex = scope.currentIndex + scope.ngPageSize;	
+					scope.currentIndex = scope.currentIndex + scope.ngPageSize;
 				}
-				
+
 				changePage(scope.currentIndex);
 			}
 
 			scope.nextOnePage = function () {
-				if(scope.currentIndex == getTotalPageCount() - 1) return;	
+				if(scope.currentIndex == getTotalPageCount() - 1) return;
 
 				if(scope.currentIndex % scope.ngPageSize == 9) {
 					scope.currentPage = scope.currentPage + 1;
@@ -1323,7 +1323,7 @@
 				scope.currentIndex = scope.currentIndex + 1;
 				changePage(scope.currentIndex);
 			}
-			
+
 			scope.prevPage = function() {
 				if(scope.currentPage == 0) return;
 				scope.currentPage = scope.currentPage - 1;
@@ -1405,7 +1405,7 @@
 						scope.arrPageSize = new Array(totalPageCount);
 					}
 				}
-				
+
 			}
 
 			function setTotalCount(count) {
@@ -1421,11 +1421,11 @@
 
 			scope.$watch('ngTotalCount', function() {
 				if(scope.currentIndex == undefined) {
-					scope.currentIndex = 0;	
+					scope.currentIndex = 0;
 				}
 				if(scope.currentPage == undefined) {
-					scope.currentPage = 0;	
-				}				
+					scope.currentPage = 0;
+				}
 				render();
 			});
 
@@ -1477,7 +1477,7 @@
 
 				if (file) {
 					var fr = new FileReader();
-					fr.onload = function(e) { 
+					fr.onload = function(e) {
 						var contents = e.target.result;
 						scope.onChange({
 							'$file': contents,
@@ -1506,7 +1506,7 @@
             $(function(){
                 element.datepicker({
                     dateFormat:'yymmdd',
-                    inline: true,  
+                    inline: true,
           			showOtherMonths: true,
                     onSelect:function (date) {
                         ngModelCtrl.$setViewValue(date);
@@ -1571,13 +1571,13 @@
 					}
 				});
 
-				if(allSet) { 
-					$scope.master = true; 
+				if(allSet) {
+					$scope.master = true;
 					masterCheckbox.indeterminate = false;
-				} else if(allClear) { 
-					$scope.master = false; 
+				} else if(allClear) {
+					$scope.master = false;
 					masterCheckbox.indeterminate = false;
-				} else { 
+				} else {
 					$scope.master = false;
 					masterCheckbox.indeterminate = true;
 				}
@@ -1585,5 +1585,47 @@
 
 			$scope.checkboxChange();  // initialize
 	    }
+	};
+})
+.directive('multiSelectDropDown', function () {
+	return {
+		link: function (scope, element, attrs) {
+			element.multiselect({
+				buttonClass: 'btn',
+				buttonWidth: 'auto',
+				buttonContainer: '<div class="btn-group" />',
+				maxHeight: 300,
+				enableFiltering: true,
+				buttonText: function(options) {
+					if (options.length == 0) {
+						return '선택해 주세요 <b class="caret"></b>';
+					}
+					else if (options.length > 1) {
+						return options.length + ' selected  <b class="caret"></b>';
+					}
+					else {
+						var selected = '';
+						options.each(function() {
+							selected += $(this).text() + ', ';
+						});
+						return selected.substr(0, selected.length -2) + ' <b class="caret"></b>';
+					}
+				}
+			});
+
+			// Watch for any changes to the length of our select element
+			scope.$watch(function () {
+				return element[0].length;
+			}, function () {
+				element.multiselect('rebuild');
+			});
+
+			// Watch for any changes from outside the directive and refresh
+			scope.$watch(attrs.ngModel, function () {
+				element.multiselect('refresh');
+			});
+
+		}
+
 	};
 });
