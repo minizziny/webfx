@@ -1,21 +1,25 @@
 window._utility = {
 	'sortColumns': function sortColumns(cols) {
-		return cols.sort().sort(function(a, b) {
-			if(a.indexOf('_') === 0 && b.indexOf('_') === 0) { 
-				if(a > b) {
+		return cols.sort().sort(function (a, b) {
+			if (a.indexOf('_') === 0 && b.indexOf('_') === 0) {
+				if (a > b) {
 					return 1;
 				}
-				if(b > a) {
+				if (b > a) {
 					return -1;
 				}
 			}
-			else if(a.indexOf('_') === 0) { return -1; }
-			else if(b.indexOf('_') === 0) { return 1; }
-			else { 
-				if(a > b) {
+			else if (a.indexOf('_') === 0) {
+				return -1;
+			}
+			else if (b.indexOf('_') === 0) {
+				return 1;
+			}
+			else {
+				if (a > b) {
 					return 1;
 				}
-				if(b > a) {
+				if (b > a) {
 					return -1;
 				}
 			}
@@ -25,570 +29,574 @@ window._utility = {
 }
 
 angular.module('app.directive.logdb', [])
-.directive('queryInput', function($compile, $parse, $translate, serviceLogdb, serviceSession) {
-	return {
-		restrict: 'E',
-		scope: {
-			onLoading: '&',
-			onLoaded: '&',
-			onStatusChange: '&',
-			onHead: '&',
-			onTail: '&',
-			ngTemplate: '=ngTemplate',
-			ngPageSize: '&',
-			ngQueryString: '=',
-			ngPid: '=',
-			onError: '&'
-		},
-		template: '<textarea ng-model="ngQueryString" placeholder="{{ \'$S_msg_QueryHere\' | translate }}" spellcheck="false" autosize autosize-max-height="145" ng-model-onblur></textarea>\
+	.directive('queryInput', function ($compile, $parse, $translate, serviceLogdb, serviceSession) {
+		return {
+			restrict: 'E',
+			scope: {
+				onLoading: '&',
+				onLoaded: '&',
+				onStatusChange: '&',
+				onHead: '&',
+				onTail: '&',
+				ngTemplate: '=ngTemplate',
+				ngPageSize: '&',
+				ngQueryString: '=',
+				ngPid: '=',
+				onError: '&'
+			},
+			template: '<textarea ng-model="ngQueryString" placeholder="{{ \'$S_msg_QueryHere\' | translate }}" spellcheck="false" autosize autosize-max-height="145" ng-model-onblur></textarea>\
 			<button class="search btn btn-primary">{{ "$S_str_Run" | translate}}</button>\
 			<button class="stop btn btn-warning">{{ "$S_str_Stop" | translate}}</button>',
-		link: function(scope, element, attrs) {
-			var textarea = element.find('textarea');
-			
-			
-			textarea.on('keydown', function(e) {
-				if (e.type === 'keydown' && ((e.ctrlKey || e.shiftKey) && e.keyCode === 13)) {
-					e.preventDefault();
-					search();
-				}
-			});
-			
-			element.find('.search').on('click', function() {
-				search();
-			});
+			link: function (scope, element, attrs) {
+				var textarea = element.find('textarea');
 
-			element.find('.stop').on('click', stop);
 
-			function createdFn(m) {
-				element.removeClass('loaded').addClass('loading');
-				//사용자 입력 쿼리 기록 넣기
-				var queryValue = scope.ngQueryString.replace(/\n/gi, ' ');
-				serviceLogdb.save(queryValue);
-			}
-
-			function startedFn(m) {
-				scope.onLoading({
-					'$msg': m
+				textarea.on('keydown', function (e) {
+					if (e.type === 'keydown' && ((e.ctrlKey || e.shiftKey) && e.keyCode === 13)) {
+						e.preventDefault();
+						search();
+					}
 				});
-			}
 
-			function getResultFn(callback) {
-				return function(m) {
-					scope.$parent[attrs.ngModel] = m.body.result;
-					scope.$parent.$apply();
-					if(!!callback) {
-						callback();
+				element.find('.search').on('click', function () {
+					search();
+				});
+
+				element.find('.stop').on('click', stop);
+
+				function createdFn(m) {
+					element.removeClass('loaded').addClass('loading');
+					//사용자 입력 쿼리 기록 넣기
+					var queryValue = scope.ngQueryString.replace(/\n/gi, ' ');
+					serviceLogdb.save(queryValue);
+				}
+
+				function startedFn(m) {
+					scope.onLoading({
+						'$msg': m
+					});
+				}
+
+				function getResultFn(callback) {
+					return function (m) {
+						scope.$parent[attrs.ngModel] = m.body.result;
+						scope.$parent.$apply();
+						if (!!callback) {
+							callback();
+						}
 					}
 				}
-			}
 
-			function onHead(helper) {
-				scope.onHead({
-					'$helper': helper
-				});
-			}
-
-			function onTail(helper) {
-				scope.onTail({
-					'$helper': helper
-				});
-			}
-
-			function loadedFn(m) {
-				element.removeClass('loading').addClass('loaded');
-				scope.onLoaded({
-					'$msg': m,
-					'$inst': z
-				});
-			}
-
-			function onStatusChangeFn(m) {
-				scope.onStatusChange({
-					'$msg': m,
-					'$inst': z
-				});
-			}
-
-			function failedFn(raw) {
-				var errorType, errorNote;
-
-				var rxType = /type=(\w*(-|_)?)*/;
-				var rxNote= /note=(.*)/;
-
-
-				if( rxType.test(raw[0].errorCode) ) {
-					errorType = raw[0].errorCode.match(rxType)[0].split('type=')[1];
+				function onHead(helper) {
+					scope.onHead({
+						'$helper': helper
+					});
 				}
-				if( rxNote.test(raw[0].errorCode) ) {
-					errorNote = raw[0].errorCode.match(rxNote)[0].split('note=')[1];
+
+				function onTail(helper) {
+					scope.onTail({
+						'$helper': helper
+					});
 				}
-				var errorMsg = $translate('$S_msg_WrongQuery') +
-					(!!errorType ? ('\n\n' + $translate('$S_str_Type') + ': ' + $translate(errorType)) : '') +
-					(!!errorNote ? ('\n' + $translate('$S_str_Note') + ': ' + $translate(errorNote)) : '')
 
-				// alert(errorMsg);
-
-				scope.onError({
-					'$raw': raw,
-					'$type': errorType,
-					'$note': errorNote
-				});
-
-				scope.$apply();
-			}
-
-			var z;
-			function search() {
-
-				var limit = scope.$eval(scope.ngPageSize);
-				
-				textarea.blur();
-				if(z != undefined) {
-					serviceLogdb.remove(z);
+				function loadedFn(m) {
+					element.removeClass('loading').addClass('loaded');
+					scope.onLoaded({
+						'$msg': m,
+						'$inst': z
+					});
 				}
-				z = serviceLogdb.create(scope.ngPid);
 
-				// console.log( textarea.data('$ngModelController').$modelValue );
-
-				z.query(scope.ngQueryString.replace(/\n/gi, ' '), limit)
-				.created(createdFn)
-				.started(startedFn)
-				.loaded(loadedFn)
-				.onStatusChange(onStatusChangeFn)
-				.onHead(onHead)
-				.onTail(onTail)
-				.failed(failedFn)
-			}
-
-			function stop() {
-				element.removeClass('loading').addClass('loaded');
-
-				z.stop()
-				.success(function() {
-					console.log('stopped')
-				})
-
-				scope.onLoaded({
-					'$msg': null
-				});
-			}
-
-			element[0].offset = function(offset, limit, callback) {
-				if(z == undefined) return;
-				z.getResult(offset, limit, getResultFn(callback));
-			}
-
-			element[0].run = function() {
-				var runner = scope.$watch('ngQueryString', function() {
-					search();
-					runner();
-				});
-			}
-
-			element[0].getInstance = function() {
-				return z;
-			}
-
-			element[0].bindBackgroundQuery = function(id, str, status) {
-				z = serviceLogdb.createFromBg(scope.ngPid, id, str, status);
-				z.registerTrap(function() {
-					console.log('registerTrap')
-				})
-				.created(createdFn)
-				.started(startedFn)
-				.loaded(loadedFn)
-				.onStatusChange(onStatusChangeFn)
-				.onHead(onHead)
-				.onTail(onTail)
-				.failed(failedFn);
-
-				if(status == 'Running') {
-					element.removeClass('loaded').addClass('loading');	
+				function onStatusChangeFn(m) {
+					scope.onStatusChange({
+						'$msg': m,
+						'$inst': z
+					});
 				}
-			}
 
-			element[0].setPristine = function() {
-				z = undefined;
-				scope.ngQueryString = '';
-			}
+				function failedFn(raw) {
+					var errorType, errorNote;
 
+					var rxType = /type=(\w*(-|_)?)*/;
+					var rxNote = /note=(.*)/;
+
+
+					if (rxType.test(raw[0].errorCode)) {
+						errorType = raw[0].errorCode.match(rxType)[0].split('type=')[1];
+					}
+					if (rxNote.test(raw[0].errorCode)) {
+						errorNote = raw[0].errorCode.match(rxNote)[0].split('note=')[1];
+					}
+					var errorMsg = $translate('$S_msg_WrongQuery') +
+						(!!errorType ? ('\n\n' + $translate('$S_str_Type') + ': ' + $translate(errorType)) : '') +
+						(!!errorNote ? ('\n' + $translate('$S_str_Note') + ': ' + $translate(errorNote)) : '')
+
+					// alert(errorMsg);
+
+					scope.onError({
+						'$raw': raw,
+						'$type': errorType,
+						'$note': errorNote
+					});
+
+					scope.$apply();
+				}
+
+				var z;
+
+				function search() {
+
+					var limit = scope.$eval(scope.ngPageSize);
+
+					textarea.blur();
+					if (z != undefined) {
+						serviceLogdb.remove(z);
+					}
+					z = serviceLogdb.create(scope.ngPid);
+
+					// console.log( textarea.data('$ngModelController').$modelValue );
+
+					z.query(scope.ngQueryString.replace(/\n/gi, ' '), limit)
+						.created(createdFn)
+						.started(startedFn)
+						.loaded(loadedFn)
+						.onStatusChange(onStatusChangeFn)
+						.onHead(onHead)
+						.onTail(onTail)
+						.failed(failedFn)
+				}
+
+				function stop() {
+					element.removeClass('loading').addClass('loaded');
+
+					z.stop()
+						.success(function () {
+							console.log('stopped')
+						})
+
+					scope.onLoaded({
+						'$msg': null
+					});
+				}
+
+				element[0].offset = function (offset, limit, callback) {
+					if (z == undefined) return;
+					z.getResult(offset, limit, getResultFn(callback));
+				}
+
+				element[0].run = function () {
+					var runner = scope.$watch('ngQueryString', function () {
+						search();
+						runner();
+					});
+				}
+
+				element[0].getInstance = function () {
+					return z;
+				}
+
+				element[0].bindBackgroundQuery = function (id, str, status) {
+					z = serviceLogdb.createFromBg(scope.ngPid, id, str, status);
+					z.registerTrap(function () {
+						console.log('registerTrap')
+					})
+						.created(createdFn)
+						.started(startedFn)
+						.loaded(loadedFn)
+						.onStatusChange(onStatusChangeFn)
+						.onHead(onHead)
+						.onTail(onTail)
+						.failed(failedFn);
+
+					if (status == 'Running') {
+						element.removeClass('loaded').addClass('loading');
+					}
+				}
+
+				element[0].setPristine = function () {
+					z = undefined;
+					scope.ngQueryString = '';
+				}
+
+			}
 		}
-	}
-})
-.directive('tableView', function($compile) {
-	return {
-		restrict: 'A',
-		require: ['ngModel'],
-		scope: {
-			'model': '=ngModel'
-		},
-		tranclude: true,
-		link: function(scope, element, attrs, ctrl, transclude) {
-			if(element[0].children.length === 0) {
-				var tmpl = angular.element('<thead><tr><th ng-repeat="col in model.__cols__">{{col}}</th></tr></thead>\
+	})
+	.directive('tableView', function ($compile) {
+		return {
+			restrict: 'A',
+			require: ['ngModel'],
+			scope: {
+				'model': '=ngModel'
+			},
+			tranclude: true,
+			link: function (scope, element, attrs, ctrl, transclude) {
+				if (element[0].children.length === 0) {
+					var tmpl = angular.element('<thead><tr><th ng-repeat="col in model.__cols__">{{col}}</th></tr></thead>\
 					<tbody><tr ng-repeat="row in model">\
 						<td ng-repeat="col in model.__cols__" ng-bind-html="row[col] | crlf"></td>\
 					</tr></tbody>');
-				$compile(tmpl, true)(scope);
-				tmpl.appendTo(element);
-			}
+					$compile(tmpl, true)(scope);
+					tmpl.appendTo(element);
+				}
 
-			function Manipulate(val) {
-				var cols = [];
-				val.forEach(function(row) {
-					cols = cols.concat(Object.keys(row));
-				});
-				
-				cols = cols.unique();
-				cols.splice(cols.indexOf('$$hashKey'), 1);
-				cols = window._utility.sortColumns(cols);
-				ctrl[0].$modelValue.__cols__ = cols.slice(0);
-			}
-			scope.$watch('model', function(val) {
-				if(val.length == 0) return;
-				ctrl[0].$modelValue.__cols__ = [];
-				Manipulate(val);
-				scope.val = val;
-			});
-		}
-	}
-})
-.directive('tableViewWithPager', function($compile) {
-	return {
-		restrict: 'E',
-		require: ['ngModel'],
-		scope: {
-			model: '=ngModel',
-			ngTotalCount: '=',
-			ngItemsPerPage: '=',
-			ngPageSize: '=',
-			onPageChange: '&'
-		},
-		tranclude: true,
-		compile: function compile(tElement, tAttrs, transclude) {
-			var tbodystr = '';
-			if(tElement[0].children.length !== 0) {
-				tbodystr = tElement.children().html().toString();
-				tElement[0].innerHTML = '';
-			}
-			return function postLink(scope, element, attrs, ctrl, transclude) {
-				var htmlstr = '<div class="tbl-view-container">\
-					<table table-view ng-model="model" show-index="true" class="table table-bordered table-condensed table-striped">'
-					+ tbodystr +
-					'</table>\
-				</div>\
-				<div class="pager-container">\
-					<div class="pull-left status">{{ngTotalCount}}건이 검색되었습니다.</div>\
-					<pager class="pull-right"\
-						ng-model="model"\
-						ng-total-count="ngTotalCount"\
-						ng-items-per-page="ngItemsPerPage"\
-						ng-page-size="ngPageSize"\
-						on-page-change="changePage()"></pager>\
-				</div>';
-				
-				var tmpl = angular.element(htmlstr);
-				$compile(tmpl, true)(scope);
-				tmpl.appendTo(element);
-
-				scope.numCurrentPage = 0;
-				scope.ngTotalCount = 0;
-
-				console.log(scope.ngItemsPerPage, scope.ngPageSize);
-				scope.changePage = function(idx) {
-					scope.numCurrentPage = idx;
-
-					scope.onPageChange({
-						'$idx': idx,
-						'$model': scope.model
+				function Manipulate(val) {
+					var cols = [];
+					val.forEach(function (row) {
+						cols = cols.concat(Object.keys(row));
 					});
-				}
 
-				element.find('pager')[0].reset();
-				element.find('pager')[0].setThresholdWidth(10);
-			}
-		} 
-	}
-})
-.directive('queryResult', function($compile, serviceUtility) {
-	return {
-		restrict: 'E',
-		scope: {
-			ngPage: '=',
-			ngPageSize: '=',
-			stopPropation: '@',
-			ngCols: '@',
-			ngModel: '=',
-			isCheckType: '@',
-			isSelectable: '@',
-			ngQuery: '='
-		},
-		template: '<div style="display: inline-block; position: relative">'+
-		'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: -5px; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\
-			<span ng-show="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
-				{{"$S_msg_MoreColumn" | translate:paramMoreColumn1()}}\
-			</span>\
-			<span ng-hide="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
-				{{"$S_msg_MoreColumn" | translate:paramMoreColumn2()}}\
-			</span>\
-		</button>\
-		<table ng-class="{ selectable: isSelectable, expandable: (numTotalColumn - numLimitColumn > 0) }" class="cmpqr table table-bordered table-striped table-condensed">\
-			<thead>\
-				<tr>\
-					<th>#</th>\
-					<th ng-class="{ selected: col.is_checked }"\
-						ng-hide="!col.is_visible"\
-						ng-repeat="col in ngCols | limitTo: numLimitColumn"\
-						ng-click="toggleCheck(col)">\
-						<input id="{{col.guid}}" type="checkbox" style="margin-right: 5px"\
-							ng-show="isSelectable"\
-							ng-click="stopPropation($event)"\
-							ng-model="col.is_checked">\
-						<span class="qr-th-type" ng-show="col.type == \'number\'">1</span>\
-						<span class="qr-th-type" ng-show="col.type == \'string\'">A</span>\
-						<span class="qr-th-type" ng-show="col.type == \'datetime\'"><i class="icon-white icon-time"></i></span>\
-						{{col.name}}\
-					</th>\
-				</tr>\
-			</thead>\
-			<tbody>\
-				<tr ng-repeat="d in ngModel">\
-					<td>{{ngPage * ngPageSize + ($index+1)}}</td>\
-					<td ng-class="{ selected: col.is_checked }"\
-						ng-hide="!col.is_visible"\
-						ng-repeat="col in ngCols | limitTo: numLimitColumn"\
-						ng-click="toggleCheck(col)"\
-						ng-bind-html="d[col.name] | crlf"></td>\
-				</tr>\
-			</tbody>\
-		</table>\
-		</div>',
-		link: function(scope, element, attrs) {
-			
-			scope.stopPropation = function(event) {
-				event.stopPropagation();
-			}
-
-			// 타입 체크 및 컬럼 정보에 타입 명시
-			function checkArrayMemberType(array) {
-				var types = ['number', 'datetime', 'string'];
-				if(array.some(angular.isNumber)) return types[0];
-				if(array.some(checkDate)) return types[1];
-
-				return types[2];
-			}
-
-			if(attrs.ngCustomTemplate != undefined) {
-				element.empty();
-				var customEl = angular.element(scope[attrs.ngCustomTemplate]);
-				element.append(customEl);
-
-				$compile(customEl)(scope);
-			}
-
-			scope.toggleCheck = function(col) {
-				col.is_checked = !col.is_checked;
-			};
-
-			scope.next = function() {
-				scope.numLimitColumn = scope.numLimitColumn + scope.numLimitColumnInterval;
-				console.log(scope.numLimitColumn)
-			}
-
-			scope.numLimitColumnInterval = 50;
-			scope.numLimitColumn = 50;
-			scope.numTotalColumn;
-			scope.paramMoreColumn1 = function() {
-				return {'p0': scope.numLimitColumnInterval}
-			}
-			scope.paramMoreColumn2 = function() {
-				return {'p0': scope.numTotalColumn - scope.numLimitColumn}
-			}
-
-			function newSearch() {
-				scope.numLimitColumnInterval = 50;
-				scope.numLimitColumn = 50;
-				scope.numTotalColumn = 0;
-				scope.$apply();
-			}
-
-			scope.ngCols = []; // ngModel의 컬럼 정보
-			scope.$watch('ngModel', function(val) {
-				if(!angular.isArray(val)) { return; } // 데이터가 배열이 아니면 리턴
-				if(scope.isCheckType == undefined) scope.isCheckType = false;
-
-				// 컬럼 순서 추출
-				// TEST HERE: http://plnkr.co/edit/qrgTBjE1hnsplJS8Nwsx
-				var fieldsLine = scope.ngQuery
-					.replace(/\[(.*?)\]/, "")
-					.replace(/\"(.*?)\"/, "")
-					.replace(/\'(.*?)\'/, "")
-					.split("|");
-				var fields = [];
-				fieldsLine.forEach(function(obj) {
-					if(!obj.match(/fields -/) && obj.match(/fields/)) {
-						obj = obj.replace(/ /gi, "");
-						if(obj.indexOf('fields') !== 0) return;
-						obj = obj.replace("fields", "");
-						if(fields.length) {
-							fields = [];
-						}
-						var tmp = obj.split(",");
-						tmp.forEach(function(f) {							
-							fields.push(f);					
-						});
-					}
-				});
-
-				// 컬럼 추출
-				var cols = [];
-				for (var i = 0; i < val.length; i++) {
-					if(i == 0) {
-						cols = Object.keys(val[i]);
-					}
-					else {
-						var keys = Object.keys(val[i]);
-						keys.forEach(function(k) {
-							if( cols.indexOf(k) == -1 ) {
-								cols.push(k);
-							}
-						});
-					}
-				}
-				
-				if(fields.length <= 0 || fields == null) {
+					cols = cols.unique();
 					cols.splice(cols.indexOf('$$hashKey'), 1);
 					cols = window._utility.sortColumns(cols);
-				} else {
-					cols.forEach(function(a) {
-						if(a == '$$hashKey') {
-							fields.push('$$hashKey');
-						}
-					});
+					ctrl[0].$modelValue.__cols__ = cols.slice(0);
+				}
 
+				scope.$watch('model', function (val) {
+					if (val.length == 0) return;
+					ctrl[0].$modelValue.__cols__ = [];
+					Manipulate(val);
+					scope.val = val;
+				});
+			}
+		}
+	})
+	.directive('tableViewWithPager', function ($compile) {
+		return {
+			restrict: 'E',
+			require: ['ngModel'],
+			scope: {
+				model: '=ngModel',
+				ngTotalCount: '=',
+				ngItemsPerPage: '=',
+				ngPageSize: '=',
+				onPageChange: '&'
+			},
+			tranclude: true,
+			compile: function compile(tElement, tAttrs, transclude) {
+				var tbodystr = '';
+				if (tElement[0].children.length !== 0) {
+					tbodystr = tElement.children().html().toString();
+					tElement[0].innerHTML = '';
+				}
+				return function postLink(scope, element, attrs, ctrl, transclude) {
+					var htmlstr = '<div class="tbl-view-container">\
+					<table table-view ng-model="model" show-index="true" class="table table-bordered table-condensed table-striped">'
+						+ tbodystr +
+						'</table>\
+					</div>\
+					<div class="pager-container">\
+						<div class="pull-left status">{{ngTotalCount}}건이 검색되었습니다.</div>\
+						<pager class="pull-right"\
+							ng-model="model"\
+							ng-total-count="ngTotalCount"\
+							ng-items-per-page="ngItemsPerPage"\
+							ng-page-size="ngPageSize"\
+							on-page-change="changePage()"></pager>\
+					</div>';
 
-					var tmp = [];
+					var tmpl = angular.element(htmlstr);
+					$compile(tmpl, true)(scope);
+					tmpl.appendTo(element);
 
-					//순서 정렬 필드 골라 담기
-					cols.forEach(function(c) {
-						for(var i = 0 ; i < fields.length ; i++) {
-							if(c == fields[i]) {
-								tmp[i] = c;							
+					scope.numCurrentPage = 0;
+					scope.ngTotalCount = 0;
+
+					console.log(scope.ngItemsPerPage, scope.ngPageSize);
+					scope.changePage = function (idx) {
+						scope.numCurrentPage = idx;
+
+						scope.onPageChange({
+							'$idx': idx,
+							'$model': scope.model
+						});
+					}
+
+					element.find('pager')[0].reset();
+					element.find('pager')[0].setThresholdWidth(10);
+				}
+			}
+		}
+	})
+	.directive('queryResult', function ($compile, serviceUtility) {
+		return {
+			restrict: 'E',
+			scope: {
+				ngPage: '=',
+				ngPageSize: '=',
+				stopPropation: '@',
+				ngCols: '@',
+				ngModel: '=',
+				isCheckType: '@',
+				isSelectable: '@',
+				ngQuery: '='
+			},
+			template: '<div style="display: inline-block; position: relative">' +
+				'<button ng-click="next()" class="btn" style="position: absolute; width: 160px; margin-right: -160px; top: 0; bottom: -5px; right: 0" ng-hide="numTotalColumn - numLimitColumn < 1">\
+					<span ng-show="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
+						{{"$S_msg_MoreColumn" | translate:paramMoreColumn1()}}\
+					</span>\
+					<span ng-hide="numTotalColumn - numLimitColumn > numLimitColumnInterval">\
+						{{"$S_msg_MoreColumn" | translate:paramMoreColumn2()}}\
+					</span>\
+				</button>\
+				<table ng-class="{ selectable: isSelectable, expandable: (numTotalColumn - numLimitColumn > 0) }" class="cmpqr table table-bordered table-striped table-condensed">\
+					<thead>\
+						<tr>\
+							<th>#</th>\
+							<th ng-class="{ selected: col.is_checked }"\
+								ng-hide="!col.is_visible"\
+								ng-repeat="col in ngCols | limitTo: numLimitColumn"\
+								ng-click="toggleCheck(col)">\
+								<input id="{{col.guid}}" type="checkbox" style="margin-right: 5px"\
+									ng-show="isSelectable"\
+									ng-click="stopPropation($event)"\
+									ng-model="col.is_checked">\
+								<span class="qr-th-type" ng-show="col.type == \'number\'">1</span>\
+								<span class="qr-th-type" ng-show="col.type == \'string\'">A</span>\
+								<span class="qr-th-type" ng-show="col.type == \'datetime\'"><i class="icon-white icon-time"></i></span>\
+								{{col.name}}\
+							</th>\
+						</tr>\
+					</thead>\
+					<tbody>\
+						<tr ng-repeat="d in ngModel">\
+							<td>{{ngPage * ngPageSize + ($index+1)}}</td>\
+							<td ng-class="{ selected: col.is_checked }"\
+								ng-hide="!col.is_visible"\
+								ng-repeat="col in ngCols | limitTo: numLimitColumn"\
+								ng-click="toggleCheck(col)"\
+								ng-bind-html="d[col.name] | crlf"></td>\
+						</tr>\
+					</tbody>\
+				</table>\
+				</div>',
+			link: function (scope, element, attrs) {
+
+				scope.stopPropation = function (event) {
+					event.stopPropagation();
+				}
+
+				// 타입 체크 및 컬럼 정보에 타입 명시
+				function checkArrayMemberType(array) {
+					var types = ['number', 'datetime', 'string'];
+					if (array.some(angular.isNumber)) return types[0];
+					if (array.some(checkDate)) return types[1];
+
+					return types[2];
+				}
+
+				if (attrs.ngCustomTemplate != undefined) {
+					element.empty();
+					var customEl = angular.element(scope[attrs.ngCustomTemplate]);
+					element.append(customEl);
+
+					$compile(customEl)(scope);
+				}
+
+				scope.toggleCheck = function (col) {
+					col.is_checked = !col.is_checked;
+				};
+
+				scope.next = function () {
+					scope.numLimitColumn = scope.numLimitColumn + scope.numLimitColumnInterval;
+					console.log(scope.numLimitColumn)
+				}
+
+				scope.numLimitColumnInterval = 50;
+				scope.numLimitColumn = 50;
+				scope.numTotalColumn;
+				scope.paramMoreColumn1 = function () {
+					return {'p0': scope.numLimitColumnInterval}
+				}
+				scope.paramMoreColumn2 = function () {
+					return {'p0': scope.numTotalColumn - scope.numLimitColumn}
+				}
+
+				function newSearch() {
+					scope.numLimitColumnInterval = 50;
+					scope.numLimitColumn = 50;
+					scope.numTotalColumn = 0;
+					scope.$apply();
+				}
+
+				scope.ngCols = []; // ngModel의 컬럼 정보
+				scope.$watch('ngModel', function (val) {
+					if (!angular.isArray(val)) {
+						return;
+					} // 데이터가 배열이 아니면 리턴
+					if (scope.isCheckType == undefined) scope.isCheckType = false;
+
+					// 컬럼 순서 추출
+					// TEST HERE: http://plnkr.co/edit/qrgTBjE1hnsplJS8Nwsx
+					var fieldsLine = scope.ngQuery
+						.replace(/\[(.*?)\]/, "")
+						.replace(/\"(.*?)\"/, "")
+						.replace(/\'(.*?)\'/, "")
+						.split("|");
+					var fields = [];
+					fieldsLine.forEach(function (obj) {
+						if (!obj.match(/fields -/) && obj.match(/fields/)) {
+							obj = obj.replace(/ /gi, "");
+							if (obj.indexOf('fields') !== 0) return;
+							obj = obj.replace("fields", "");
+							if (fields.length) {
+								fields = [];
 							}
-						}					
-					});
-
-					tmp.forEach(function(k, i) {
-						if(k == '$$hashKey') {
-							tmp.splice(tmp.indexOf(k), 1);
+							var tmp = obj.split(",");
+							tmp.forEach(function (f) {
+								fields.push(f);
+							});
 						}
 					});
 
-					var dupCols = [];
-					cols.forEach(function(c) {
-						dupCols.push(c);
-					});
+					// 컬럼 추출
+					var cols = [];
+					for (var i = 0; i < val.length; i++) {
+						if (i == 0) {
+							cols = Object.keys(val[i]);
+						}
+						else {
+							var keys = Object.keys(val[i]);
+							keys.forEach(function (k) {
+								if (cols.indexOf(k) == -1) {
+									cols.push(k);
+								}
+							});
+						}
+					}
 
-					//정렬된 필드 비워내기
-					fields.forEach(function(f) {
-						dupCols.forEach(function(c) {
-							if(f == c) {
-								dupCols.splice(dupCols.indexOf(c), 1);
+					if (fields.length <= 0 || fields == null) {
+						cols.splice(cols.indexOf('$$hashKey'), 1);
+						cols = window._utility.sortColumns(cols);
+					} else {
+						cols.forEach(function (a) {
+							if (a == '$$hashKey') {
+								fields.push('$$hashKey');
 							}
 						});
-					});
 
-					//결과 필드 합치기
-					tmp = tmp.concat(dupCols);
 
-					var mixedCols = [];
-					tmp.forEach(function(t) {
-						mixedCols.push(t);
-					});
+						var tmp = [];
 
-					//// 정렬된 배열로 치환
-					cols = mixedCols;					
-				}
-				
-				//console.log(cols.length)
-				if(cols.length > scope.numLimitColumn) {
-					scope.numTotalColumn = cols.length;
-				}
+						//순서 정렬 필드 골라 담기
+						cols.forEach(function (c) {
+							for (var i = 0; i < fields.length; i++) {
+								if (c == fields[i]) {
+									tmp[i] = c;
+								}
+							}
+						});
 
-				// console.log("[cols]");
-				// console.log(cols);
-				
-				scope.ngCols = cols.map(function(k) {
-					return {
-						guid: serviceUtility.generateType2(),
-						name: k,
-						is_visible: true,
-						is_checked: undefined
-					}
-				});
-				console.log('ngCols assigned')
+						tmp.forEach(function (k, i) {
+							if (k == '$$hashKey') {
+								tmp.splice(tmp.indexOf(k), 1);
+							}
+						});
 
-				if(scope.isCheckType.toString() == 'true') {
-					for (var i = 0; i < scope.ngCols.length; i++) {
-						if(scope.ngCols[i].type == undefined) {
-							var mapAll = val.map(function(obj, j) {
-								return obj[scope.ngCols[i].name];
+						var dupCols = [];
+						cols.forEach(function (c) {
+							dupCols.push(c);
+						});
+
+						//정렬된 필드 비워내기
+						fields.forEach(function (f) {
+							dupCols.forEach(function (c) {
+								if (f == c) {
+									dupCols.splice(dupCols.indexOf(c), 1);
+								}
 							});
-							var type = checkArrayMemberType(mapAll);
-							scope.ngCols[i]['type'] = type;
+						});
+
+						//결과 필드 합치기
+						tmp = tmp.concat(dupCols);
+
+						var mixedCols = [];
+						tmp.forEach(function (t) {
+							mixedCols.push(t);
+						});
+
+						//// 정렬된 배열로 치환
+						cols = mixedCols;
+					}
+
+					//console.log(cols.length)
+					if (cols.length > scope.numLimitColumn) {
+						scope.numTotalColumn = cols.length;
+					}
+
+					// console.log("[cols]");
+					// console.log(cols);
+
+					scope.ngCols = cols.map(function (k) {
+						return {
+							guid: serviceUtility.generateType2(),
+							name: k,
+							is_visible: true,
+							is_checked: undefined
+						}
+					});
+					console.log('ngCols assigned')
+
+					if (scope.isCheckType.toString() == 'true') {
+						for (var i = 0; i < scope.ngCols.length; i++) {
+							if (scope.ngCols[i].type == undefined) {
+								var mapAll = val.map(function (obj, j) {
+									return obj[scope.ngCols[i].name];
+								});
+								var type = checkArrayMemberType(mapAll);
+								scope.ngCols[i]['type'] = type;
+							}
 						}
 					}
+				});
+
+				element[0].addColumn = function (name, type) {
+					obj = {
+						guid: serviceUtility.generateType2(),
+						name: name,
+						is_visible: true,
+						is_checked: true,
+						type: type
+					};
+					scope.ngCols.push(obj);
+					return obj;
 				}
-			});
 
-			element[0].addColumn = function(name, type) {
-				obj = {
-					guid: serviceUtility.generateType2(),
-					name: name,
-					is_visible: true,
-					is_checked: true,
-					type: type
-				};
-				scope.ngCols.push(obj);
-				return obj;
+				element[0].getSelectedItems = function () {
+					return scope.ngCols.filter(function (obj) {
+						return obj.is_checked;
+					});
+				}
+
+				element[0].getColumns = function (fn) {
+					var async = scope.$watch('ngCols', function () {
+						fn.call(scope, scope.ngCols);
+						async();
+					});
+				}
+
+				// 로딩 인디케이터
+				var loadingInd = angular.element('<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>')
+				element.prepend(loadingInd.hide());
+
+				element[0].showLoadingIndicator = function () {
+					element.find('table').hide();
+					loadingInd.show();
+				}
+
+				element[0].showTable = function () {
+					element.find('table').show();
+				}
+
+				element[0].hideTable = function () {
+					element.find('table').hide();
+				}
+
+				element[0].hideLoadingIndicator = function () {
+					loadingInd.fadeOut();
+				}
+
+				element[0].newSearch = newSearch;
 			}
-
-			element[0].getSelectedItems = function() {
-				return scope.ngCols.filter(function(obj) {
-					return obj.is_checked;
-				});
-			}
-
-			element[0].getColumns = function(fn) {
-				var async = scope.$watch('ngCols', function() {
-					fn.call(scope, scope.ngCols);
-					async();
-				});
-			}
-
-			// 로딩 인디케이터
-			var loadingInd = angular.element('<div class="progress progress-striped active"><div class="bar" style="width: 100%;"></div></div>')
-			element.prepend(loadingInd.hide());
-
-			element[0].showLoadingIndicator = function() {
-				element.find('table').hide();
-				loadingInd.show();
-			}
-
-			element[0].showTable = function() {
-				element.find('table').show();
-			}
-
-			element[0].hideTable = function() {
-				element.find('table').hide();
-			}
-
-			element[0].hideLoadingIndicator = function() {
-				loadingInd.fadeOut();
-			}
-
-			element[0].newSearch = newSearch;
 		}
-	}
-});
+	});
