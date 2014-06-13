@@ -489,7 +489,7 @@
 
 	"$S_str_Category": "项目",
 	"$S_str_MacAddress": "MAC地址",
-	"$S_str_DiskLetter": "驱动器名称",
+	"$S_str_DiskLetter": "分区",
 	"$S_str_DiskFree": "可用空间",
 	"$S_str_DiskTotal": "全部空间",
 
@@ -497,7 +497,7 @@
 	"$S_str_OsName": "操作系统",
 	"$S_str_Architecture": "架构",
 	"$S_str_Java": "Java",
-	"$S_str_UserDir": "工作目录",
+	"$S_str_UserDir": "安装路径",
 
 	"$S_str_NetworkStatus": "网络状态",
 	"$S_str_Protocol": "协议",
@@ -510,10 +510,10 @@
 	"$S_str_ArpCache": "ARP缓存",
 	"$S_str_Type": "类型",
 	"$S_str_IP": "IP",
-	"$S_str_Adapter": "适配器",
+	"$S_str_Adapter": "网卡",
 	"$S_str_Process": "进程",
 	"$S_str_CpuUsage": "CPU使用率",
-	"$S_str_WorkingSetDisksized": "操作集内存",
+	"$S_str_WorkingSetDisksized": "内存使用",
 	"$S_str_RoutingTable": "路由表",
 	"$S_str_NetworkDestination": "目标",
 	"$S_str_Gateway": "网关",
