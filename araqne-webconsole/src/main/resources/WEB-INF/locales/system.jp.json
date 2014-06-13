@@ -3,6 +3,10 @@
 	"$S_str_Apps": "Apps",
 	"$S_str_All": "All",
 
+	"--------cronizer--------": "",
+	"$S_str_Basic": "Basic",
+	"$S_str_Expert": "Expert",
+
 	"--------orgchart--------": "",
 	"$S_str_RemoveOrganization": "部署削除",
 	"$S_msg_RemoveOrganizationConfirmPre": "本当に部署 ",

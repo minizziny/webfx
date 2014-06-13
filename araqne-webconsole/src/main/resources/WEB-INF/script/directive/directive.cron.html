@@ -1,8 +1,8 @@
 <div class="ui-cronizer">
-	<div class="btn-group">
-		<button class="btn" ng-click="toggle('basic')">Basic</button>
-		<button class="btn" ng-click="toggle('expert')">Expert</button>
-	</div>
+	<ul class="nav nav-tabs">
+		<li ng-class="{active:!isExpert}"><a ng-click="toggle('basic')">{{'$S_str_Basic' | translate}}</a></li>
+		<li ng-class="{active: isExpert}"><a ng-click="toggle('expert')">{{'$S_str_Expert' | translate}}</a></li>
+	</ul>
 	<table class="table table-condensed">
 		<colgroup>
 			<col style="width: 110px">

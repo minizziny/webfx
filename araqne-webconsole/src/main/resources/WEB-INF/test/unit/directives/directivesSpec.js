@@ -175,7 +175,6 @@ describe('directives', function() {
 	"$S_msg_Dec": "12월"
 		}
 
-		var INTERVAL = 1000;
 		var $compile, scope, template, body = $('<div id="fixture"></div>').appendTo('body');
 
 		angular.module('app', function () {})
@@ -208,6 +207,7 @@ describe('directives', function() {
 		});
 	
 		it("cronizer", function() {
+			var INTERVAL = 2000;
 			scope.dataCron = '';
 			var element = $compile(angular.element('<div><ui-cronizer ng-model="dataCron"></ui-cronizer><hr><h4>{{dataCron}}</h4></div>'))(scope);
 			element.appendTo(body);			
@@ -228,6 +228,197 @@ describe('directives', function() {
 			runs(function() {
 				expect(scope.dataCron).toEqual('0 0 1 1 ');
 			});
-		})
+		});
+
+
+		it("cronizer init by model", function() {
+			var INTERVAL = 500;
+			scope.dataCron = '2 2 4 6 1,3';
+			var element = $compile(angular.element('<div><ui-cronizer ng-model="dataCron"></ui-cronizer><hr><h4>{{dataCron}}</h4></div>'))(scope);
+			element.appendTo(body);			
+			scope.$digest();
+
+			var flag = false;
+
+			runs(function() {
+				setTimeout(function() {
+					flag = true;
+				}, INTERVAL);
+			});
+
+			waitsFor(function() {
+				return flag;
+			}, INTERVAL + 100);
+
+			runs(function() {
+				expect(scope.dataCron).toEqual('2 2 4 6 1,3');
+			});
+		});
+
+
+		it("cronizer init by model: expert set", function() {
+			var INTERVAL = 500;
+			scope.dataCron = '*/5 2 4 6 1,3';
+			var element = $compile(angular.element('<div><ui-cronizer ng-model="dataCron"></ui-cronizer><hr><h4>{{dataCron}}</h4></div>'))(scope);
+			element.appendTo(body);			
+			scope.$digest();
+
+			var flag = false;
+
+			runs(function() {
+				setTimeout(function() {
+					flag = true;
+				}, INTERVAL);
+			});
+
+			waitsFor(function() {
+				return flag;
+			}, INTERVAL + 100);
+
+			runs(function() {
+				expect(scope.dataCron).toEqual('*/5 2 4 6 1,3');
+			});
+		});
+
+		it("cronizer init by model: every time", function() {
+			var INTERVAL = 500;
+			scope.dataCron = '* 2 * 6 1,3';
+			var element = $compile(angular.element('<div><ui-cronizer ng-model="dataCron"></ui-cronizer><hr><h4>{{dataCron}}</h4></div>'))(scope);
+			element.appendTo(body);			
+			scope.$digest();
+
+			var flag = false;
+
+			runs(function() {
+				setTimeout(function() {
+					flag = true;
+				}, INTERVAL);
+			});
+
+			waitsFor(function() {
+				return flag;
+			}, INTERVAL + 100);
+
+			runs(function() {
+				expect(scope.dataCron).toEqual('* 2 * 6 1,3');
+			});
+		});
+
+		it("cronizer init by model: every time & expert", function() {
+			var INTERVAL = 500;
+			scope.dataCron = '*/5 * * */6 1,3';
+			var element = $compile(angular.element('<div><ui-cronizer ng-model="dataCron"></ui-cronizer><hr><h4>{{dataCron}}</h4></div>'))(scope);
+			element.appendTo(body);			
+			scope.$digest();
+
+			var flag = false;
+
+			runs(function() {
+				setTimeout(function() {
+					flag = true;
+				}, INTERVAL);
+			});
+
+			waitsFor(function() {
+				return flag;
+			}, INTERVAL + 100);
+
+			runs(function() {
+				expect(scope.dataCron).toEqual('*/5 * * */6 1,3');
+			});
+		});
+
+
+		it("cronizer init by model: every DayofWeek: basic", function() {
+			var INTERVAL = 500;
+			scope.dataCron = '* 1 * 5 *';
+			var element = $compile(angular.element('<div><ui-cronizer ng-model="dataCron"></ui-cronizer><hr><h4>{{dataCron}}</h4></div>'))(scope);
+			element.appendTo(body);			
+			scope.$digest();
+
+			var flag = false;
+
+			runs(function() {
+				setTimeout(function() {
+					flag = true;
+				}, INTERVAL);
+			});
+
+			waitsFor(function() {
+				return flag;
+			}, INTERVAL + 100);
+
+			runs(function() {
+				expect(scope.dataCron).toEqual('* 1 * 5 *');
+			});
+		});
+
+		it("cronizer init by model: every DayofWeek: expert", function() {
+			var INTERVAL = 500;
+			scope.dataCron = '*/2 1 * 5 *';
+			var element = $compile(angular.element('<div><ui-cronizer ng-model="dataCron"></ui-cronizer><hr><h4>{{dataCron}}</h4></div>'))(scope);
+			element.appendTo(body);			
+			scope.$digest();
+
+			var flag = false;
+
+			runs(function() {
+				setTimeout(function() {
+					flag = true;
+				}, INTERVAL);
+			});
+
+			waitsFor(function() {
+				return flag;
+			}, INTERVAL + 100);
+
+			runs(function() {
+				expect(scope.dataCron).toEqual('*/2 1 * 5 *');
+			});
+		});
+
+
+
+		it("cronizer init by model: lazy binding", function() {
+			var INTERVAL = 2000;
+			scope.dataCron = '* 1 * 5 *';
+			var element = $compile(angular.element('<div><ui-cronizer ng-model="dataCron"></ui-cronizer><hr><h4>{{dataCron}}</h4></div>'))(scope);
+			element.appendTo(body);			
+			scope.$digest();
+
+			var flag = false;
+
+			runs(function() {
+				setTimeout(function() {
+					flag = true;
+				}, INTERVAL);
+			});
+
+			waitsFor(function() {
+				return flag;
+			}, INTERVAL + 100);
+
+			runs(function() {
+				flag = false;
+				expect(scope.dataCron).toEqual('* 1 * 5 *');
+				
+				scope.dataCron = '* 1 * 5 2,3';
+				scope.$apply();
+				console.log('dataCron changed!!', scope.dataCron);
+				
+				setTimeout(function() {
+					flag = true;
+				}, INTERVAL);
+			});
+
+			waitsFor(function() {
+				return flag;
+			}, INTERVAL + 100);
+
+			runs(function() {
+				expect(scope.dataCron).toEqual('* 1 * 5 2,3');
+			});
+		});
+
 	});
 });

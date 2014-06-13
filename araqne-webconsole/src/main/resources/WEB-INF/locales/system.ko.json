@@ -3,6 +3,10 @@
 	"$S_str_Apps": "앱",
 	"$S_str_All": "전체",
 
+	"--------cronizer--------": "",
+	"$S_str_Basic": "기본",
+	"$S_str_Expert": "고급",
+
 	"--------orgchart--------": "",
 	"$S_str_RemoveOrganization": "부서 삭제",
 	"$S_msg_RemoveOrganizationConfirmPre": "정말 부서 ",
@@ -314,8 +318,8 @@
 	"$S_str_Saturday": "토요일",
 	"$S_str_Minute": "분",
 	"$S_str_Hour": "시",
-	"$S_str_Sunday_shrt": "월",
-	"$S_str_Monday_shrt": "화",
+	"$S_str_Sunday_shrt": "일",
+	"$S_str_Monday_shrt": "월",
 	"$S_str_Tuesday_shrt": "화",
 	"$S_str_Wednesday_shrt": "수",
 	"$S_str_Thursday_shrt": "목",

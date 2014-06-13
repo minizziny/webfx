@@ -11,6 +11,8 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 
 		},
 		link: function(scope, element, attrs, ctrl) {
+			// console.log('---------------------')
+			var setModelByForce = false
 			var mode = 'basic';
 			scope.valMinute = 0;
 			scope.valHour = 0;
@@ -23,6 +25,114 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 			scope.everyDayofMonth = false;
 			scope.everyMonth = false;
 			scope.everyDayofWeek = false;
+
+			function setEvery(default_value, model) {
+				return function(newval) {
+					if(newval) {
+						scope[model] = '*';
+					} else {
+						scope[model] = default_value;
+					}
+				}
+			}
+
+			scope.$watch('everyMinute', setEvery(0, 'valMinute'));
+			scope.$watch('everyHour', setEvery(0, 'valHour'));
+			scope.$watch('everyDayofMonth', setEvery(1, 'valDayofMonth'));
+			scope.$watch('everyMonth', setEvery(1, 'valMonth'));
+
+			scope.$watch(function () {
+				return ctrl.$modelValue;
+			}, function(newval, oldval) {
+				if (!setModelByForce) { // model change by binding
+					// console.log('model change!', newval);
+					if(angular.isUndefined(newval) || newval == '') {
+						newval = '0 0 1 1 ';
+					}
+					var ss = newval.split(' ');
+
+					var hasOneMoreExpertSet = ss.some(function(s) {
+						return /\//.test(s);
+					});
+
+					if(hasOneMoreExpertSet) {
+						scope.toggle('expert');
+					}
+
+					ss.forEach(function(s, i) {
+						if(s === '*') {
+							switch(i) {
+								case 0:
+									scope.everyMinute = true;
+									break;
+								case 1:
+									scope.everyHour = true;
+									break;
+								case 2:
+									scope.everyDayofMonth = true;
+									break;
+								case 3:
+									scope.everyMonth = true;
+									break;
+							}
+						}
+						else if(!/\//.test(s)) { // just number
+							switch(i) {
+								case 0:
+									scope.valMinute = parseInt(s);
+									scope.cron.valMinute = s;
+									break;
+								case 1:
+									scope.valHour = parseInt(s);
+									scope.cron.valHour = s;
+									break;
+								case 2:
+									scope.valDayofMonth = parseInt(s);
+									scope.cron.valDayofMonth = s;
+									break;
+								case 3:
+									scope.valMonth = parseInt(s);
+									scope.cron.valMonth = s;
+									break;
+							}
+						}
+						else { // value contains slash character
+							switch(i) {
+								case 0:
+									scope.cron.valMinute = s;
+									break;
+								case 1:
+									scope.cron.valHour = s;
+									break;
+								case 2:
+									scope.cron.valDayofMonth = s;
+									break;
+								case 3:
+									scope.cron.valMonth = s;
+									break;
+							}
+						}
+					})
+					
+					if(ss[4] === '*') {
+						scope.everyDayofWeek = true;
+						scope.changeDayofWeek();
+					}
+					else {
+						var dows = ss[4].split(',');
+						scope.everyDayofWeek = false;
+						scope.changeDayofWeek();
+						dows.forEach(function(dow) {
+							scope.valDayofWeek[dow - 1] = true;
+						});
+					}
+					parseValDayofWeek(scope.valDayofWeek);
+				}
+				else {
+					// model change by inner code
+					setModelByForce = false;
+				}
+			});
 
 			scope.setRange = function(val, model, min, max) {
 				scope.cron[model] = val;
@@ -52,20 +162,6 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 
 			scope.cron = {}
 
-			function setEvery(default_value, model) {
-				return function(v) {
-					if(v) {
-						scope[model] = '*';
-					} else {
-						scope[model] = default_value;
-					}
-				}
-			}
-
-			scope.$watch('everyMinute', setEvery(0, 'valMinute'));
-			scope.$watch('everyHour', setEvery(0, 'valHour'));
-			scope.$watch('everyDayofMonth', setEvery(1, 'valDayofMonth'));
-			scope.$watch('everyMonth', setEvery(1, 'valMonth'));
 			scope.changeDayofWeek = function() {
 				for (var i = 6; i >= 0; i--) {
 					scope.valDayofWeek[i] = scope.everyDayofWeek;
@@ -89,10 +185,13 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 			scope.$watch('valDayofWeek', parseValDayofWeek, true);
 
 			scope.$watch('cron', function(val) {
+				setModelByForce = true;
 				ctrl.$setViewValue(val.valMinute + ' ' + val.valHour + ' ' + val.valDayofMonth + ' ' + val.valMonth + ' ' + val.valDayofWeek);
 			}, true);
 
+			scope.isExpert = false;
 			scope.toggle = function(val) {
+				scope.isExpert = val === 'expert';
 				mode = val;
 				if(mode === 'expert') {
 					element.find('col.expert')[0].style.cssText = '';
@@ -100,6 +199,7 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 						el.style.cssText = 'width: 0px !important';
 					});
 
+					setModelByForce = true;
 					ctrl.$setViewValue(scope.cron.valMinute + ' ' + scope.cron.valHour + ' ' + scope.cron.valDayofMonth + ' ' + scope.cron.valMonth + ' ' + scope.cron.valDayofWeek);
 				}
 				else if (mode === 'basic') {
@@ -108,6 +208,7 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 						el.style.cssText = '';
 					});
 
+					setModelByForce = true;
 					ctrl.$setViewValue(scope.valMinute + ' ' + scope.valHour + ' ' + scope.valDayofMonth + ' ' + scope.valMonth + ' ' + parseValDayofWeek(scope.valDayofWeek));
 				}
 			}
