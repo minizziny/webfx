@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Invalidate;
@@ -46,10 +47,12 @@ import org.araqne.dom.api.LoginCallback;
 import org.araqne.dom.api.OrganizationApi;
 import org.araqne.dom.api.OtpApi;
 import org.araqne.dom.api.ProgramApi;
+import org.araqne.dom.api.ProgramFilter;
 import org.araqne.dom.api.Transaction;
 import org.araqne.dom.api.UserApi;
 import org.araqne.dom.model.Admin;
 import org.araqne.dom.model.Permission;
+import org.araqne.dom.model.Program;
 import org.araqne.dom.model.ProgramProfile;
 import org.araqne.dom.model.User;
 import org.araqne.msgbus.PushApi;
@@ -111,6 +114,7 @@ public class AdminApiImpl implements AdminApi {
 
 	private Set<LoginCallback> callbacks = new HashSet<LoginCallback>();
 	private PriorityQueue<LoggedInAdmin> loggedIn = new PriorityQueue<LoggedInAdmin>(11, new LoggedInAdminComparator());
+	private CopyOnWriteArraySet<ProgramFilter> programFilters = new CopyOnWriteArraySet<ProgramFilter>();
 
 	@Validate
 	public void validate() {
@@ -426,6 +430,11 @@ public class AdminApiImpl implements AdminApi {
 			loggedIn.remove(new LoggedInAdmin(session));
 			for (LoginCallback callback : callbacks)
 				callback.onLogout(admin, session);
+			
+			// unset credentials
+			session.unsetProperty("org_domain");
+			session.unsetProperty("admin_login_name");
+			session.unsetProperty("auth");
 		}
 	}
 
@@ -508,12 +517,37 @@ public class AdminApiImpl implements AdminApi {
 		Object ext = user.getExt().get("admin");
 		if (ext == null)
 			return true;
-		
+
 		Admin targetAdmin = PrimitiveConverter.parse(Admin.class, ext, cfg.getParseCallback(domain));
 		if (targetAdmin != null && !loginName.equals(admin.getUser().getLoginName())
 				&& targetAdmin.getRole().getLevel() >= admin.getRole().getLevel()) {
 			return false;
 		}
 		return true;
+	}
+
+	@Override
+	public List<Program> getAvailablePrograms(Session session) {
+		ProgramProfile profile = getAdmin(session.getOrgDomain(), session.getAdminLoginName()).getProfile();
+
+		List<Program> programs = new ArrayList<Program>();
+		if (profile != null)
+			programs = profile.getPrograms();
+
+		for (ProgramFilter filter : programFilters) {
+			programs = filter.getAllowedPrograms(session, programs);
+		}
+
+		return programs;
+	}
+
+	@Override
+	public void addProgramFilter(ProgramFilter filter) {
+		programFilters.add(filter);
+	}
+
+	@Override
+	public void removeProgramFilter(ProgramFilter filter) {
+		programFilters.remove(filter);
 	}
 }

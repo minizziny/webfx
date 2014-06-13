@@ -127,8 +127,8 @@ logpresso.config(['$translateProvider', function ($translateProvider) {
 	});
 	setTimeout(function() {
 		console.log(z.translations());
+		$.getScript( 'lib/jquery/jquery.ui.datepicker-' + $lang + '.js' );
 	}, 1000)
-	
 
 	$translateProvider.preferredLanguage($lang);
 	$translateProvider.fallbackLanguage('en');

@@ -1,6 +1,6 @@
 body {
 	padding: 0 !important;
-	font-family: 'Lucida Grande', Geneva, 'Malgun Gothic', Verdana, Arial, sans-serif;
+	font-family: 'Lucida Grande', Geneva, Helvetica, 'Malgun Gothic', Arial, sans-serif;
 }
 
 topbar { 
@@ -863,7 +863,6 @@ input[type=text].input-single.error:focus {
 .table-cell {
 	display: table-cell;
 }
-
 
 /* table-view-with-pager */
 table-view-with-pager {

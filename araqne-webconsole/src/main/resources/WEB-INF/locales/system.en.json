@@ -204,6 +204,7 @@
 	"$S_msg_CannotLoadTableStatus": "Cannot load table trends.",
 	"$S_str_RecentQuery": "Recent Queries",
 	"$S_str_Query": "Query",
+	"$S_str_QueryOnMenu": "Query",
 	"$S_str_RunAt": "Run at",
 	"$S_msg_CannotLoadRecentQuery": "Cannot load recent queries.",
 	"$S_str_Status": "Status",
@@ -341,6 +342,7 @@
 	"$S_msg_On": "",
 	"$S_msg_PreEvery": "",
 	"$S_msg_PreMonth": "Every ",
+	"$S_msg_PreMonths": "",
 	"$S_msg_PostMonth": " month, ",
 	"$S_msg_PostMonths": " months, ",
 	"$S_msg_Every": "Every ",
@@ -731,6 +733,9 @@
 	"$S_str_NameValidationErrorMsg": "Name can only contain alphabets, numbers, '_' characters",
 	"$S_str_EmailValidationErrorMsg": "Email can only contain alphabets, numbers, '_', '@', domain characters",
 	"$S_str_AlreadyExistsMsg": "table already exists",
+
+	"$S_str_ChangeIndexDay": "인덱스 대상 기간 변경",
+	"$S_msg_ChangeIndexDay": "변경할 인덱스 대상 기간을 입력하세요.",
 
 	"--------index--------": "",
 	"$S_str_ValidateDateFormat": "Date Format is yyyymmdd",

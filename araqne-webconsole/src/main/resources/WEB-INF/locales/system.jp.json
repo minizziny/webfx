@@ -204,6 +204,7 @@
 	"$S_msg_CannotLoadTableStatus": "テーブルのステータスを読めません。問題があります",
 	"$S_str_RecentQuery": "最近のクエリ",
 	"$S_str_Query": "クエリ",
+	"$S_str_QueryOnMenu": "クエリ",
 	"$S_str_RunAt": "実行時間",
 	"$S_msg_CannotLoadRecentQuery": "最近のクエリを読めません。問題があります",
 	"$S_str_Status": "ステータス",
@@ -732,6 +733,9 @@
 	"$S_str_NameValidationErrorMsg" : "名前はアルファベット、数字、'_'で作成してください",
 	"$S_str_EmailValidationErrorMsg" : "名前はアルファベット、数字、'_'、'@'、DOMAINで作成してください",
 	"$S_str_AlreadyExistsMsg": "すでに存在するテーブルです",
+
+	"$S_str_ChangeIndexDay": "인덱스 대상 기간 변경",
+	"$S_msg_ChangeIndexDay": "변경할 인덱스 대상 기간을 입력하세요.",
 
 	"--------index--------": "",
 	"$S_str_ValidateDateFormat": "日付の形式は yyyymmdd 形です",
