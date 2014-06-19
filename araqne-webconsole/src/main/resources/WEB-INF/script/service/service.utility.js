@@ -29,7 +29,13 @@ angular.module('app.utility', ['app.filter'])
 			object.period = "every_week";
 		else if (object.date == "*" && object.month == "*" && isNaN(object.dayOfWeek) == false)
 			object.period = "every_week";
+		else if (object.month == "*")
+			object.period = "every_month";
 		else if (object.month.indexOf("/") > -1)
+			object.period = "every_month";
+		else if (object.month.indexOf("-") > -1)
+			object.period = "every_month";
+		else if (object.month.indexOf(",") > -1)
 			object.period = "every_month";
 		else if (isNaN(object.month) == false)
 			object.period = "every_year";
@@ -55,36 +61,28 @@ angular.module('app.utility', ['app.filter'])
 
 		var result = "";
 
+		console.log('period', period, conObject);
+
 		if(period == "every_day") {
 			if(date == "*") {
 				if(hour == "*") {
 					result += $filter('translate')('$S_msg_EveryDay');
-					result += $filter('translate')('$S_msg_Every');
+					result += $filter('translate')('$S_msg_EveryHour');
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				} else {
 					result += $filter('translate')('$S_msg_EveryDay');
-					result += $filter('translate')('$S_msg_Every');
 					result += analysisUnit($filter, hour, "hour");
-					result += " "
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				}
 			} else {
 				if(hour == "*") {
-					result += $filter('translate')('$S_msg_Every');
 					result += analysisUnit($filter, date, "date");
 					result += " " + $filter('translate')('$S_msg_EveryHour');
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				} else {
-					result += $filter('translate')('$S_msg_Every');
 					result += analysisUnit($filter, date, "date");
-					result += " " + $filter('translate')('$S_msg_Every');
 					result += analysisUnit($filter, hour, "hour");
-					result += " ";
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				}
 			}
 		} else if(period == "every_week") {
@@ -93,7 +91,6 @@ angular.module('app.utility', ['app.filter'])
 				result += analysisUnit($filter, dayOfWeek, "day-of-week");
 				result += " " + $filter('translate')('$S_msg_EveryHour');
 				result += analysisUnit($filter, min, "minute");
-				result += $filter('translate')('$S_msg_Moment');
 			} else {
 				result += $filter('translate')('$S_msg_EveryWeek');
 				result += analysisUnit($filter, dayOfWeek, "day-of-week");
@@ -104,48 +101,36 @@ angular.module('app.utility', ['app.filter'])
 				result += analysisUnit($filter, hour, "hour");
 				result += " ";
 				result += analysisUnit($filter, min, "minute");
-				result += $filter('translate')('$S_msg_Moment');
 			}
 		} else if(period == "every_month") {
+			if( month != "*" ){
+				result += analysisUnit($filter, month, "month");
+				result += " ";
+			}
+
 			if(dayOfWeek == "*"){
 				if(hour == "*") {
-					result += analysisUnit($filter, month, "month");
-					result += $filter('translate')('$S_msg_AttachMoment');
 					result += analysisUnit($filter, date, "date");
-					result += $filter('translate')('$S_msg_On');
 					result += $filter('translate')('$S_msg_EveryHour');
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				} else {
-					result += analysisUnit($filter, month, "month");
-					result += $filter('translate')('$S_msg_AttachMoment');
 					result += analysisUnit($filter, date, "date");
-					result += $filter('translate')('$S_msg_On');
-					result += $filter('translate')('$S_msg_PreEvery');
 					result += analysisUnit($filter, hour, "hour");
-					result += " ";
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				}				
 			} else {
 				if(hour == "*") {
-					result += analysisUnit($filter, month, "month");
-					result += $filter('translate')('$S_msg_AttachMoment');
+					result += $filter('translate')('$S_msg_Every');
 					result += analysisUnit($filter, dayOfWeek, "day-of-week");
 					result += $filter('translate')('$S_msg_On');
 					result += $filter('translate')('$S_msg_EveryHour');
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				} else {
-					result += analysisUnit($filter, month, "month");
-					result += $filter('translate')('$S_msg_AttachMoment');
+					result += $filter('translate')('$S_msg_Every');
 					result += analysisUnit($filter, dayOfWeek, "day-of-week");
 					result += $filter('translate')('$S_msg_On');
-					result += $filter('translate')('$S_msg_PreEvery')
 					result += analysisUnit($filter, hour, "hour");
-					result += " ";
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				}
 			}
 		} else if(period == "every_year") {
@@ -153,58 +138,48 @@ angular.module('app.utility', ['app.filter'])
 				if(hour == "*") {
 					result += $filter('translate')('$S_msg_EveryYear');
 					result += analysisUnit($filter, month, "month");
-					result += " ";
-					result += analysisUnit($filter, date, "date");
 					result += $filter('translate')('$S_msg_On');
+					result += analysisUnit($filter, date, "date");
 					result += $filter('translate')('$S_msg_EveryHour');
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				} else {
 					result += $filter('translate')('$S_msg_EveryYear');
 					result += analysisUnit($filter, month, "month");
-					result += " ";
-					result += analysisUnit($filter, date, "date");
 					result += $filter('translate')('$S_msg_On');
-					result += $filter('translate')('$S_msg_PreEvery')
+					result += analysisUnit($filter, date, "date");
 					result += analysisUnit($filter, hour, "hour");
 					result += " ";
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				}
 			} else {
 				if(hour == "*") {
 					result += $filter('translate')('$S_msg_EveryYear');
 					result += analysisUnit($filter, month, "month");
-					result += " ";
+					result += $filter('translate')('$S_msg_On');
 					result += analysisUnit($filter, dayOfWeek, "day-of-week");
 					result += $filter('translate')('$S_msg_On');
 					result += $filter('translate')('$S_msg_EveryHour');
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				} else {
 					result += $filter('translate')('$S_msg_EveryYear');
 					result += analysisUnit($filter, month, "month");
-					result += " ";
+					result += $filter('translate')('$S_msg_On');
 					result += analysisUnit($filter, dayOfWeek, "day-of-week");
 					result += $filter('translate')('$S_msg_On');
-					result += $filter('translate')('$S_msg_PreEvery')
 					result += analysisUnit($filter, hour, "hour");
 					result += " ";
 					result += analysisUnit($filter, min, "minute");
-					result += $filter('translate')('$S_msg_Moment');
 				}
 			}
 		} else {
 			if(hour == "*" && date == "*" && month == "*" && dayOfWeek == "*") {
 				result += $filter('translate')('$S_msg_EveryDay');
-				result += $filter('translate')('$S_msg_Every');
+				result += $filter('translate')('$S_msg_EveryHour');
 				result += analysisUnit($filter, min, "minute");
-				result += $filter('translate')('$S_msg_Moment');
-			}			
+			}
 		}
 		return result;
 	}
-
 
 	function analysisUnit($filter, cronUnit, type) {
 		var dataDayOfWeek = [
@@ -249,7 +224,7 @@ angular.module('app.utility', ['app.filter'])
 		else if(type == "date")
 			post = $filter('translate')('$S_msg_Date');
 		else if(type == "month")
-			post = "";
+			post = $filter('translate')('$S_msg_Month');
 		else if(type == "day-of-week")
 			post = "";
 
@@ -269,7 +244,7 @@ angular.module('app.utility', ['app.filter'])
 
 					//마지막 , 삭제
 					convertToLocale = convertToLocale.substring(0, convertToLocale.length - 2);
-					cronUnit = convertToLocale;
+					cronUnit = convertToLocale + $filter('translate')('$S_msg_On');
 				}
 			} else {
 				if(cronUnit == "*") {
@@ -293,30 +268,56 @@ angular.module('app.utility', ['app.filter'])
 						unit += $filter('translate')('$S_msg_PostMonth');
 					else
 						unit += $filter('translate')('$S_msg_PostMonths');
+				} else if(type == "hour"){
+					unit += cronUnit.split("/")[1] + $filter('translate')('$S_str_Time');
 				} else {
 					unit = cronUnit.split("/")[1] + post;
 				}
+
+				unit += $filter('translate')('$S_msg_Interval');
+				unit += "으로 ";
+
 			} else if(cronUnit.indexOf(",") > -1) {
 				if(type == "hour")
-					unit = cronUnit + oclock;
+					unit = cronUnit + oclock + $filter('translate')('$S_msg_On');
+				else if(type == "minute")
+					unit = cronUnit + post + $filter('translate')('$S_msg_Moment');
 				else	
-					unit = cronUnit + post;
+					unit = cronUnit + post + $filter('translate')('$S_msg_On');
 
 			} else if(cronUnit.indexOf("-") > -1) {
 				var from = 	cronUnit.split("-")[0];	
 				var to = cronUnit.split("-")[1];
-				unit = between + from + and + fromPost + " " + to + oclock + toPost;
+				unit = between + from + and + fromPost + " " + to;
+
+				if( type == "hour")
+					unit += oclock + toPost;
+				else if( type == "month" )
+					unit += $filter('translate')('$S_msg_Month') + toPost;
+				else
+					unit += post + toPost;
+
+			} else if(cronUnit == "*") {
+				if(type == "month") {
+				}else if(type == "date"){
+					unit = $filter('translate')('$S_msg_EveryDay') + $filter('translate')('$S_msg_PostDate2');
+				}else if(type == "hour"){
+					unit = $filter('translate')('$S_msg_EveryHour') + $filter('translate')('$S_msg_PostDate2');
+				}else if(type == "minute"){
+					unit = $filter('translate')('$S_msg_EveryMin') + $filter('translate')('$S_msg_PostDate2') + $filter('translate')('$S_msg_Moment');
+				}
 			} else {
 				if(type == "month") {
+					// console.log(cronUnit);
 					parseInt
 					var index = parseInt(cronUnit) - 1;
 					unit = dataMonth[index] + $filter('translate')('$S_msg_Comma');
 				} else if(type == "date") {
-					unit = $filter('translate')('$S_msg_PreDate') + cronUnit + $filter('translate')('$S_msg_PostDate') + $filter('translate')('$S_msg_PostDate2');
+					unit = $filter('translate')('$S_msg_PreDate') + cronUnit + $filter('translate')('$S_msg_PostDate') + $filter('translate')('$S_msg_PostDate2') + $filter('translate')('$S_msg_On');
 				} else if(type == "hour") {
-					unit = cronUnit + oclock;
+					unit = cronUnit + oclock + $filter('translate')('$S_msg_On');
 				} else {
-					unit = cronUnit + post;
+					unit = cronUnit + post + $filter('translate')('$S_msg_Moment');					
 				}
 			}
 		}

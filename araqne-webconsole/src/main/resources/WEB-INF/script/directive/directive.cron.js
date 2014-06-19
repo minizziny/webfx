@@ -171,6 +171,8 @@ angular.module('app.directive.cron', ['app.connection', 'app.filter'])
 			function parseValDayofWeek(newval) {
 				if(newval.every(function(v) { return v })) {
 					scope.cron.valDayofWeek = '*';
+				}else if( newval.every(function(v) { return !v })) {
+					scope.cron.valDayofWeek = '*';
 				}
 				else {
 					scope.cron.valDayofWeek = newval

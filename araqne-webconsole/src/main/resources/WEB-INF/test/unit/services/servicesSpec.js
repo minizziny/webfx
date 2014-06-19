@@ -62,6 +62,7 @@ describe('services', function() {
 	"$S_msg_PreMonth": "",
 	"$S_msg_PreMonths": "",
 	"$S_msg_PostMonth": "",
+	"$S_msg_PostMonths": "",
 	"$S_msg_Every": "매 ",
 	"$S_msg_EveryYear": "매년 ",
 	"$S_msg_EveryWeek": "매주 ",
@@ -70,7 +71,7 @@ describe('services', function() {
 	"$S_msg_Moment": " 마다.",
 	"$S_msg_AttachMoment": " 마다 ",
 	"$S_msg_From": " 부터",
-	"$S_msg_To": " 사이",
+	"$S_msg_To": " 사이 ",
 	"$S_msg_Oclock": "시",
 	"$S_msg_Between": "",
 	"$S_msg_And": "",
@@ -97,7 +98,10 @@ describe('services', function() {
 	"$S_msg_Sep": "9월",
 	"$S_msg_Oct": "10월",
 	"$S_msg_Nov": "11월",
-	"$S_msg_Dec": "12월"
+	"$S_msg_Dec": "12월",
+
+	"$S_msg_Interval": " 간격",
+	"$S_msg_EveryMin": "매분",
 		}
 
 		var $compile, scope, serviceUtility, body = $('<div id="fixture"></div>').appendTo('body');
@@ -125,15 +129,59 @@ describe('services', function() {
 		});
 
 		it("every_day", function() {
-			expect(serviceUtility.cronStringify('0 * */1 * *')).toEqual('매 1일 매시 0분 마다.');
+			expect(serviceUtility.cronStringify('0 * */2 * *')).toEqual('2일 간격 매시 0분 마다.');
 		});
 
 		it('every_month', function() {
-			expect(serviceUtility.cronStringify('20 20 * */1 2')).toEqual('1개월 마다 화요일에 매 20시 20분 마다.');
+			expect(serviceUtility.cronStringify('20 20 * */3 2')).toEqual('매년 1월 화요일에 매 20시 20분 마다.');
 		})
 
 		it("failed test", function() {
-			expect(serviceUtility.cronStringify('1 1 2 */1 *')).toEqual('1개월 마다 2일에 매 1시 1분 마다.');
+			expect(serviceUtility.cronStringify('* 1-15 * 3 7')).toEqual('1개월 마다 매 2일에 매 1시 1분 마다.');
+		});
+
+		it("failed test", function() {
+			expect(serviceUtility.cronStringify('* * */2 * *')).toEqual('매 1일에 매 0시 0분 마다.');
+		});
+
+		it("failed test", function() {
+			expect(serviceUtility.cronStringify('* * * * *')).toEqual('매 1일에 매 0시 0분 마다.');
+		});
+
+		it("failed test", function() {
+			expect(serviceUtility.cronStringify('* * * * 1,2')).toEqual('매 1일에 매 0시 0분 마다.');
+		});
+
+		it("failed test", function() {
+			expect(serviceUtility.cronStringify('* * 1 * *')).toEqual('매 1일에 매 0시 0분 마다.');
+		});
+
+		it("failed test", function() {
+			expect(serviceUtility.cronStringify('* 1 */1 * *')).toEqual('매 1일에 매 0시 0분 마다.');
+		});
+
+		it("failed test", function() {
+			expect(serviceUtility.cronStringify('*/10 1 1 * *')).toEqual('매 1일에 매 0시 0분 마다.');
+		});
+
+		it("failed test", function() {
+			expect(serviceUtility.cronStringify('0 */2 1 * *')).toEqual('매 1일에 매 0시 0분 마다.');
+		});
+
+		it("failed test", function() {
+			expect(serviceUtility.cronStringify('0 * * * 6,7')).toEqual('매 1일에 매 0시 0분 마다.');
+		});
+	
+		it("failed test", function() {
+			expect(serviceUtility.cronStringify('0 * 1-4 * *')).toEqual('매 1일에 매 0시 0분 마다.');
+		});
+	
+		it("failed test", function() {
+			expect(serviceUtility.cronStringify('0 1-4 * * *')).toEqual('매 1일에 매 0시 0분 마다.');
+		});
+	
+		it("failed test", function() {
+			expect(serviceUtility.cronStringify('0-30 * * * *')).toEqual('매 1일에 매 0시 0분 마다.');
 		});
 	});
 	
